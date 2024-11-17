@@ -8,11 +8,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class GameMatchLog {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
