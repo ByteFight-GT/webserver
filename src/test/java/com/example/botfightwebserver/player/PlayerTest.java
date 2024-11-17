@@ -98,8 +98,7 @@ class PlayerTest extends PersistentTestBase {
 
         player.onCreate();
 
-        assertNotNull(player.getCreationDateTime());
-        assertNotNull(player.getLastModifiedDate());
+        assertNotNull(player.getId());
         assertEquals(player.getCreationDateTime(), NOW);
         assertEquals(player.getLastModifiedDate(), NOW);
     }
@@ -141,11 +140,6 @@ class PlayerTest extends PersistentTestBase {
             .build();
 
         player.onCreate();
-
-        assertNotNull(player.getCreationDateTime());
-        assertNotNull(player.getLastModifiedDate());
-        assertEquals(player.getCreationDateTime(), NOW);
-        assertEquals(player.getLastModifiedDate(), NOW);
 
         player.setMatchesPlayed(1);
         player.setNumberWins(1);
