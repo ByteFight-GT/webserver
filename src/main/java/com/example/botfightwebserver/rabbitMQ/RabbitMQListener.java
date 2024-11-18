@@ -1,13 +1,9 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.GameMatchResult;
-import com.example.botfightwebserver.gameMatch.GameMatchResultHandler;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResultHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -7,15 +7,18 @@ import com.example.botfightwebserver.submission.SubmissionService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class GameMatchService {
 
     private final GameMatchRepository gameMatchRepository;
@@ -26,7 +29,7 @@ public class GameMatchService {
     private final Clock clock;
 
     @VisibleForTesting
-    public static final int STALE_THRESHOLD = 60;
+    public static final int STALE_THRESHOLD_MINUTES = 60;
 
 
     public List<GameMatch> getGameMatches() {
@@ -65,11 +68,6 @@ public class GameMatchService {
         gameMatchRepository.save(gameMatch);
     }
 
-    //only to be used for testing
-    public void submitGameMatchResults(GameMatchResult result) {
-        rabbitMQService.enqueueGameMatchResult(result);
-    }
-
     public GameMatchDTO getDTOById(Long id) {
         return GameMatchDTO.fromEntity(gameMatchRepository.getReferenceById(id));
     }
@@ -99,7 +97,8 @@ public class GameMatchService {
     }
 
     public List<GameMatch> getStaleWaitingMatches() {
-        LocalDateTime thresholdTime = LocalDateTime.now(clock).minusSeconds(STALE_THRESHOLD);
+        LocalDateTime thresholdTime = LocalDateTime.now(clock).minusMinutes(STALE_THRESHOLD_MINUTES);
+
         return gameMatchRepository
             .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
             .stream()
@@ -111,7 +110,38 @@ public class GameMatchService {
             .findByStatus(MATCH_STATUS.FAILED)
             .stream()
             .toList();
+    }
 
+    public List<GameMatch> rescheduleFailedAndStaleMatches() {
+        List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
+            getStaleWaitingMatches().stream()).toList();
+
+        log.info("Found {} matches to reschedule", matchesToReschedule.size());
+
+        matchesToReschedule.forEach(match -> {
+            try {
+                log.info("Rescheduling match {}", match.getId());
+                rescheduleMatch(match);
+            } catch (Exception e) {
+                log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
+            }
+        });
+
+        log.info("Rescheduling completed");
+        return matchesToReschedule;
+    }
+
+    public GameMatch rescheduleMatch(GameMatch gameMatch) {
+        Integer timesQueued = gameMatch.getTimesQueued();
+        if (timesQueued == 3) {
+            throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
+        }
+        gameMatch.setQueuedAt(LocalDateTime.now(clock));
+        gameMatch.setStatus(MATCH_STATUS.WAITING);
+        gameMatch.setTimesQueued(gameMatch.getTimesQueued() + 1);
+        GameMatchJob job = GameMatchJob.fromEntity(gameMatch);
+        rabbitMQService.enqueueGameMatchJob(job);
+        return gameMatchRepository.save(gameMatch);
     }
     }
 

@@ -1,4 +1,6 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatchResult;
+
+import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 
 import java.io.Serializable;
 

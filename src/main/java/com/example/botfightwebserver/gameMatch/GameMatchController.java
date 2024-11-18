@@ -1,9 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +16,6 @@ import java.util.List;
 public class GameMatchController {
 
     private final GameMatchService gameMatchService;
-    private final GameMatchResultHandler gameMatchResultHandler;
 
     @PostMapping("/submit/match")
     public ResponseEntity<GameMatchJob> submitMatch(@RequestBody MatchSubmissionRequest request) {
@@ -34,19 +31,6 @@ public class GameMatchController {
         return ResponseEntity.ok(job);
     }
 
-    // only used for testing
-    @PostMapping("/submit/results")
-    public ResponseEntity<GameMatchResult> submitResults(@RequestBody GameMatchResult result) {
-        gameMatchService.submitGameMatchResults(result);
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/handle/results")
-    public ResponseEntity<GameMatchResult> handleMatchResults(@RequestBody GameMatchResult result) {
-        gameMatchResultHandler.handleGameMatchResult(result);
-        return ResponseEntity.ok(result);
-    }
-
     @PostMapping("/queue/remove_all")
     public ResponseEntity<List<GameMatchJob>> removeAllQueuedMatches() {
         return ResponseEntity.ok(gameMatchService.deleteQueuedMatches());
@@ -55,6 +39,11 @@ public class GameMatchController {
     @GetMapping("/queued")
     public ResponseEntity<List<GameMatchJob>> queued() {
         return ResponseEntity.ok(gameMatchService.peekQueuedMatches());
+    }
+
+    @PostMapping("/reschedule/all")
+    public ResponseEntity<List<GameMatchDTO>> rescheduleAllQueuedMatches() {
+        return ResponseEntity.ok(gameMatchService.rescheduleFailedAndStaleMatches().stream().map(GameMatchDTO::fromEntity).toList());
     }
 
 }

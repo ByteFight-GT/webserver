@@ -1,9 +1,7 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.GameMatchResult;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -56,6 +54,23 @@ public class RabbitMQService {
                 hasMore = false;
             } else {
                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    public List<GameMatchResult> deleteGameResultQueue() {
+        List<GameMatchResult> messages = new ArrayList<>();
+        boolean hasMore = true;
+        while (hasMore) {
+            GameMatchResult message = (GameMatchResult) rabbitTemplate.receiveAndConvert(
+                RabbitMQConfiguration.GAME_MATCH_QUEUE,
+                1000
+            );
+            if (message == null) {
+                hasMore = false;
+            } else {
+                messages.add(message);
             }
         }
         return messages;

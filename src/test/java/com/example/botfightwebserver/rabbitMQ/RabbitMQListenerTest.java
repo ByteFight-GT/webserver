@@ -1,15 +1,13 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.GameMatchResult;
-import com.example.botfightwebserver.gameMatch.GameMatchResultHandler;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResultHandler;
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.Mockito.*;
 

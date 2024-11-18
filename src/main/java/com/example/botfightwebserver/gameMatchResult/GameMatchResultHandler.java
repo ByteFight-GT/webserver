@@ -1,20 +1,23 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatchResult;
 
 import com.example.botfightwebserver.elo.EloCalculator;
 import com.example.botfightwebserver.elo.EloChanges;
+import com.example.botfightwebserver.gameMatch.GameMatch;
+import com.example.botfightwebserver.gameMatch.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerDTO;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.submission.SubmissionDTO;
 import com.example.botfightwebserver.submission.SubmissionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -32,12 +35,10 @@ public class GameMatchResultHandler {
     public void handleGameMatchResult(GameMatchResult result) {
         long gameMatchId = result.matchId();
         if (!gameMatchService.isGameMatchIdExist(gameMatchId)) {
-            log.warn("Game match id " + gameMatchId + " does not exist");
-            return;
+            throw new IllegalArgumentException("Game match id " + gameMatchId + " does not exist");
         }
         if (!gameMatchService.isGameMatchWaiting(gameMatchId)) {
-            log.info("Game match is already played");
-            return;
+            throw new UnsupportedOperationException("Game match is already played {}" + result);
         }
         MATCH_STATUS status = result.status();
         GameMatch gameMatch = gameMatchService.getReferenceById(gameMatchId);
@@ -63,10 +64,7 @@ public class GameMatchResultHandler {
         gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), eloChanges.getPlayer1Change(), eloChanges.getPlayer2Change());
     }
 
-
-
     private void handleLadderResult(Player player1, Player player2, MATCH_STATUS status, EloChanges eloChanges) {
-        // make this cleaner
         if (status == MATCH_STATUS.PLAYER_ONE_WIN) {
             playerService.updatePlayerAfterLadderMatch(player1, eloChanges.getPlayer1Change(), true, false);
             playerService.updatePlayerAfterLadderMatch(player2, eloChanges.getPlayer2Change(), false, false);
@@ -77,7 +75,13 @@ public class GameMatchResultHandler {
             playerService.updatePlayerAfterLadderMatch(player1, eloChanges.getPlayer1Change(), false, true);
             playerService.updatePlayerAfterLadderMatch(player2, eloChanges.getPlayer2Change(), false, true);
         }
+    }
 
+    public void submitGameMatchResults(GameMatchResult result) {
+        if (!gameMatchService.isGameMatchIdExist(result.matchId())) {
+            throw new RuntimeException("Game match id " + result.matchId() + " does not exist");
+        }
+        rabbitMQService.enqueueGameMatchResult(result);
     }
 
     private  void handleValidationResult(Player player, Submission submission) {
@@ -87,4 +91,8 @@ public class GameMatchResultHandler {
         }
     }
 
+    public List<GameMatchResult> deleteQueuedMatches() {
+        List<GameMatchResult> removedResults = rabbitMQService.deleteGameResultQueue();
+        return removedResults;
+    }
 }
