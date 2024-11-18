@@ -42,8 +42,8 @@ public class GameMatchController {
     }
 
     @PostMapping("/reschedule/all")
-    public ResponseEntity<List<GameMatchDTO>> rescheduleAllQueuedMatches() {
-        return ResponseEntity.ok(gameMatchService.rescheduleFailedAndStaleMatches().stream().map(GameMatchDTO::fromEntity).toList());
+    public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
+        return ResponseEntity.ok(gameMatchService.rescheduleFailedAndStaleMatches());
     }
 
 }
