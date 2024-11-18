@@ -35,6 +35,7 @@ class PlayerTest extends PersistentTestBase {
     private Clock fixedClock;
 
     private final LocalDateTime NOW = LocalDateTime.of(2024, 1, 1, 12, 0);
+
     @BeforeEach
     void setup() {
         fixedClock = Clock.fixed(NOW.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
@@ -96,11 +97,10 @@ class PlayerTest extends PersistentTestBase {
             .currentSubmission(testSubmission)
             .build();
 
-        player.onCreate();
+        persistEntity(player);
 
-        assertNotNull(player.getId());
-        assertEquals(player.getCreationDateTime(), NOW);
-        assertEquals(player.getLastModifiedDate(), NOW);
+        assertEquals(NOW, player.getCreationDateTime());
+        assertEquals(NOW, player.getLastModifiedDate());
     }
 
     @Test
@@ -149,7 +149,6 @@ class PlayerTest extends PersistentTestBase {
         Player.setClock(newClock);
 
         player.onUpdate();
-
 
         assertNotNull(player.getCreationDateTime());
         assertNotNull(player.getLastModifiedDate());

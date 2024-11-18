@@ -43,10 +43,8 @@ public class Submission {
     @Enumerated(EnumType.STRING)
     private STORAGE_SOURCE source;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @CreationTimestamp
     private LocalDateTime validateAt;
 
     private static Clock clock = Clock.systemDefaultZone();

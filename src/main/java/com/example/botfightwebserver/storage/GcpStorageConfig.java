@@ -33,7 +33,7 @@ public class GcpStorageConfig {
 
         return StorageOptions.newBuilder()
             .setCredentials(credentials)
-            .setProjectId("propane-karma-440020-d4")
+            .setProjectId(projectId)
             .build()
             .getService();    }
 }

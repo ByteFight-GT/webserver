@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class EloChanges {
-    private double player1Change = 0;
-    private double player2Change = 0 ;
+    private Double player1Change;
+    private Double player2Change;
 }

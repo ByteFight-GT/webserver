@@ -8,8 +8,8 @@ class EloChangesTest {
     @Test
     void testDefaultConstructor() {
         EloChanges eloChanges = EloChanges.builder().build();
-        assertEquals(0.0, eloChanges.getPlayer1Change());
-        assertEquals(0.0, eloChanges.getPlayer2Change());
+        assertEquals(null, eloChanges.getPlayer1Change());
+        assertEquals(null, eloChanges.getPlayer2Change());
     }
 
     @Test

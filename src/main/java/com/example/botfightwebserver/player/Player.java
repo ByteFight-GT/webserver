@@ -36,17 +36,15 @@ import java.time.LocalDateTime;
 @Builder
 public class Player {
 
-    private static Clock clock = Clock.systemDefaultZone();
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
     @Email
     private String email;
-    @CreationTimestamp
+
     private LocalDateTime creationDateTime;
-    @LastModifiedDate
+
     private LocalDateTime lastModifiedDate;
     @Builder.Default
     private Double elo=1200.0;
@@ -62,6 +60,8 @@ public class Player {
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)
     private Submission currentSubmission;
+
+    private static Clock clock = Clock.systemDefaultZone();
 
     @PrePersist
     public void onCreate() {
