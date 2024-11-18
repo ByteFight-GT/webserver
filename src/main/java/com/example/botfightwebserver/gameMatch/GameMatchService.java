@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -112,26 +113,27 @@ public class GameMatchService {
             .toList();
     }
 
-    public List<GameMatch> rescheduleFailedAndStaleMatches() {
+    public List<GameMatchJob> rescheduleFailedAndStaleMatches() {
         List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
             getStaleWaitingMatches().stream()).toList();
-
         log.info("Found {} matches to reschedule", matchesToReschedule.size());
 
-        matchesToReschedule.forEach(match -> {
+        List<GameMatchJob> rescheduledJobs = new ArrayList<>();
+
+        for (GameMatch match : matchesToReschedule) {
             try {
                 log.info("Rescheduling match {}", match.getId());
-                rescheduleMatch(match);
+                rescheduledJobs.add(rescheduleMatch(match));
             } catch (Exception e) {
                 log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
             }
-        });
+        }
 
         log.info("Rescheduling completed");
-        return matchesToReschedule;
+        return rescheduledJobs;
     }
 
-    public GameMatch rescheduleMatch(GameMatch gameMatch) {
+    public GameMatchJob rescheduleMatch(GameMatch gameMatch) {
         Integer timesQueued = gameMatch.getTimesQueued();
         if (timesQueued == 3) {
             throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
@@ -141,7 +143,8 @@ public class GameMatchService {
         gameMatch.setTimesQueued(gameMatch.getTimesQueued() + 1);
         GameMatchJob job = GameMatchJob.fromEntity(gameMatch);
         rabbitMQService.enqueueGameMatchJob(job);
-        return gameMatchRepository.save(gameMatch);
+        gameMatchRepository.save(gameMatch);
+        return job;
     }
     }
 
