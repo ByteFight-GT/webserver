@@ -5,12 +5,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
+// still need to schedule
 @RequiredArgsConstructor
 public class GameMatchRescheduler {
 
     private GameMatchService gameMatchService;
 
-    // may want to change to return GameMatchJobs
     public List<GameMatchJob> reschedule() {
         return gameMatchService.rescheduleFailedAndStaleMatches();
     }
