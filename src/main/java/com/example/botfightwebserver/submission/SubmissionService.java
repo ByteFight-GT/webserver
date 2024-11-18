@@ -3,6 +3,7 @@ package com.example.botfightwebserver.submission;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerRepository;
 import com.example.botfightwebserver.storage.StorageService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -27,18 +28,19 @@ public class SubmissionService {
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-    public SubmissionDTO createSubmission(Long playerId, MultipartFile file) {
+    public Submission createSubmission(Long playerId, MultipartFile file) {
         validateFile(file);
 
-        Player player = playerRepository.getReferenceById(playerId);
+        Player player = playerRepository.findById(playerId)
+            .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
+
         String filePathString = storageService.uploadFile(playerId, file);
 
         Submission submission = new Submission();
         submission.setStoragePath(filePathString);
         submission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
         submission.setPlayerId(playerId);
-        // Can be optimized if we create the DTO just using the playerID
-        return SubmissionDTO.fromEntity(submissionRepository.save(submission));
+        return submissionRepository.save(submission);
     }
 
     public Submission getSubmissionReferenceById(Long id) {

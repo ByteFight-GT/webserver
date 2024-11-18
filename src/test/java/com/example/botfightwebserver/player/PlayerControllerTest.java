@@ -28,9 +28,9 @@ class PlayerControllerTest {
 
     @Test
     void testGetPlayers() throws Exception {
-        PlayerDTO player1 = PlayerDTO.builder().id(1L).email("tkwok123@gmail.com").name("tyler").build();
-        PlayerDTO player2 = PlayerDTO.builder().id(2L).email("bkwok123@gmail.com").name("ben").build();
-        List<PlayerDTO> players = List.of(player1, player2);
+        Player player1 = Player.builder().id(1L).email("tkwok123@gmail.com").name("tyler").build();
+        Player player2 = Player.builder().id(2L).email("bkwok123@gmail.com").name("ben").build();
+        List<Player> players = List.of(player1, player2);
 
         when(playerService.getPlayers()).thenReturn(players);
 
@@ -47,7 +47,7 @@ class PlayerControllerTest {
 
     @Test
     void testGetPlayersEmpty() throws Exception {
-        List<PlayerDTO> emptyPlayers = List.of();
+        List<Player> emptyPlayers = List.of();
         when(playerService.getPlayers()).thenReturn(emptyPlayers);
 
         mockMvc.perform(get("/api/v1/player/players"))
@@ -57,8 +57,8 @@ class PlayerControllerTest {
 
     @Test
     void testCreatePlayer() throws Exception {
-        PlayerDTO newPlayer =
-            PlayerDTO.builder()
+        Player newPlayer =
+            Player.builder()
                 .id(1L)
                 .email("tkwok123@gmail.com")
                 .name("tyler")

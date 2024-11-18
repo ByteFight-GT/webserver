@@ -56,9 +56,12 @@ public class GameMatch {
     private MATCH_REASON reason;
 
     private LocalDateTime createdAt;
+    private LocalDateTime queuedAt;
     private LocalDateTime processedAt;
 
     private String map;
+
+    private Integer timesQueued;
 
     private static Clock clock = Clock.systemDefaultZone();
 

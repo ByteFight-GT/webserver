@@ -24,13 +24,13 @@ public class PlayerController {
 
     @GetMapping("/players")
     public List<PlayerDTO> getPlayers() {
-        return playerService.getPlayers();
+        return playerService.getPlayers().stream().map(PlayerDTO::fromEntity).toList();
     }
 
     @PostMapping
     public ResponseEntity<PlayerDTO> createPlayer(@RequestParam String name,
                                                @RequestParam String email) {
-        return ResponseEntity.ok(playerService.createPlayer(name, email));
+        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.createPlayer(name, email)));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

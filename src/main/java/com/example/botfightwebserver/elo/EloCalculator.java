@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.elo;
 
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerDTO;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ public class EloCalculator {
     private static final int K_FACTOR_HIGH_RATED = 10;
     private static final int NEW_PLAYER_THRESHOLD = 20;
 
-    public EloChanges calculateElo(PlayerDTO player1, PlayerDTO player2, MATCH_STATUS matchStatus) {
+    public EloChanges calculateElo(Player player1, Player player2, MATCH_STATUS matchStatus) {
         if (matchStatus == MATCH_STATUS.IN_PROGRESS || matchStatus == MATCH_STATUS.FAILED || matchStatus == MATCH_STATUS.WAITING) {
             throw new IllegalArgumentException("Match must have determined result. Match was in state: " + matchStatus);
         }

@@ -21,6 +21,6 @@ public class SubmissionController {
     public ResponseEntity<SubmissionDTO> uploadSubmission(
         @RequestParam("playerId") Long playerId,
         @RequestParam("file") MultipartFile file) {
-            return ResponseEntity.ok(submissionService.createSubmission(playerId, file));
+            return ResponseEntity.ok(SubmissionDTO.fromEntity(submissionService.createSubmission(playerId, file)));
         }
 }

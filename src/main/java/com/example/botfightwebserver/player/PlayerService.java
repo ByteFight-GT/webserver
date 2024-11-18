@@ -18,10 +18,9 @@ public class PlayerService {
     private final PlayerRepository playerRepository;
     private final SubmissionService submissionService;
 
-    public List<PlayerDTO> getPlayers() {
+    public List<Player> getPlayers() {
         return playerRepository.findAll()
             .stream()
-            .map(PlayerDTO::fromEntity)
             .collect(Collectors.toUnmodifiableList());
     }
 
@@ -34,14 +33,14 @@ public class PlayerService {
     }
 
 
-    public PlayerDTO createPlayer(String name, String email) {
+    public Player createPlayer(String name, String email) {
         if (playerRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Player with email " + email + " already exists");
         }
         Player player = new Player();
         player.setName(name);
         player.setEmail(email);
-        return PlayerDTO.fromEntity(playerRepository.save(player));
+        return playerRepository.save(player);
     }
 
     public void validatePlayers(Long player1Id, Long player2Id) {
@@ -56,13 +55,12 @@ public class PlayerService {
         }
     }
 
-    public PlayerDTO updatePlayerAfterLadderMatch(PlayerDTO playerDTO, double eloChange, boolean isWin, boolean isDraw) {
+    public Player updatePlayerAfterLadderMatch(Player player, double eloChange, boolean isWin, boolean isDraw) {
         if(isWin && isDraw) {
             throw new IllegalArgumentException("Result can't be a win and a draw");
         }
-        double currentElo = playerDTO.getElo();
+        double currentElo = player.getElo();
         double newElo = currentElo + eloChange;
-        Player player = playerRepository.findById(playerDTO.getId()).get();
         player.setElo(newElo);
         player.setMatchesPlayed(player.getMatchesPlayed() + 1);
         if (!isWin && !isDraw) {
@@ -72,7 +70,7 @@ public class PlayerService {
         } else if (isDraw) {
             player.setNumberDraws(player.getNumberDraws() + 1);
         }
-        return PlayerDTO.fromEntity(playerRepository.save(player));
+        return playerRepository.save(player);
     }
 
     public void setCurrentSubmission(Long playerId, Long submissionId) {

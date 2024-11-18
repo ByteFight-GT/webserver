@@ -82,32 +82,34 @@ class PlayerServiceTest extends PersistentTestBase {
 
         persistEntity(player1);
         persistEntity(player2);
-        List<PlayerDTO> players = playerService.getPlayers();
-        PlayerDTO player1DTO = players.get(0);
-        PlayerDTO player2DTO = players.get(1);
 
-        assertEquals(submission1.getId(), player1DTO.getCurrentSubmissionDTO().id());
-        assertEquals(1200.0, player1DTO.getElo());
-        assertEquals("Tyler", player1DTO.getName());
-        assertEquals("tkwok123@gmail.com", player1DTO.getEmail());
-        assertEquals(10, player1DTO.getMatchesPlayed());
-        assertEquals(3, player1DTO.getNumberLosses());
-        assertEquals(2, player1DTO.getNumberDraws());
-        assertEquals(5, player1DTO.getNumberWins());
+        List<Player> players = playerService.getPlayers();
 
-        assertEquals(submission2.getId(), player2DTO.getCurrentSubmissionDTO().id());
-        assertEquals(1400.0, player2DTO.getElo());
-        assertEquals("Ben", player2DTO.getName());
-        assertEquals("bkwok123@gmail.com", player2DTO.getEmail());
-        assertEquals(5, player2DTO.getMatchesPlayed());
-        assertEquals(3, player2DTO.getNumberWins());
-        assertEquals(2, player2DTO.getNumberLosses());
-        assertEquals(0, player2DTO.getNumberDraws());
+        Player player1Persisted = players.get(0);
+        Player player2Persisted = players.get(1);
+
+        assertEquals(submission1.getId(), player1Persisted.getCurrentSubmission().getId());
+        assertEquals(1200.0, player1Persisted.getElo());
+        assertEquals("Tyler", player1Persisted.getName());
+        assertEquals("tkwok123@gmail.com", player1Persisted.getEmail());
+        assertEquals(10, player1Persisted.getMatchesPlayed());
+        assertEquals(3, player1Persisted.getNumberLosses());
+        assertEquals(2, player1Persisted.getNumberDraws());
+        assertEquals(5, player1Persisted.getNumberWins());
+
+        assertEquals(submission2.getId(), player2Persisted.getCurrentSubmission().getId());
+        assertEquals(1400.0, player2Persisted.getElo());
+        assertEquals("Ben", player2Persisted.getName());
+        assertEquals("bkwok123@gmail.com", player2Persisted.getEmail());
+        assertEquals(5, player2Persisted.getMatchesPlayed());
+        assertEquals(3, player2Persisted.getNumberWins());
+        assertEquals(2, player2Persisted.getNumberLosses());
+        assertEquals(0, player2Persisted.getNumberDraws());
     }
 
     @Test
     void testGetPlayers_none() {
-        List<PlayerDTO> players = playerService.getPlayers();
+        List<Player> players = playerService.getPlayers();
         assertEquals(0, players.size());
     }
 
@@ -199,9 +201,8 @@ class PlayerServiceTest extends PersistentTestBase {
         String name = "New Player";
         String email = "newplayer@example.com";
 
-        PlayerDTO createdPlayer = playerService.createPlayer(name, email);
+        Player persistedPlayer = playerService.createPlayer(name, email);
 
-        Player persistedPlayer = playerRepository.findById(createdPlayer.getId()).orElseThrow();
         assertEquals(name, persistedPlayer.getName());
         assertEquals(email, persistedPlayer.getEmail());
         assertEquals(0, persistedPlayer.getMatchesPlayed());
@@ -301,12 +302,10 @@ class PlayerServiceTest extends PersistentTestBase {
             .numberDraws(1)
             .build());
 
-        PlayerDTO initialDTO = PlayerDTO.fromEntity(initialPlayer);
         double eloChange = 15.0;
 
-        PlayerDTO updatedDTO = playerService.updatePlayerAfterLadderMatch(initialDTO, eloChange, true, false);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, true, false);
 
-        Player persistedPlayer = playerRepository.findById(updatedDTO.getId()).get();
         assertEquals(1215.0, persistedPlayer.getElo());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(3, persistedPlayer.getNumberWins());
@@ -326,18 +325,10 @@ class PlayerServiceTest extends PersistentTestBase {
             .numberDraws(1)
             .build());
 
-        PlayerDTO initialDTO = PlayerDTO.fromEntity(initialPlayer);
         double eloChange = -15.0;
 
-        PlayerDTO updatedDTO = playerService.updatePlayerAfterLadderMatch(initialDTO, eloChange, false, false);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, false, false);
 
-        assertEquals(1185.0, updatedDTO.getElo()); // 1200 - 15
-        assertEquals(6, updatedDTO.getMatchesPlayed());
-        assertEquals(2, updatedDTO.getNumberWins()); // unchanged
-        assertEquals(3, updatedDTO.getNumberLosses()); // 2 + 1
-        assertEquals(1, updatedDTO.getNumberDraws()); // unchanged
-
-        Player persistedPlayer = playerRepository.findById(updatedDTO.getId()).get();
         assertEquals(1185.0, persistedPlayer.getElo());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(2, persistedPlayer.getNumberWins());
@@ -357,12 +348,10 @@ class PlayerServiceTest extends PersistentTestBase {
             .numberDraws(1)
             .build());
 
-        PlayerDTO initialDTO = PlayerDTO.fromEntity(initialPlayer);
         double eloChange = 0.0;
 
-        PlayerDTO updatedDTO = playerService.updatePlayerAfterLadderMatch(initialDTO, eloChange, false, true);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, false, true);
 
-        Player persistedPlayer = playerRepository.findById(updatedDTO.getId()).get();
         assertEquals(1200.0, persistedPlayer.getElo());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(2, persistedPlayer.getNumberWins());
@@ -382,16 +371,15 @@ class PlayerServiceTest extends PersistentTestBase {
             .numberDraws(1)
             .build());
 
-        PlayerDTO initialDTO = PlayerDTO.fromEntity(initialPlayer);
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> playerService.updatePlayerAfterLadderMatch(initialDTO, 15.0, true, true)
+            () -> playerService.updatePlayerAfterLadderMatch(initialPlayer, 15.0, true, true)
         );
 
         assertEquals("Result can't be a win and a draw", exception.getMessage());
 
-        Player unchangedPlayer = playerRepository.findById(initialDTO.getId()).get();
+        Player unchangedPlayer = playerRepository.findById(initialPlayer.getId()).get();
         assertEquals(1200.0, unchangedPlayer.getElo());
         assertEquals(5, unchangedPlayer.getMatchesPlayed());
         assertEquals(2, unchangedPlayer.getNumberWins());

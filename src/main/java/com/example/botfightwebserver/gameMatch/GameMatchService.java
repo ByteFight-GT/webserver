@@ -4,6 +4,7 @@ import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,10 @@ public class GameMatchService {
     private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
 
+    @VisibleForTesting
+    public static final int STALE_THRESHOLD = 60;
+
+
     public List<GameMatch> getGameMatches() {
         return gameMatchRepository.findAll();
     }
@@ -39,6 +44,8 @@ public class GameMatchService {
         gameMatch.setStatus(MATCH_STATUS.WAITING);
         gameMatch.setReason(reason);
         gameMatch.setMap(map);
+        gameMatch.setQueuedAt(LocalDateTime.now(clock));
+        gameMatch.setTimesQueued(1);
         return gameMatchRepository.save(gameMatch);
     }
 
@@ -89,6 +96,22 @@ public class GameMatchService {
 
     public List<GameMatchJob> peekQueuedMatches() {
         return rabbitMQService.peekGameMatchQueue();
+    }
+
+    public List<GameMatch> getStaleWaitingMatches() {
+        LocalDateTime thresholdTime = LocalDateTime.now(clock).minusSeconds(STALE_THRESHOLD);
+        return gameMatchRepository
+            .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
+            .stream()
+            .toList();
+    }
+
+    public List<GameMatch> getFailedMatches() {
+        return gameMatchRepository
+            .findByStatus(MATCH_STATUS.FAILED)
+            .stream()
+            .toList();
+
     }
     }
 
