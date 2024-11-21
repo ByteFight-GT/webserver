@@ -7,9 +7,9 @@ import java.util.List;
 
 // still need to schedule
 @RequiredArgsConstructor
-public class GameMatchRescheduler {
+public class  GameMatchRescheduler {
 
-    private GameMatchService gameMatchService;
+    private final GameMatchService gameMatchService;
 
     public List<GameMatchJob> reschedule() {
         return gameMatchService.rescheduleFailedAndStaleMatches();
