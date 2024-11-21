@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,5 +17,6 @@ import java.lang.annotation.Target;
 @Import(TestContainerConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
+@ActiveProfiles("testcontainers")
 public @interface PostgresIntegrationTest {
 }
