@@ -20,6 +20,15 @@ jobs:
     permissions:
       contents: read
 
+    services:
+      docker:
+        image: docker:dind
+        privileged: true
+        options: >-
+          --privileged
+        ports:
+          - 2375:2375
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
