@@ -47,7 +47,7 @@ public class Player {
 
     private LocalDateTime lastModifiedDate;
     @Builder.Default
-    private Double elo=1200.0;
+    private Double glicko=1200.0;
     @Builder.Default
     private Integer matchesPlayed=0;
     @Builder.Default
@@ -56,6 +56,12 @@ public class Player {
     private Integer numberLosses=0;
     @Builder.Default
     private Integer numberDraws=0;
+
+    @Builder.Default
+    private Double phi=350.0;
+
+    @Builder.Default
+    private Double sigma=0.06;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)

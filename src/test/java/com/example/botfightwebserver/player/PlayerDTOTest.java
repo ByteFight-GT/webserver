@@ -19,7 +19,7 @@ class PlayerDTOTest {
         Player player = Player.builder()
             .id(1L)
             .currentSubmission(submission)
-            .elo(1200.0)
+            .glicko(1200.0)
             .email("tkwok123@gmail.com")
             .name("Tyler")
             .creationDateTime(NOW)
@@ -33,7 +33,7 @@ class PlayerDTOTest {
 
         assertEquals(1L, playerDTO.getId());
         assertEquals(2L, playerDTO.getCurrentSubmissionDTO().id());
-        assertEquals(1200.0, playerDTO.getElo());
+        assertEquals(1200.0, playerDTO.getGlicko());
         assertEquals("tkwok123@gmail.com", playerDTO.getEmail());
         assertEquals("Tyler", playerDTO.getName());
         assertEquals(NOW, playerDTO.getCreationDateTime());

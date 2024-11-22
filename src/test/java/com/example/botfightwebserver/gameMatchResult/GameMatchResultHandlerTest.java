@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatchResult;
 
-import com.example.botfightwebserver.elo.EloCalculator;
-import com.example.botfightwebserver.elo.EloChanges;
+import com.example.botfightwebserver.glicko.GlickoCalculator;
+import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
@@ -38,7 +38,7 @@ class GameMatchResultHandlerTest {
     @Mock
     private RabbitMQService rabbitMQService;
     @Mock
-    private EloCalculator eloCalculator;
+    private GlickoCalculator glickoCalculator;
     @Mock
     private GameMatchLogService gameMatchLogService;
 
@@ -55,7 +55,7 @@ class GameMatchResultHandlerTest {
             playerService,
             submissionService,
             rabbitMQService,
-            eloCalculator,
+            glickoCalculator,
             gameMatchLogService
         );
 
@@ -81,18 +81,18 @@ class GameMatchResultHandlerTest {
     void handleGameMatchResult_LadderMatch_PlayerOneWin() {
         GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.PLAYER_ONE_WIN, "match log");
         gameMatch.setReason(MATCH_REASON.LADDER);
-        EloChanges eloChanges = new EloChanges(15.0, -15.0);
+        GlickoChanges glickoChanges = new GlickoChanges(15.0, -15.0, 0.0, 0.0, 0.0, 0.0);
 
         when(gameMatchService.isGameMatchIdExist(1L)).thenReturn(true);
         when(gameMatchService.isGameMatchWaiting(1L)).thenReturn(true);
         when(gameMatchService.getReferenceById(1L)).thenReturn(gameMatch);
-        when(eloCalculator.calculateElo(player1, player2, MATCH_STATUS.PLAYER_ONE_WIN))
-            .thenReturn(eloChanges);
+        when(glickoCalculator.calculateGlicko(player1, player2, MATCH_STATUS.PLAYER_ONE_WIN))
+            .thenReturn(glickoChanges);
 
         gameMatchResultHandler.handleGameMatchResult(result);
 
-        verify(playerService).updatePlayerAfterLadderMatch(player1, 15, true, false);
-        verify(playerService).updatePlayerAfterLadderMatch(player2, -15, false, false);
+        verify(playerService).updatePlayerAfterLadderMatch(player1, 15,0.0,0.0, true, false);
+        verify(playerService).updatePlayerAfterLadderMatch(player2, -15, 0.0,0.0, false, false);
         verify(gameMatchService).setGameMatchStatus(1L, MATCH_STATUS.PLAYER_ONE_WIN);
         verify(gameMatchLogService).createGameMatchLog(1L, "match log", 15, -15);
     }

@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.player;
 
 import com.example.botfightwebserver.PersistentTestBase;
-import com.example.botfightwebserver.elo.EloCalculator;
+import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class PlayerServiceTest extends PersistentTestBase {
     private SubmissionService submissionService;
 
     @MockBean
-    private EloCalculator eloCalculator;
+    private GlickoCalculator glickoCalculator;
 
     private PlayerService playerService;
 
@@ -60,7 +60,7 @@ class PlayerServiceTest extends PersistentTestBase {
 
         Player player1 = Player.builder()
             .currentSubmission(submission1)
-            .elo(1200.0)
+            .glicko(1200.0)
             .email("tkwok123@gmail.com")
             .name("Tyler")
             .matchesPlayed(10)
@@ -71,7 +71,7 @@ class PlayerServiceTest extends PersistentTestBase {
 
         Player player2 = Player.builder()
             .currentSubmission(submission2)
-            .elo(1400.0)
+            .glicko(1400.0)
             .email("bkwok123@gmail.com")
             .name("Ben")
             .matchesPlayed(5)
@@ -89,7 +89,7 @@ class PlayerServiceTest extends PersistentTestBase {
         Player player2Persisted = players.get(1);
 
         assertEquals(submission1.getId(), player1Persisted.getCurrentSubmission().getId());
-        assertEquals(1200.0, player1Persisted.getElo());
+        assertEquals(1200.0, player1Persisted.getGlicko());
         assertEquals("Tyler", player1Persisted.getName());
         assertEquals("tkwok123@gmail.com", player1Persisted.getEmail());
         assertEquals(10, player1Persisted.getMatchesPlayed());
@@ -98,7 +98,7 @@ class PlayerServiceTest extends PersistentTestBase {
         assertEquals(5, player1Persisted.getNumberWins());
 
         assertEquals(submission2.getId(), player2Persisted.getCurrentSubmission().getId());
-        assertEquals(1400.0, player2Persisted.getElo());
+        assertEquals(1400.0, player2Persisted.getGlicko());
         assertEquals("Ben", player2Persisted.getName());
         assertEquals("bkwok123@gmail.com", player2Persisted.getEmail());
         assertEquals(5, player2Persisted.getMatchesPlayed());
@@ -116,7 +116,7 @@ class PlayerServiceTest extends PersistentTestBase {
     @Test
     void testGetPlayerReferenceById() {
         Player expectedPlayer = Player.builder()
-            .elo(1200.0)
+            .glicko(1200.0)
             .email("test@example.com")
             .name("Test Player")
             .matchesPlayed(0)
@@ -131,7 +131,7 @@ class PlayerServiceTest extends PersistentTestBase {
         assertEquals(persistedPlayer.getId(), retrievedPlayer.getId());
         assertEquals(expectedPlayer.getEmail(), retrievedPlayer.getEmail());
         assertEquals(expectedPlayer.getName(), retrievedPlayer.getName());
-        assertEquals(expectedPlayer.getElo(), retrievedPlayer.getElo());
+        assertEquals(expectedPlayer.getGlicko(), retrievedPlayer.getGlicko());
         assertEquals(expectedPlayer.getMatchesPlayed(), retrievedPlayer.getMatchesPlayed());
         assertEquals(expectedPlayer.getNumberWins(), retrievedPlayer.getNumberWins());
         assertEquals(expectedPlayer.getNumberLosses(), retrievedPlayer.getNumberLosses());
@@ -144,7 +144,7 @@ class PlayerServiceTest extends PersistentTestBase {
 
         Player expectedPlayer = Player.builder()
             .currentSubmission(submission)
-            .elo(1200.0)
+            .glicko(1200.0)
             .email("test@example.com")
             .name("Test Player")
             .matchesPlayed(5)
@@ -160,7 +160,7 @@ class PlayerServiceTest extends PersistentTestBase {
         assertEquals(persistedPlayer.getId(), playerDTO.getId());
         assertEquals(expectedPlayer.getEmail(), playerDTO.getEmail());
         assertEquals(expectedPlayer.getName(), playerDTO.getName());
-        assertEquals(expectedPlayer.getElo(), playerDTO.getElo());
+        assertEquals(expectedPlayer.getGlicko(), playerDTO.getGlicko());
         assertEquals(expectedPlayer.getMatchesPlayed(), playerDTO.getMatchesPlayed());
         assertEquals(expectedPlayer.getNumberWins(), playerDTO.getNumberWins());
         assertEquals(expectedPlayer.getNumberLosses(), playerDTO.getNumberLosses());
@@ -172,7 +172,7 @@ class PlayerServiceTest extends PersistentTestBase {
     void testGetDTOById_WithNullSubmission() {
         Player expectedPlayer = Player.builder()
             .currentSubmission(null)
-            .elo(1200.0)
+            .glicko(1200.0)
             .email("test@example.com")
             .name("Test Player")
             .matchesPlayed(0)
@@ -188,7 +188,7 @@ class PlayerServiceTest extends PersistentTestBase {
         assertEquals(persistedPlayer.getId(), playerDTO.getId());
         assertEquals(expectedPlayer.getEmail(), playerDTO.getEmail());
         assertEquals(expectedPlayer.getName(), playerDTO.getName());
-        assertEquals(expectedPlayer.getElo(), playerDTO.getElo());
+        assertEquals(expectedPlayer.getGlicko(), playerDTO.getGlicko());
         assertEquals(expectedPlayer.getMatchesPlayed(), playerDTO.getMatchesPlayed());
         assertEquals(expectedPlayer.getNumberWins(), playerDTO.getNumberWins());
         assertEquals(expectedPlayer.getNumberLosses(), playerDTO.getNumberLosses());
@@ -295,18 +295,18 @@ class PlayerServiceTest extends PersistentTestBase {
         Player initialPlayer = persistAndReturnEntity(Player.builder()
             .name("Test Player")
             .email("test@example.com")
-            .elo(1200.0)
+            .glicko(1200.0)
             .matchesPlayed(5)
             .numberWins(2)
             .numberLosses(2)
             .numberDraws(1)
             .build());
 
-        double eloChange = 15.0;
+        double glickoChange = 15.0;
 
-        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, true, false);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, glickoChange,0.0,0.0, true, false);
 
-        assertEquals(1215.0, persistedPlayer.getElo());
+        assertEquals(1215.0, persistedPlayer.getGlicko());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(3, persistedPlayer.getNumberWins());
         assertEquals(2, persistedPlayer.getNumberLosses());
@@ -318,18 +318,18 @@ class PlayerServiceTest extends PersistentTestBase {
         Player initialPlayer = persistAndReturnEntity(Player.builder()
             .name("Test Player")
             .email("test@example.com")
-            .elo(1200.0)
+            .glicko(1200.0)
             .matchesPlayed(5)
             .numberWins(2)
             .numberLosses(2)
             .numberDraws(1)
             .build());
 
-        double eloChange = -15.0;
+        double glickoChange = -15.0;
 
-        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, false, false);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, glickoChange,0.0,0.0, false, false);
 
-        assertEquals(1185.0, persistedPlayer.getElo());
+        assertEquals(1185.0, persistedPlayer.getGlicko());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(2, persistedPlayer.getNumberWins());
         assertEquals(3, persistedPlayer.getNumberLosses());
@@ -341,18 +341,18 @@ class PlayerServiceTest extends PersistentTestBase {
         Player initialPlayer = persistAndReturnEntity(Player.builder()
             .name("Test Player")
             .email("test@example.com")
-            .elo(1200.0)
+            .glicko(1200.0)
             .matchesPlayed(5)
             .numberWins(2)
             .numberLosses(2)
             .numberDraws(1)
             .build());
 
-        double eloChange = 0.0;
+        double glickoChange = 0.0;
 
-        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, eloChange, false, true);
+        Player persistedPlayer = playerService.updatePlayerAfterLadderMatch(initialPlayer, glickoChange,0.0,0.0, false, true);
 
-        assertEquals(1200.0, persistedPlayer.getElo());
+        assertEquals(1200.0, persistedPlayer.getGlicko());
         assertEquals(6, persistedPlayer.getMatchesPlayed());
         assertEquals(2, persistedPlayer.getNumberWins());
         assertEquals(2, persistedPlayer.getNumberLosses());
@@ -364,7 +364,7 @@ class PlayerServiceTest extends PersistentTestBase {
         Player initialPlayer = persistAndReturnEntity(Player.builder()
             .name("Test Player")
             .email("test@example.com")
-            .elo(1200.0)
+            .glicko(1200.0)
             .matchesPlayed(5)
             .numberWins(2)
             .numberLosses(2)
@@ -374,13 +374,13 @@ class PlayerServiceTest extends PersistentTestBase {
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> playerService.updatePlayerAfterLadderMatch(initialPlayer, 15.0, true, true)
+            () -> playerService.updatePlayerAfterLadderMatch(initialPlayer, 15.0,0.0,0.0, true, true)
         );
 
         assertEquals("Result can't be a win and a draw", exception.getMessage());
 
         Player unchangedPlayer = playerRepository.findById(initialPlayer.getId()).get();
-        assertEquals(1200.0, unchangedPlayer.getElo());
+        assertEquals(1200.0, unchangedPlayer.getGlicko());
         assertEquals(5, unchangedPlayer.getMatchesPlayed());
         assertEquals(2, unchangedPlayer.getNumberWins());
         assertEquals(2, unchangedPlayer.getNumberLosses());

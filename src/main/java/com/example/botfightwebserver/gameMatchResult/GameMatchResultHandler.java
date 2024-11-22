@@ -1,13 +1,14 @@
 package com.example.botfightwebserver.gameMatchResult;
 
-import com.example.botfightwebserver.elo.EloCalculator;
-import com.example.botfightwebserver.elo.EloChanges;
+
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
+import com.example.botfightwebserver.glicko.GlickoCalculator;
+import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
@@ -28,7 +29,7 @@ public class GameMatchResultHandler {
     private final PlayerService playerService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
-    private final EloCalculator eloCalculator;
+    private final GlickoCalculator glickoCalculator;
     private final GameMatchLogService gameMatchLogService;
 
 
@@ -48,11 +49,11 @@ public class GameMatchResultHandler {
         log.info("Processing match result for game {}: {} vs {}, status: {}",
             gameMatchId, player1.getName(), player2.getName(), status);
 
-        EloChanges eloChanges = new EloChanges();
+        GlickoChanges glickoChanges = new GlickoChanges();
         if (gameMatch.getReason() == MATCH_REASON.LADDER) {
-            eloChanges = eloCalculator.calculateElo(player1, player2, status);
+            glickoChanges = glickoCalculator.calculateGlicko(player1, player2, status);
             log.debug("Handling ladder match: player1 {}, player2 {}", player1.getId(), player2.getId());
-            handleLadderResult(player1, player2, status, eloChanges);
+            handleLadderResult(player1, player2, status, glickoChanges);
             log.info("Ladder match handled");
         } else if (gameMatch.getReason() == MATCH_REASON.VALIDATION) {
             Submission submission = gameMatch.getSubmissionOne();
@@ -61,19 +62,19 @@ public class GameMatchResultHandler {
             log.info("Validation match handled");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
-        gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), eloChanges.getPlayer1Change(), eloChanges.getPlayer2Change());
+        gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), glickoChanges.getPlayer1Change(), glickoChanges.getPlayer2Change());
     }
 
-    private void handleLadderResult(Player player1, Player player2, MATCH_STATUS status, EloChanges eloChanges) {
+    private void handleLadderResult(Player player1, Player player2, MATCH_STATUS status, GlickoChanges glickoChanges) {
         if (status == MATCH_STATUS.PLAYER_ONE_WIN) {
-            playerService.updatePlayerAfterLadderMatch(player1, eloChanges.getPlayer1Change(), true, false);
-            playerService.updatePlayerAfterLadderMatch(player2, eloChanges.getPlayer2Change(), false, false);
+            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), true, false);
+            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), false, false);
         } else if (status == MATCH_STATUS.PLAYER_TWO_WIN) {
-            playerService.updatePlayerAfterLadderMatch(player1, eloChanges.getPlayer1Change(), false, false);
-            playerService.updatePlayerAfterLadderMatch(player2, eloChanges.getPlayer2Change(), true, false);
+            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), false, false);
+            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), true, false);
         } else if (status == MATCH_STATUS.DRAW) {
-            playerService.updatePlayerAfterLadderMatch(player1, eloChanges.getPlayer1Change(), false, true);
-            playerService.updatePlayerAfterLadderMatch(player2, eloChanges.getPlayer2Change(), false, true);
+            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), false, true);
+            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), false, true);
         }
     }
 

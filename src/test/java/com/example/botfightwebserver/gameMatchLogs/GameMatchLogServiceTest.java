@@ -30,38 +30,38 @@ class GameMatchLogServiceTest {
         // Setup
         Long gameMatchId = 1L;
         String logs = "Test logs";
-        double player1EloChange = 10.0;
-        double player2EloChange = -10.0;
+        double player1GlickoChange = 10.0;
+        double player2GlickoChange = -10.0;
 
         GameMatchLog expectedGameMatchLog = GameMatchLog.builder()
                 .matchId(gameMatchId)
                 .matchLog(logs)
-                .player1EloChange(player1EloChange)
-                .player2EloChange(player2EloChange)
+                .player1GlickoChange(player1GlickoChange)
+                .player2GlickoChange(player2GlickoChange)
                 .build();
 
         // Configure mock behavior
         when(gameMatchLogRepository.save(argThat(gameMatchLog ->
                 gameMatchLog.getMatchId().equals(gameMatchId) &&
                         gameMatchLog.getMatchLog().equals(logs) &&
-                        gameMatchLog.getPlayer1EloChange() == player1EloChange &&
-                        gameMatchLog.getPlayer2EloChange() == player2EloChange
+                        gameMatchLog.getPlayer1GlickoChange() == player1GlickoChange &&
+                        gameMatchLog.getPlayer2GlickoChange() == player2GlickoChange
         ))).thenReturn(expectedGameMatchLog);
 
         // Call function
         GameMatchLog result = gameMatchLogService.createGameMatchLog(
                 gameMatchId,
                 logs,
-                player1EloChange,
-                player2EloChange
+                player1GlickoChange,
+                player2GlickoChange
         );
 
         // Assert
         assertNotNull(result);
         assertEquals(gameMatchId, result.getMatchId());
         assertEquals(logs, result.getMatchLog());
-        assertEquals(player1EloChange, result.getPlayer1EloChange());
-        assertEquals(player2EloChange, result.getPlayer2EloChange());
+        assertEquals(player1GlickoChange, result.getPlayer1GlickoChange());
+        assertEquals(player2GlickoChange, result.getPlayer2GlickoChange());
 
         // Verify repository interaction
         verify(gameMatchLogRepository).save(any(GameMatchLog.class));
