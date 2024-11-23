@@ -62,7 +62,7 @@ class PlayerControllerTest {
                 .id(1L)
                 .email("tkwok123@gmail.com")
                 .name("tyler")
-                .elo(1200.0)
+                .glicko(1200.0)
                 .matchesPlayed(0)
                 .numberLosses(0)
                 .numberWins(0)

@@ -19,7 +19,9 @@ public class PlayerDTO {
     private String email;
     private LocalDateTime creationDateTime;
     private LocalDateTime lastModifiedDate;
-    private Double elo;
+    private Double glicko;
+    private Double phi;
+    private Double sigma;
     private Integer matchesPlayed;
     private Integer numberWins;
     private Integer numberLosses;
@@ -33,7 +35,9 @@ public class PlayerDTO {
             .email(player.getEmail())
             .creationDateTime(player.getCreationDateTime())
             .lastModifiedDate(player.getLastModifiedDate())
-            .elo(player.getElo())
+            .glicko(player.getGlicko())
+                .phi(player.getPhi())
+                .sigma(player.getSigma())
             .matchesPlayed(player.getMatchesPlayed())
             .numberWins(player.getNumberWins())
             .numberLosses(player.getNumberLosses())

@@ -19,8 +19,8 @@ class GameMatchLogTest extends PersistentTestBase {
         GameMatchLog gameMatchLog = GameMatchLog.builder()
                 .matchId(700L)
                 .matchLog("Player 1 won!")
-                .player1EloChange(10.0)
-                .player2EloChange(-10.0)
+                .player1GlickoChange(10.0)
+                .player2GlickoChange(-10.0)
                 .build();
 
         GameMatchLog persistedAndReturnedEntity = persistAndReturnEntity(gameMatchLog);
@@ -28,8 +28,8 @@ class GameMatchLogTest extends PersistentTestBase {
         assertNotNull(persistedAndReturnedEntity.getId());
         assertEquals(700L, persistedAndReturnedEntity.getMatchId());
         assertEquals("Player 1 won!", persistedAndReturnedEntity.getMatchLog());
-        assertEquals(10.0, persistedAndReturnedEntity.getPlayer1EloChange());
-        assertEquals(-10.0, persistedAndReturnedEntity.getPlayer2EloChange());
+        assertEquals(10.0, persistedAndReturnedEntity.getPlayer1GlickoChange());
+        assertEquals(-10.0, persistedAndReturnedEntity.getPlayer2GlickoChange());
     }
 
     @Test
@@ -41,7 +41,7 @@ class GameMatchLogTest extends PersistentTestBase {
         assertNotNull(persistedAndReturnedEntity.getId());
         assertNull(persistedAndReturnedEntity.getMatchId());
         assertNull(persistedAndReturnedEntity.getMatchLog());
-        assertNull(persistedAndReturnedEntity.getPlayer1EloChange());
-        assertNull(persistedAndReturnedEntity.getPlayer2EloChange());
+        assertNull(persistedAndReturnedEntity.getPlayer1GlickoChange());
+        assertNull(persistedAndReturnedEntity.getPlayer2GlickoChange());
     }
 }

@@ -53,7 +53,7 @@ class PlayerTest extends PersistentTestBase {
             .email("john@example.com")
             .creationDateTime(now)
             .lastModifiedDate(now)
-            .elo(1500.0)
+            .glicko(1500.0)
             .matchesPlayed(10)
             .numberWins(5)
             .numberLosses(3)
@@ -66,7 +66,7 @@ class PlayerTest extends PersistentTestBase {
         assertEquals("john@example.com", player.getEmail());
         assertEquals(now, player.getCreationDateTime());
         assertEquals(now, player.getLastModifiedDate());
-        assertEquals(1500.0, player.getElo());
+        assertEquals(1500.0, player.getGlicko());
         assertEquals(10, player.getMatchesPlayed());
         assertEquals(5, player.getNumberWins());
         assertEquals(3, player.getNumberLosses());
@@ -82,7 +82,7 @@ class PlayerTest extends PersistentTestBase {
             .currentSubmission(testSubmission)
             .build();
 
-        assertEquals(1200.0, player.getElo());
+        assertEquals(1200.0, player.getGlicko());
         assertEquals(0, player.getMatchesPlayed());
         assertEquals(0, player.getNumberWins());
         assertEquals(0, player.getNumberLosses());
