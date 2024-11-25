@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -105,22 +106,41 @@ public class PlayerService {
         return false;
     }
 
-    public Player[] pagination(int page, int size) {
-        if (page < 0) {
-            throw new IllegalArgumentException("Page index must be zero or greater");
+
+        public List<Player> pagination(int page, int size) {
+            if (page < 0) {
+                throw new IllegalArgumentException("Page index must be zero or greater");
+            }
+            if (size <= 0) {
+                throw new IllegalArgumentException("Page size must be greater than 0");
+            }
+
+            // Create a pageable request with sorting by Glicko in descending order
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
+
+            // Fetch the players for the specified page
+            Page<Player> playerPage = playerRepository.findAll(pageable);
+
+            List<String> playerDetails = playerPage.getContent().stream()
+                    .map(player -> "Player{id=" + player.getId() +
+                            ", name='" + player.getName() + '\'' +
+                            ", email='" + player.getEmail() + '\'' +
+                            ", glicko=" + player.getGlicko() +
+                            ", matchesPlayed=" + player.getMatchesPlayed() +
+                            ", numberWins=" + player.getNumberWins() +
+                            ", numberLosses=" + player.getNumberLosses() +
+                            ", numberDraws=" + player.getNumberDraws() +
+                            "}")
+                    .toList();
+
+            // Print the readable player details
+            System.out.println("Page Content: " + playerDetails);
+
+
+            // Return the players as a list
+            return playerPage.getContent();
         }
-        if (size <= 0) {
-            throw new IllegalArgumentException("Page size must be greater than 0");
-        }
 
-        Pageable pageable = PageRequest.of(page, size);
-
-        // Fetch the players for the specified page
-        Page<Player> playerPage = playerRepository.findAll(pageable);
-
-        // Return the players as an array
-        return playerPage.getContent().toArray(new Player[0]);
-    }
 
 }
 
