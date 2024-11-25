@@ -121,22 +121,6 @@ public class PlayerService {
             // Fetch the players for the specified page
             Page<Player> playerPage = playerRepository.findAll(pageable);
 
-            List<String> playerDetails = playerPage.getContent().stream()
-                    .map(player -> "Player{id=" + player.getId() +
-                            ", name='" + player.getName() + '\'' +
-                            ", email='" + player.getEmail() + '\'' +
-                            ", glicko=" + player.getGlicko() +
-                            ", matchesPlayed=" + player.getMatchesPlayed() +
-                            ", numberWins=" + player.getNumberWins() +
-                            ", numberLosses=" + player.getNumberLosses() +
-                            ", numberDraws=" + player.getNumberDraws() +
-                            "}")
-                    .toList();
-
-            // Print the readable player details
-            System.out.println("Page Content: " + playerDetails);
-
-
             // Return the players as a list
             return playerPage.getContent();
         }
