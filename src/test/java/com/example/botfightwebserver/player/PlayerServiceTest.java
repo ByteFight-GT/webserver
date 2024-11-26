@@ -18,7 +18,9 @@ import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -465,5 +467,102 @@ class PlayerServiceTest extends PersistentTestBase {
 
         assertFalse(result.isPresent());
     }
+    @Test
+    void testPagination_ValidPageAndSize() {
+        // Setup data: Create 10 players
+        List<Player> players = IntStream.range(1, 11)
+                .mapToObj(i -> persistAndReturnEntity(
+                        Player.builder()
+                                .name("Player " + i)
+                                .email("player" + i + "@example.com")
+                                .glicko(1000.0 + i) // Add Glicko ratings for sorting
+                                .build()))
+                .collect(Collectors.toList());
+
+        // Fetch page 0 with a size of 5
+        List<Player> paginatedPlayers = playerService.pagination(0, 5);
+
+        assertEquals(5, paginatedPlayers.size());
+        assertEquals(players.get(10 - 1).getId(), paginatedPlayers.get(0).getId()); // First player on page 0 (highest Glicko)
+        assertEquals(players.get(6 - 1).getId(), paginatedPlayers.get(4).getId()); // Last player on page 0
+    }
+
+    @Test
+    void testPagination_PageSizeLargerThanTotalPlayers() {
+        // Setup data: Create 5 players
+        List<Player> players = IntStream.range(1, 6)
+                .mapToObj(i -> persistAndReturnEntity(
+                        Player.builder()
+                                .name("Player " + i)
+                                .email("player" + i + "@example.com")
+                                .glicko(1000.0 + i) // Add Glicko ratings for sorting
+                                .build()))
+                .collect(Collectors.toList());
+
+        // Fetch page 0 with a size of 10
+        List<Player> paginatedPlayers = playerService.pagination(0, 10);
+
+        assertEquals(players.size(), paginatedPlayers.size());
+        assertEquals(players.get(5 - 1).getId(), paginatedPlayers.get(0).getId()); // First player (highest Glicko)
+        assertEquals(players.get(1 - 1).getId(), paginatedPlayers.get(4).getId()); // Last player
+    }
+
+    @Test
+    void testPagination_NoPlayers() {
+        // Fetch page 0 with a size of 5 when there are no players
+        List<Player> paginatedPlayers = playerService.pagination(0, 5);
+
+        assertEquals(0, paginatedPlayers.size());
+    }
+
+    @Test
+    void testPagination_InvalidPageOrSize() {
+        // Test invalid page size
+        IllegalArgumentException exceptionForInvalidSize = assertThrows(
+                IllegalArgumentException.class,
+                () -> playerService.pagination(0, 0)
+        );
+        assertEquals("Page size must be greater than 0", exceptionForInvalidSize.getMessage());
+
+        // Test invalid page number
+        IllegalArgumentException exceptionForInvalidPage = assertThrows(
+                IllegalArgumentException.class,
+                () -> playerService.pagination(-1, 5)
+        );
+        assertEquals("Page index must be zero or greater", exceptionForInvalidPage.getMessage());
+    }
+
+    @Test
+    void testPagination_SpecificRangeAndGlickoSorting() {
+        // Setup data: Create 100 players
+        List<Player> players = IntStream.range(1, 101)
+                .mapToObj(i -> persistAndReturnEntity(
+                        Player.builder()
+                                .name("Player " + i)
+                                .email("player" + i + "@example.com")
+                                .glicko(1000.0 + i) // Assign Glicko ratings for sorting
+                                .build()))
+                .collect(Collectors.toList());
+
+        // Fetch players 50–59 (page index 5, size 10)
+        List<Player> paginatedPlayers = playerService.pagination(5, 10);
+
+        // Validate the size of the result
+        assertEquals(10, paginatedPlayers.size());
+
+        // Validate that the players are sorted by Glicko in descending order
+        for (int i = 1; i < paginatedPlayers.size(); i++) {
+            assertTrue(
+                    paginatedPlayers.get(i - 1).getGlicko() >= paginatedPlayers.get(i).getGlicko(),
+                    "Players are not sorted by Glicko in descending order"
+            );
+        }
+
+        // Validate the specific players retrieved
+        assertEquals(1050.0, paginatedPlayers.get(0).getGlicko());
+        assertEquals(1041.0, paginatedPlayers.get(9).getGlicko());
+    }
+
+
 
 }
