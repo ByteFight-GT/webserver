@@ -5,7 +5,7 @@ public enum MATCH_STATUS {
     IN_PROGRESS,
     FAILED,
     MANUALLY_FAILED,
-    PLAYER_ONE_WIN,
-    PLAYER_TWO_WIN,
+    TEAM_ONE_WIN,
+    TEAM_TWO_WIN,
     DRAW
 }

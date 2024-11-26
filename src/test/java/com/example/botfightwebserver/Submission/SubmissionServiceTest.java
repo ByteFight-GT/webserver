@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.submission;
 
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerRepository;
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamRepository;
 import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,26 +29,26 @@ class SubmissionServiceTest {
     private StorageService storageService;
 
     @Mock
-    private PlayerRepository playerRepository;
+    private TeamRepository teamRepository;
 
     @InjectMocks
     private SubmissionService submissionService;
 
-    private Player testPlayer;
+    private Team testTeam;
     private Submission testSubmission;
     private MockMultipartFile validFile;
     private MockMultipartFile invalidFile;
 
     @BeforeEach
     void setUp() {
-        // Set up test player
-        testPlayer = new Player();
-        testPlayer.setId(1L);
+        // Set up test team
+        testTeam = new Team();
+        testTeam.setId(1L);
 
         // Set up test submission
         testSubmission = new Submission();
         testSubmission.setId(1L);
-        testSubmission.setPlayerId(1L);
+        testSubmission.setTeamId(1L);
         testSubmission.setStoragePath("test/path");
         testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
 
@@ -72,7 +72,7 @@ class SubmissionServiceTest {
     @Test
     void createSubmission_Success() {
         // Arrange
-        when(playerRepository.findById(1L)).thenReturn(Optional.of(testPlayer));
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(testTeam));
         when(storageService.uploadFile(eq(1L), any(MultipartFile.class))).thenReturn("test/path");
         when(submissionRepository.save(any(Submission.class))).thenReturn(testSubmission);
 
@@ -82,25 +82,25 @@ class SubmissionServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(testSubmission.getId(), result.getId());
-        assertEquals(testSubmission.getPlayerId(), result.getPlayerId());
+        assertEquals(testSubmission.getTeamId(), result.getTeamId());
         assertEquals(testSubmission.getStoragePath(), result.getStoragePath());
         assertEquals(SUBMISSION_VALIDITY.NOT_EVALUATED, result.getSubmissionValidity());
 
-        verify(playerRepository).findById(1L);
+        verify(teamRepository).findById(1L);
         verify(storageService).uploadFile(eq(1L), any(MultipartFile.class));
         verify(submissionRepository).save(any(Submission.class));
     }
 
     @Test
-    void createSubmission_PlayerNotFound() {
+    void createSubmission_TeamNotFound() {
         // Arrange
-        when(playerRepository.findById(1L)).thenReturn(Optional.empty());
+        when(teamRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(EntityNotFoundException.class,
                 () -> submissionService.createSubmission(1L, validFile));
 
-        verify(playerRepository).findById(1L);
+        verify(teamRepository).findById(1L);
         verifyNoInteractions(storageService);
         verifyNoInteractions(submissionRepository);
     }

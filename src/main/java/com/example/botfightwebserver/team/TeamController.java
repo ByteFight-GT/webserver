@@ -1,10 +1,8 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.team;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,21 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/player")
+@RequestMapping("/api/v1/team")
 @RequiredArgsConstructor
-public class PlayerController {
+public class TeamController {
 
-    private final PlayerService playerService;
+    private final TeamService teamService;
 
-    @GetMapping("/players")
-    public List<PlayerDTO> getPlayers() {
-        return playerService.getPlayers().stream().map(PlayerDTO::fromEntity).toList();
+    @GetMapping("/teams")
+    public List<TeamDTO> getTeams() {
+        return teamService.getTeams().stream().map(TeamDTO::fromEntity).toList();
     }
 
     @PostMapping
-    public ResponseEntity<PlayerDTO> createPlayer(@RequestParam String name,
-                                               @RequestParam String email) {
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.createPlayer(name, email)));
+    public ResponseEntity<TeamDTO> createTeam(@RequestParam String name) {
+        return ResponseEntity.ok(TeamDTO.fromEntity(teamService.createTeam(name)));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

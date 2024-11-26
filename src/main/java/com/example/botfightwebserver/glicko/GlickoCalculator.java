@@ -1,10 +1,13 @@
 package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.team.Team;
+import org.springframework.stereotype.Service;
+
 import java.util.Arrays;
 import java.util.List;
 
+@Service
 public class GlickoCalculator {
 
     public static final double MU = 1500.0;
@@ -46,14 +49,14 @@ public class GlickoCalculator {
     public class MatchResult {
         private double score1;
         private double score2;
-        private Rating updatedPlayer1;
-        private Rating updatedPlayer2;
+        private Rating updatedTeam1;
+        private Rating updatedTeam2;
 
-        public MatchResult(double score1, double score2, Rating updatedPlayer1, Rating updatedPlayer2) {
+        public MatchResult(double score1, double score2, Rating updatedTeam1, Rating updatedTeam2) {
             this.score1 = score1;
             this.score2 = score2;
-            this.updatedPlayer1 = updatedPlayer1;
-            this.updatedPlayer2 = updatedPlayer2;
+            this.updatedTeam1 = updatedTeam1;
+            this.updatedTeam2 = updatedTeam2;
         }
 
         public double getScore1() {
@@ -64,37 +67,37 @@ public class GlickoCalculator {
             return score2;
         }
 
-        public Rating getUpdatedPlayer1() {
-            return updatedPlayer1;
+        public Rating getUpdatedTeam1() {
+            return updatedTeam1;
         }
 
-        public Rating getUpdatedPlayer2() {
-            return updatedPlayer2;
+        public Rating getUpdatedTeam2() {
+            return updatedTeam2;
         }
 
         // Convenience methods to access mu, phi, sigma
-        public double getPlayer1Mu() {
-            return updatedPlayer1.getMu();
+        public double getTeam1Mu() {
+            return updatedTeam1.getMu();
         }
 
-        public double getPlayer1Phi() {
-            return updatedPlayer1.getPhi();
+        public double getTeam1Phi() {
+            return updatedTeam1.getPhi();
         }
 
-        public double getPlayer1Sigma() {
-            return updatedPlayer1.getSigma();
+        public double getTeam1Sigma() {
+            return updatedTeam1.getSigma();
         }
 
-        public double getPlayer2Mu() {
-            return updatedPlayer2.getMu();
+        public double getTeam2Mu() {
+            return updatedTeam2.getMu();
         }
 
-        public double getPlayer2Phi() {
-            return updatedPlayer2.getPhi();
+        public double getTeam2Phi() {
+            return updatedTeam2.getPhi();
         }
 
-        public double getPlayer2Sigma() {
-            return updatedPlayer2.getSigma();
+        public double getTeam2Sigma() {
+            return updatedTeam2.getSigma();
         }
     }
 
@@ -154,11 +157,11 @@ public class GlickoCalculator {
         double score2;
 
         switch (winner.toLowerCase()) {
-            case "player1":
+            case "team1":
                 score1 = 1.0;
                 score2 = 0.0;
                 break;
-            case "player2":
+            case "team2":
                 score1 = 0.0;
                 score2 = 1.0;
                 break;
@@ -170,10 +173,10 @@ public class GlickoCalculator {
                 throw new IllegalArgumentException("Invalid winner: " + winner);
         }
 
-        Rating updatedPlayer1 = rate(rating1, Arrays.asList(score1, rating2.getMu(), rating2.getPhi(), rating2.getSigma()));
-        Rating updatedPlayer2 = rate(rating2, Arrays.asList(score2, rating1.getMu(), rating1.getPhi(), rating1.getSigma()));
+        Rating updatedTeam1 = rate(rating1, Arrays.asList(score1, rating2.getMu(), rating2.getPhi(), rating2.getSigma()));
+        Rating updatedTeam2 = rate(rating2, Arrays.asList(score2, rating1.getMu(), rating1.getPhi(), rating1.getSigma()));
 
-        return new MatchResult(score1, score2, updatedPlayer1, updatedPlayer2);
+        return new MatchResult(score1, score2, updatedTeam1, updatedTeam2);
     }
 
     public double determineSigma(Rating rating, double difference, double variance) {
@@ -182,7 +185,7 @@ public class GlickoCalculator {
     }
 
     // Optional: Method to calculate Elo changes directly
-    public GlickoChanges calculateGlicko(Player player1, Player player2, MATCH_STATUS matchStatus) {
+    public GlickoChanges calculateGlicko(Team team1, Team team2, MATCH_STATUS matchStatus) {
         // Validate the match status
         if (matchStatus == MATCH_STATUS.IN_PROGRESS ||
                 matchStatus == MATCH_STATUS.FAILED ||
@@ -190,36 +193,36 @@ public class GlickoCalculator {
             throw new IllegalArgumentException("Match must have a determined result. Match was in state: " + matchStatus);
         }
 
-        // Validate player Elo ratings
-        if (player1.getGlicko() == null || player2.getGlicko() == null) {
-            throw new IllegalArgumentException("Player Elo cannot be null.");
+        // Validate team Elo ratings
+        if (team1.getGlicko() == null || team2.getGlicko() == null) {
+            throw new IllegalArgumentException("Team Elo cannot be null.");
         }
 
-        // Create player ratings
-        Rating player1Rating = new Rating(player1.getGlicko(), player1.getPhi(), player1.getSigma());
-        Rating player2Rating = new Rating(player2.getGlicko(), player2.getPhi(), player2.getSigma());
+        // Create team ratings
+        Rating team1Rating = new Rating(team1.getGlicko(), team1.getPhi(), team1.getSigma());
+        Rating team2Rating = new Rating(team2.getGlicko(), team2.getPhi(), team2.getSigma());
 
         // Determine match status for Glicko calculation
         String glickoMatchStatus;
         if (matchStatus == MATCH_STATUS.DRAW) {
             glickoMatchStatus = "draw";
-        } else if (matchStatus == MATCH_STATUS.PLAYER_ONE_WIN) {
-            glickoMatchStatus = "player1";
-        } else if (matchStatus == MATCH_STATUS.PLAYER_TWO_WIN) {
-            glickoMatchStatus = "player2";
+        } else if (matchStatus == MATCH_STATUS.TEAM_ONE_WIN) {
+            glickoMatchStatus = "team1";
+        } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
+            glickoMatchStatus = "team2";
         } else {
             throw new IllegalArgumentException("Unknown match status: " + matchStatus);
         }
 
-        MatchResult result = rate1vs1(player1Rating, player2Rating, glickoMatchStatus);
+        MatchResult result = rate1vs1(team1Rating, team2Rating, glickoMatchStatus);
 
         return new GlickoChanges(
-                result.getUpdatedPlayer1().getMu() - player1.getGlicko(),
-                result.getUpdatedPlayer2().getMu() - player2.getGlicko(),
-                result.getUpdatedPlayer1().getPhi() - player1.getPhi(),
-                result.getUpdatedPlayer2().getPhi() - player2.getPhi(),
-                result.getUpdatedPlayer1().getSigma() - player1.getSigma(),
-                result.getUpdatedPlayer2().getSigma() - player2.getSigma()
+                result.getUpdatedTeam1().getMu() - team1.getGlicko(),
+                result.getUpdatedTeam2().getMu() - team2.getGlicko(),
+                result.getUpdatedTeam1().getPhi() - team1.getPhi(),
+                result.getUpdatedTeam2().getPhi() - team2.getPhi(),
+                result.getUpdatedTeam1().getSigma() - team1.getSigma(),
+                result.getUpdatedTeam2().getSigma() - team2.getSigma()
         );
     }
 }

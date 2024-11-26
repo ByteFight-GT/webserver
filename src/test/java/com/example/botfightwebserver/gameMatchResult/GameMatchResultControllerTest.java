@@ -35,10 +35,10 @@ class GameMatchResultControllerTest {
 
     @BeforeEach
     void setUp() {
-        sampleResult = new GameMatchResult(1L, MATCH_STATUS.PLAYER_ONE_WIN, "Sample match log");
+        sampleResult = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "Sample match log");
         sampleResults = Arrays.asList(
-            new GameMatchResult(1L, MATCH_STATUS.PLAYER_ONE_WIN, "Log 1"),
-            new GameMatchResult(2L, MATCH_STATUS.PLAYER_TWO_WIN, "Log 2")
+            new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "Log 1"),
+            new GameMatchResult(2L, MATCH_STATUS.TEAM_TWO_WIN, "Log 2")
         );
     }
 

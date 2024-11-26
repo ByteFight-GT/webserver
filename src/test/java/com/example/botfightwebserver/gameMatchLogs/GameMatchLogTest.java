@@ -1,7 +1,6 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
 import com.example.botfightwebserver.PersistentTestBase;
-import com.example.botfightwebserver.player.Player;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,18 +17,18 @@ class GameMatchLogTest extends PersistentTestBase {
     void testBuilderWithAllFields() {
         GameMatchLog gameMatchLog = GameMatchLog.builder()
                 .matchId(700L)
-                .matchLog("Player 1 won!")
-                .player1GlickoChange(10.0)
-                .player2GlickoChange(-10.0)
+                .matchLog("Team 1 won!")
+                .team1GlickoChange(10.0)
+                .team2GlickoChange(-10.0)
                 .build();
 
         GameMatchLog persistedAndReturnedEntity = persistAndReturnEntity(gameMatchLog);
 
         assertNotNull(persistedAndReturnedEntity.getId());
         assertEquals(700L, persistedAndReturnedEntity.getMatchId());
-        assertEquals("Player 1 won!", persistedAndReturnedEntity.getMatchLog());
-        assertEquals(10.0, persistedAndReturnedEntity.getPlayer1GlickoChange());
-        assertEquals(-10.0, persistedAndReturnedEntity.getPlayer2GlickoChange());
+        assertEquals("Team 1 won!", persistedAndReturnedEntity.getMatchLog());
+        assertEquals(10.0, persistedAndReturnedEntity.getTeam1GlickoChange());
+        assertEquals(-10.0, persistedAndReturnedEntity.getTeam2GlickoChange());
     }
 
     @Test
@@ -41,7 +40,7 @@ class GameMatchLogTest extends PersistentTestBase {
         assertNotNull(persistedAndReturnedEntity.getId());
         assertNull(persistedAndReturnedEntity.getMatchId());
         assertNull(persistedAndReturnedEntity.getMatchLog());
-        assertNull(persistedAndReturnedEntity.getPlayer1GlickoChange());
-        assertNull(persistedAndReturnedEntity.getPlayer2GlickoChange());
+        assertNull(persistedAndReturnedEntity.getTeam1GlickoChange());
+        assertNull(persistedAndReturnedEntity.getTeam2GlickoChange());
     }
 }

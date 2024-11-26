@@ -26,7 +26,7 @@ class RabbitMQListenerTest {
 
     @Test
     void receiveGameMatchResults_ShouldProcessMessageSuccessfully() {
-        GameMatchResult gameMatchResult = new GameMatchResult(1L, MATCH_STATUS.PLAYER_TWO_WIN, "SOME LOGS");
+        GameMatchResult gameMatchResult = new GameMatchResult(1L, MATCH_STATUS.TEAM_TWO_WIN, "SOME LOGS");
 
         rabbitMQListener.receiveGameMatchResults(gameMatchResult);
 

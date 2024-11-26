@@ -39,7 +39,7 @@ class GcpStorageServiceImplTest {
 
     @Test
     void uploadFile_Success() throws IOException {
-        Long playerId = 123L;
+        Long teamId = 123L;
         String originalFileName = "test.txt";
         String contentType = "text/plain";
         byte[] content = "test content".getBytes();
@@ -54,21 +54,21 @@ class GcpStorageServiceImplTest {
         Blob mockBlob = mock(Blob.class);
         when(storage.create(any(BlobInfo.class), any(byte[].class))).thenReturn(mockBlob);
 
-        String result = storageService.uploadFile(playerId, file);
+        String result = storageService.uploadFile(teamId, file);
 
-        String expectedFileName = "PLAYER_123/test.txt_20240101120000";
+        String expectedFileName = "TEAM_123/test.txt_20240101120000";
         assertEquals(expectedFileName, result);
         verify(storage, times(1)).create(any(BlobInfo.class), eq(content));
     }
 
     @Test
     void generateFileName_ReturnsCorrectFormat() {
-        Long playerId = 123L;
+        Long teamId = 123L;
         String originalFileName = "test.txt";
 
-        String result = storageService.generateFileName(playerId, originalFileName);
+        String result = storageService.generateFileName(teamId, originalFileName);
 
-        String expectedFileName = "PLAYER_123/test.txt_20240101120000";
+        String expectedFileName = "TEAM_123/test.txt_20240101120000";
         assertEquals(expectedFileName, result);
     }
 

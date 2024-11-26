@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.team;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,50 +17,47 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PlayerController.class)
-class PlayerControllerTest {
+@WebMvcTest(TeamController.class)
+class TeamControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private PlayerService playerService;
+    private TeamService teamService;
 
     @Test
-    void testGetPlayers() throws Exception {
-        Player player1 = Player.builder().id(1L).email("tkwok123@gmail.com").name("tyler").build();
-        Player player2 = Player.builder().id(2L).email("bkwok123@gmail.com").name("ben").build();
-        List<Player> players = List.of(player1, player2);
+    void testGetTeams() throws Exception {
+        Team team1 = Team.builder().id(1L).name("tyler").build();
+        Team team2 = Team.builder().id(2L).name("ben").build();
+        List<Team> teams = List.of(team1, team2);
 
-        when(playerService.getPlayers()).thenReturn(players);
+        when(teamService.getTeams()).thenReturn(teams);
 
-        mockMvc.perform(get("/api/v1/player/players"))
+        mockMvc.perform(get("/api/v1/team/teams"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].id").value(1L))
             .andExpect(jsonPath("$[0].name").value("tyler"))
-            .andExpect(jsonPath("$[0].email").value("tkwok123@gmail.com"))
             .andExpect(jsonPath("$[1].id").value(2L))
-            .andExpect(jsonPath("$[1].name").value("ben"))
-            .andExpect(jsonPath("$[1].email").value("bkwok123@gmail.com"));
+            .andExpect(jsonPath("$[1].name").value("ben"));
     }
 
     @Test
-    void testGetPlayersEmpty() throws Exception {
-        List<Player> emptyPlayers = List.of();
-        when(playerService.getPlayers()).thenReturn(emptyPlayers);
+    void testGetTeamsEmpty() throws Exception {
+        List<Team> emptyTeams = List.of();
+        when(teamService.getTeams()).thenReturn(emptyTeams);
 
-        mockMvc.perform(get("/api/v1/player/players"))
+        mockMvc.perform(get("/api/v1/team/teams"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
-    void testCreatePlayer() throws Exception {
-        Player newPlayer =
-            Player.builder()
+    void testCreateTeam() throws Exception {
+        Team newTeam =
+            Team.builder()
                 .id(1L)
-                .email("tkwok123@gmail.com")
                 .name("tyler")
                 .glicko(1200.0)
                 .matchesPlayed(0)
@@ -68,16 +65,14 @@ class PlayerControllerTest {
                 .numberWins(0)
                 .numberDraws(0).build();
 
-        when(playerService.createPlayer("tyler", "tkwok123@gmail.com")).thenReturn(newPlayer);
+        when(teamService.createTeam("tyler")).thenReturn(newTeam);
 
-        mockMvc.perform(post("/api/v1/player")
-                .param("email", "tkwok123@gmail.com")
+        mockMvc.perform(post("/api/v1/team")
                 .param("name", "tyler")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.name").value("tyler"))
-            .andExpect(jsonPath("$.email").value("tkwok123@gmail.com"))
             .andExpect(jsonPath("$.matchesPlayed").value(0))
             .andExpect(jsonPath("$.numberLosses").value(0))
             .andExpect(jsonPath("$.numberWins").value(0))
@@ -85,18 +80,16 @@ class PlayerControllerTest {
     }
 
     @Test
-    void testCreatePlayerEmailExists() throws Exception {
-        String email = "tkwok123@gmail.com";
+    void testCreateTeamNameExists() throws Exception {
         String name = "tyler";
-        when(playerService.createPlayer("tyler", "tkwok123@gmail.com")).thenThrow(
-            new IllegalArgumentException("Player with email " + email + " already exists"));
+        when(teamService.createTeam("tyler")).thenThrow(
+            new IllegalArgumentException("Team with name " + name + " already exists"));
 
-        mockMvc.perform(post("/api/v1/player")
-            .param("email", "tkwok123@gmail.com")
+        mockMvc.perform(post("/api/v1/team")
             .param("name", "tyler")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(content().string(containsString("Player with email " + email + " already exists")));
+            .andExpect(content().string(containsString("Team with name " + name + " already exists")));
     }
 
 }

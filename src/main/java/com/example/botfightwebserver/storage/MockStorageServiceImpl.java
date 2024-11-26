@@ -16,14 +16,14 @@ public class MockStorageServiceImpl implements  StorageService {
 
     private Clock clock;
 
-    public String uploadFile(Long playerId, MultipartFile file) {
+    public String uploadFile(Long teamId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is null or empty");
         }
         String fileName = file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty() ?
             file.getOriginalFilename() : "unknown";
         String timestamp = LocalDateTime.now(clock).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        return String.format("PLAYER_%s/%s_%s",playerId, fileName, timestamp);
+        return String.format("TEAM_%s/%s_%s",teamId, fileName, timestamp);
     }
 
     @Override

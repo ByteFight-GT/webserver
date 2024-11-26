@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.team;
 
 import com.example.botfightwebserver.submission.Submission;
 import com.google.common.annotations.VisibleForTesting;
@@ -13,18 +13,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,14 +29,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class Player {
+public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     private String name;
-    @Email
-    private String email;
 
     private LocalDateTime creationDateTime;
 

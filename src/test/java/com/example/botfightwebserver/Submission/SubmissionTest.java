@@ -30,7 +30,7 @@ class SubmissionTest extends PersistentTestBase {
         Submission.setClock(fixedClock);
         testSubmission = Submission.builder()
                 .storagePath("/fake/storage/path")
-                .playerId(1L)
+                .teamId(1L)
                 .submissionValidity(SUBMISSION_VALIDITY.VALID)
                 .source(STORAGE_SOURCE.LOCAL)
                 .build();
@@ -41,7 +41,7 @@ class SubmissionTest extends PersistentTestBase {
         Submission submission = Submission.builder()
                 .id(1L)
                 .storagePath("/fake/storage/path")
-                .playerId(2L)
+                .teamId(2L)
                 .submissionValidity(SUBMISSION_VALIDITY.VALID)
                 .source(STORAGE_SOURCE.GCP)
                 .createdAt(NOW)
@@ -50,7 +50,7 @@ class SubmissionTest extends PersistentTestBase {
 
         assertEquals(1L, submission.getId());
         assertEquals("/fake/storage/path", submission.getStoragePath());
-        assertEquals(2L, submission.getPlayerId());
+        assertEquals(2L, submission.getTeamId());
         assertEquals(SUBMISSION_VALIDITY.VALID, submission.getSubmissionValidity());
         assertEquals(STORAGE_SOURCE.GCP, submission.getSource());
         assertEquals(NOW, submission.getCreatedAt());

@@ -30,7 +30,7 @@ class MockStorageServiceImplTest {
     @Test
     void uploadFile_ValidFile_ReturnsCorrectFormat() {
         // Arrange
-        Long playerId = 123L;
+        Long teamId = 123L;
         String filename = "test.txt";
         MultipartFile file = new MockMultipartFile(
             "file",
@@ -38,15 +38,15 @@ class MockStorageServiceImplTest {
             "text/plain",
             "test content".getBytes()
         );
-        String result = storageService.uploadFile(playerId, file);
+        String result = storageService.uploadFile(teamId, file);
 
-        String expected = "PLAYER_123/test.txt_20240101120000";
+        String expected = "TEAM_123/test.txt_20240101120000";
         assertEquals(expected, result);
     }
 
     @Test
     void uploadFile_NullFilename_UsesUnknown() {
-        Long playerId = 123L;
+        Long teamId = 123L;
         MultipartFile file = new MockMultipartFile(
             "file",
             null,
@@ -54,24 +54,24 @@ class MockStorageServiceImplTest {
             "test content".getBytes()
         );
 
-        String result = storageService.uploadFile(playerId, file);
+        String result = storageService.uploadFile(teamId, file);
 
-        String expected = "PLAYER_123/unknown_20240101120000";
+        String expected = "TEAM_123/unknown_20240101120000";
         assertEquals(expected, result);
     }
 
     @Test
     void uploadFile_NullFile_ThrowsException() {
-        Long playerId = 123L;
+        Long teamId = 123L;
 
         assertThrows(IllegalArgumentException.class, () ->
-            storageService.uploadFile(playerId, null)
+            storageService.uploadFile(teamId, null)
         );
     }
 
     @Test
     void uploadFile_EmptyFile_ThrowsException() {
-        Long playerId = 123L;
+        Long teamId = 123L;
         MultipartFile file = new MockMultipartFile(
             "file",
             "test.txt",
@@ -80,7 +80,7 @@ class MockStorageServiceImplTest {
         );
 
         assertThrows(IllegalArgumentException.class, () ->
-            storageService.uploadFile(playerId, file)
+            storageService.uploadFile(teamId, file)
         );
     }
 }

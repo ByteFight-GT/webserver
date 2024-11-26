@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.team.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
 import com.google.common.annotations.VisibleForTesting;
@@ -14,6 +14,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 public class GameMatchService {
 
     private final GameMatchRepository gameMatchRepository;
-    private final PlayerService playerService;
+    private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
     private final GameMatchLogService gameMatchLogService;
@@ -37,12 +38,12 @@ public class GameMatchService {
         return gameMatchRepository.findAll();
     }
 
-    public GameMatch createMatch(Long player1Id, Long player2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
-        playerService.validatePlayers(player1Id, player2Id);
+    public GameMatch createMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
+        teamService.validateTeams(team1Id, team2Id);
         submissionService.validateSubmissions(submission1Id, submission2Id);
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setPlayerOne(playerService.getPlayerReferenceById(player1Id));
-        gameMatch.setPlayerTwo(playerService.getPlayerReferenceById(player2Id));
+        gameMatch.setTeamOne(teamService.getReferenceById(team1Id));
+        gameMatch.setTeamTwo(teamService.getReferenceById(team2Id));
         gameMatch.setSubmissionOne(submissionService.getSubmissionReferenceById(submission1Id));
         gameMatch.setSubmissionTwo(submissionService.getSubmissionReferenceById(submission2Id));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
@@ -53,15 +54,20 @@ public class GameMatchService {
         return gameMatchRepository.save(gameMatch);
     }
 
-    public GameMatchJob submitGameMatch(Long player1Id, Long player2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
-        GameMatch match = createMatch(player1Id, player2Id, submission1Id, submission2Id, reason, map);
+    public GameMatchJob submitGameMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
+        GameMatch match = createMatch(team1Id, team2Id, submission1Id, submission2Id, reason, map);
         GameMatchJob job = GameMatchJob.fromEntity(match);
         rabbitMQService.enqueueGameMatchJob(job);
         return job;
     }
 
     public void setGameMatchStatus(Long gameMatchId, MATCH_STATUS status) {
-        GameMatch gameMatch = gameMatchRepository.findById(gameMatchId).get();
+        System.out.println("GAME MATCHID" + gameMatchId);
+        Optional maybeGameMatch = gameMatchRepository.findById(gameMatchId);
+        if (maybeGameMatch.isEmpty()) {
+            throw new IllegalStateException("Failed setting match to" + status + " Game Id doesn't exist" + gameMatchId);
+        }
+        GameMatch gameMatch = (GameMatch) maybeGameMatch.get();
         gameMatch.setStatus(status);
         if (!MATCH_STATUS.WAITING.equals(gameMatch.getStatus())) {
             gameMatch.setProcessedAt(LocalDateTime.now(clock));

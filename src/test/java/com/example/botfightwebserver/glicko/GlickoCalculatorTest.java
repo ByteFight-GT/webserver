@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.team.Team;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,20 +106,20 @@ class GlickoCalculatorTest {
     }
 
     @Test
-    void testRate1vs1Player1Wins() {
+    void testRate1vs1Team1Wins() {
         GlickoCalculator calculator = new GlickoCalculator();
 
         GlickoCalculator.Rating rating1 = calculator.createRating(1500.0, 200.0, 0.06);
         GlickoCalculator.Rating rating2 = calculator.createRating(1400.0, 30.0, 0.06);
 
-        GlickoCalculator.MatchResult result = calculator.rate1vs1(rating1, rating2, "player1");
+        GlickoCalculator.MatchResult result = calculator.rate1vs1(rating1, rating2, "team1");
 
         assertNotNull(result, "Match result should not be null");
-        assertEquals(1.0, result.getScore1(), "Player 1 score should be 1.0");
-        assertEquals(0.0, result.getScore2(), "Player 2 score should be 0.0");
+        assertEquals(1.0, result.getScore1(), "Team 1 score should be 1.0");
+        assertEquals(0.0, result.getScore2(), "Team 2 score should be 0.0");
 
-        assertNotNull(result.getUpdatedPlayer1(), "Updated Player 1 rating should not be null");
-        assertNotNull(result.getUpdatedPlayer2(), "Updated Player 2 rating should not be null");
+        assertNotNull(result.getUpdatedTeam1(), "Updated Team 1 rating should not be null");
+        assertNotNull(result.getUpdatedTeam2(), "Updated Team 2 rating should not be null");
     }
 
     @Test
@@ -132,89 +132,83 @@ class GlickoCalculatorTest {
         GlickoCalculator.MatchResult result = calculator.rate1vs1(rating1, rating2, "draw");
 
         assertNotNull(result, "Match result should not be null");
-        assertEquals(0.5, result.getScore1(), "Player 1 score should be 0.5");
-        assertEquals(0.5, result.getScore2(), "Player 2 score should be 0.5");
+        assertEquals(0.5, result.getScore1(), "Team 1 score should be 0.5");
+        assertEquals(0.5, result.getScore2(), "Team 2 score should be 0.5");
 
-        assertNotNull(result.getUpdatedPlayer1(), "Updated Player 1 rating should not be null");
-        assertNotNull(result.getUpdatedPlayer2(), "Updated Player 2 rating should not be null");
+        assertNotNull(result.getUpdatedTeam1(), "Updated Team 1 rating should not be null");
+        assertNotNull(result.getUpdatedTeam2(), "Updated Team 2 rating should not be null");
     }
 
     @Test
-    void testCalculateGlickoPlayerOneWins() {
+    void testCalculateGlickoTeamOneWins() {
         GlickoCalculator calculator = new GlickoCalculator();
 
-        Player player1 = Player.builder()
-                .name("Player One")
-                .email("playerone@example.com")
+        Team team1 = Team.builder()
+                .name("Team One")
                 .glicko(1500.0)
                 .phi(200.0)
                 .sigma(0.06)
                 .build();
 
-        Player player2 = Player.builder()
-                .name("Player Two")
-                .email("playertwo@example.com")
+        Team team2 = Team.builder()
+                .name("Team Two")
                 .glicko(1400.0)
                 .phi(30.0)
                 .sigma(0.06)
                 .build();
 
-        GlickoChanges changes = calculator.calculateGlicko(player1, player2, MATCH_STATUS.PLAYER_ONE_WIN);
+        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MATCH_STATUS.TEAM_ONE_WIN);
 
         assertNotNull(changes, "GlickoChanges should not be null");
-        assertTrue(changes.getPlayer1Change() > 0, "Player 1 Elo change should be positive");
-        assertTrue(changes.getPlayer2Change() < 0, "Player 2 Elo change should be negative");
+        assertTrue(changes.getTeam1Change() > 0, "Team 1 Elo change should be positive");
+        assertTrue(changes.getTeam2Change() < 0, "Team 2 Elo change should be negative");
     }
 
     @Test
     void testCalculateGlickoDraw() {
         GlickoCalculator calculator = new GlickoCalculator();
 
-        Player player1 = Player.builder()
-                .name("Player One")
-                .email("playerone@example.com")
+        Team team1 = Team.builder()
+                .name("Team One")
                 .glicko(1500.0)
                 .phi(200.0)
                 .sigma(0.06)
                 .build();
 
-        Player player2 = Player.builder()
-                .name("Player Two")
-                .email("playertwo@example.com")
+        Team team2 = Team.builder()
+                .name("Team Two")
                 .glicko(1500.0)
                 .phi(200.0)
                 .sigma(0.06)
                 .build();
 
-        GlickoChanges changes = calculator.calculateGlicko(player1, player2, MATCH_STATUS.DRAW);
+        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MATCH_STATUS.DRAW);
 
         assertNotNull(changes, "GlickoChanges should not be null");
-        assertEquals(0.0, changes.getPlayer1Change(), 0.0001, "Player 1 Elo change should be zero");
-        assertEquals(0.0, changes.getPlayer2Change(), 0.0001, "Player 2 Elo change should be zero");
+        assertEquals(0.0, changes.getTeam1Change(), 0.0001, "Team 1 Elo change should be zero");
+        assertEquals(0.0, changes.getTeam2Change(), 0.0001, "Team 2 Elo change should be zero");
     }
 
     @Test
     void testCalculateGlickoInvalidMatchStatus() {
         GlickoCalculator calculator = new GlickoCalculator();
 
-        Player player1 = Player.builder()
-                .name("Player One")
-                .email("playerone@example.com")
+        Team team1 = Team.builder()
+                .name("Team One")
                 .glicko(1500.0)
                 .phi(200.0)
                 .sigma(0.06)
                 .build();
 
-        Player player2 = Player.builder()
-                .name("Player Two")
-                .email("playertwo@example.com")
+        Team team2 = Team.builder()
+                .name("Team Two")
                 .glicko(1500.0)
                 .phi(200.0)
                 .sigma(0.06)
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> {
-            calculator.calculateGlicko(player1, player2, MATCH_STATUS.IN_PROGRESS);
+            calculator.calculateGlicko(team1, team2, MATCH_STATUS.IN_PROGRESS);
         }, "Should throw IllegalArgumentException for invalid match status");
     }
 }

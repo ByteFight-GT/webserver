@@ -34,8 +34,8 @@ class GameMatchControllerTest {
     void testSubmitMatch() throws Exception {
         // Arrange: Create an instance of MatchSubmissionRequest
         MatchSubmissionRequest request = new MatchSubmissionRequest();
-        request.setPlayer1Id(1L);
-        request.setPlayer2Id(2L);
+        request.setTeam1Id(1L);
+        request.setTeam2Id(2L);
         request.setSubmission1Id(10L);
         request.setSubmission2Id(20L);
         request.setReason(MATCH_REASON.VALIDATION);

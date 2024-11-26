@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.submission.Submission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameMatchTest {
     private GameMatch gameMatch;
-    private Player playerOne;
-    private Player playerTwo;
+    private Team teamOne;
+    private Team teamTwo;
     private Submission submissionOne;
     private Submission submissionTwo;
     private Clock fixedClock;
@@ -23,11 +23,11 @@ class GameMatchTest {
 
     @BeforeEach
     void setUp() {
-        playerOne = new Player();
-        playerOne.setId(1L);
+        teamOne = new Team();
+        teamOne.setId(1L);
 
-        playerTwo = new Player();
-        playerTwo.setId(2L);
+        teamTwo = new Team();
+        teamTwo.setId(2L);
 
         submissionOne = new Submission();
         submissionOne.setId(1L);
@@ -36,8 +36,8 @@ class GameMatchTest {
         submissionTwo.setId(2L);
 
         gameMatch = new GameMatch();
-        gameMatch.setPlayerOne(playerOne);
-        gameMatch.setPlayerTwo(playerTwo);
+        gameMatch.setTeamOne(teamOne);
+        gameMatch.setTeamTwo(teamTwo);
         gameMatch.setSubmissionOne(submissionOne);
         gameMatch.setSubmissionTwo(submissionTwo);
         gameMatch.setMap("test_map");
@@ -72,8 +72,8 @@ class GameMatchTest {
         GameMatch match = new GameMatch();
 
         assertNull(match.getId());
-        assertNull(match.getPlayerOne());
-        assertNull(match.getPlayerTwo());
+        assertNull(match.getTeamOne());
+        assertNull(match.getTeamTwo());
         assertNull(match.getSubmissionOne());
         assertNull(match.getSubmissionTwo());
         assertNull(match.getStatus());
@@ -96,8 +96,8 @@ class GameMatchTest {
         gameMatch.setMap("new_map");
 
         assertEquals(1L, gameMatch.getId());
-        assertEquals(playerOne, gameMatch.getPlayerOne());
-        assertEquals(playerTwo, gameMatch.getPlayerTwo());
+        assertEquals(teamOne, gameMatch.getTeamOne());
+        assertEquals(teamTwo, gameMatch.getTeamTwo());
         assertEquals(submissionOne, gameMatch.getSubmissionOne());
         assertEquals(submissionTwo, gameMatch.getSubmissionTwo());
         assertEquals(MATCH_STATUS.IN_PROGRESS, gameMatch.getStatus());

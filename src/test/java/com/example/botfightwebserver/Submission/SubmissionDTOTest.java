@@ -12,13 +12,13 @@ class SubmissionDTOTest {
     void fromEntity_ShouldCorrectlyMapAllFields() {
         // Arrange
         Long id = 1L;
-        Long playerId = 2L;
+        Long teamId = 2L;
         SUBMISSION_VALIDITY validity = SUBMISSION_VALIDITY.VALID;
         LocalDateTime createdAt = LocalDateTime.now();
 
         Submission submission = new Submission();
         submission.setId(id);
-        submission.setPlayerId(playerId);
+        submission.setTeamId(teamId);
         submission.setSubmissionValidity(validity);
         submission.setCreatedAt(createdAt);
 
@@ -28,7 +28,7 @@ class SubmissionDTOTest {
         // Assert
         assertNotNull(dto, "DTO should not be null");
         assertEquals(id, dto.id(), "ID should match");
-        assertEquals(playerId, dto.playerId(), "Player ID should match");
+        assertEquals(teamId, dto.teamId(), "Team ID should match");
         assertEquals(validity, dto.validity(), "Validity should match");
         assertEquals(createdAt, dto.createdAt(), "Created at should match");
     }
@@ -46,14 +46,14 @@ class SubmissionDTOTest {
     void recordMethods_ShouldWorkCorrectly() {
         // Arrange
         Long id = 1L;
-        Long playerId = 2L;
+        Long teamId = 2L;
         SUBMISSION_VALIDITY validity = SUBMISSION_VALIDITY.VALID;
         LocalDateTime createdAt = LocalDateTime.now();
 
         // Act
-        SubmissionDTO dto1 = new SubmissionDTO(id, playerId, validity, createdAt);
-        SubmissionDTO dto2 = new SubmissionDTO(id, playerId, validity, createdAt);
-        SubmissionDTO differentDto = new SubmissionDTO(3L, playerId, validity, createdAt);
+        SubmissionDTO dto1 = new SubmissionDTO(id, teamId, validity, createdAt);
+        SubmissionDTO dto2 = new SubmissionDTO(id, teamId, validity, createdAt);
+        SubmissionDTO differentDto = new SubmissionDTO(3L, teamId, validity, createdAt);
 
         // Assert
         // Test equals and hashCode
@@ -63,14 +63,14 @@ class SubmissionDTOTest {
 
         // Test getters
         assertEquals(id, dto1.id(), "id getter should work");
-        assertEquals(playerId, dto1.playerId(), "playerId getter should work");
+        assertEquals(teamId, dto1.teamId(), "teamId getter should work");
         assertEquals(validity, dto1.validity(), "validity getter should work");
         assertEquals(createdAt, dto1.createdAt(), "createdAt getter should work");
 
         // Test toString
         String toString = dto1.toString();
         assertTrue(toString.contains(id.toString()), "toString should contain id");
-        assertTrue(toString.contains(playerId.toString()), "toString should contain playerId");
+        assertTrue(toString.contains(teamId.toString()), "toString should contain teamId");
         assertTrue(toString.contains(validity.toString()), "toString should contain validity");
         assertTrue(toString.contains(createdAt.toString()), "toString should contain createdAt");
     }
@@ -82,7 +82,7 @@ class SubmissionDTOTest {
 
         // Assert
         assertNull(dto.id(), "ID should be null");
-        assertNull(dto.playerId(), "Player ID should be null");
+        assertNull(dto.teamId(), "Team ID should be null");
         assertNull(dto.validity(), "Validity should be null");
         assertNull(dto.createdAt(), "Created at should be null");
     }

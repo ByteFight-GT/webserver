@@ -2,15 +2,14 @@ package com.example.botfightwebserver.gameMatchResult;
 
 
 import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
@@ -26,7 +25,7 @@ import java.util.List;
 public class GameMatchResultHandler {
 
     private final GameMatchService gameMatchService;
-    private final PlayerService playerService;
+    private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
     private final GlickoCalculator glickoCalculator;
@@ -43,38 +42,38 @@ public class GameMatchResultHandler {
         }
         MATCH_STATUS status = result.status();
         GameMatch gameMatch = gameMatchService.getReferenceById(gameMatchId);
-        Player player1 = gameMatch.getPlayerOne();
-        Player player2 = gameMatch.getPlayerTwo();
+        Team team1 = gameMatch.getTeamOne();
+        Team team2 = gameMatch.getTeamTwo();
 
         log.info("Processing match result for game {}: {} vs {}, status: {}",
-            gameMatchId, player1.getName(), player2.getName(), status);
+            gameMatchId, team1.getName(), team2.getName(), status);
 
         GlickoChanges glickoChanges = new GlickoChanges();
         if (gameMatch.getReason() == MATCH_REASON.LADDER) {
-            glickoChanges = glickoCalculator.calculateGlicko(player1, player2, status);
-            log.debug("Handling ladder match: player1 {}, player2 {}", player1.getId(), player2.getId());
-            handleLadderResult(player1, player2, status, glickoChanges);
+            glickoChanges = glickoCalculator.calculateGlicko(team1, team2, status);
+            log.debug("Handling ladder match: team1 {}, team2 {}", team1.getId(), team2.getId());
+            handleLadderResult(team1, team2, status, glickoChanges);
             log.info("Ladder match handled");
         } else if (gameMatch.getReason() == MATCH_REASON.VALIDATION) {
             Submission submission = gameMatch.getSubmissionOne();
-            log.info("Processing validation match for player {}", player1.getName());
-            handleValidationResult(player1, submission);
+            log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
+            handleValidationResult(team1, submission);
             log.info("Validation match handled");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
-        gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), glickoChanges.getPlayer1Change(), glickoChanges.getPlayer2Change());
+        gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
     }
 
-    private void handleLadderResult(Player player1, Player player2, MATCH_STATUS status, GlickoChanges glickoChanges) {
-        if (status == MATCH_STATUS.PLAYER_ONE_WIN) {
-            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), true, false);
-            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), false, false);
-        } else if (status == MATCH_STATUS.PLAYER_TWO_WIN) {
-            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), false, false);
-            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), true, false);
+    private void handleLadderResult(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges) {
+        if (status == MATCH_STATUS.TEAM_ONE_WIN) {
+            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
+            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
+        } else if (status == MATCH_STATUS.TEAM_TWO_WIN) {
+            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
+            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
         } else if (status == MATCH_STATUS.DRAW) {
-            playerService.updatePlayerAfterLadderMatch(player1, glickoChanges.getPlayer1Change(), glickoChanges.getPlayer1PhiChange(),glickoChanges.getPlayer1SigmaChange(), false, true);
-            playerService.updatePlayerAfterLadderMatch(player2, glickoChanges.getPlayer2Change(), glickoChanges.getPlayer2PhiChange(), glickoChanges.getPlayer2SigmaChange(), false, true);
+            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
+            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
         }
     }
 
@@ -85,10 +84,10 @@ public class GameMatchResultHandler {
         rabbitMQService.enqueueGameMatchResult(result);
     }
 
-    private  void handleValidationResult(Player player, Submission submission) {
+    private  void handleValidationResult(Team team, Submission submission) {
         submissionService.validateSubmissionAfterMatch(submission.getId());
-        if (playerService.getCurrentSubmission(player.getId()).isEmpty()) {
-            playerService.setCurrentSubmission(player.getId(), submission.getId());
+        if (teamService.getCurrentSubmission(team.getId()).isEmpty()) {
+            teamService.setCurrentSubmission(team.getId(), submission.getId());
         }
     }
 

@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.submission;
 
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerRepository;
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamRepository;
 import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,29 +17,29 @@ public class SubmissionService {
 
     private final SubmissionRepository submissionRepository;
     private final StorageService storageService;
-    private final PlayerRepository playerRepository;
+    private final TeamRepository teamRepository;
 
     public SubmissionService(SubmissionRepository submissionRepository, @Qualifier("gcpStorageServiceImpl") StorageService storageService,
-                             PlayerRepository playerRepository) {
+                             TeamRepository teamRepository) {
         this.submissionRepository = submissionRepository;
         this.storageService = storageService;
-        this.playerRepository = playerRepository;
+        this.teamRepository = teamRepository;
     }
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-    public Submission createSubmission(Long playerId, MultipartFile file) {
+    public Submission createSubmission(Long teamId, MultipartFile file) {
         validateFile(file);
 
-        Player player = playerRepository.findById(playerId)
-            .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
+        Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
 
-        String filePathString = storageService.uploadFile(playerId, file);
+        String filePathString = storageService.uploadFile(teamId, file);
 
         Submission submission = new Submission();
         submission.setStoragePath(filePathString);
         submission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
-        submission.setPlayerId(playerId);
+        submission.setTeamId(teamId);
         return submissionRepository.save(submission);
     }
 

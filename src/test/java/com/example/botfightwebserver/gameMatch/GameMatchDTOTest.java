@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerDTO;
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamDTO;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +18,17 @@ import static org.mockito.Mockito.*;
 class GameMatchDTOTest {
 
     @Mock
-    private Player playerOne;
+    private Team teamOne;
     @Mock
-    private Player playerTwo;
+    private Team teamTwo;
     @Mock
     private Submission submissionOne;
     @Mock
     private Submission submissionTwo;
     @Mock
-    private PlayerDTO playerOneDTO;
+    private TeamDTO teamOneDTO;
     @Mock
-    private PlayerDTO playerTwoDTO;
+    private TeamDTO teamTwoDTO;
     @Mock
     private SubmissionDTO submissionOneDTO;
     @Mock
@@ -44,8 +44,8 @@ class GameMatchDTOTest {
 
         gameMatch = GameMatch.builder()
             .id(1L)
-            .playerOne(playerOne)
-            .playerTwo(playerTwo)
+            .teamOne(teamOne)
+            .teamTwo(teamTwo)
             .submissionOne(submissionOne)
             .submissionTwo(submissionTwo)
             .status(MATCH_STATUS.IN_PROGRESS)
@@ -58,11 +58,11 @@ class GameMatchDTOTest {
 
     @Test
     void testFromEntity() {
-        try (MockedStatic<PlayerDTO> playerDTOMock = mockStatic(PlayerDTO.class);
+        try (MockedStatic<TeamDTO> teamDTOMock = mockStatic(TeamDTO.class);
              MockedStatic<SubmissionDTO> submissionDTOMock = mockStatic(SubmissionDTO.class)) {
 
-            playerDTOMock.when(() -> PlayerDTO.fromEntity(playerOne)).thenReturn(playerOneDTO);
-            playerDTOMock.when(() -> PlayerDTO.fromEntity(playerTwo)).thenReturn(playerTwoDTO);
+            teamDTOMock.when(() -> TeamDTO.fromEntity(teamOne)).thenReturn(teamOneDTO);
+            teamDTOMock.when(() -> TeamDTO.fromEntity(teamTwo)).thenReturn(teamTwoDTO);
             submissionDTOMock.when(() -> SubmissionDTO.fromEntity(submissionOne)).thenReturn(submissionOneDTO);
             submissionDTOMock.when(() -> SubmissionDTO.fromEntity(submissionTwo)).thenReturn(submissionTwoDTO);
 
@@ -70,8 +70,8 @@ class GameMatchDTOTest {
 
             assertNotNull(dto);
             assertEquals(1L, dto.getId());
-            assertEquals(playerOneDTO, dto.getPlayerOne());
-            assertEquals(playerTwoDTO, dto.getPlayerTwo());
+            assertEquals(teamOneDTO, dto.getTeamOne());
+            assertEquals(teamTwoDTO, dto.getTeamTwo());
             assertEquals(submissionOneDTO, dto.getSubmissionOne());
             assertEquals(submissionTwoDTO, dto.getSubmissionTwo());
             assertEquals(MATCH_STATUS.IN_PROGRESS, dto.getStatus());
@@ -80,8 +80,8 @@ class GameMatchDTOTest {
             assertEquals(processedAt, dto.getProcessedAt());
             assertEquals(2, dto.getTimesQueued());
 
-            playerDTOMock.verify(() -> PlayerDTO.fromEntity(playerOne));
-            playerDTOMock.verify(() -> PlayerDTO.fromEntity(playerTwo));
+            teamDTOMock.verify(() -> TeamDTO.fromEntity(teamOne));
+            teamDTOMock.verify(() -> TeamDTO.fromEntity(teamTwo));
             submissionDTOMock.verify(() -> SubmissionDTO.fromEntity(submissionOne));
             submissionDTOMock.verify(() -> SubmissionDTO.fromEntity(submissionTwo));
         }
