@@ -20,17 +20,17 @@ public class PlayerService {
             .toList();
     }
 
-    public Player createPlayer(String name, String email, Long team_id) {
+    public Player createPlayer(String name, String email, Long teamId) {
         if (playerRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Player with email " + email + " already exists");
         }
-        if (!teamService.isExistById(team_id)) {
-            throw new IllegalArgumentException("Team with id " + team_id + " does not exist");
+        if (teamId != null && !teamService.isExistById(teamId)) {
+            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Player player = new Player();
         player.setName(name);
         player.setEmail(email);
-        player.setTeamId(team_id);
+        player.setTeamId(teamId);
         return playerRepository.save(player);
     }
 
