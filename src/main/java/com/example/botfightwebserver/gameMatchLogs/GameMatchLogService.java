@@ -11,12 +11,12 @@ public class GameMatchLogService {
 
     private final GameMatchLogRepository gameMatchLogRepository;
 
-    public GameMatchLog createGameMatchLog(Long gameMatchId, String logs, double player1GlickoChange, double player2GlickoChange) {
+    public GameMatchLog createGameMatchLog(Long gameMatchId, String logs, double team1GlickoChange, double team2GlickoChange) {
         GameMatchLog gameMatchLog = new GameMatchLog();
         gameMatchLog.setMatchId(gameMatchId);
         gameMatchLog.setMatchLog(logs);
-        gameMatchLog.setPlayer1GlickoChange(player1GlickoChange);
-        gameMatchLog.setPlayer2GlickoChange(player2GlickoChange);
+        gameMatchLog.setTeam1GlickoChange(team1GlickoChange);
+        gameMatchLog.setTeam2GlickoChange(team2GlickoChange);
         return gameMatchLogRepository.save(gameMatchLog);
     }
 }

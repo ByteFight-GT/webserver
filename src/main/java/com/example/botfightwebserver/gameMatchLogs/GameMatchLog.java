@@ -24,7 +24,7 @@ public class GameMatchLog {
 
     private String matchLog;
 
-    private Double player1GlickoChange;
+    private Double team1GlickoChange;
 
-    private Double player2GlickoChange;
+    private Double team2GlickoChange;
 }

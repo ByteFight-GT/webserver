@@ -21,8 +21,8 @@ public class GameMatchController {
     public ResponseEntity<GameMatchJob> submitMatch(@RequestBody MatchSubmissionRequest request) {
         // add validation logic here for match reason
         GameMatchJob job = gameMatchService.submitGameMatch(
-            request.getPlayer1Id(),
-            request.getPlayer2Id(),
+            request.getTeam1Id(),
+            request.getTeam2Id(),
             request.getSubmission1Id(),
             request.getSubmission2Id(),
             request.getReason(),

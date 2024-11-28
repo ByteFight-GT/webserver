@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.Submission;
@@ -31,7 +31,7 @@ class GameMatchServiceTest {
     @Mock
     private GameMatchRepository gameMatchRepository;
     @Mock
-    private PlayerService playerService;
+    private TeamService teamService;
     @Mock
     private SubmissionService submissionService;
     @Mock
@@ -48,7 +48,7 @@ class GameMatchServiceTest {
         fixedClock = Clock.fixed(Instant.parse("2024-01-01T10:00:00Z"), ZoneId.systemDefault());
         gameMatchService = new GameMatchService(
                 gameMatchRepository,
-                playerService,
+            teamService,
                 submissionService,
                 rabbitMQService,
                 gameMatchLogService,
@@ -59,25 +59,25 @@ class GameMatchServiceTest {
     @Test
     void createMatch_ShouldCreateNewGameMatch() {
         // Arrange
-        Long player1Id = 1L;
-        Long player2Id = 2L;
+        Long team1Id = 1L;
+        Long team2Id = 2L;
         Long submission1Id = 1L;
         Long submission2Id = 2L;
         String map = "testMap";
 
-        Player player1 = new Player();
-        Player player2 = new Player();
+        Team team1 = new Team();
+        Team team2 = new Team();
         Submission submission1 = new Submission();
         Submission submission2 = new Submission();
 
-        when(playerService.getPlayerReferenceById(player1Id)).thenReturn(player1);
-        when(playerService.getPlayerReferenceById(player2Id)).thenReturn(player2);
+        when(teamService.getReferenceById(team1Id)).thenReturn(team1);
+        when(teamService.getReferenceById(team2Id)).thenReturn(team2);
         when(submissionService.getSubmissionReferenceById(submission1Id)).thenReturn(submission1);
         when(submissionService.getSubmissionReferenceById(submission2Id)).thenReturn(submission2);
         when(gameMatchRepository.save(any(GameMatch.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Act
-        GameMatch result = gameMatchService.createMatch(player1Id, player2Id, submission1Id, submission2Id, MATCH_REASON.SCRIMMAGE, map);
+        GameMatch result = gameMatchService.createMatch(team1Id, team2Id, submission1Id, submission2Id, MATCH_REASON.SCRIMMAGE, map);
 
         // Assert
         assertNotNull(result);
@@ -86,15 +86,15 @@ class GameMatchServiceTest {
         assertEquals(MATCH_REASON.SCRIMMAGE, result.getReason());
         assertEquals(1, result.getTimesQueued());
         assertEquals(LocalDateTime.now(fixedClock), result.getQueuedAt());
-        verify(playerService).validatePlayers(player1Id, player2Id);
+        verify(teamService).validateTeams(team1Id, team2Id);
         verify(submissionService).validateSubmissions(submission1Id, submission2Id);
     }
 
     @Test
     void submitGameMatch_ShouldCreateAndEnqueueMatch() {
         // Arrange
-        Long player1Id = 1L;
-        Long player2Id = 2L;
+        Long team1Id = 1L;
+        Long team2Id = 2L;
         Long submission1Id = 1L;
         Long submission2Id = 2L;
         String map = "testMap";
@@ -121,7 +121,7 @@ class GameMatchServiceTest {
 
         // Act
         GameMatchJob result = gameMatchService.submitGameMatch(
-                player1Id, player2Id, submission1Id, submission2Id, MATCH_REASON.SCRIMMAGE, map);
+                team1Id, team2Id, submission1Id, submission2Id, MATCH_REASON.SCRIMMAGE, map);
 
         // Assert
         assertNotNull(result);  // Ensure the result is not null

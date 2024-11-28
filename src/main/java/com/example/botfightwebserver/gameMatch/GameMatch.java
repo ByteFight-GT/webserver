@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.submission.Submission;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.Entity;
@@ -36,12 +36,12 @@ public class GameMatch {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_one_id", nullable = false)
-    private Player playerOne;
+    @JoinColumn(name = "team_one_id", nullable = false)
+    private Team teamOne;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_two_id", nullable = false)
-    private Player playerTwo;
+    @JoinColumn(name = "team_two_id", nullable = false)
+    private Team teamTwo;
 
     @ManyToOne()
     @JoinColumn(name = "submission_one_id", nullable = false)

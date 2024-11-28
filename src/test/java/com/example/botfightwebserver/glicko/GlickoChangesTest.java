@@ -9,49 +9,49 @@ class GlickoChangesTest {
     void testDefaultConstructor() {
         GlickoChanges glickoChanges = GlickoChanges.builder().build();
 
-        assertEquals(0.0, glickoChanges.getPlayer1Change());
-        assertEquals(0.0, glickoChanges.getPlayer2Change());
-        assertEquals(0.0, glickoChanges.getPlayer1PhiChange());
-        assertEquals(0.0, glickoChanges.getPlayer2PhiChange());
-        assertEquals(0.0, glickoChanges.getPlayer1SigmaChange());
-        assertEquals(0.0, glickoChanges.getPlayer2SigmaChange());
+        assertEquals(0.0, glickoChanges.getTeam1Change());
+        assertEquals(0.0, glickoChanges.getTeam2Change());
+        assertEquals(0.0, glickoChanges.getTeam1PhiChange());
+        assertEquals(0.0, glickoChanges.getTeam2PhiChange());
+        assertEquals(0.0, glickoChanges.getTeam1SigmaChange());
+        assertEquals(0.0, glickoChanges.getTeam2SigmaChange());
     }
 
     @Test
     void testAllArgsConstructor() {
         GlickoChanges glickoChanges = GlickoChanges.builder()
-                .player1Change(1.0)
-                .player2Change(-2.0)
-                .player1PhiChange(-10.0)
-                .player2PhiChange(-15.0)
-                .player1SigmaChange(0.01)
-                .player2SigmaChange(0.02)
+                .team1Change(1.0)
+                .team2Change(-2.0)
+                .team1PhiChange(-10.0)
+                .team2PhiChange(-15.0)
+                .team1SigmaChange(0.01)
+                .team2SigmaChange(0.02)
                 .build();
 
-        assertEquals(1.0, glickoChanges.getPlayer1Change());
-        assertEquals(-2.0, glickoChanges.getPlayer2Change());
-        assertEquals(-10.0, glickoChanges.getPlayer1PhiChange());
-        assertEquals(-15.0, glickoChanges.getPlayer2PhiChange());
-        assertEquals(0.01, glickoChanges.getPlayer1SigmaChange());
-        assertEquals(0.02, glickoChanges.getPlayer2SigmaChange());
+        assertEquals(1.0, glickoChanges.getTeam1Change());
+        assertEquals(-2.0, glickoChanges.getTeam2Change());
+        assertEquals(-10.0, glickoChanges.getTeam1PhiChange());
+        assertEquals(-15.0, glickoChanges.getTeam2PhiChange());
+        assertEquals(0.01, glickoChanges.getTeam1SigmaChange());
+        assertEquals(0.02, glickoChanges.getTeam2SigmaChange());
     }
 
     @Test
     void testSettersAndGetters() {
         GlickoChanges glickoChanges = GlickoChanges.builder().build();
 
-        glickoChanges.setPlayer1Change(15.7);
-        glickoChanges.setPlayer2Change(-15.7);
-        glickoChanges.setPlayer1PhiChange(-12.5);
-        glickoChanges.setPlayer2PhiChange(-8.3);
-        glickoChanges.setPlayer1SigmaChange(0.05);
-        glickoChanges.setPlayer2SigmaChange(0.04);
+        glickoChanges.setTeam1Change(15.7);
+        glickoChanges.setTeam2Change(-15.7);
+        glickoChanges.setTeam1PhiChange(-12.5);
+        glickoChanges.setTeam2PhiChange(-8.3);
+        glickoChanges.setTeam1SigmaChange(0.05);
+        glickoChanges.setTeam2SigmaChange(0.04);
 
-        assertEquals(15.7, glickoChanges.getPlayer1Change());
-        assertEquals(-15.7, glickoChanges.getPlayer2Change());
-        assertEquals(-12.5, glickoChanges.getPlayer1PhiChange());
-        assertEquals(-8.3, glickoChanges.getPlayer2PhiChange());
-        assertEquals(0.05, glickoChanges.getPlayer1SigmaChange());
-        assertEquals(0.04, glickoChanges.getPlayer2SigmaChange());
+        assertEquals(15.7, glickoChanges.getTeam1Change());
+        assertEquals(-15.7, glickoChanges.getTeam2Change());
+        assertEquals(-12.5, glickoChanges.getTeam1PhiChange());
+        assertEquals(-8.3, glickoChanges.getTeam2PhiChange());
+        assertEquals(0.05, glickoChanges.getTeam1SigmaChange());
+        assertEquals(0.04, glickoChanges.getTeam2SigmaChange());
     }
 }

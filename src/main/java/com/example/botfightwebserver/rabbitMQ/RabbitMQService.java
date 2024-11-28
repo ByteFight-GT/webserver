@@ -64,7 +64,7 @@ public class RabbitMQService {
         boolean hasMore = true;
         while (hasMore) {
             GameMatchResult message = (GameMatchResult) rabbitTemplate.receiveAndConvert(
-                RabbitMQConfiguration.GAME_MATCH_QUEUE,
+                RabbitMQConfiguration.GAME_MATCH_RESULTS,
                 1000
             );
             if (message == null) {

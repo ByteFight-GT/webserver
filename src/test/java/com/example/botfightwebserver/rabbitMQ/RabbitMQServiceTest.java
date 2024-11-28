@@ -110,7 +110,7 @@ class RabbitMQServiceTest {
 
     @Test
     void enqueueGameMatchResult_shouldSendResultToQueue() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.PLAYER_ONE_WIN, "some logs");
+        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "some logs");
 
         rabbitMQService.enqueueGameMatchResult(result);
 

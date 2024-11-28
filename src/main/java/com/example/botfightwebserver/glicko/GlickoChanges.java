@@ -12,20 +12,20 @@ import lombok.NoArgsConstructor;
 public class GlickoChanges {
 
     @Builder.Default
-    private Double player1Change = 0.0;
+    private Double team1Change = 0.0;
 
     @Builder.Default
-    private Double player2Change = 0.0;
+    private Double team2Change = 0.0;
 
     @Builder.Default
-    private Double player1PhiChange = 0.0;
+    private Double team1PhiChange = 0.0;
 
     @Builder.Default
-    private Double player2PhiChange = 0.0;
+    private Double team2PhiChange = 0.0;
 
     @Builder.Default
-    private Double player1SigmaChange = 0.0;
+    private Double team1SigmaChange = 0.0;
 
     @Builder.Default
-    private Double player2SigmaChange = 0.0;
+    private Double team2SigmaChange = 0.0;
 }

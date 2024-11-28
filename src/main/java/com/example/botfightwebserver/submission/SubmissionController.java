@@ -19,8 +19,8 @@ public class SubmissionController {
 
     @PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
-        @RequestParam("playerId") Long playerId,
+        @RequestParam("teamId") Long teamId,
         @RequestParam("file") MultipartFile file) {
-            return ResponseEntity.ok(SubmissionDTO.fromEntity(submissionService.createSubmission(playerId, file)));
+            return ResponseEntity.ok(SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file)));
         }
 }
