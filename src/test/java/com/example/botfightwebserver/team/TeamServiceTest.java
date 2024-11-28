@@ -533,6 +533,15 @@ class TeamServiceTest extends PersistentTestBase {
         assertEquals(1041.0, paginatedTeams.get(9).getGlicko());
     }
 
+    @Test
+    void isExistById() {
+        Team team = persistAndReturnEntity(Team.builder()
+            .name("Test Team")
+            .currentSubmission(null)
+            .build());
 
+        assertTrue(teamService.isExistById(team.getId()));
+        assertFalse(teamService.isExistById(-1L));
+    }
 
 }

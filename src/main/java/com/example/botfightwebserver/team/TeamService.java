@@ -58,8 +58,9 @@ public class TeamService {
         }
     }
 
-    public Team updateAfterLadderMatch(Team team, double glickoChange, double phiChange, double sigmaChange, boolean isWin, boolean isDraw) {
-        if(isWin && isDraw) {
+    public Team updateAfterLadderMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
+                                       boolean isWin, boolean isDraw) {
+        if (isWin && isDraw) {
             throw new IllegalArgumentException("Result can't be a win and a draw");
         }
         double currentGlicko = team.getGlicko();
@@ -105,26 +106,28 @@ public class TeamService {
         return false;
     }
 
+    public boolean isExistById(Long teamId) {
+        return teamRepository.existsById(teamId);
+    }
 
-        public List<Team> pagination(int page, int size) {
-            if (page < 0) {
-                throw new IllegalArgumentException("Page index must be zero or greater");
-            }
-            if (size <= 0) {
-                throw new IllegalArgumentException("Page size must be greater than 0");
-            }
 
-            // Create a pageable request with sorting by Glicko in descending order
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
-
-            // Fetch the teams for the specified page
-            Page<Team> teamPage = teamRepository.findAll(pageable);
-
-            // Return the teams as a list
-            return teamPage.getContent();
+    public List<Team> pagination(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Page index must be zero or greater");
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("Page size must be greater than 0");
         }
 
+        // Create a pageable request with sorting by Glicko in descending order
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
 
+        // Fetch the teams for the specified page
+        Page<Team> teamPage = teamRepository.findAll(pageable);
+
+        // Return the teams as a list
+        return teamPage.getContent();
+    }
 }
 
 
