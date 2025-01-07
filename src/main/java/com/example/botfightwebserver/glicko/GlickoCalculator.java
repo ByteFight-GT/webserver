@@ -2,12 +2,14 @@ package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.team.Team;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Service
+@Slf4j
 public class GlickoCalculator {
 
     public static final double MU = 1500.0;
@@ -190,12 +192,12 @@ public class GlickoCalculator {
         if (matchStatus == MATCH_STATUS.IN_PROGRESS ||
                 matchStatus == MATCH_STATUS.FAILED ||
                 matchStatus == MATCH_STATUS.WAITING) {
-            throw new IllegalArgumentException("Match must have a determined result. Match was in state: " + matchStatus);
+            log.error("Match must have a determined result. Match was in state: " + matchStatus);
         }
 
         // Validate team Elo ratings
         if (team1.getGlicko() == null || team2.getGlicko() == null) {
-            throw new IllegalArgumentException("Team Elo cannot be null.");
+            log.error("Team Elo cannot be null.");
         }
 
         // Create team ratings
@@ -211,7 +213,8 @@ public class GlickoCalculator {
         } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
             glickoMatchStatus = "team2";
         } else {
-            throw new IllegalArgumentException("Unknown match status: " + matchStatus);
+            log.error("Team Elo cannot be null.");
+            return new GlickoChanges();
         }
 
         MatchResult result = rate1vs1(team1Rating, team2Rating, glickoMatchStatus);
