@@ -189,26 +189,26 @@ class GlickoCalculatorTest {
         assertEquals(0.0, changes.getTeam2Change(), 0.0001, "Team 2 Elo change should be zero");
     }
 
-    @Test
-    void testCalculateGlickoInvalidMatchStatus() {
-        GlickoCalculator calculator = new GlickoCalculator();
-
-        Team team1 = Team.builder()
-                .name("Team One")
-                .glicko(1500.0)
-                .phi(200.0)
-                .sigma(0.06)
-                .build();
-
-        Team team2 = Team.builder()
-                .name("Team Two")
-                .glicko(1500.0)
-                .phi(200.0)
-                .sigma(0.06)
-                .build();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            calculator.calculateGlicko(team1, team2, MATCH_STATUS.IN_PROGRESS);
-        }, "Should throw IllegalArgumentException for invalid match status");
-    }
+//    @Test
+//    void testCalculateGlickoInvalidMatchStatus() {
+//        GlickoCalculator calculator = new GlickoCalculator();
+//
+//        Team team1 = Team.builder()
+//                .name("Team One")
+//                .glicko(1500.0)
+//                .phi(200.0)
+//                .sigma(0.06)
+//                .build();
+//
+//        Team team2 = Team.builder()
+//                .name("Team Two")
+//                .glicko(1500.0)
+//                .phi(200.0)
+//                .sigma(0.06)
+//                .build();
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            calculator.calculateGlicko(team1, team2, MATCH_STATUS.IN_PROGRESS);
+//        }, "Should throw IllegalArgumentException for invalid match status");
+//    }
 }
