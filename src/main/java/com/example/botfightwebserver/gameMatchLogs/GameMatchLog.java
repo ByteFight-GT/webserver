@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
 import com.example.botfightwebserver.gameMatch.GameMatch;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +23,7 @@ public class GameMatchLog {
 
     private Long matchId;
 
+    @Column(columnDefinition = "TEXT")
     private String matchLog;
 
     private Double team1GlickoChange;

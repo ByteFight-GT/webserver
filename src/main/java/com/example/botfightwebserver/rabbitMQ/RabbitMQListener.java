@@ -14,7 +14,7 @@ public class RabbitMQListener {
     private final GameMatchResultHandler gameMatchResultHandler;
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.GAME_MATCH_RESULTS)
+    @RabbitListener(queues = RabbitMQConfiguration.GAME_MATCH_RESULTS, errorHandler = "gameMatchListenerErrorHandler")
     public void receiveGameMatchResults(GameMatchResult gameMatchResult) {
         gameMatchResultHandler.handleGameMatchResult(gameMatchResult);
     }
