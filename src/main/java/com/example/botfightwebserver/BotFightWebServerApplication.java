@@ -27,7 +27,7 @@ public class BotFightWebServerApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                    .allowedOrigins("https://botfightrenderer-production.up.railway.app/")
+                    .allowedOrigins("https://botfightrenderer-production.up.railway.app")
                     .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
