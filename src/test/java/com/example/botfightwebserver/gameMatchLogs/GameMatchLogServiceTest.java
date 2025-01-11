@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
@@ -65,5 +67,32 @@ class GameMatchLogServiceTest {
 
         // Verify repository interaction
         verify(gameMatchLogRepository).save(any(GameMatchLog.class));
+    }
+
+    @Test
+    void getAllGameMatchLogs() {
+        Long gameMatchId = 1L;
+        String logs = "Test logs";
+        double team1GlickoChange = 10.0;
+        double team2GlickoChange = -10.0;
+
+        GameMatchLog gameMatchLog = GameMatchLog.builder()
+            .matchId(gameMatchId)
+            .matchLog(logs)
+            .team1GlickoChange(team1GlickoChange)
+            .team2GlickoChange(team2GlickoChange)
+            .build();
+
+        when(gameMatchLogRepository.findAll()).thenReturn(List.of(gameMatchLog));
+
+        List<GameMatchLog> result = gameMatchLogService.getAllGameMatchLogs();
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(gameMatchId, result.get(0).getMatchId());
+        assertEquals(logs, result.get(0).getMatchLog());
+        assertEquals(team1GlickoChange, result.get(0).getTeam1GlickoChange());
+        assertEquals(team2GlickoChange, result.get(0).getTeam2GlickoChange());
+
+        verify(gameMatchLogRepository).findAll();
     }
 }
