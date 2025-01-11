@@ -4,7 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -24,5 +26,13 @@ public class GameMatchLogService {
 
     public List<GameMatchLog> getAllGameMatchLogs() {
         return gameMatchLogRepository.findAll();
+    }
+
+    public Optional<GameMatchLog> getGameMatchLogById(Long gameMatchLogId) {
+        return gameMatchLogRepository.findById(gameMatchLogId);
+    }
+
+    public List<Long> getGameMatchLogIds() {
+        return gameMatchLogRepository.findAll().stream().map(GameMatchLog::getId).toList();
     }
 }

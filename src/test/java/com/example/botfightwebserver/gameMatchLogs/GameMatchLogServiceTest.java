@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -93,6 +94,33 @@ class GameMatchLogServiceTest {
         assertEquals(team1GlickoChange, result.get(0).getTeam1GlickoChange());
         assertEquals(team2GlickoChange, result.get(0).getTeam2GlickoChange());
 
+        verify(gameMatchLogRepository).findAll();
+    }
+
+    @Test
+    void getGameMatchLogById_shouldReturnLog() {
+        GameMatchLog log = new GameMatchLog();
+        log.setId(1L);
+        when(gameMatchLogRepository.findById(1L)).thenReturn(Optional.of(log));
+
+        Optional<GameMatchLog> result = gameMatchLogService.getGameMatchLogById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+        verify(gameMatchLogRepository).findById(1L);
+    }
+
+    @Test
+    void getGameMatchLogIds_shouldReturnAllIds() {
+        GameMatchLog log1 = new GameMatchLog();
+        log1.setId(1L);
+        GameMatchLog log2 = new GameMatchLog();
+        log2.setId(2L);
+        when(gameMatchLogRepository.findAll()).thenReturn(List.of(log1, log2));
+
+        List<Long> result = gameMatchLogService.getGameMatchLogIds();
+
+        assertEquals(List.of(1L, 2L), result);
         verify(gameMatchLogRepository).findAll();
     }
 }
