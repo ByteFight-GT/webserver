@@ -164,21 +164,6 @@ class SubmissionServiceTest {
     }
 
     @Test
-    void validateSubmissions_SameSubmission() {
-        // Arrange
-        Long submissionId = 1L;
-        when(submissionRepository.existsById(submissionId)).thenReturn(true);
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> submissionService.validateSubmissions(submissionId, submissionId));
-        assertEquals("Submission 1 is the same as submission 2", exception.getMessage());
-
-        // Verify - the method calls existsById twice, once for each submission
-        verify(submissionRepository, times(2)).existsById(submissionId);
-    }
-
-    @Test
     void validateSubmissions_NonExistentSubmission() {
         // Arrange
         when(submissionRepository.existsById(1L)).thenReturn(true);

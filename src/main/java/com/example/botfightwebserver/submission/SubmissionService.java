@@ -66,9 +66,6 @@ public class SubmissionService {
         if(!submissionRepository.existsById(submission1Id) || !submissionRepository.existsById(submission2Id)) {
             throw new IllegalArgumentException("Submission 1 or 2 does not exist");
         }
-        if (submission1Id == submission2Id) {
-            throw new IllegalArgumentException("Submission 1 is the same as submission 2");
-        }
     }
 
     public void validateSubmissionAfterMatch(long submissionId) {

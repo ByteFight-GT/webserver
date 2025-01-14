@@ -60,9 +60,6 @@ public class TeamService {
         if (!teamRepository.existsById(team1Id) || !teamRepository.existsById(team2Id)) {
             throw new IllegalArgumentException("One or both teams do not exist");
         }
-        if (team1Id.equals(team2Id)) {
-            throw new IllegalArgumentException("Teams must be different");
-        }
     }
 
     public Team updateAfterLadderMatch(Team team, double glickoChange, double phiChange, double sigmaChange,

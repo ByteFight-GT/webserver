@@ -24,8 +24,8 @@ class GameMatchReschedulerTest {
 
     @BeforeEach
     void setUp() {
-        jobs = List.of(new GameMatchJob(1L, "path1", "path2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "map"),
-            new GameMatchJob(2L, "path_3", "path_4", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "map"));
+        jobs = List.of(new GameMatchJob(1L, "path1", "path2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MATCH_REASON.LADDER,"map"),
+            new GameMatchJob(2L, "path_3", "path_4", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MATCH_REASON.LADDER,"map"));
 
         when(gameMatchService.rescheduleFailedAndStaleMatches()).thenReturn(jobs);
         gameMatchRescheduler = new GameMatchRescheduler(gameMatchService);

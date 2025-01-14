@@ -228,20 +228,6 @@ class TeamServiceTest extends PersistentTestBase {
     }
 
     @Test
-    void testValidateTeams_SameTeam() {
-        Team team = persistAndReturnEntity(Team.builder()
-            .name("Team 1")
-            .build());
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> teamService.validateTeams(team.getId(), team.getId())
-        );
-
-        assertEquals("Teams must be different", exception.getMessage());
-    }
-
-    @Test
     void testValidateTeams_TeamDoesNotExist() {
         Team team = persistAndReturnEntity(Team.builder()
             .name("Team 1")

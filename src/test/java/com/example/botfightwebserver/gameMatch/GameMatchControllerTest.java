@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -47,6 +47,7 @@ class GameMatchControllerTest {
                 "path/to/submission2",
                 STORAGE_SOURCE.LOCAL,
                 STORAGE_SOURCE.LOCAL,
+                MATCH_REASON.LADDER,
                 "Map1"
         );
 
@@ -84,8 +85,10 @@ class GameMatchControllerTest {
     void testQueuedMatches() throws Exception {
         // Arrange: Mock the service to return a list of GameMatchJobs
         List<GameMatchJob> jobs = List.of(
-                new GameMatchJob(123L, "path1", "path2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, "Map1"),
-                new GameMatchJob(124L, "path3", "path4", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, "Map2")
+            new GameMatchJob(123L, "path1", "path2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER,
+                "Map1"),
+            new GameMatchJob(124L, "path3", "path4", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER,
+                "Map2")
         );
 
         when(gameMatchService.peekQueuedMatches()).thenReturn(jobs);
@@ -106,7 +109,8 @@ class GameMatchControllerTest {
     void testRescheduleAllQueuedMatches() throws Exception {
         // Arrange: Mock the service to return a list of rescheduled GameMatchJobs
         List<GameMatchJob> rescheduledJobs = List.of(
-                new GameMatchJob(125L, "reschedulePath1", "reschedulePath2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, "RescheduleMap1")
+            new GameMatchJob(125L, "reschedulePath1", "reschedulePath2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL,
+                MATCH_REASON.LADDER, "RescheduleMap1")
         );
 
         when(gameMatchService.rescheduleFailedAndStaleMatches()).thenReturn(rescheduledJobs);

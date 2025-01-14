@@ -1,8 +1,9 @@
 package com.example.botfightwebserver.rabbitMQ;
 
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
-import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
+import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,8 @@ class RabbitMQServiceTest {
     @Test
     void enqueueGameMatchJob_shouldSendMessageToQueue() {
         GameMatchJob gameMatchJob =
-            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "default map");
+            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
+                MATCH_REASON.LADDER, "default map");
 
         rabbitMQService.enqueueGameMatchJob(gameMatchJob);
 
@@ -55,10 +57,12 @@ class RabbitMQServiceTest {
     @Test
     void peekGameMatchQueue_shouldReturnAllMessagesAndRequeueThem() {
         GameMatchJob gameMatchJob1 =
-            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "default map");
+            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
+                MATCH_REASON.LADDER, "default map");
 
         GameMatchJob gameMatchJob2 =
-            new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "default map");
+            new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
+                MATCH_REASON.LADDER, "default map");
 
         when(rabbitTemplate.receiveAndConvert(
             eq(RabbitMQConfiguration.GAME_MATCH_QUEUE),
@@ -85,10 +89,12 @@ class RabbitMQServiceTest {
     @Test
     void deleteGameMatchQueue_shouldReturnAllMessagesWithoutRequeueing() {
         GameMatchJob gameMatchJob1 =
-            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "default map");
+            new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
+                MATCH_REASON.LADDER, "default map");
 
         GameMatchJob gameMatchJob2 =
-            new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, "default map");
+            new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
+                MATCH_REASON.LADDER, "default map");
 
 
         when(rabbitTemplate.receiveAndConvert(
