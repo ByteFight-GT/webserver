@@ -28,6 +28,13 @@ public class TeamService {
             .collect(Collectors.toUnmodifiableList());
     }
 
+    public List<Team> getTeamsWithSubmission() {
+        return teamRepository.findAll()
+            .stream()
+            .filter(team -> team.getCurrentSubmission() != null)
+            .toList();
+    }
+
     public Team getReferenceById(Long id) {
         return teamRepository.getReferenceById(id);
     }
