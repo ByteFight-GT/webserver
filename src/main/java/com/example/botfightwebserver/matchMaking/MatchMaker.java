@@ -5,6 +5,7 @@ import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,10 +16,11 @@ import java.util.Map;
 import java.util.Random;
 
 @RequiredArgsConstructor
+@Component
 public class MatchMaker {
 
-    private TeamService teamService;
-    private GameMatchService gameMatchService;
+    private final TeamService teamService;
+    private final GameMatchService gameMatchService;
 
     public void generateMatches() {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
