@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final TeamAuditService teamAuditService;
 
     @GetMapping("/teams")
     public List<TeamDTO> getTeams() {
@@ -45,6 +47,11 @@ public class TeamController {
     public ResponseEntity<String> setQuote(@RequestParam Long teamId,@RequestParam String quote) {
         teamService.setQuote(teamId, quote);
         return ResponseEntity.ok(quote);
+    }
+
+    @GetMapping("/glicko-history")
+    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@RequestParam Long teamId) {
+        return ResponseEntity.ok(teamAuditService.getGlickoHistory(teamId));
     }
 
 }
