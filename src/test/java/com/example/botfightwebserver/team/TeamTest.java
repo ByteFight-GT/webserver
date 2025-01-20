@@ -49,6 +49,7 @@ class TeamTest extends PersistentTestBase {
             .numberLosses(3)
             .numberDraws(2)
             .currentSubmission(testSubmission)
+            .quote("ByteFight ftw")
             .build();
 
         assertEquals(1L, team.getId());
@@ -60,6 +61,7 @@ class TeamTest extends PersistentTestBase {
         assertEquals(5, team.getNumberWins());
         assertEquals(3, team.getNumberLosses());
         assertEquals(2, team.getNumberDraws());
+        assertEquals("ByteFight ftw", team.getQuote());
         assertEquals(testSubmission, team.getCurrentSubmission());
     }
 
@@ -75,6 +77,7 @@ class TeamTest extends PersistentTestBase {
         assertEquals(0, team.getNumberWins());
         assertEquals(0, team.getNumberLosses());
         assertEquals(0, team.getNumberDraws());
+        assertEquals("Welcome to ByteFight!", team.getQuote());
     }
 
     @Test

@@ -36,4 +36,10 @@ public class TeamController {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
+    @PostMapping("/quote")
+    public ResponseEntity<String> setQuote(@RequestParam Long teamId,@RequestParam String quote) {
+        teamService.setQuote(teamId, quote);
+        return ResponseEntity.ok(quote);
+    }
+
 }

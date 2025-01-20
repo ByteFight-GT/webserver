@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.google.cloud:google-cloud-storage")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.hibernate.orm:hibernate-envers:6.4.4.Final")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")

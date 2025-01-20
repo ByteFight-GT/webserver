@@ -13,14 +13,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -530,4 +529,14 @@ class TeamServiceTest extends PersistentTestBase {
         assertFalse(teamService.isExistById(-1L));
     }
 
+    @Test
+    void shouldSetQuoteWhenTeamExists() {
+        String quote = "We are the champions!";
+        String newQuote = "new quote";
+
+        Team persistedTeam =
+            persistAndReturnEntity(Team.builder().name("name").currentSubmission(null).build());
+        teamService.setQuote(persistedTeam.getId(), "new quote");
+        assertEquals(newQuote, persistedTeam.getQuote());
+    }
 }

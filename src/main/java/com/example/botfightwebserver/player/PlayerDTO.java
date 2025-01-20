@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,6 +17,8 @@ public class PlayerDTO {
     private String name;
     private String email;
     private Long teamId;
+    private Boolean hasTeam;
+    private List<String> badges;
     private LocalDateTime creationDateTime;
 
     public static PlayerDTO fromEntity(Player player) {
@@ -24,7 +27,9 @@ public class PlayerDTO {
             .name(player.getName())
             .email(player.getEmail())
             .teamId(player.getTeamId())
+            .hasTeam(player.isHasTeam())
             .creationDateTime(player.getCreationDateTime())
+            .badges(player.getBadgeList())
             .build();
     }
 }

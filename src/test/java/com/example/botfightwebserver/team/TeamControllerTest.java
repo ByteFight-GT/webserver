@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -92,4 +93,32 @@ class TeamControllerTest {
             .andExpect(content().string(containsString("Team with name " + name + " already exists")));
     }
 
+    @Test
+    void testSetQuote() throws Exception {
+        Long teamId = 1L;
+        String quote = "We are the champions!";
+
+        mockMvc.perform(post("/api/v1/team/quote")
+                .param("teamId", teamId.toString())
+                .param("quote", quote)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string(quote));
+    }
+
+    @Test
+    void testSetQuoteTeamNotFound() throws Exception {
+        Long teamId = 999L;
+        String quote = "We are the champions!";
+
+        doThrow(new IllegalArgumentException("Team not found with id: " + teamId))
+            .when(teamService).setQuote(teamId, quote);
+
+        mockMvc.perform(post("/api/v1/team/quote")
+                .param("teamId", teamId.toString())
+                .param("quote", quote)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Team not found with id: " + teamId)));
+    }
 }
