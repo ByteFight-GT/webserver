@@ -2,6 +2,9 @@ package com.example.botfightwebserver.team;
 
 import com.example.botfightwebserver.PersistentTestBase;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
+import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
+import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,11 +46,14 @@ class TeamServiceTest extends PersistentTestBase {
     @MockBean
     private GlickoCalculator glickoCalculator;
 
+    @MockBean
+    private PlayerService playerService;
+
     private TeamService teamService;
 
     @BeforeEach
     void setUp() {
-        teamService = new TeamService(teamRepository, submissionService);
+        teamService = new TeamService(teamRepository, submissionService, playerService);
     }
 
     @Test
@@ -538,5 +545,63 @@ class TeamServiceTest extends PersistentTestBase {
             persistAndReturnEntity(Team.builder().name("name").currentSubmission(null).build());
         teamService.setQuote(persistedTeam.getId(), "new quote");
         assertEquals(newQuote, persistedTeam.getQuote());
+    }
+
+    @Test
+    void testGetLeaderboard() {
+        // Setup teams with different Glicko ratings
+        Team team1 = persistAndReturnEntity(Team.builder()
+            .name("Team 1")
+            .glicko(1400.0)
+            .creationDateTime(LocalDateTime.now())
+            .quote("Quote 1")
+            .build());
+
+        Team team2 = persistAndReturnEntity(Team.builder()
+            .name("Team 2")
+            .glicko(1200.0)
+            .creationDateTime(LocalDateTime.now())
+            .quote("Quote 2")
+            .build());
+
+        // Mock playerService response
+        List<Player> team1Players = List.of(
+            Player.builder().name("Player1").build(),
+            Player.builder().name("Player2").build()
+        );
+        List<Player> team2Players = List.of(
+            Player.builder().name("Player3").build()
+        );
+
+        when(playerService.getPlayersByTeam(team1.getId())).thenReturn(team1Players);
+        when(playerService.getPlayersByTeam(team2.getId())).thenReturn(team2Players);
+
+        List<LeaderboardDTO> leaderboard = teamService.getLeaderboard();
+
+        assertEquals(2, leaderboard.size());
+
+        LeaderboardDTO firstPlace = leaderboard.get(0);
+        assertEquals(team1.getId(), firstPlace.getTeamId());
+        assertEquals(1, firstPlace.getRank());
+        assertEquals(1400.0, firstPlace.getGlicko());
+        assertEquals("Team 1", firstPlace.getTeamName());
+        assertEquals(team1.getCreationDateTime(), firstPlace.getCreatedAt());
+        assertEquals("Quote 1", firstPlace.getQuote());
+        assertEquals(List.of("Player1", "Player2"), firstPlace.getMembers());
+
+        LeaderboardDTO secondPlace = leaderboard.get(1);
+        assertEquals(team2.getId(), secondPlace.getTeamId());
+        assertEquals(2, secondPlace.getRank());
+        assertEquals(1200.0, secondPlace.getGlicko());
+        assertEquals("Team 2", secondPlace.getTeamName());
+        assertEquals(team2.getCreationDateTime(), secondPlace.getCreatedAt());
+        assertEquals("Quote 2", secondPlace.getQuote());
+        assertEquals(List.of("Player3"), secondPlace.getMembers());
+    }
+
+    @Test
+    void testGetLeaderboard_NoTeams() {
+        List<LeaderboardDTO> leaderboard = teamService.getLeaderboard();
+        assertTrue(leaderboard.isEmpty());
     }
 }
