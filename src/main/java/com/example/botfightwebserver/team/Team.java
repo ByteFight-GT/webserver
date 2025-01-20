@@ -18,12 +18,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Entity
 @Table
+@Audited
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -46,8 +48,17 @@ public class Team {
 
     @Builder.Default
     private Double glicko=1200.0;
+
+    @Builder.Default
+    private Double phi=350.0;
+
+    @Builder.Default
+    @Audited
+    private Double sigma=0.06;
+
     @Builder.Default
     private Integer matchesPlayed=0;
+
     @Builder.Default
     private Integer numberWins=0;
     @Builder.Default
@@ -55,11 +66,7 @@ public class Team {
     @Builder.Default
     private Integer numberDraws=0;
 
-    @Builder.Default
-    private Double phi=350.0;
 
-    @Builder.Default
-    private Double sigma=0.06;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)
@@ -83,3 +90,4 @@ public class Team {
         clock = testClock;
     }
 }
+
