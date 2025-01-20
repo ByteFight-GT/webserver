@@ -3,6 +3,7 @@ package com.example.botfightwebserver.player;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.team.Team;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,8 @@ import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
@@ -40,6 +43,12 @@ public class Player {
 
     private Long teamId;
 
+    private boolean hasTeam;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer badgeBitFlags = 0;
+
     private LocalDateTime creationDateTime;
 
     private static Clock clock = Clock.systemDefaultZone();
@@ -54,4 +63,25 @@ public class Player {
         clock = testClock;
     }
 
+    public boolean hasBadge(Badge badge) {
+        return (badgeBitFlags & badge.getBitFlag()) != 0;
+    }
+
+    public void addBadge(Badge badge) {
+        badgeBitFlags |= badge.getBitFlag();
+    }
+
+    public void removeBadge(Badge badge) {
+        badgeBitFlags &= ~badge.getBitFlag();
+    }
+
+    public List<String> getBadgeList() {
+        List<String> badges = new ArrayList<>();
+        for (Badge badge : Badge.values()) {
+            if (hasBadge(badge)) {
+                badges.add(badge.getDisplayName());
+            }
+        }
+        return badges;
+    }
 }
