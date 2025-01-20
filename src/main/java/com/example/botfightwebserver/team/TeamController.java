@@ -25,6 +25,11 @@ public class TeamController {
         return teamService.getTeams().stream().map(TeamDTO::fromEntity).toList();
     }
 
+    @GetMapping("/team")
+    public ResponseEntity<TeamDTO> getTeam(@RequestParam Long teamId) {
+        return ResponseEntity.ok(teamService.getDTOById(teamId));
+    }
+
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@RequestParam String name) {
         return ResponseEntity.ok(TeamDTO.fromEntity(teamService.createTeam(name)));
