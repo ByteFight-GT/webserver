@@ -48,13 +48,13 @@ public class Team {
     private String quote = "Welcome to ByteFight!";
 
     @Builder.Default
+    @Audited
     private Double glicko=1200.0;
 
     @Builder.Default
     private Double phi=350.0;
 
     @Builder.Default
-    @Audited
     private Double sigma=0.06;
 
     @Builder.Default
