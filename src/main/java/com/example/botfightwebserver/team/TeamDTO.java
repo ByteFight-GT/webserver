@@ -24,6 +24,7 @@ public class TeamDTO {
     private Integer numberWins;
     private Integer numberLosses;
     private Integer numberDraws;
+    private String quote;
     private SubmissionDTO currentSubmissionDTO;
 
     public static TeamDTO fromEntity(Team team) {
@@ -39,6 +40,7 @@ public class TeamDTO {
             .numberWins(team.getNumberWins())
             .numberLosses(team.getNumberLosses())
             .numberDraws(team.getNumberDraws())
+            .quote(team.getQuote())
             .currentSubmissionDTO(
                 team.getCurrentSubmission() != null? SubmissionDTO.fromEntity(team.getCurrentSubmission()): null)
             .build();

@@ -40,6 +40,10 @@ public class Team {
     private LocalDateTime creationDateTime;
 
     private LocalDateTime lastModifiedDate;
+
+    @Builder.Default
+    private String quote = "Welcome to ByteFight!";
+
     @Builder.Default
     private Double glicko=1200.0;
     @Builder.Default

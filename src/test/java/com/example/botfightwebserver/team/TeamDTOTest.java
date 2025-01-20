@@ -26,6 +26,7 @@ class TeamDTOTest {
             .numberWins(5)
             .numberLosses(3)
             .numberDraws(2)
+            .quote("some quote")
             .build();
         TeamDTO teamDTO = TeamDTO.fromEntity(team);
 
@@ -39,5 +40,6 @@ class TeamDTOTest {
         assertEquals(5, teamDTO.getNumberWins());
         assertEquals(3, teamDTO.getNumberLosses());
         assertEquals(2, teamDTO.getNumberDraws());
+        assertEquals("some quote", teamDTO.getQuote());
     }
 }
