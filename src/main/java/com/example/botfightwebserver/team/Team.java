@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table
-@Audited
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -71,7 +70,6 @@ public class Team {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Submission currentSubmission;
 
     private static Clock clock = Clock.systemDefaultZone();
