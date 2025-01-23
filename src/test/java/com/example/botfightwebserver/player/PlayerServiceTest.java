@@ -23,14 +23,11 @@ class PlayerServiceTest extends PersistentTestBase {
     @Autowired
     private PlayerRepository playerRepository;
 
-    @MockBean
-    private TeamService teamService;
-
     private PlayerService playerService;
 
     @BeforeEach
     void setUp() {
-        playerService = new PlayerService(playerRepository, teamService);
+        playerService = new PlayerService(playerRepository);
     }
 
     @Test
@@ -53,8 +50,6 @@ class PlayerServiceTest extends PersistentTestBase {
 
     @Test
     void testCreatePlayer() {
-        when(teamService.isExistById(1L)).thenReturn(true);
-
         Player player = playerService.createPlayer("Test", "test@email.com", 1L);
 
         assertNotNull(player);
@@ -78,24 +73,10 @@ class PlayerServiceTest extends PersistentTestBase {
     }
 
     @Test
-    void testCreatePlayer_TeamDoesNotExist() {
-        when(teamService.isExistById(1L)).thenReturn(false);
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> playerService.createPlayer("Test", "test@email.com", 1L)
-        );
-
-        assertEquals("Team with id 1 does not exist", exception.getMessage());
-    }
-
-    @Test
     void testSetPlayerTeam() {
         Player player = persistAndReturnEntity(Player.builder()
             .name("Test")
             .build());
-
-        when(teamService.isExistById(2L)).thenReturn(true);
 
         Player updated = playerService.setPlayerTeam(player.getId(), 2L);
 
@@ -116,5 +97,40 @@ class PlayerServiceTest extends PersistentTestBase {
         assertEquals(player.getName(), found.getName());
         assertEquals(player.getEmail(), found.getEmail());
         assertEquals(player.getTeamId(), found.getTeamId());
+    }
+
+    @Test
+    void testGetPlayersByTeam() {
+        Player player1 = persistAndReturnEntity(Player.builder()
+            .name("Test1")
+            .email("test1@email.com")
+            .teamId(1L)
+            .build());
+
+        Player player2 = persistAndReturnEntity(Player.builder()
+            .name("Test2")
+            .email("test2@email.com")
+            .teamId(1L)
+            .build());
+
+        persistAndReturnEntity(Player.builder()
+            .name("Test3")
+            .email("test3@email.com")
+            .teamId(2L)
+            .build());
+
+        List<Player> teamPlayers = playerService.getPlayersByTeam(1L);
+
+        assertEquals(2, teamPlayers.size());
+        assertTrue(teamPlayers.stream().anyMatch(p -> p.getName().equals("Test1")));
+        assertTrue(teamPlayers.stream().anyMatch(p -> p.getName().equals("Test2")));
+        assertFalse(teamPlayers.stream().anyMatch(p -> p.getName().equals("Test3")));
+    }
+
+    @Test
+    void testGetPlayersByTeam_NoPlayers() {
+        List<Player> teamPlayers = playerService.getPlayersByTeam(999L);
+
+        assertTrue(teamPlayers.isEmpty());
     }
 }

@@ -1,7 +1,5 @@
 package com.example.botfightwebserver.player;
-
-import com.example.botfightwebserver.team.TeamRepository;
-import com.example.botfightwebserver.team.TeamService;
+;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +10,6 @@ import java.util.List;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final TeamService teamService;
 
     public List<Player> getPlayers() {
         return playerRepository.findAll()
@@ -23,9 +20,6 @@ public class PlayerService {
     public Player createPlayer(String name, String email, Long teamId) {
         if (playerRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Player with email " + email + " already exists");
-        }
-        if (teamId != null && !teamService.isExistById(teamId)) {
-            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Player player = new Player();
         player.setName(name);
@@ -38,12 +32,13 @@ public class PlayerService {
         if (!playerRepository.existsById(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
-        if (!teamService.isExistById(teamId)) {
-            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
-        }
         Player player = playerRepository.findById(playerId).orElse(null);
         player.setTeamId(teamId);
         return playerRepository.save(player);
+    }
+
+    public List<Player> getPlayersByTeam(Long teamId) {
+        return playerRepository.findByTeamId(teamId);
     }
 
     public Player getPlayer(Long playerId) {

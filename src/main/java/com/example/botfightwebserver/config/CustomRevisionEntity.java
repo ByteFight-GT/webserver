@@ -1,4 +1,4 @@
-package com.example.botfightwebserver;
+package com.example.botfightwebserver.config;
 
 
 import jakarta.persistence.Entity;

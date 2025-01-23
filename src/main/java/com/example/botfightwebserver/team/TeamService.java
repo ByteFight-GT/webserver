@@ -1,15 +1,20 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
+import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,6 +26,7 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final SubmissionService submissionService;
+    private final PlayerService playerService;
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -140,6 +146,31 @@ public class TeamService {
         Team team = teamRepository.findById(teamId).get();
         team.setQuote(quote);
         teamRepository.save(team);
+    }
+
+    public List<LeaderboardDTO> getLeaderboard() {
+        List<LeaderboardDTO> leaderboard = new ArrayList<>();
+        List<Team> allTeams = teamRepository.findAll()
+            .stream()
+            .sorted(Comparator.comparing(Team::getGlicko).reversed())
+            .collect(Collectors.toList());
+
+        for (int i = 0; i < allTeams.size(); i++) {
+            Team team = allTeams.get(i);
+            List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
+            List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
+            LeaderboardDTO leaderboardDTO = LeaderboardDTO.builder()
+                .teamId(team.getId())
+                .rank(i + 1)
+                .glicko(team.getGlicko())
+                .teamName(team.getName())
+                .createdAt(team.getCreationDateTime())
+                .quote(team.getQuote())
+                .members(playerNames)
+                .build();
+            leaderboard.add(leaderboardDTO);
+        }
+        return leaderboard;
     }
 }
 

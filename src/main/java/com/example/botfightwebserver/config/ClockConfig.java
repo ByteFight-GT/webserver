@@ -1,4 +1,4 @@
-package com.example.botfightwebserver;
+package com.example.botfightwebserver.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
