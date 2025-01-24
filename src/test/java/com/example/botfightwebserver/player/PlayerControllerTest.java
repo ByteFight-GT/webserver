@@ -15,9 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.UUID;
 
 @WebMvcTest(PlayerController.class)
 class PlayerControllerTest {
+
+    private static final UUID TEST_AUTH_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,6 +32,7 @@ class PlayerControllerTest {
         .id(1L)
         .name("Test")
         .email("test@email.com")
+        .authId(TEST_AUTH_ID)
         .build();
 
     @Test
@@ -40,7 +44,8 @@ class PlayerControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1))
             .andExpect(jsonPath("$[0].name").value("Test"))
-            .andExpect(jsonPath("$[0].email").value("test@email.com"));
+            .andExpect(jsonPath("$[0].email").value("test@email.com"))
+            .andExpect(jsonPath("$[0].authId").value(TEST_AUTH_ID.toString()));
 
         verify(playerService).getPlayers();
     }
@@ -54,14 +59,15 @@ class PlayerControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("Test"))
-            .andExpect(jsonPath("$.email").value("test@email.com"));
+            .andExpect(jsonPath("$.email").value("test@email.com"))
+            .andExpect(jsonPath("$.authId").value(TEST_AUTH_ID.toString()));
 
         verify(playerService).getPlayer(1L);
     }
 
     @Test
     void shouldCreatePlayer() throws Exception {
-        when(playerService.createPlayer("Test", "test@email.com", null))
+        when(playerService.createPlayer("Test", "test@email.com", TEST_AUTH_ID, null))
             .thenReturn(TEST_PLAYER);
 
         mockMvc.perform(post("/api/v1/player/create")
@@ -70,9 +76,10 @@ class PlayerControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("Test"))
-            .andExpect(jsonPath("$.email").value("test@email.com"));
+            .andExpect(jsonPath("$.email").value("test@email.com"))
+            .andExpect(jsonPath("$.authId").value(TEST_AUTH_ID.toString()));
 
-        verify(playerService).createPlayer("Test", "test@email.com", null);
+        verify(playerService).createPlayer("Test", "test@email.com", TEST_AUTH_ID,null);
     }
 
     @Test
@@ -82,9 +89,10 @@ class PlayerControllerTest {
             .teamId(2L)
             .name("Test")
             .email("test@email.com")
+            .authId(TEST_AUTH_ID)
             .build();
 
-        when(playerService.setPlayerTeam(1L, 2L)).thenReturn(playerWithTeam);
+        when(playerService.setPlayerTeam(TEST_AUTH_ID, 2L)).thenReturn(playerWithTeam);
 
         mockMvc.perform(post("/api/v1/player/team")
                 .param("playerId", "1")
@@ -93,6 +101,6 @@ class PlayerControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.teamId").value(2));
 
-        verify(playerService).setPlayerTeam(1L, 2L);
+        verify(playerService).setPlayerTeam(TEST_AUTH_ID, 2L);
     }
 }

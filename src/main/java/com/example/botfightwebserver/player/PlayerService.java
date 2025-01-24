@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,22 +18,22 @@ public class PlayerService {
             .toList();
     }
 
-    public Player createPlayer(String name, String email, Long teamId) {
-        if (playerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Player with email " + email + " already exists");
+    public Player createPlayer(String name, String email, UUID authId, Long teamId) {
+        if (playerRepository.existsByEmail(email)) {throw new IllegalArgumentException("Player with email " + email + " already exists");
         }
         Player player = new Player();
         player.setName(name);
         player.setEmail(email);
         player.setTeamId(teamId);
+        player.setAuthId(authId);
         return playerRepository.save(player);
     }
 
-    public Player setPlayerTeam(Long playerId, Long teamId) {
-        if (!playerRepository.existsById(playerId)) {
+    public Player setPlayerTeam(UUID playerId, Long teamId) {
+        if (!playerRepository.existsByAuthId(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
-        Player player = playerRepository.findById(playerId).orElse(null);
+        Player player = playerRepository.findByAuthId(playerId).orElse(null);
         player.setTeamId(teamId);
         return playerRepository.save(player);
     }
@@ -43,6 +44,10 @@ public class PlayerService {
 
     public Player getPlayer(Long playerId) {
         return playerRepository.findById(playerId).orElse(null);
+    }
+
+    public Player getPlayer(UUID authId) {
+        return playerRepository.findByAuthId(authId).orElse(null);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.gameMatchResult;
 
+import com.example.botfightwebserver.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,20 +19,30 @@ import java.util.List;
 public class GameMatchResultController {
 
     private final GameMatchResultHandler gameMatchResultHandler;
+    private final UserService userService;
 
     @PostMapping("/handle/results")
     public ResponseEntity<Void> handleMatchResults(@RequestBody GameMatchResult result) {
+        if (!userService.hasAccess()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         gameMatchResultHandler.handleGameMatchResult(result);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/submit/results")
     public ResponseEntity<Void> submitResults(@RequestBody GameMatchResult result) {
+        if (!userService.hasAccess()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         gameMatchResultHandler.submitGameMatchResults(result);
         return ResponseEntity.accepted().build();    }
 
     @PostMapping("/queue/remove_all")
     public ResponseEntity<List<GameMatchResult>> removeAllQueuedResults() {
+        if (!userService.hasAccess()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         return ResponseEntity.ok(gameMatchResultHandler.deleteQueuedMatches());
     }
 
