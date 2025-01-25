@@ -1,9 +1,17 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
+import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.gameMatch.GameMatchController;
+import com.example.botfightwebserver.gameMatch.TestJwtFilter;
+import com.example.botfightwebserver.security.JwtAuthFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -15,7 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(GameMatchLogController.class)
+@WebMvcTest(value = GameMatchLogController.class, excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
+})
+@Import({SecurityTestConfig.class, TestJwtFilter.class})
+@WithMockUser()
 public class GameMatchLogControllerTest {
 
     @Autowired

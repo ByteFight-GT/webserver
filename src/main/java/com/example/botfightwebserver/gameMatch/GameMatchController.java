@@ -1,6 +1,5 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,12 +48,10 @@ public class GameMatchController {
         return ResponseEntity.ok(gameMatchService.peekQueuedMatches());
     }
 
-    @PostMapping(value="/reschedule/all", produces = MediaType.APPLICATION_JSON_VALUE)
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value="/reschedule/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
-        System.out.println("I AM HERE WATF");
         List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches();
-        System.out.println(jobs.size());
         for (GameMatchJob job : jobs) {
             System.out.println(job);
         }

@@ -1,6 +1,5 @@
 package com.example.botfightwebserver.player;
 
-import com.example.botfightwebserver.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import java.util.UUID;
 public class PlayerController {
 
     private final PlayerService playerService;
-    private final UserService userService;
 
     @GetMapping("/players")
     public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
@@ -49,9 +47,6 @@ public class PlayerController {
 
     @GetMapping("/player")
     public ResponseEntity<PlayerDTO> getPlayerById(@RequestParam Long id) {
-        if (!userService.hasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(id)));
     }
 

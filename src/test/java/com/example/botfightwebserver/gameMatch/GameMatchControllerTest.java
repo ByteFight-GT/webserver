@@ -1,49 +1,58 @@
 package com.example.botfightwebserver.gameMatch;
 
+import com.example.botfightwebserver.SecurityTestConfig;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.botfightwebserver.security.TestSecurityConfig;
-
-@WebMvcTest(GameMatchController.class)
-@WithMockUser(roles = "ADMIN")
-@AutoConfigureMockMvc
+@WebMvcTest(value = GameMatchController.class, excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
+})
+@Import({SecurityTestConfig.class, TestJwtFilter.class})
+@WithMockUser()
 class GameMatchControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
+    private TestJwtFilter jwtAuthFilter;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
     private GameMatchService gameMatchService;
-
-    @MockBean
-    private JwtAuthFilter jwtAuthFilter;
-
-    private static final String TEST_TOKEN = "5EBZXvyjCEspndvK/18edD7qHwXuy7H+HLOiYeDEQz4=";
 
     @Test
     void testSubmitMatch() throws Exception {
@@ -70,9 +79,10 @@ class GameMatchControllerTest {
                 .thenReturn(job);
 
         // Act: Perform the request
-        mockMvc.perform(post("/api/v1/game-match/submit/match")
+        mockMvc.perform(post("/api/v1/game-match/submit/match").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request)
+                        ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameMatchId").value(123))
                 .andExpect(jsonPath("$.Submission1Path").value("path/to/submission1"))
@@ -87,9 +97,8 @@ class GameMatchControllerTest {
     void testRemoveAllQueuedMatches() throws Exception {
         when(gameMatchService.deleteQueuedMatches()).thenReturn(List.of());
 
-        mockMvc.perform(post("/api/v1/game-match/queue/remove_all")
-                .header("Authorization", TEST_TOKEN))  // Add auth header
-            .andExpect(status().isOk())
+        mockMvc.perform(post("/api/v1/game-match/queue/remove_all").with(csrf())
+            ).andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(0));
 
         verify(gameMatchService).deleteQueuedMatches();
@@ -97,7 +106,6 @@ class GameMatchControllerTest {
 
     @Test
     void testQueuedMatches() throws Exception {
-        // Arrange: Mock the service to return a list of GameMatchJobs
         List<GameMatchJob> jobs = List.of(
             new GameMatchJob(123L, "path1", "path2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER,
                 "Map1"),
@@ -107,7 +115,6 @@ class GameMatchControllerTest {
 
         when(gameMatchService.peekQueuedMatches()).thenReturn(jobs);
 
-        // Act and Assert
         mockMvc.perform(get("/api/v1/game-match/queued"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -130,38 +137,10 @@ class GameMatchControllerTest {
         when(gameMatchService.rescheduleFailedAndStaleMatches()).thenReturn(rescheduledJobs);
 
         // Act and Assert
-        mockMvc.perform(post("/api/v1/game-match/reschedule/all")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andDo(result -> {
-                System.out.println("Request URL: " + result.getRequest().getRequestURL());
-                System.out.println("Request Method: " + result.getRequest().getMethod());
-            });
+        mockMvc.perform(post("/api/v1/game-match/reschedule/all").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         verify(gameMatchService).rescheduleFailedAndStaleMatches();
     }
 
-    @Test
-    void shouldHitEndpoint() throws Exception {
-        // Add simple debug endpoint test
-        mockMvc.perform(get("/api/v1/game-match/queued"))  // Try the non-secured endpoint first
-            .andDo(result -> {
-                System.out.println("Request URL: " + result.getRequest().getRequestURL());
-                System.out.println("Handler: " + result.getHandler()); // This will show if Spring found a handler
-            })
-            .andDo(print());
-    }
-
-
-    @Test
-    void shouldHitEndpoint2() throws Exception {
-        List<GameMatchJob> jobs = List.of(new GameMatchJob(1L, "path1", "path2",
-            STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER, "map1"));
-        when(gameMatchService.peekQueuedMatches()).thenReturn(jobs);
-
-        mockMvc.perform(get("/api/v1/game-match/queued")
-                .accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
 }

@@ -1,36 +1,61 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.gameMatch.GameMatchController;
+import com.example.botfightwebserver.gameMatch.TestJwtFilter;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
+import com.example.botfightwebserver.player.Player;
+import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.security.JwtAuthFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TeamController.class)
+@WebMvcTest(value = TeamController.class, excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
+})
+@Import({SecurityTestConfig.class, TestJwtFilter.class})
+@WithMockUser()
 class TeamControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private TestJwtFilter jwtAuthFilter;
 
     @MockBean
     private TeamService teamService;
 
     @MockBean
     private TeamAuditService teamAuditService;
+
+    @MockBean
+    private PlayerService playerService;
 
     @Test
     void testGetTeams() throws Exception {
@@ -47,6 +72,8 @@ class TeamControllerTest {
             .andExpect(jsonPath("$[0].name").value("tyler"))
             .andExpect(jsonPath("$[1].id").value(2L))
             .andExpect(jsonPath("$[1].name").value("ben"));
+
+        verify(teamService).getTeams();
     }
 
     @Test
@@ -72,8 +99,9 @@ class TeamControllerTest {
                 .numberDraws(0).build();
 
         when(teamService.createTeam("tyler")).thenReturn(newTeam);
+        when(playerService.setPlayerTeam(any(), any())).thenReturn(null);
 
-        mockMvc.perform(post("/api/v1/team")
+        mockMvc.perform(post("/api/v1/team").with(csrf())
                 .param("name", "tyler")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -91,7 +119,17 @@ class TeamControllerTest {
         when(teamService.createTeam("tyler")).thenThrow(
             new IllegalArgumentException("Team with name " + name + " already exists"));
 
-        mockMvc.perform(post("/api/v1/team")
+        Team newTeam =
+            Team.builder()
+                .id(1L)
+                .name("tyler")
+                .glicko(1200.0)
+                .matchesPlayed(0)
+                .numberLosses(0)
+                .numberWins(0)
+                .numberDraws(0).build();
+
+        mockMvc.perform(post("/api/v1/team").with(csrf())
             .param("name", "tyler")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
@@ -100,10 +138,12 @@ class TeamControllerTest {
 
     @Test
     void testSetQuote() throws Exception {
+        UUID authId = UUID.randomUUID();
+        Player player = Player.builder().authId(authId).teamId(1L).build();
         Long teamId = 1L;
         String quote = "We are the champions!";
-
-        mockMvc.perform(post("/api/v1/team/quote")
+        when(playerService.getPlayer((UUID) any())).thenReturn(player);
+        mockMvc.perform(post("/api/v1/team/quote").with(csrf())
                 .param("teamId", teamId.toString())
                 .param("quote", quote)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -113,13 +153,17 @@ class TeamControllerTest {
 
     @Test
     void testSetQuoteTeamNotFound() throws Exception {
+        UUID authId = UUID.randomUUID();
+        Player player = Player.builder().authId(authId).teamId(999L).build();
         Long teamId = 999L;
         String quote = "We are the champions!";
+
+        when(playerService.getPlayer((UUID) any())).thenReturn(player);
 
         doThrow(new IllegalArgumentException("Team not found with id: " + teamId))
             .when(teamService).setQuote(teamId, quote);
 
-        mockMvc.perform(post("/api/v1/team/quote")
+        mockMvc.perform(post("/api/v1/team/quote").with(csrf())
                 .param("teamId", teamId.toString())
                 .param("quote", quote)
                 .contentType(MediaType.APPLICATION_JSON))
