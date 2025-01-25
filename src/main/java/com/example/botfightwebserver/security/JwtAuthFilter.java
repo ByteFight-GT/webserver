@@ -50,12 +50,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 context.setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, authorities));
                 SecurityContextHolder.setContext(context);
             } catch (JwtException e) {
+                System.out.println("blocked because try fail" + e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "idk whats happening " + e.getMessage());
                 return;
             }
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid");
-            return;
         }
         System.out.println("TOKEN " + token);
         filterChain.doFilter(request, response);

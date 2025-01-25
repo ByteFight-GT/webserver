@@ -12,12 +12,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/leaderboard")
+@RequestMapping("/api/v1/public/leaderboard")
 public class LeaderboardController {
 
     private final TeamService teamService;
 
-    @GetMapping("/public/all")
+    @GetMapping("/all")
     public ResponseEntity<List<LeaderboardDTO>> getLeaderboard() {
         return ResponseEntity.ok(teamService.getLeaderboard());
     }
