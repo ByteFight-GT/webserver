@@ -37,8 +37,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             token = token.substring(7);
             try {
                 Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret)))
-                    .build()
+                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))                    .build()
                     .parseClaimsJws(token)
                     .getBody();
                 String userId = claims.getSubject();

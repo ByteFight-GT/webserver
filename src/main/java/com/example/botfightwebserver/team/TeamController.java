@@ -45,8 +45,6 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getDTOById(player.getTeamId()));
     }
 
-
-
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@RequestParam String name) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
