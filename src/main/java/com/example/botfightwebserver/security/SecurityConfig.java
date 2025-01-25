@@ -29,22 +29,9 @@ public class SecurityConfig {
             .authorizeHttpRequests()
             .requestMatchers("/api/v1/public/**").permitAll()
             .anyRequest().hasRole("ADMIN")
-            .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        System.out.println("REAL SECURITAY CONFIG USED");
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", FRONT_END_URL)); // Add your frontend URL
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
 }
