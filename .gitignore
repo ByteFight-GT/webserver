@@ -41,3 +41,4 @@ src/main/resources/.env
 GcpKey/
 **/.DS_Store
 /logs
+.env

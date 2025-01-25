@@ -25,12 +25,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable().cors().disable()
+        http
+            .csrf().disable().cors().disable()
             .authorizeHttpRequests()
-            .requestMatchers("/api/v1/public/**").permitAll()
-            .anyRequest().hasRole("ADMIN")
+            .requestMatchers("/api/v1/public/**").permitAll() // Allow access to public endpoints
+            .anyRequest().authenticated() // Require authentication for all other requests
             .and()
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before UsernamePasswordAuthenticationFilter
+
         return http.build();
     }
 
