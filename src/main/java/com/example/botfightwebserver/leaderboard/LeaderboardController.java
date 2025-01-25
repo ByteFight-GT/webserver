@@ -17,7 +17,7 @@ public class LeaderboardController {
 
     private final TeamService teamService;
 
-    @GetMapping("/all")
+    @GetMapping("/public/all")
     public ResponseEntity<List<LeaderboardDTO>> getLeaderboard() {
         return ResponseEntity.ok(teamService.getLeaderboard());
     }

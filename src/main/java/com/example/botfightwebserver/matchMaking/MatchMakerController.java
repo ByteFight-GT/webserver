@@ -2,6 +2,8 @@ package com.example.botfightwebserver.matchMaking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,8 +17,9 @@ public class MatchMakerController {
     private final MatchMaker matchMaker;
 
     @PostMapping("/generate")
-    @ResponseStatus(HttpStatus.OK)
-    public void generateMatches() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> generateMatches() {
         matchMaker.generateMatches();
+        return ResponseEntity.ok().build();
     }
 }

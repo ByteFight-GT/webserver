@@ -1,10 +1,18 @@
 package com.example.botfightwebserver.leaderboard;
 
+import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.gameMatch.TestJwtFilter;
+import com.example.botfightwebserver.gameMatchLogs.GameMatchLogController;
+import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.example.botfightwebserver.team.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -16,7 +24,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(LeaderboardController.class)
+@WebMvcTest(value = LeaderboardController.class, excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
+})
+@Import({SecurityTestConfig.class, TestJwtFilter.class})
+@WithMockUser()
 class LeaderboardControllerTest {
 
     @Autowired
@@ -40,7 +52,7 @@ class LeaderboardControllerTest {
         List<LeaderboardDTO> leaderboard = List.of(TEST_LEADERBOARD_ENTRY);
         when(teamService.getLeaderboard()).thenReturn(leaderboard);
 
-        mockMvc.perform(get("/api/v1/leaderboard/all"))
+        mockMvc.perform(get("/api/v1/leaderboard/public/all"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].teamId").value(1))
             .andExpect(jsonPath("$[0].rank").value(1))
