@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +20,9 @@ public class GcpStorageServiceImpl implements StorageService {
 
     private final Storage storage;
     private final Clock clock;
-    private final String bucketName = "botfight_submissions";
+
+    @Value("${GCP_BUCKET}")
+    private String bucketName;
 
     public GcpStorageServiceImpl(Storage storage, Clock clock) {
         this.storage = storage;

@@ -35,12 +35,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Value("${JWT_SECRET}")
     private String jwtSecret;
 
+    @Value("${ADMINS_PATH}")
+    private String adminsPath;
+
     private Set<String> adminIds = new HashSet<>();
 
     @PostConstruct  // Load admins when bean is created
     public void loadAdmins() {
         try {
-            Path path = Paths.get("admins.txt");
+            Path path = Paths.get(adminsPath);
             adminIds = new HashSet<>(Files.readAllLines(path));
         } catch (IOException e) {
             System.err.println("Could not load admins.txt: " + e.getMessage());

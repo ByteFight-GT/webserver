@@ -53,7 +53,7 @@ public class MatchMaker {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
             gameMatchService.submitGameMatch(teamOne.getId(), teamTwo.getId(), teamOne.getCurrentSubmission().getId(),
-                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, "map1");
+                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, "pillars");
         });
     }
 

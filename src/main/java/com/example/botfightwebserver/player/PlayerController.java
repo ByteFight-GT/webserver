@@ -50,6 +50,19 @@ public class PlayerController {
         return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(id)));
     }
 
+    @GetMapping("/player-auth")
+    public ResponseEntity<PlayerDTO> getPlayerByAuthId(@RequestParam String authId) {
+        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(UUID.fromString(authId))));
+    }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<PlayerDTO> getMe() {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(UUID.fromString(authId))));
+    }
+
+
     public boolean hasAccess(UUID requestedAuthId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUserId = (String) auth.getPrincipal();

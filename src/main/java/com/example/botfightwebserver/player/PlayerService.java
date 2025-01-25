@@ -35,6 +35,7 @@ public class PlayerService {
         }
         Player player = playerRepository.findByAuthId(playerId).orElse(null);
         player.setTeamId(teamId);
+        player.setHasTeam(true);
         return playerRepository.save(player);
     }
 

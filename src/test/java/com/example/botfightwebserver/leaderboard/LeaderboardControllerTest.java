@@ -52,7 +52,7 @@ class LeaderboardControllerTest {
         List<LeaderboardDTO> leaderboard = List.of(TEST_LEADERBOARD_ENTRY);
         when(teamService.getLeaderboard()).thenReturn(leaderboard);
 
-        mockMvc.perform(get("/api/v1/leaderboard/public/all"))
+        mockMvc.perform(get("/api/v1/public/leaderboard/all"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].teamId").value(1))
             .andExpect(jsonPath("$[0].rank").value(1))

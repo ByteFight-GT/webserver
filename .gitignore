@@ -42,3 +42,4 @@ GcpKey/
 **/.DS_Store
 /logs
 .env
+admins.txt
