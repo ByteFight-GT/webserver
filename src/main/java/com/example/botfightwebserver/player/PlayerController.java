@@ -50,7 +50,7 @@ public class PlayerController {
         return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(id)));
     }
 
-
+`
     public boolean hasAccess(UUID requestedAuthId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUserId = (String) auth.getPrincipal();

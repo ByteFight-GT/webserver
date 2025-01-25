@@ -41,7 +41,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
                 String userId = claims.getSubject();
-                List<String> roles = claims.get("roles", List.class);
+                List<String> roles = List.of("USER");
+                // add admin logic
                 List<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring Security expects "ROLE_" prefix
                     .toList();
