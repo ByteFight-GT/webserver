@@ -25,26 +25,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable().cors().disable()
+        http
+            .csrf().disable().cors().disable()
             .authorizeHttpRequests()
-            .requestMatchers("/api/v1/public/**").permitAll()
-            .anyRequest().hasRole("ADMIN")
-            .anyRequest().authenticated()
+            .requestMatchers("/api/v1/public/**").permitAll() // Allow access to public endpoints
+            .anyRequest().authenticated() // Require authentication for all other requests
             .and()
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before UsernamePasswordAuthenticationFilter
+
         return http.build();
     }
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        System.out.println("REAL SECURITAY CONFIG USED");
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", FRONT_END_URL)); // Add your frontend URL
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
 }
