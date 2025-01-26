@@ -68,7 +68,7 @@ public class GameMatchController {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();
-        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId).stream().map(GameMatchDTO::fromEntity).toList());
+        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId).stream().map(GameMatchDTO::fromEntity).toList());
     }
 
 }

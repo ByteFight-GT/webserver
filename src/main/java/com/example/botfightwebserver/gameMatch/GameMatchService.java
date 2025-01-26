@@ -153,8 +153,8 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatch> getTeamMatches(Long teamId) {
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNot(teamId, teamId, MATCH_STATUS.WAITING);
+    public List<GameMatch> getPlayedTeamMatches(Long teamId) {
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByTimeDesc(teamId, teamId, MATCH_STATUS.WAITING);
     }
     }
 
