@@ -154,7 +154,7 @@ public class GameMatchService {
     }
 
     public List<GameMatch> getTeamMatches(Long teamId) {
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_Id(teamId, teamId);
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNot(teamId, teamId, MATCH_STATUS.WAITING);
     }
     }
 

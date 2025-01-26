@@ -9,5 +9,8 @@ import java.util.List;
 @Repository
 public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
     List<GameMatch> findByStatusAndQueuedAtBefore(MATCH_STATUS status, LocalDateTime threshold);
+
     List<GameMatch> findByStatus(MATCH_STATUS status);
-    List<GameMatch> findByTeamOne_IdOrTeamTwo_Id(Long teamOneId, Long teamTwoId);}
+
+    List<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNot(Long teamOneId, Long teamTwoId, MATCH_STATUS status);
+}
