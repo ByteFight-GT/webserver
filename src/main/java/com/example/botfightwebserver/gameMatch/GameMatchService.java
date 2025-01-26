@@ -152,6 +152,10 @@ public class GameMatchService {
         gameMatchRepository.save(gameMatch);
         return job;
     }
+
+    public List<GameMatch> getTeamMatches(Long teamId) {
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_Id(teamId, teamId);
+    }
     }
 
 
