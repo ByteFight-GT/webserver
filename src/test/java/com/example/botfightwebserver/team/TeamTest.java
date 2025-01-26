@@ -72,7 +72,7 @@ class TeamTest extends PersistentTestBase {
             .currentSubmission(testSubmission)
             .build();
 
-        assertEquals(1200.0, team.getGlicko());
+        assertEquals(1500.0, team.getGlicko());
         assertEquals(0, team.getMatchesPlayed());
         assertEquals(0, team.getNumberWins());
         assertEquals(0, team.getNumberLosses());

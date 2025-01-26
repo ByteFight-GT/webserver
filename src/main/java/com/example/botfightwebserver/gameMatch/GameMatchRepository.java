@@ -12,4 +12,4 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
 
-    List<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByTimeDesc(Long teamOneId, Long teamTwoId, MATCH_STATUS status);}
+    List<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(Long teamOneId, Long teamTwoId, MATCH_STATUS status);}

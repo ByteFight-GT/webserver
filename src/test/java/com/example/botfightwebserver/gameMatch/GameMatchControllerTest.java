@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,9 @@ class GameMatchControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private PlayerService playerService;
 
     @MockBean
     private GameMatchService gameMatchService;

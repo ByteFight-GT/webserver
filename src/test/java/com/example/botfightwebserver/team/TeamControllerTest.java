@@ -92,7 +92,7 @@ class TeamControllerTest {
             Team.builder()
                 .id(1L)
                 .name("tyler")
-                .glicko(1200.0)
+                .glicko(1500.0)
                 .matchesPlayed(0)
                 .numberLosses(0)
                 .numberWins(0)

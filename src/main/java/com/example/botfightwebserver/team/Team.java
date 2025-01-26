@@ -48,7 +48,7 @@ public class Team {
 
     @Builder.Default
     @Audited
-    private Double glicko=1200.0;
+    private Double glicko=1500.0;
 
     @Builder.Default
     private Double phi=350.0;
