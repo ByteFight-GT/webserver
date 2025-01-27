@@ -1,13 +1,15 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.team.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.team.TeamService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -153,8 +155,14 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatch> getPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(teamId, teamId, MATCH_STATUS.WAITING);
+    public List<GameMatchDTO> getPlayedTeamMatches(Long teamId) {
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(teamId, teamId, MATCH_STATUS.WAITING).stream().map(GameMatchDTO::fromEntity).toList();
+    }
+
+    public List<GameMatchDTO> getPlayedTeamMatces(Long teamId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(teamId, teamId,
+            MATCH_STATUS.WAITING, pageable).stream().map(GameMatchDTO::fromEntity).toList();
     }
     }
 

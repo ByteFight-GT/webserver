@@ -13,10 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -149,28 +149,36 @@ public class TeamService {
     }
 
     public List<LeaderboardDTO> getLeaderboard() {
-        List<LeaderboardDTO> leaderboard = new ArrayList<>();
-        List<Team> allTeams = teamRepository.findAll()
-            .stream()
+        AtomicInteger rank = new AtomicInteger(1);
+        List<LeaderboardDTO> leaderboard = teamRepository.findAll().stream()
             .sorted(Comparator.comparing(Team::getGlicko).reversed())
+            .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
             .collect(Collectors.toList());
-
-        for (int i = 0; i < allTeams.size(); i++) {
-            Team team = allTeams.get(i);
-            List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
-            List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
-            LeaderboardDTO leaderboardDTO = LeaderboardDTO.builder()
-                .teamId(team.getId())
-                .rank(i + 1)
-                .glicko(team.getGlicko())
-                .teamName(team.getName())
-                .createdAt(team.getCreationDateTime())
-                .quote(team.getQuote())
-                .members(playerNames)
-                .build();
-            leaderboard.add(leaderboardDTO);
-        }
         return leaderboard;
+    }
+
+    public List<LeaderboardDTO> getLeaderboard(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        AtomicInteger rank = new AtomicInteger(1 + page * size);
+
+        return teamRepository.findAll(pageable).stream()
+            .sorted(Comparator.comparing(Team::getGlicko).reversed())
+            .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
+            .collect(Collectors.toList());
+    }
+
+    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank) {
+        List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
+        List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
+        return LeaderboardDTO.builder()
+            .teamId(team.getId())
+            .rank(rank)
+            .glicko(team.getGlicko())
+            .teamName(team.getName())
+            .createdAt(team.getCreationDateTime())
+            .quote(team.getQuote())
+            .members(playerNames)
+            .build();
     }
 }
 
