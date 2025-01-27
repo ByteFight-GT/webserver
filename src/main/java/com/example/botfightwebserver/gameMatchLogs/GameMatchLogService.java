@@ -35,4 +35,8 @@ public class GameMatchLogService {
     public List<Long> getGameMatchLogIds() {
         return gameMatchLogRepository.findAll().stream().map(GameMatchLog::getId).toList();
     }
+
+    public Optional<GameMatchLog> getMatchLogFromGame(Long gameMatchId) {
+        return gameMatchLogRepository.findByMatchId(gameMatchId);
+    }
 }

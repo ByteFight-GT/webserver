@@ -34,4 +34,14 @@ public class GameMatchLogController {
     public ResponseEntity<List<Long>> getGameMatchIds() {
         return ResponseEntity.ok(gameMatchLogService.getGameMatchLogIds());
     }
+
+    @GetMapping("/from-match-id")
+    public ResponseEntity<GameMatchLog> getGameMatchLogFromMatchId(@RequestParam Long id) {
+        Optional<GameMatchLog> maybeLog = gameMatchLogService.getMatchLogFromGame(id);
+        if (maybeLog == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(maybeLog.get());
+    }
+
 }
