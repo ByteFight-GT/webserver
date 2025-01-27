@@ -13,12 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,19 +35,23 @@ public class SubmissionController {
 
     @PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
-        @RequestParam("teamId") Long teamId,
         @RequestParam("file") MultipartFile file) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
-        if (!player.getTeamId().equals(teamId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        Long teamId = player.getTeamId();
         SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file));
-        // for submitting a validation match
         GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
             MATCH_REASON.VALIDATION,
             "val_map");
         rabbitMQService.enqueueGameMatchJob(GameMatchJob.fromEntity(valMatch));
         return ResponseEntity.ok(submissionDTO);
         }
+
+    @GetMapping("/team")
+    public ResponseEntity<List<SubmissionDTO>> getTeamSubmissions() {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Long teamId = player.getTeamId();
+        return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
+    }
 }
