@@ -12,5 +12,5 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByName(String name);
-    Page<Team> findAllByOrderByGlickoDesc(Pageable pageable);
+    Page<Team> findAllByPage(Pageable pageable);
 }

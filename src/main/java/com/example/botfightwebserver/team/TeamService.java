@@ -129,10 +129,8 @@ public class TeamService {
             throw new IllegalArgumentException("Page size must be greater than 0");
         }
 
-        // Create a pageable request with sorting by Glicko in descending order
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
 
-        // Fetch the teams for the specified page
         Page<Team> teamPage = teamRepository.findAll(pageable);
 
         // Return the teams as a list
@@ -158,11 +156,10 @@ public class TeamService {
     }
 
     public List<LeaderboardDTO> getLeaderboard(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
         AtomicInteger rank = new AtomicInteger(1 + page * size);
 
         return teamRepository.findAll(pageable).stream()
-            .sorted(Comparator.comparing(Team::getGlicko).reversed())
             .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
             .collect(Collectors.toList());
     }
