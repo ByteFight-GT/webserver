@@ -57,7 +57,7 @@ public class GameMatchResultHandler {
         } else if (gameMatch.getReason() == MATCH_REASON.VALIDATION) {
             Submission submission = gameMatch.getSubmissionOne();
             log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
-            handleValidationResult(team1, submission, matchStatus);
+            handleValidationResult(team1, submission, gameMatch.getStatus());
             log.info("Validation match handled");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
