@@ -28,7 +28,7 @@ public class BotFightWebServerApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                    .allowedOrigins("https://botfightrenderer-production.up.railway.app", "http://localhost:3000")
+                    .allowedOrigins("https://botfightrenderer-production.up.railway.app", "http://localhost:3000", "https://bytefight.org")
                     .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
