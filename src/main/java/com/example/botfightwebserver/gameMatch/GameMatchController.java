@@ -78,7 +78,7 @@ public class GameMatchController {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();
-        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatces(teamId, page, size));
+        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
     }
 
 }

@@ -1,6 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -15,7 +17,10 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
 
-    List<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(Long teamOneId, Long teamTwoId, MATCH_STATUS status);
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status != :status")
+    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("status") MATCH_STATUS status);
 
-    Page<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusIsNot(Long teamOneId, Long teamTwoId, MATCH_STATUS status, Pageable pageable);
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status != :status")
+    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("status") MATCH_STATUS status, Pageable pageable);
 }
+

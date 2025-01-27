@@ -156,12 +156,12 @@ public class GameMatchService {
     }
 
     public List<GameMatchDTO> getPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(teamId, teamId, MATCH_STATUS.WAITING).stream().map(GameMatchDTO::fromEntity).toList();
+        return gameMatchRepository.findTeamMatches(teamId, MATCH_STATUS.WAITING).stream().map(GameMatchDTO::fromEntity).toList();
     }
 
-    public List<GameMatchDTO> getPlayedTeamMatces(Long teamId, int page, int size) {
+    public List<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusIsNot(teamId, teamId,
+        return gameMatchRepository.findTeamMatches(teamId,
             MATCH_STATUS.WAITING, pageable).stream().map(GameMatchDTO::fromEntity).toList();
     }
     }
