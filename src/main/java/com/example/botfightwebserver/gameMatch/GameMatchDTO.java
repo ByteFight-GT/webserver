@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GameMatchDTO {
     private Long id;
-    private TeamDTO teamOne;
-    private TeamDTO teamTwo;
-    private SubmissionDTO submissionOne;
-    private SubmissionDTO submissionTwo;
+    private String teamOneName;
+    private String teamTwoName;
+    private String submissionOneName;
+    private String submissionTwoName;
     private MATCH_STATUS status;
     private MATCH_REASON reason;
     private LocalDateTime createdAt;
@@ -29,10 +29,10 @@ public class GameMatchDTO {
     public static GameMatchDTO fromEntity(GameMatch gameMatch) {
         return GameMatchDTO.builder()
             .id(gameMatch.getId())
-            .teamOne(TeamDTO.fromEntity(gameMatch.getTeamOne()))
-            .teamTwo(TeamDTO.fromEntity(gameMatch.getTeamTwo()))
-            .submissionOne(SubmissionDTO.fromEntity(gameMatch.getSubmissionOne()))
-            .submissionTwo(SubmissionDTO.fromEntity(gameMatch.getSubmissionTwo()))
+            .teamOneName(gameMatch.getTeamOne().getName())
+            .teamTwoName(gameMatch.getTeamTwo().getName())
+            .submissionOneName(gameMatch.getSubmissionOne().getName())
+            .submissionTwoName(gameMatch.getSubmissionTwo().getName())
             .status(gameMatch.getStatus())
             .reason(gameMatch.getReason())
             .createdAt(gameMatch.getCreatedAt())

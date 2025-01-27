@@ -17,5 +17,5 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
 
     List<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(Long teamOneId, Long teamTwoId, MATCH_STATUS status);
 
-    Page<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(Long teamOneId, Long teamTwoId, MATCH_STATUS status, Pageable pageable);
+    Page<GameMatch> findByTeamOne_IdOrTeamTwo_IdAndStatusIsNot(Long teamOneId, Long teamTwoId, MATCH_STATUS status, Pageable pageable);
 }

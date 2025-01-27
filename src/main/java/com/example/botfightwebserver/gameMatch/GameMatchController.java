@@ -59,9 +59,6 @@ public class GameMatchController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
         List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches();
-        for (GameMatchJob job : jobs) {
-            System.out.println(job);
-        }
         return ResponseEntity.ok(jobs);
     }
 

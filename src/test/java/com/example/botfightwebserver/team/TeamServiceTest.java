@@ -160,7 +160,7 @@ class TeamServiceTest extends PersistentTestBase {
         assertEquals(expectedTeam.getNumberWins(), teamDTO.getNumberWins());
         assertEquals(expectedTeam.getNumberLosses(), teamDTO.getNumberLosses());
         assertEquals(expectedTeam.getNumberDraws(), teamDTO.getNumberDraws());
-        assertEquals(submission.getId(), teamDTO.getCurrentSubmissionDTO().id());
+        assertEquals(submission.getId(), teamDTO.getCurrentSubmissionDTO().getId());
     }
 
     @Test

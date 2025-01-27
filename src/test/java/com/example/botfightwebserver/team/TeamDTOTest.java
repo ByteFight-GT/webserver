@@ -31,7 +31,7 @@ class TeamDTOTest {
         TeamDTO teamDTO = TeamDTO.fromEntity(team);
 
         assertEquals(1L, teamDTO.getId());
-        assertEquals(2L, teamDTO.getCurrentSubmissionDTO().id());
+        assertEquals(2L, teamDTO.getCurrentSubmissionDTO().getId());
         assertEquals(1200.0, teamDTO.getGlicko());
         assertEquals("Tyler Team", teamDTO.getName());
         assertEquals(NOW, teamDTO.getCreationDateTime());

@@ -42,7 +42,7 @@ public class SubmissionController {
         }
         SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file));
         // for submitting a validation match
-        GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.id(), submissionDTO.id(),
+        GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
             MATCH_REASON.VALIDATION,
             "val_map");
         rabbitMQService.enqueueGameMatchJob(GameMatchJob.fromEntity(valMatch));

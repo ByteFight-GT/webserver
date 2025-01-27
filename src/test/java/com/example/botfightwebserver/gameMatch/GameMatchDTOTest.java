@@ -17,22 +17,15 @@ import static org.mockito.Mockito.*;
 
 class GameMatchDTOTest {
 
-    @Mock
-    private Team teamOne;
-    @Mock
-    private Team teamTwo;
-    @Mock
-    private Submission submissionOne;
-    @Mock
-    private Submission submissionTwo;
-    @Mock
-    private TeamDTO teamOneDTO;
-    @Mock
-    private TeamDTO teamTwoDTO;
-    @Mock
-    private SubmissionDTO submissionOneDTO;
-    @Mock
-    private SubmissionDTO submissionTwoDTO;
+
+    private Team teamOne = Team.builder().name("Team One").build();
+
+    private Team teamTwo = Team.builder().name("Team Two").build();
+
+    private Submission submissionOne = Submission.builder().name("Submission One").build();
+
+    private Submission submissionTwo = Submission.builder().name("Submission Two").build();
+
 
     private GameMatch gameMatch;
     private final LocalDateTime createdAt = LocalDateTime.now();
@@ -61,29 +54,19 @@ class GameMatchDTOTest {
         try (MockedStatic<TeamDTO> teamDTOMock = mockStatic(TeamDTO.class);
              MockedStatic<SubmissionDTO> submissionDTOMock = mockStatic(SubmissionDTO.class)) {
 
-            teamDTOMock.when(() -> TeamDTO.fromEntity(teamOne)).thenReturn(teamOneDTO);
-            teamDTOMock.when(() -> TeamDTO.fromEntity(teamTwo)).thenReturn(teamTwoDTO);
-            submissionDTOMock.when(() -> SubmissionDTO.fromEntity(submissionOne)).thenReturn(submissionOneDTO);
-            submissionDTOMock.when(() -> SubmissionDTO.fromEntity(submissionTwo)).thenReturn(submissionTwoDTO);
-
             GameMatchDTO dto = GameMatchDTO.fromEntity(gameMatch);
 
             assertNotNull(dto);
             assertEquals(1L, dto.getId());
-            assertEquals(teamOneDTO, dto.getTeamOne());
-            assertEquals(teamTwoDTO, dto.getTeamTwo());
-            assertEquals(submissionOneDTO, dto.getSubmissionOne());
-            assertEquals(submissionTwoDTO, dto.getSubmissionTwo());
+            assertEquals(teamOne.getName(), dto.getTeamOneName());
+            assertEquals(teamTwo.getName(), dto.getTeamTwoName());
+            assertEquals(submissionOne.getName(), dto.getSubmissionOneName());
+            assertEquals(submissionTwo.getName(), dto.getSubmissionTwoName());
             assertEquals(MATCH_STATUS.IN_PROGRESS, dto.getStatus());
             assertEquals(MATCH_REASON.LADDER, dto.getReason());
             assertEquals(createdAt, dto.getCreatedAt());
             assertEquals(processedAt, dto.getProcessedAt());
             assertEquals(2, dto.getTimesQueued());
-
-            teamDTOMock.verify(() -> TeamDTO.fromEntity(teamOne));
-            teamDTOMock.verify(() -> TeamDTO.fromEntity(teamTwo));
-            submissionDTOMock.verify(() -> SubmissionDTO.fromEntity(submissionOne));
-            submissionDTOMock.verify(() -> SubmissionDTO.fromEntity(submissionTwo));
         }
     }
 

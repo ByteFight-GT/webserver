@@ -22,7 +22,7 @@ public class GcpStorageServiceImpl implements StorageService {
     private final Clock clock;
 
     @Value("${GCP_BUCKET}")
-    private String bucketName;
+    private String bucketName = "some bucket";
 
     public GcpStorageServiceImpl(Storage storage, Clock clock) {
         this.storage = storage;

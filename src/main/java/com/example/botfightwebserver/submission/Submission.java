@@ -41,6 +41,8 @@ public class Submission {
 
     private LocalDateTime validateAt;
 
+    private String name;
+
     private static Clock clock = Clock.systemDefaultZone();
 
     @PrePersist

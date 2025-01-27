@@ -9,7 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -160,8 +160,8 @@ public class GameMatchService {
     }
 
     public List<GameMatchDTO> getPlayedTeamMatces(Long teamId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusNotOrderByProcessedAtDesc(teamId, teamId,
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
+        return gameMatchRepository.findByTeamOne_IdOrTeamTwo_IdAndStatusIsNot(teamId, teamId,
             MATCH_STATUS.WAITING, pageable).stream().map(GameMatchDTO::fromEntity).toList();
     }
     }
