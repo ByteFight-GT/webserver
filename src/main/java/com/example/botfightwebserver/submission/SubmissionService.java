@@ -75,6 +75,12 @@ public class SubmissionService {
         submissionRepository.save(submission);
     }
 
+    public void invalidateSubmissionAfterMatch(long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId).get();
+        submission.setSubmissionValidity(SUBMISSION_VALIDITY.INVALID);
+        submissionRepository.save(submission);
+    }
+
     public boolean isSubmissionValid(Long submissionId) {
         Optional<Submission> maybeSubmission = submissionRepository.findById(submissionId);
         if (maybeSubmission.isPresent()) {

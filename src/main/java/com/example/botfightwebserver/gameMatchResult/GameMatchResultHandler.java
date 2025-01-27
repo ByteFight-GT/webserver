@@ -57,7 +57,7 @@ public class GameMatchResultHandler {
         } else if (gameMatch.getReason() == MATCH_REASON.VALIDATION) {
             Submission submission = gameMatch.getSubmissionOne();
             log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
-            handleValidationResult(team1, submission);
+            handleValidationResult(team1, submission, matchStatus);
             log.info("Validation match handled");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
@@ -84,10 +84,14 @@ public class GameMatchResultHandler {
         rabbitMQService.enqueueGameMatchResult(result);
     }
 
-    private  void handleValidationResult(Team team, Submission submission) {
-        submissionService.validateSubmissionAfterMatch(submission.getId());
-        if (teamService.getCurrentSubmission(team.getId()).isEmpty()) {
-            teamService.setCurrentSubmission(team.getId(), submission.getId());
+    private  void handleValidationResult(Team team, Submission submission, MATCH_STATUS status) {
+        if (status == MATCH_STATUS.TEAM_ONE_WIN) {
+            submissionService.validateSubmissionAfterMatch(submission.getId());
+            if (teamService.getCurrentSubmission(team.getId()).isEmpty()) {
+                teamService.setCurrentSubmission(team.getId(), submission.getId());
+            }
+        } else {
+            submissionService.invalidateSubmissionAfterMatch(submission.getId());
         }
     }
 
