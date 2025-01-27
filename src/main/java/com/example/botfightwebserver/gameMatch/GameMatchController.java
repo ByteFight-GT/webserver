@@ -4,6 +4,7 @@ import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +72,7 @@ public class GameMatchController {
     }
 
     @GetMapping("/my-logs/paginated")
-    public ResponseEntity<List<GameMatchDTO>> myLogs(
+    public ResponseEntity<Page<GameMatchDTO>> myLogs(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {

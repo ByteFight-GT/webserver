@@ -2,6 +2,7 @@ package com.example.botfightwebserver.leaderboard;
 
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/all/paginated")
-    public ResponseEntity<List<LeaderboardDTO>> getLeaderboard(
+    public ResponseEntity<Page<LeaderboardDTO>> getLeaderboard(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {

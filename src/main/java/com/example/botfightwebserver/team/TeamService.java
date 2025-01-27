@@ -155,13 +155,11 @@ public class TeamService {
         return leaderboard;
     }
 
-    public List<LeaderboardDTO> getLeaderboard(int page, int size) {
+    public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
         AtomicInteger rank = new AtomicInteger(1 + page * size);
-
-        return teamRepository.findAll(pageable).stream()
-            .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
-            .collect(Collectors.toList());
+        Page<Team> teamPage = teamRepository.findAll(pageable);
+        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
     }
 
     private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank) {

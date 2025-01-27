@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -159,10 +160,11 @@ public class GameMatchService {
         return gameMatchRepository.findTeamMatches(teamId, MATCH_STATUS.WAITING).stream().map(GameMatchDTO::fromEntity).toList();
     }
 
-    public List<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
+    public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        return gameMatchRepository.findTeamMatches(teamId,
-            MATCH_STATUS.WAITING, pageable).stream().map(GameMatchDTO::fromEntity).toList();
+        Page<GameMatchDTO> pageResponse = gameMatchRepository.findTeamMatches(teamId,
+            MATCH_STATUS.WAITING, pageable).map(GameMatchDTO::fromEntity);
+        return pageResponse;
     }
     }
 
