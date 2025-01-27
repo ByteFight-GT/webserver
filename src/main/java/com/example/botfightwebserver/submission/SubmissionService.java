@@ -43,6 +43,7 @@ public class SubmissionService {
         submission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
         submission.setSource(STORAGE_SOURCE.GCP);
         submission.setTeamId(teamId);
+        submission.setName(file.getOriginalFilename());
         return submissionRepository.save(submission);
     }
 
