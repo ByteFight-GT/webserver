@@ -17,6 +17,7 @@ public class SubmissionDTO {
     private SUBMISSION_VALIDITY validity;
     private LocalDateTime createdAt;
     private String name;
+    private String storagePath;
 
     public static SubmissionDTO fromEntity(Submission submission) {
         return new SubmissionDTO(
@@ -24,7 +25,8 @@ public class SubmissionDTO {
             submission.getTeamId(),
             submission.getSubmissionValidity(),
             submission.getCreatedAt(),
-            submission.getName()
+            submission.getName(),
+            submission.getStoragePath()
         );
     }
 }

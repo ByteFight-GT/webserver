@@ -51,9 +51,9 @@ class SubmissionDTOTest {
         LocalDateTime createdAt = LocalDateTime.now();
 
         // Act
-        SubmissionDTO dto1 = new SubmissionDTO(id, teamId, validity, createdAt, "same");
-        SubmissionDTO dto2 = new SubmissionDTO(id, teamId, validity, createdAt, "same");
-        SubmissionDTO differentDto = new SubmissionDTO(3L, teamId, validity, createdAt, "different");
+        SubmissionDTO dto1 = new SubmissionDTO(id, teamId, validity, createdAt, "same", "/path");
+        SubmissionDTO dto2 = new SubmissionDTO(id, teamId, validity, createdAt, "same", "/path");
+        SubmissionDTO differentDto = new SubmissionDTO(3L, teamId, validity, createdAt, "different", "/path/path");
 
         // Assert
         // Test equals and hashCode
@@ -78,7 +78,7 @@ class SubmissionDTOTest {
     @Test
     void constructor_ShouldAcceptNullFields() {
         // Act
-        SubmissionDTO dto = new SubmissionDTO(null, null, null, null, null);
+        SubmissionDTO dto = new SubmissionDTO(null, null, null, null, null, null);
 
         // Assert
         assertNull(dto.getId(), "ID should be null");
