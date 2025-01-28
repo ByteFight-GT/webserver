@@ -177,7 +177,7 @@ public class TeamService {
     }
 
     public int countTeamsWithSubmission() {
-        return teamRepository.countTeamsByCurrentSubmissionNotEmpty();
+        return teamRepository.countByCurrentSubmissionNotNull();
     }
 }
 
