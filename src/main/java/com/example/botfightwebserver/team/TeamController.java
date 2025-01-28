@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,4 +74,17 @@ public class TeamController {
         return ResponseEntity.ok(teamAuditService.getGlickoHistory(teamId));
     }
 
+    @GetMapping("/public/teams-with-submission")
+    public ResponseEntity<Integer> countTeamsWithSubmission() {
+           return ResponseEntity.ok((teamService.countTeamsWithSubmission()));
+    }
+
+    @PostMapping("/set-submission")
+    public ResponseEntity<Void> setCurrentSubmission(@RequestParam Long submissionId) {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Long teamId = player.getTeamId();
+        teamService.setCurrentSubmission(teamId, submissionId);
+        return ResponseEntity.ok().build();
+    }
 }

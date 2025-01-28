@@ -175,6 +175,10 @@ public class TeamService {
             .members(playerNames)
             .build();
     }
+
+    public int countTeamsWithSubmission() {
+        return teamRepository.countTeamsByCurrentSubmissionNotEmpty();
+    }
 }
 
 
