@@ -5,6 +5,7 @@ import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +30,7 @@ public class TeamController {
     private final TeamService teamService;
     private final TeamAuditService teamAuditService;
     private final PlayerService playerService;
+    private final Clock clock;
 
     @GetMapping("/teams")
     public List<TeamDTO> getTeams() {
@@ -50,12 +55,6 @@ public class TeamController {
         Team team = teamService.createTeam(name);
         playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
         return ResponseEntity.ok(TeamDTO.fromEntity(team));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @PostMapping("/quote")
@@ -86,5 +85,11 @@ public class TeamController {
         Long teamId = player.getTeamId();
         teamService.setCurrentSubmission(teamId, submissionId);
         return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handleException(Exception e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }

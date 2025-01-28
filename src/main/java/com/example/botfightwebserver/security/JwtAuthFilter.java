@@ -65,7 +65,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String userId = claims.getSubject();
                 List<String> roles = new ArrayList<>();
                 roles.add("USER");
-                System.out.println("USer " + userId);
                 if (adminIds.contains(userId)) {
                     roles.add("ADMIN");
                 }
@@ -81,7 +80,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
         }
-        System.out.println("TOKEN " + token);
         filterChain.doFilter(request, response);
     }
 }
