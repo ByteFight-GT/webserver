@@ -46,6 +46,8 @@ public class Submission {
 
     private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
+    private Boolean isAutoSet;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now(clock);
