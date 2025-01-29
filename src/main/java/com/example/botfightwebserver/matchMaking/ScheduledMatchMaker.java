@@ -10,7 +10,7 @@ public class ScheduledMatchMaker {
 
     private final MatchMaker matchMaker;
 
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void scheduleMatchGeneration() {
         System.out.println("Scheduled Match Generation");
         matchMaker.generateMatches();
