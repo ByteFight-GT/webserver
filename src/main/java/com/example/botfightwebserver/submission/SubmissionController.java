@@ -38,11 +38,11 @@ public class SubmissionController {
 
     @PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
-        @RequestParam("file") MultipartFile file) {
+        @RequestParam("file") MultipartFile file, @RequestParam("isAutoSet") boolean isAutoSet) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();
-        SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file));
+        SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file, isAutoSet));
         GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
             MATCH_REASON.VALIDATION,
             "val_map");

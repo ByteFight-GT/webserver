@@ -30,7 +30,7 @@ public class SubmissionService {
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-    public Submission createSubmission(Long teamId, MultipartFile file) {
+    public Submission createSubmission(Long teamId, MultipartFile file, Boolean isAutoSet) {
         validateFile(file);
 
         Team team = teamRepository.findById(teamId)
@@ -44,6 +44,7 @@ public class SubmissionService {
         submission.setSource(STORAGE_SOURCE.GCP);
         submission.setTeamId(teamId);
         submission.setName(file.getOriginalFilename());
+        submission.setIsAutoSet(isAutoSet);
         return submissionRepository.save(submission);
     }
 
