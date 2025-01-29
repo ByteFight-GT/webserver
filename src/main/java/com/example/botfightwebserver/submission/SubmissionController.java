@@ -38,7 +38,7 @@ public class SubmissionController {
 
     @PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
-        @RequestParam("file") MultipartFile file, @RequestParam("isAutoSet") boolean isAutoSet) {
+        @RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "false") Boolean isAutoSet) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();
