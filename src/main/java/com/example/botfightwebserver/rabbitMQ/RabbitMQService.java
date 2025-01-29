@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.rabbitMQ;
 
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,14 @@ public class RabbitMQService {
     private final RabbitTemplate rabbitTemplate;
 
     public void enqueueGameMatchJob(GameMatchJob job) {
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_QUEUE, job);
+        int priority = 0;
+        if (job.reason() == MATCH_REASON.VALIDATION) {
+            priority = 1;
+        }
+        rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_QUEUE, job, message -> {
+            message.getMessageProperties().setPriority(1);
+            return message;
+        });
     }
 
     public List<GameMatchJob> peekGameMatchQueue() {

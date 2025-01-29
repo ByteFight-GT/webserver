@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitMQConfiguration {
 
@@ -39,7 +42,9 @@ public class RabbitMQConfiguration {
 
     @Bean
     public Queue gameMatchJobQueue() {
-        return new Queue(GAME_MATCH_QUEUE, true);
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-max-priority", 2);
+        return new Queue(GAME_MATCH_QUEUE, true, false, false, args);
     }
 
     @Bean
