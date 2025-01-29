@@ -87,7 +87,7 @@ public class GameMatchResultHandler {
     private  void handleValidationResult(Team team, Submission submission, MATCH_STATUS status) {
         if (status == MATCH_STATUS.TEAM_ONE_WIN) {
             submissionService.validateSubmissionAfterMatch(submission.getId());
-            if (teamService.getCurrentSubmission(team.getId()).isEmpty()) {
+            if (teamService.getCurrentSubmission(team.getId()).isEmpty() || submission.getIsAutoSet()) {
                 teamService.setCurrentSubmission(team.getId(), submission.getId());
             }
         } else {

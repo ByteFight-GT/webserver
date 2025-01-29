@@ -18,6 +18,7 @@ public class SubmissionDTO {
     private LocalDateTime createdAt;
     private String name;
     private String storagePath;
+    private Boolean isAutoSet;
 
     public static SubmissionDTO fromEntity(Submission submission) {
         return new SubmissionDTO(
@@ -26,7 +27,8 @@ public class SubmissionDTO {
             submission.getSubmissionValidity(),
             submission.getCreatedAt(),
             submission.getName(),
-            submission.getStoragePath()
+            submission.getStoragePath(),
+            submission.getIsAutoSet()
         );
     }
 }

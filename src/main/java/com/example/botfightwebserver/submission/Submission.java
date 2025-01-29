@@ -43,6 +43,8 @@ public class Submission {
 
     private String name;
 
+    private Boolean isAutoSet;
+
     private static Clock clock = Clock.systemDefaultZone();
 
     @PrePersist
