@@ -17,6 +17,7 @@ import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table
@@ -43,7 +44,7 @@ public class Submission {
 
     private String name;
 
-    private static Clock clock = Clock.systemDefaultZone();
+    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
     @PrePersist
     protected void onCreate() {

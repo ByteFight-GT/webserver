@@ -19,9 +19,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table
@@ -65,7 +67,7 @@ public class GameMatch {
 
     private Integer timesQueued;
 
-    private static Clock clock = Clock.systemDefaultZone();
+    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
     @PrePersist
     public void onCreate() {

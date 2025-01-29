@@ -21,6 +21,7 @@ import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +56,7 @@ public class Player {
 
     private LocalDateTime creationDateTime;
 
-    private static Clock clock = Clock.systemDefaultZone();
+    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
     @PrePersist
     public void onCreate() {

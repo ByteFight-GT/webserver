@@ -23,6 +23,7 @@ import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table
@@ -72,7 +73,7 @@ public class Team {
     @JoinColumn(name="current_submission_id", nullable = true)
     private Submission currentSubmission;
 
-    private static Clock clock = Clock.systemDefaultZone();
+    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
     @PrePersist
     public void onCreate() {

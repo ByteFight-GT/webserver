@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +92,7 @@ public class SubmissionService {
     }
 
     public List<SubmissionDTO> getTeamSubmissions(Long teamId) {
-        List<Submission> submissions =submissionRepository.findSubmissionsByTeamId(teamId);
+        List<Submission> submissions =submissionRepository.findSubmissionsByTeamIdOrderByCreatedAtDesc(teamId);
         return submissions.stream().map(SubmissionDTO::fromEntity).toList();
     }
 

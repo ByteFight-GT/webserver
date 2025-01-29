@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-    List<Submission> findSubmissionsByTeamId(Long teamId);
+    List<Submission> findSubmissionsByTeamIdOrderByCreatedAtDesc(Long teamId);
 }
