@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,8 +28,9 @@ public class TeamAuditService {
         AuditReader auditReader = AuditReaderFactory.get(em);
 
         List<Number> revisions = auditReader.getRevisions(Team.class, teamId);
-
+        AtomicInteger counter = new AtomicInteger(0);
         return revisions.stream()
+            .filter(rev -> counter.getAndIncrement() % 4 == 0)
             .map(rev -> {
                 Team team = auditReader.find(Team.class, teamId, rev);
                 return GlickoHistoryDTO.builder()
