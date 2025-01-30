@@ -18,8 +18,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -48,7 +46,6 @@ public class Team {
     private String quote = "Welcome to ByteFight!";
 
     @Builder.Default
-    @Audited
     private Double glicko=1500.0;
 
     @Builder.Default

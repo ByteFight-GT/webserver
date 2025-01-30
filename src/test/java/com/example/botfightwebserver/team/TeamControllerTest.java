@@ -52,9 +52,6 @@ class TeamControllerTest {
     private TeamService teamService;
 
     @MockBean
-    private TeamAuditService teamAuditService;
-
-    @MockBean
     private PlayerService playerService;
 
     @Test
@@ -169,33 +166,5 @@ class TeamControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Team not found with id: " + teamId)));
-    }
-
-    @Test
-    void testGetGlickoHistory() throws Exception {
-        Long teamId = 1L;
-        List<GlickoHistoryDTO> history = List.of(
-            GlickoHistoryDTO.builder()
-                .teamId(teamId)
-                .glicko(1200.0)
-                .revisionDate(LocalDateTime.of(2024, 1, 1, 12, 0))
-                .build(),
-            GlickoHistoryDTO.builder()
-                .teamId(teamId)
-                .glicko(1250.0)
-                .revisionDate(LocalDateTime.of(2024, 1, 2, 12, 0))
-                .build()
-        );
-
-        when(teamAuditService.getGlickoHistory(teamId)).thenReturn(history);
-
-        mockMvc.perform(get("/api/v1/team/glicko-history")
-                .param("teamId", teamId.toString()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].teamId").value(teamId))
-            .andExpect(jsonPath("$[0].glicko").value(1200.0))
-            .andExpect(jsonPath("$[1].teamId").value(teamId))
-            .andExpect(jsonPath("$[1].glicko").value(1250.0));
     }
 }
