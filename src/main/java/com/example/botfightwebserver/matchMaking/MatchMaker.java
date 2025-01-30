@@ -2,6 +2,7 @@ package com.example.botfightwebserver.matchMaking;
 
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,15 @@ public class MatchMaker {
 
     private final TeamService teamService;
     private final GameMatchService gameMatchService;
+    private final GlickoHistoryService glickoHistoryService;
 
     public void generateMatches() {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         final List<Team> teams =
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
 
+        playableTeams.forEach(team -> glickoHistoryService.save(team.getId(), team.getGlicko()));
+        
         List<int[]> edges;
         if (teams.size() <= 4) {
             edges = new ArrayList<>();

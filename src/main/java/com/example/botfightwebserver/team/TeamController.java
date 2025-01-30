@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.team;
 
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
+import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,9 @@ import java.util.UUID;
 public class TeamController {
 
     private final TeamService teamService;
-    private final TeamAuditService teamAuditService;
     private final PlayerService playerService;
     private final Clock clock;
+    private final GlickoHistoryService glickoHistoryService;
 
     @GetMapping("/teams")
     public List<TeamDTO> getTeams() {
@@ -70,7 +71,7 @@ public class TeamController {
 
     @GetMapping("/glicko-history")
     public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@RequestParam Long teamId) {
-        return ResponseEntity.ok(teamAuditService.getGlickoHistory(teamId));
+        return ResponseEntity.ok(glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
     }
 
     @GetMapping("/public/teams-with-submission")

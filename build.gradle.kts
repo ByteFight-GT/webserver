@@ -32,6 +32,7 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:3.0.0")
     implementation(platform("com.google.cloud:libraries-bom:26.29.0"))
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.data:spring-data-commons")
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")

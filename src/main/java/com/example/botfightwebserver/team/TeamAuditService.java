@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Deprecated
 public class TeamAuditService {
 
     private final Clock clock;
@@ -36,7 +37,7 @@ public class TeamAuditService {
                 return GlickoHistoryDTO.builder()
                     .teamId(teamId)
                     .glicko(team.getGlicko())
-                    .revisionDate(LocalDateTime.ofInstant(
+                    .saveDate(LocalDateTime.ofInstant(
                         auditReader.getRevisionDate(rev).toInstant(),
                         clock.getZone()))
                     .build();
