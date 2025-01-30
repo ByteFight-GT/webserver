@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -23,11 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -35,19 +38,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Value("${JWT_SECRET}")
     private String jwtSecret;
 
-    @Value("${ADMINS_PATH}")
-    private String adminsPath;
+    @Value("${ADMINS}")
+    private String admins;
 
-    private Set<String> adminIds = new HashSet<>();
+    private Set<String> adminIds;
 
     @PostConstruct  // Load admins when bean is created
     public void loadAdmins() {
-        try {
-            Path path = Paths.get(adminsPath);
-            adminIds = new HashSet<>(Files.readAllLines(path));
-        } catch (IOException e) {
-            System.err.println("Could not load admins.txt: " + e.getMessage());
-        }
+        adminIds=Arrays.stream(StringUtils.trimAllWhitespace(admins).split(",")).collect(Collectors.toSet());
     }
 
 
