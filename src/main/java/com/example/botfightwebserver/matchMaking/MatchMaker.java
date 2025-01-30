@@ -24,13 +24,15 @@ public class MatchMaker {
     private final GameMatchService gameMatchService;
     private final GlickoHistoryService glickoHistoryService;
 
-    public void generateMatches() {
+    public void generateMatches(boolean saveHistory) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         final List<Team> teams =
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
 
-        playableTeams.forEach(team -> glickoHistoryService.save(team.getId(), team.getGlicko()));
-        
+        if (saveHistory) {
+            playableTeams.forEach(team -> glickoHistoryService.save(team.getId(), team.getGlicko()));
+        }
+
         List<int[]> edges;
         if (teams.size() <= 4) {
             edges = new ArrayList<>();

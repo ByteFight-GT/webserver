@@ -19,7 +19,7 @@ public class MatchMakerController {
     @PostMapping("/generate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> generateMatches() {
-        matchMaker.generateMatches();
+        matchMaker.generateMatches(false);
         return ResponseEntity.ok().build();
     }
 }

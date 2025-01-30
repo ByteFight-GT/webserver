@@ -11,8 +11,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GlickoHistoryService {
 
-    private GlickoHistoryRepository glickoHistoryRepository;
-    private ClockConfig clockConfig;
+    private final  GlickoHistoryRepository glickoHistoryRepository;
+    private final ClockConfig clockConfig;
 
     public GlickoHistory save(long teamId, Double glicko) {
         GlickoHistory glickoHistory = GlickoHistory.builder()

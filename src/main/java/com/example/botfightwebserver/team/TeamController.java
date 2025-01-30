@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.player.Player;
@@ -18,8 +19,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class TeamController {
     private final PlayerService playerService;
     private final Clock clock;
     private final GlickoHistoryService glickoHistoryService;
+    private final ClockConfig clockConfig;
 
     @GetMapping("/teams")
     public List<TeamDTO> getTeams() {
@@ -71,7 +73,12 @@ public class TeamController {
 
     @GetMapping("/glicko-history")
     public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@RequestParam Long teamId) {
-        return ResponseEntity.ok(glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
+        Team team = teamService.getReferenceById(teamId);
+        List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
+            glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
+        glickoHistories.add(GlickoHistoryDTO.builder().teamId(teamId).glicko(team.getGlicko())
+            .saveDate(LocalDateTime.now(clockConfig.clock())).build());
+        return ResponseEntity.ok(glickoHistories);
     }
 
     @GetMapping("/public/teams-with-submission")
