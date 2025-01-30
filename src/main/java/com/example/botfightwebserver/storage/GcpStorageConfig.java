@@ -8,15 +8,17 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 @Configuration
 public class GcpStorageConfig {
 
-    @Value("${spring.cloud.gcp.credentials.location}")
-    private String credentialsPath;
+    @Value("${spring.cloud.gcp.credentials.encoded}")
+    private String credentials;
 
     @Value("${spring.cloud.gcp.credentials.project}")
     private String projectId;
@@ -27,8 +29,9 @@ public class GcpStorageConfig {
 
     @Bean
     public Storage googleCloudStorage() throws IOException {
+        byte[] decodedCredentials = Base64.getDecoder().decode(credentials);
         GoogleCredentials credentials = GoogleCredentials.fromStream(
-            createFileInputStream(credentialsPath)
+            new ByteArrayInputStream(decodedCredentials)
         );
 
         return StorageOptions.newBuilder()
