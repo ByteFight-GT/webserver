@@ -80,7 +80,7 @@ public class PlayerController {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    @GetMapping("/check-username/{username}")
+    @GetMapping("/public/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean isAvailable = !playerService.isUsernameExist(username);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));

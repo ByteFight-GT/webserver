@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
             .csrf().disable().cors().disable()
             .authorizeHttpRequests()
-            .requestMatchers("/**").permitAll() // Allow access to public endpoints
+            .requestMatchers("/api/v1/public/", "api/v1/player/public/").permitAll() // Allow access to public endpoints
             .anyRequest().authenticated() // Require authentication for all other requests
             .and()
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before UsernamePasswordAuthenticationFilter
