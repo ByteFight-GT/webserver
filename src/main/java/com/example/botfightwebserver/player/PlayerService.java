@@ -51,4 +51,8 @@ public class PlayerService {
         return playerRepository.findByAuthId(authId).orElse(null);
     }
 
+    public boolean isUsernameExist(String username) {
+        return playerRepository.existsByName(username);
+    }
+
 }
