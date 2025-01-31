@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/game-match-log")
+@RequestMapping("/api/v1/public/game-match-log")
 public class GameMatchLogController {
 
     private final GameMatchLogService gameMatchLogService;
