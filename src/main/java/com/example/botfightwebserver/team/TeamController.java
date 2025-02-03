@@ -60,6 +60,17 @@ public class TeamController {
         return ResponseEntity.ok(TeamDTO.fromEntity(team));
     }
 
+    @PostMapping("/name")
+    public ResponseEntity<String> setName(@RequestParam Long teamId,@RequestParam String name) {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        if (!player.getTeamId().equals(teamId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        teamService.setName(teamId, name);
+        return ResponseEntity.ok(name);
+    }
+
     @PostMapping("/quote")
     public ResponseEntity<String> setQuote(@RequestParam Long teamId,@RequestParam String quote) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();

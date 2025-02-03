@@ -29,6 +29,15 @@ public class PlayerService {
         return playerRepository.save(player);
     }
 
+    public void setName(Long playerId, String name) {
+        if (!playerRepository.existsById(playerId)) {
+            throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
+        }
+        Player player = playerRepository.findById(playerId).get();
+        player.setName(name);
+        playerRepository.save(player);
+    }
+
     public Player setPlayerTeam(UUID playerId, Long teamId) {
         if (!playerRepository.existsByAuthId(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");

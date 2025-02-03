@@ -86,6 +86,17 @@ public class PlayerController {
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
 
+    @PostMapping("/name")
+    public ResponseEntity<String> updateName(@RequestParam String name) {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        if (player.getName().equals(name)) {
+            return ResponseEntity.ok(name);
+        }
+        playerService.setName(player.getId(), name);
+        return ResponseEntity.ok(name);
+    }
+
     @GetMapping("/public/check-email/{email}")
     public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
         boolean isAvailable = ! playerService.isEmailExist(email);
