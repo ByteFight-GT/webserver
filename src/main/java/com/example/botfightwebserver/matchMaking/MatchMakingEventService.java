@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,5 +22,9 @@ public class MatchMakingEventService {
             .build();
         matchMakingEventRepository.save(event);
         return event;
+    }
+
+    public Optional<MatchMakingEvent> getLastScheduledEvent() {
+        return matchMakingEventRepository.findFirstByReasonOrderByCreationDateTimeDesc(MATCHMAKING_REASON.SCHEDULED);
     }
 }
