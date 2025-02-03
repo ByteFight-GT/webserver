@@ -137,6 +137,15 @@ public class TeamService {
         return teamPage.getContent();
     }
 
+    public void setName(Long teamId, String name) {
+        if (!teamRepository.existsById(teamId)) {
+            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
+        }
+        Team team = teamRepository.findById(teamId).get();
+        team.setName(name);
+        teamRepository.save(team);
+    }
+
     public void setQuote(Long teamId, String quote) {
         if (!teamRepository.existsById(teamId)) {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");

@@ -85,4 +85,15 @@ public class PlayerController {
         boolean isAvailable = !playerService.isUsernameExist(username);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
+
+    @PostMapping("/name")
+    public ResponseEntity<String> updateName(@RequestParam String name) {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        if (player.getName().equals(name)) {
+            return ResponseEntity.ok(name);
+        }
+        playerService.setName(player.getId(), name);
+        return ResponseEntity.ok(name);
+    }
 }
