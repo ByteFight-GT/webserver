@@ -85,4 +85,10 @@ public class PlayerController {
         boolean isAvailable = !playerService.isUsernameExist(username);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
+
+    @GetMapping("/public/check-email/{email}")
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
+        boolean isAvailable = ! playerService.isEmailExist(email);
+        return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
+    }
 }

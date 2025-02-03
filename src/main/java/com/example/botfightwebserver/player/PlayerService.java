@@ -55,4 +55,8 @@ public class PlayerService {
         return playerRepository.existsByName(username);
     }
 
+    public boolean isEmailExist(String email) {
+        return playerRepository.existsByEmail(email);
+    }
+
 }
