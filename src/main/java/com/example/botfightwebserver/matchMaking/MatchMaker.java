@@ -3,6 +3,7 @@ package com.example.botfightwebserver.matchMaking;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
+import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,9 @@ public class MatchMaker {
     private final TeamService teamService;
     private final GameMatchService gameMatchService;
     private final GlickoHistoryService glickoHistoryService;
+    private final MatchMakingEventService matchMakingEventService;
 
-    public void generateMatches(boolean saveHistory) {
+    public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         final List<Team> teams =
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
@@ -55,6 +57,7 @@ public class MatchMaker {
         }
 
         Collections.shuffle(edges, random);
+        matchMakingEventService.createEvent(playableTeams.size(), edges.size(), reason);
         edges.stream().forEach((edge) -> {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
@@ -142,7 +145,6 @@ public class MatchMaker {
                 }
             }
         }
-
         return edges;
     }
 

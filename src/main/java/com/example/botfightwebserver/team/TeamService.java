@@ -158,6 +158,7 @@ public class TeamService {
     public List<LeaderboardDTO> getLeaderboard() {
         AtomicInteger rank = new AtomicInteger(1);
         List<LeaderboardDTO> leaderboard = teamRepository.findAll().stream()
+            .filter(team -> team.getCurrentSubmission() != null)
             .sorted(Comparator.comparing(Team::getGlicko).reversed())
             .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
             .collect(Collectors.toList());
@@ -167,7 +168,7 @@ public class TeamService {
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
         AtomicInteger rank = new AtomicInteger(1 + page * size);
-        Page<Team> teamPage = teamRepository.findAll(pageable);
+        Page<Team> teamPage = teamRepository.findAllTeamsWithCurrentSubmission(pageable);
         return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
     }
 
