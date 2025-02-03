@@ -155,11 +155,11 @@ public class GlickoCalculator {
     // }
 
     public Rating rate(Rating rating, List<Double> game) {
-        double K = 32
+        double K = 32;
 
-        double rating1 = rating.getMu()
-        double rating2 = game.get(1)
-        double score = game.get(0)
+        double rating1 = rating.getMu();
+        double rating2 = game.get(1);
+        double score = game.get(0);
 
         double expectedScore = 1.0 / (1.0 + Math.pow(10, (rating2 - rating1) / 400));
         double newRating = rating1 + K * (score - expectedScore);
