@@ -26,7 +26,7 @@ public class MatchMaker {
     private final GlickoHistoryService glickoHistoryService;
     private final MatchMakingEventService matchMakingEventService;
 
-    public void generateMatches(boolean saveHistory) {
+    public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         final List<Team> teams =
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
@@ -57,7 +57,7 @@ public class MatchMaker {
         }
 
         Collections.shuffle(edges, random);
-        matchMakingEventService.createEvent(playableTeams.size(), edges.size());
+        matchMakingEventService.createEvent(playableTeams.size(), edges.size(), reason);
         edges.stream().forEach((edge) -> {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);

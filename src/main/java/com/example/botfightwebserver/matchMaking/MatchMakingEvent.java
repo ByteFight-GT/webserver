@@ -1,6 +1,9 @@
 package com.example.botfightwebserver.matchMaking;
 
+import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,5 +33,8 @@ public class MatchMakingEvent {
     private Integer numberMatches;
 
     private LocalDateTime creationDateTime;
+
+    @Enumerated(EnumType.STRING)
+    private MATCHMAKING_REASON reason;
 
 }

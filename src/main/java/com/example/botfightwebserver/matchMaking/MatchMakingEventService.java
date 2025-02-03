@@ -13,7 +13,7 @@ public class MatchMakingEventService {
     private final MatchMakingEventRepository matchMakingEventRepository;
     private final ClockConfig clockConfig;
 
-    public MatchMakingEvent createEvent(Integer numberTeams, Integer numMatches) {
+    public MatchMakingEvent createEvent(Integer numberTeams, Integer numMatches, MATCHMAKING_REASON reason) {
         MatchMakingEvent event = MatchMakingEvent.builder()
             .numberTeams(numberTeams)  // or whatever values you need
             .numberMatches(numMatches)
