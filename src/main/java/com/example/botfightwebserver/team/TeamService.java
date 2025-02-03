@@ -189,6 +189,10 @@ public class TeamService {
     public int countTeamsWithSubmission() {
         return teamRepository.countByCurrentSubmissionNotNull();
     }
+
+    public boolean isNameExist(String name) {
+    return teamRepository.existsByName(name);
+}
 }
 
 
