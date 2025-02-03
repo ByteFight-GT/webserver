@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/team")
@@ -61,14 +59,18 @@ public class TeamController {
     }
 
     @PostMapping("/name")
-    public ResponseEntity<String> setName(@RequestParam Long teamId,@RequestParam String name) {
+    public ResponseEntity<Map<String, String>> setName(@RequestParam Long teamId, @RequestParam String name) {
+        boolean isAvailable = !teamService.isNameExist(name);
+        if (!isAvailable) {
+            return ResponseEntity.ok(Collections.singletonMap("setName", "Name is Already Taken."));
+        }
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         if (!player.getTeamId().equals(teamId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         teamService.setName(teamId, name);
-        return ResponseEntity.ok(name);
+        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
     }
 
     @PostMapping("/quote")

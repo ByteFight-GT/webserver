@@ -87,14 +87,18 @@ public class PlayerController {
     }
 
     @PostMapping("/name")
-    public ResponseEntity<String> updateName(@RequestParam String name) {
+    public ResponseEntity<Map<String, String>> updateName(@RequestParam String name) {
+        boolean isAvailable = !playerService.isUsernameExist(name);
+        if (!isAvailable) {
+            return ResponseEntity.ok(Collections.singletonMap("setName", "Name is Already Taken."));
+        }
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         if (player.getName().equals(name)) {
-            return ResponseEntity.ok(name);
+            return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
         }
         playerService.setName(player.getId(), name);
-        return ResponseEntity.ok(name);
+        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
     }
 
     @GetMapping("/public/check-email/{email}")
