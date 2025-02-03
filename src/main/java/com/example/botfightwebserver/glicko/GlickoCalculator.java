@@ -130,29 +130,6 @@ public class GlickoCalculator {
         return 1.0 / (1.0 + Math.exp(-impact * (rating.getMu() - otherRating.getMu())));
     }
 
-    // public Rating rate(Rating rating, List<Double> game) {
-    //     rating = scaleDown(rating, RATIO);
-
-    //     double varianceInv = 0;
-    //     double difference = 0;
-
-    //     double actualScore = game.get(0);
-    //     Rating opponent = scaleDown(createRating(game.get(1), game.get(2), game.get(3)), RATIO);
-    //     double impact = reduceImpact(opponent);
-    //     double expectedScore = expectScore(rating, opponent, impact);
-    //     varianceInv += Math.pow(impact, 2) * expectedScore * (1 - expectedScore);
-    //     difference += impact * (actualScore - expectedScore);
-
-    //     double variance = 1.0 / varianceInv;
-    //     difference /= varianceInv;
-
-    //     double sigma = determineSigma(rating, difference, variance);
-    //     double phiStar = Math.sqrt(Math.pow(rating.getPhi(), 2) + Math.pow(sigma, 2));
-    //     double phi = 1.0 / Math.sqrt(1.0 / Math.pow(phiStar, 2) + 1.0 / variance);
-    //     double mu = rating.getMu() + Math.pow(phi, 2) * (difference / variance);
-
-    //     return scaleUp(createRating(mu, phi, sigma), RATIO);
-    // }
 
     public Rating rate(Rating rating, List<Double> game) {
         double K = 32;
