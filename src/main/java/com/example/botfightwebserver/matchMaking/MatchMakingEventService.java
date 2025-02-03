@@ -19,6 +19,7 @@ public class MatchMakingEventService {
             .numberTeams(numberTeams)  // or whatever values you need
             .numberMatches(numMatches)
             .creationDateTime(LocalDateTime.now(clockConfig.clock()))
+            .reason(reason)
             .build();
         matchMakingEventRepository.save(event);
         return event;
