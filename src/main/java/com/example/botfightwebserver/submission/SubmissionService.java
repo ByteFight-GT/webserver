@@ -61,13 +61,6 @@ public class SubmissionService {
         }
 
         String contentType = file.getContentType();
-        System.out.println(contentType);
-        if (contentType == null ||
-            !(contentType.equals("application/zip") ||
-                contentType.equals("application/x-zip-compressed") ||
-                contentType.equals("application/octet-stream"))) {
-            throw new IllegalArgumentException("Unsupported content type: only zip files allowed");
-        }
     }
 
     public void validateSubmissions(Long submission1Id, Long submission2Id) {
