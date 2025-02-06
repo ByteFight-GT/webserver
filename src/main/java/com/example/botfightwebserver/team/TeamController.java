@@ -5,6 +5,7 @@ import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -25,6 +26,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/team")
 @RequiredArgsConstructor
+@Transactional
 public class TeamController {
 
     private final TeamService teamService;
