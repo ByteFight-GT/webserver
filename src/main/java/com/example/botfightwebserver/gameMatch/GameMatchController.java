@@ -69,8 +69,7 @@ public class GameMatchController {
     @GetMapping("/my-logs")
     public ResponseEntity<List<GameMatchDTO>> myLogs() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
-        Long teamId = player.getTeamId();
+        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
         return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId));
     }
 

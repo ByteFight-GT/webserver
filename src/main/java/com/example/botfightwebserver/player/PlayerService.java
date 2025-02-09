@@ -53,11 +53,17 @@ public class PlayerService {
     }
 
     public Player getPlayer(Long playerId) {
-        return playerRepository.findById(playerId).orElse(null);
+        if (playerId == null) {
+            throw new IllegalArgumentException("Player id cannot be null");
+        }
+        return playerRepository.findById(playerId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
     }
 
     public Player getPlayer(UUID authId) {
-        return playerRepository.findByAuthId(authId).orElse(null);
+        if (authId == null) {
+            throw new IllegalArgumentException("Auth id cannot be null");
+        }
+        return playerRepository.findByAuthId(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
     }
 
     public boolean isUsernameExist(String username) {
@@ -66,6 +72,14 @@ public class PlayerService {
 
     public boolean isEmailExist(String email) {
         return playerRepository.existsByEmail(email);
+    }
+
+    public Long getTeamFromUUID(UUID uuid) {
+        Player player = getPlayer(uuid);
+        if (!player.isHasTeam()) {
+            throw new IllegalArgumentException("Player with UUID " + uuid + " has no team");
+        }
+        return player.getTeamId();
     }
 
 }
