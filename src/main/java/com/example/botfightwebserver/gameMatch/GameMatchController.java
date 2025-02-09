@@ -84,6 +84,15 @@ public class GameMatchController {
         return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
     }
 
+    @GetMapping("/logs/paginated")
+    public ResponseEntity<Page<GameMatchDTO>> logs(
+        @RequestParam long teamId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
