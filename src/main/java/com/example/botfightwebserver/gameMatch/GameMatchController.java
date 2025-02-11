@@ -97,6 +97,19 @@ public class GameMatchController {
         return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
     }
 
+    @GetMapping("/public/logs/paginated")
+    public ResponseEntity<Page<GameMatchDTO>> logs_v2(
+        @RequestParam Long teamId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Long otherTeamId
+    ) {
+        if (otherTeamId != null) {
+            return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, otherTeamId, page, size));
+        }
+        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
