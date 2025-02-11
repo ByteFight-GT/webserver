@@ -86,10 +86,14 @@ public class GameMatchController {
 
     @GetMapping("/logs/paginated")
     public ResponseEntity<Page<GameMatchDTO>> logs(
-        @RequestParam long teamId,
+        @RequestParam Long teamId,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Long otherTeamId
     ) {
+        if (otherTeamId != null) {
+            return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, otherTeamId, page, size));
+        }
         return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
     }
 
