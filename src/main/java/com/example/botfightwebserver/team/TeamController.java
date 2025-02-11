@@ -106,11 +106,19 @@ public class TeamController {
     }
 
     @GetMapping("/public/glicko-history")
-    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory_v2(@RequestParam(required = false) Long teamId) {
-        if (teamId == null) {
-            String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
-        }
+    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory_v2(@RequestParam Long teamId) {
+        Team team = teamService.getReferenceById(teamId);
+        List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
+            glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
+        glickoHistories.add(GlickoHistoryDTO.builder().teamId(teamId).glicko(team.getGlicko())
+            .saveDate(LocalDateTime.now(clockConfig.clock())).build());
+        return ResponseEntity.ok(glickoHistories);
+    }
+
+    @GetMapping("/my-glicko-history")
+    public ResponseEntity<List<GlickoHistoryDTO>> getMyGlickoHistory() {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
         Team team = teamService.getReferenceById(teamId);
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
             glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
