@@ -45,6 +45,11 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getDTOById(teamId));
     }
 
+    @GetMapping("/public/team")
+    public ResponseEntity<TeamDTO> getTeamv2(@RequestParam Long teamId) {
+        return ResponseEntity.ok(teamService.getDTOById(teamId));
+    }
+
     @GetMapping("/my-team")
     public ResponseEntity<TeamDTO> getTeam() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
