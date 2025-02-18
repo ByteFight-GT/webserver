@@ -24,7 +24,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew bootJar --no-daemon
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
