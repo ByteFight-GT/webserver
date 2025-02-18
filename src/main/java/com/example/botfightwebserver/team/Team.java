@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.submission.Submission;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.Entity;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,10 +20,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
@@ -30,12 +36,14 @@ import java.time.ZoneId;
 @Getter
 @Setter
 @Builder
+@Indexed
 public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @FullTextField
     private String name;
 
     private LocalDateTime creationDateTime;
@@ -64,7 +72,13 @@ public class Team {
     @Builder.Default
     private Integer numberDraws=0;
 
+    @OneToMany(mappedBy = "teamOne")
+    @Builder.Default
+    private List<GameMatch> teamOneMatches = new ArrayList<>();
 
+    @OneToMany(mappedBy = "teamTwo")
+    @Builder.Default
+    private List<GameMatch> teamTwoMatches = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)

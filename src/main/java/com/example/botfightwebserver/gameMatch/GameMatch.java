@@ -19,6 +19,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
@@ -32,6 +34,7 @@ import java.time.ZoneId;
 @Getter
 @Setter
 @Builder
+@Indexed
 public class GameMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,10 +42,12 @@ public class GameMatch {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_one_id", nullable = false)
+    @IndexedEmbedded
     private Team teamOne;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_two_id", nullable = false)
+    @IndexedEmbedded
     private Team teamTwo;
 
     @ManyToOne()
