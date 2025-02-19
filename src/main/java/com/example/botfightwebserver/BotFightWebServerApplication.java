@@ -23,7 +23,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @SpringBootApplication
-@RestmController
+@RestController
 @EnableScheduling
 public class BotFightWebServerApplication {
 
