@@ -34,7 +34,6 @@ import java.time.ZoneId;
 @Getter
 @Setter
 @Builder
-@Indexed
 public class GameMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,12 +41,10 @@ public class GameMatch {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_one_id", nullable = false)
-    @IndexedEmbedded
     private Team teamOne;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_two_id", nullable = false)
-    @IndexedEmbedded
     private Team teamTwo;
 
     @ManyToOne()
