@@ -1,5 +1,7 @@
 package com.example.botfightwebserver;
 
+import com.example.botfightwebserver.searchEngine.SearchIndexBuild;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -29,4 +31,8 @@ public class BotFightWebServerApplication {
         SpringApplication.run(BotFightWebServerApplication.class, args);
     }
 
+    @Bean
+    public ApplicationRunner buildIndex(SearchIndexBuild searchIndexBuild) {
+        return args -> {searchIndexBuild.indexPersistedData();};
+    }
 }
