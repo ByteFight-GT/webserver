@@ -1,5 +1,8 @@
 package com.example.botfightwebserver.searchEngine;
 
+import com.example.botfightwebserver.gameMatch.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.team.TeamDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,5 +30,18 @@ public class SearchEngineController {
         Page<TeamDTO> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable)
             .map(TeamDTO::fromEntity);
         return ResponseEntity.ok(teamSearchResult);
+    }
+
+    @GetMapping("/match")
+    public ResponseEntity<Page<GameMatchDTO>> searchGame(
+        @RequestParam(required = false) String teamSearchparam,
+        @RequestParam(required = false) String requiredTeamName,
+        @RequestParam(required = false) MATCH_STATUS matchStatus,
+        @RequestParam(required = false) MATCH_REASON matchReason,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<GameMatchDTO> gameSearchResult = searchEngineService.searchGame(teamSearchparam, requiredTeamName, matchStatus, matchReason, pageable);
+        return ResponseEntity.ok(gameSearchResult);
     }
 }
