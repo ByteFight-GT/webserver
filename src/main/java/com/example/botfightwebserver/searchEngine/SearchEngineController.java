@@ -34,14 +34,12 @@ public class SearchEngineController {
 
     @GetMapping("/match")
     public ResponseEntity<Page<GameMatchDTO>> searchGame(
-        @RequestParam(required = false) String teamSearchparam,
-        @RequestParam(required = false) String requiredTeamName,
-        @RequestParam(required = false) MATCH_STATUS matchStatus,
-        @RequestParam(required = false) MATCH_REASON matchReason,
+        @RequestParam(required = false) String teamSearchParam,
+        @RequestParam(required = false) Long requiredTeamId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GameMatchDTO> gameSearchResult = searchEngineService.searchGame(teamSearchparam, requiredTeamName, matchStatus, matchReason, pageable);
+        Page<GameMatchDTO> gameSearchResult = searchEngineService.searchGame(teamSearchParam, requiredTeamId, pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 }

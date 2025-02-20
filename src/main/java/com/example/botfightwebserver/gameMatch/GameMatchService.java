@@ -169,10 +169,12 @@ public class GameMatchService {
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
+        System.out.println("Team id " + teamId + " other team Id " + otherTeamId);
         Page<GameMatchDTO> pageResponse =
             gameMatchRepository.findTeamMatches(teamId, otherTeamId, MATCH_STATUS.WAITING, pageable).map(GameMatchDTO::fromEntity);
         return pageResponse;
     }
+
     }
 
 
