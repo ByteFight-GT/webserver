@@ -8,10 +8,13 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -32,6 +35,7 @@ public class GameMatchService {
     private final RabbitMQService rabbitMQService;
     private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
+
 
     @VisibleForTesting
     public static final int STALE_THRESHOLD_MINUTES = 60;
@@ -57,15 +61,19 @@ public class GameMatchService {
         return gameMatchRepository.save(gameMatch);
     }
 
-    public GameMatchJob submitGameMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
+    public GameMatch submitGameMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
         GameMatch match = createMatch(team1Id, team2Id, submission1Id, submission2Id, reason, map);
-        GameMatchJob job = GameMatchJob.fromEntity(match);
-        rabbitMQService.enqueueGameMatchJob(job);
-        return job;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                GameMatchJob job = GameMatchJob.fromEntity(match);
+                rabbitMQService.enqueueGameMatchJob(job);
+            }
+        });
+        return match;
     }
 
     public void setGameMatchStatus(Long gameMatchId, MATCH_STATUS status) {
-        System.out.println("GAME MATCHID" + gameMatchId);
         Optional maybeGameMatch = gameMatchRepository.findById(gameMatchId);
         if (maybeGameMatch.isEmpty()) {
             throw new IllegalStateException("Failed setting match to" + status + " Game Id doesn't exist" + gameMatchId);

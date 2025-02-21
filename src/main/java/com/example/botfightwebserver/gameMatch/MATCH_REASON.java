@@ -4,5 +4,6 @@ public enum MATCH_REASON {
     VALIDATION,
     SCRIMMAGE,
     LADDER,
+    TOURNAMENT,
     UNKNOWN
 }
