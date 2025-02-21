@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.searchEngine;
 
+import com.example.botfightwebserver.gameMatch.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.team.Team;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class SearchEngineService {
 
     private final EntityManager entityManager;
+    private final GameMatchService gameMatchService;
     private SearchSession searchSession;
 
     @PostConstruct
@@ -44,5 +47,25 @@ public class SearchEngineService {
         );
     }
 
+    public Page<GameMatchDTO> searchGame(String teamSearchparam,
+                                         Long requiredTeamId,
+                                         Pageable pageable) {
+        SearchResult<Team> result = searchSession.search(Team.class)
+            .where(f -> f.match()
+                .field("name")
+                .matching(teamSearchparam)
+                .fuzzy(2))
+            .fetch(0, 1);
+
+        System.out.println(result.hits());
+        System.out.println(result.total().hitCount());
+        System.out.println(result.hits().get(0).getName());
+        if (result.hits().isEmpty()) {
+            return Page.empty();
+        }
+
+        return gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId,  pageable.getPageNumber(),
+            pageable.getPageSize());
+    }
 
 }

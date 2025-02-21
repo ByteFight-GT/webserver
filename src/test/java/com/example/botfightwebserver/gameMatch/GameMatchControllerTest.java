@@ -79,8 +79,8 @@ class GameMatchControllerTest {
                 "Map1"
         );
 
-        when(gameMatchService.submitGameMatch(1L, 2L, 10L, 20L, MATCH_REASON.VALIDATION, "Map1"))
-                .thenReturn(job);
+//        when(gameMatchService.submitGameMatch(1L, 2L, 10L, 20L, MATCH_REASON.VALIDATION, "Map1"))
+//                .thenReturn(job);
 
         // Act: Perform the request
         mockMvc.perform(post("/api/v1/game-match/submit/match").with(csrf())

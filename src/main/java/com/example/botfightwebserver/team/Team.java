@@ -2,12 +2,15 @@ package com.example.botfightwebserver.team;
 
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.submission.Submission;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -74,10 +77,12 @@ public class Team {
 
     @OneToMany(mappedBy = "teamOne")
     @Builder.Default
+    @JsonIgnore
     private List<GameMatch> teamOneMatches = new ArrayList<>();
 
     @OneToMany(mappedBy = "teamTwo")
     @Builder.Default
+    @JsonIgnore
     private List<GameMatch> teamTwoMatches = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)

@@ -25,5 +25,6 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
 
     @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND (gm.teamOne.id = :otherTeamId OR gm.teamTwo.id = :otherTeamId) AND gm.status != :status")
     Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("otherTeamId") Long otherTeamId, @Param("status") MATCH_STATUS status, Pageable pageable);
+
 }
 

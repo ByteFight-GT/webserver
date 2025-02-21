@@ -35,9 +35,9 @@ public class GameMatchController {
 
     @PostMapping("/submit/match")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GameMatchJob> submitMatch(@RequestBody MatchSubmissionRequest request) {
+    public ResponseEntity<GameMatchDTO> submitMatch(@RequestBody MatchSubmissionRequest request) {
         // add validation logic here for match reason
-        GameMatchJob job = gameMatchService.submitGameMatch(
+        GameMatch match = gameMatchService.submitGameMatch(
             request.getTeam1Id(),
             request.getTeam2Id(),
             request.getSubmission1Id(),
@@ -45,7 +45,7 @@ public class GameMatchController {
             request.getReason(),
             request.getMap()
         );
-        return ResponseEntity.ok(job);
+        return ResponseEntity.ok(GameMatchDTO.fromEntity(match));
     }
 
     @PostMapping("/queue/remove_all")

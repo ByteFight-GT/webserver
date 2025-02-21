@@ -39,7 +39,8 @@ public class SecurityConfig {
                     "/api/v1/player/public/**",
                     "/api/v1/team/public/**",
                     "/api/v1/matches/public/**",
-                    "/api/v1/game-match/public/**"
+                    "/api/v1/game-match/public/**",
+                    "https://api.challonge.com/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
