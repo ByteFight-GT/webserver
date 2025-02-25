@@ -27,19 +27,26 @@ public class Permissions {
     @Version
     private Long version;
 
-    private Boolean allowNewSubmission;
+    @Builder.Default
+    private Boolean allowNewSubmission = false;
 
-    private Boolean allowSetSubmission;
+    @Builder.Default
+    private Boolean allowSetSubmission = false;
 
-    private Boolean allowRegister;
+    @Builder.Default
+    private Boolean allowRegister = false;
 
-    private Boolean allowUpdateTeam;
+    @Builder.Default
+    private Boolean allowUpdateTeam = false;
 
-    private Boolean allowUpdateProfile;
+    @Builder.Default
+    private Boolean allowUpdateProfile = false;
 
-    private Boolean allowCreateTeam;
+    @Builder.Default
+    private Boolean allowCreateTeam = false;
 
-    private Boolean allowJoinTeam;
+    @Builder.Default
+    private Boolean allowJoinTeam = false;
 
     private LocalDateTime createdAt;
 }
