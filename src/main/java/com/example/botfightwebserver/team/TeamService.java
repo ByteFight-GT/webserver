@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
+    private final ClockConfig clockConfig;
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -185,6 +188,11 @@ public class TeamService {
             .quote(team.getQuote())
             .members(playerNames)
             .build();
+    }
+
+    public Team findTeamByCode(String code) {
+        Optional<Team> team = teamRepository.findByTeamCode(code);
+        return team.orElseThrow(() -> new IllegalArgumentException("Team with code " + code + " does not exist"));
     }
 
     public int countTeamsWithSubmission() {

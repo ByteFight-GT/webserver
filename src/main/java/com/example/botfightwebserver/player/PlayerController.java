@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.player;
 
+import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class PlayerController {
 
     private final PlayerService playerService;
+    private final TeamService teamService;
 
     @GetMapping("/players")
     public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
@@ -51,6 +54,14 @@ public class PlayerController {
             playerService.setPlayerTeam(UUID.fromString(authId), teamId)));
     }
 
+    @PostMapping("/join-team")
+    public ResponseEntity<PlayerDTO> joinTeam(@RequestParam String teamCode) {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Team team = teamService.findTeamByCode(teamCode);
+        return ResponseEntity.ok(
+            PlayerDTO.fromEntity(playerService.setPlayerTeam(UUID.fromString(authId), team.getId())));
+    }
+
     @GetMapping("/player")
     public ResponseEntity<PlayerDTO> getPlayerById(@RequestParam Long id) {
         return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(id)));
@@ -74,6 +85,7 @@ public class PlayerController {
         String currentUserId = (String) auth.getPrincipal();
         return currentUserId.equals(requestedAuthId.toString());
     }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
