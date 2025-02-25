@@ -19,6 +19,8 @@ public class PermissionsDTO {
     private Boolean allowRegister;
     private Boolean allowUpdateTeam;
     private Boolean allowUpdateProfile;
+    private Boolean allowCreateTeam;
+    private Boolean allowJoinTeam;
 
     public static PermissionsDTO fromEntity(Permissions permissions) {
         return PermissionsDTO.builder()
@@ -27,6 +29,8 @@ public class PermissionsDTO {
             .allowRegister(permissions.getAllowRegister())
             .allowUpdateTeam(permissions.getAllowUpdateTeam())
             .allowUpdateProfile(permissions.getAllowUpdateProfile())
+            .allowCreateTeam(permissions.getAllowCreateTeam())
+            .allowJoinTeam(permissions.getAllowJoinTeam())
             .build();
     }
 
@@ -37,6 +41,9 @@ public class PermissionsDTO {
             .allowRegister(dto.allowRegister)
             .allowUpdateProfile(dto.allowUpdateTeam)
             .allowUpdateProfile(dto.allowUpdateProfile)
+            .allowCreateTeam(dto.allowCreateTeam)
+            .allowJoinTeam(dto.allowJoinTeam)
+            .createdAt(localDateTime)
             .build();
     }
 }
