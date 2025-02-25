@@ -3,6 +3,7 @@ package com.example.botfightwebserver.permissions;
 import com.example.botfightwebserver.config.ClockConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ public class PermissionsController {
     private final ClockConfig clockConfig;
 
     @PostMapping("/update")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PermissionsDTO> updatePermissions(@RequestBody PermissionsDTO permissionsDTO) {
         Permissions permissions = PermissionsDTO.toEntity(permissionsDTO, LocalDateTime.now(clockConfig.clock()));
         permissionsService.createPermission(permissions);
