@@ -48,6 +48,18 @@ public class PlayerService {
         return playerRepository.save(player);
     }
 
+    public Long leaveTeam(UUID playerId) {
+        if (!playerRepository.existsByAuthId(playerId)) {
+            throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
+        }
+        Player player = playerRepository.findByAuthId(playerId).orElse(null);
+        Long oldTeamId = player.getTeamId();
+        player.setHasTeam(false);
+        player.setTeamId(null);
+        playerRepository.save(player);
+        return oldTeamId;
+    }
+
     public List<Player> getPlayersByTeam(Long teamId) {
         return playerRepository.findByTeamId(teamId);
     }
@@ -81,5 +93,6 @@ public class PlayerService {
         }
         return player.getTeamId();
     }
+
 
 }

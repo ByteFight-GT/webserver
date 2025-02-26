@@ -50,16 +50,19 @@ public class PlayerController {
     @PostMapping("/team")
     public ResponseEntity<PlayerDTO> assignTeam(@RequestParam Long teamId) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return ResponseEntity.ok(PlayerDTO.fromEntity(
-            playerService.setPlayerTeam(UUID.fromString(authId), teamId)));
+        Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
+        teamService.incrementTeamMembers(teamId);
+        return ResponseEntity.ok(PlayerDTO.fromEntity(player
+            ));
     }
 
     @PostMapping("/join-team")
     public ResponseEntity<PlayerDTO> joinTeam(@RequestParam String teamCode) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Team team = teamService.findTeamByCode(teamCode);
-        return ResponseEntity.ok(
-            PlayerDTO.fromEntity(playerService.setPlayerTeam(UUID.fromString(authId), team.getId())));
+        Player player = playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
+        teamService.incrementTeamMembers(team.getId());
+        return ResponseEntity.ok(PlayerDTO.fromEntity(player));
     }
 
     @GetMapping("/player")
@@ -111,6 +114,14 @@ public class PlayerController {
         }
         playerService.setName(player.getId(), name);
         return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
+    }
+
+    @PostMapping("/leave-team")
+    public ResponseEntity<Void> leaveTeam() {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Long oldTeamId = playerService.leaveTeam(UUID.fromString(authId));
+        teamService.decrementTeamMembers(oldTeamId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/public/check-email/{email}")

@@ -199,6 +199,24 @@ public class TeamService {
         return teamRepository.countByCurrentSubmissionNotNull();
     }
 
+    public Integer incrementTeamMembers(Long teamId) {
+        Team team = teamRepository.findById(teamId).get();
+        Integer currentNumber = team.getNumberPlayers();
+        team.setNumberPlayers(currentNumber + 1);
+        return currentNumber + 1;
+    }
+
+    public Integer decrementTeamMembers(Long teamId) {
+        Team team = teamRepository.findById(teamId).get();
+        if (team.getNumberPlayers() == 0) {
+            throw new IllegalArgumentException("Team with id " + teamId + " has 0 players");
+        }
+        Integer currentNumber = team.getNumberPlayers();
+        team.setNumberPlayers(currentNumber - 1);
+        return currentNumber - 1;
+    }
+
+
     public boolean isNameExist(String name) {
     return teamRepository.existsByName(name);
 }

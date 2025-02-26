@@ -73,6 +73,9 @@ public class Team {
     @Builder.Default
     private Integer numberDraws=0;
 
+    @Builder.Default
+    private Integer numberPlayers=1;
+
     @OneToMany(mappedBy = "teamOne")
     @Builder.Default
     @JsonIgnore
