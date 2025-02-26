@@ -31,6 +31,7 @@ public class TeamService {
     private final SubmissionService submissionService;
     private final PlayerService playerService;
     private final ClockConfig clockConfig;
+    private static final int MAX_PLAYERS = 2;
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -157,6 +158,10 @@ public class TeamService {
         Team team = teamRepository.findById(teamId).get();
         team.setQuote(quote);
         teamRepository.save(team);
+    }
+
+    public boolean isTeamJoinable(Team team) {
+        return team.getNumberPlayers() < 2;
     }
 
     public List<LeaderboardDTO> getLeaderboard() {

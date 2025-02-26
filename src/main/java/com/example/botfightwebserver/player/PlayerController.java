@@ -50,6 +50,10 @@ public class PlayerController {
     @PostMapping("/team")
     public ResponseEntity<PlayerDTO> assignTeam(@RequestParam Long teamId) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Team team = teamService.getReferenceById(teamId);
+        if (!teamService.isTeamJoinable(team)) {
+            throw new IllegalArgumentException("Team " + teamId + " is not joinable");
+        }
         Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
         teamService.incrementTeamMembers(teamId);
         return ResponseEntity.ok(PlayerDTO.fromEntity(player
@@ -60,6 +64,9 @@ public class PlayerController {
     public ResponseEntity<PlayerDTO> joinTeam(@RequestParam String teamCode) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Team team = teamService.findTeamByCode(teamCode);
+        if (!teamService.isTeamJoinable(team)) {
+            throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
+        }
         Player player = playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
         teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PlayerDTO.fromEntity(player));
