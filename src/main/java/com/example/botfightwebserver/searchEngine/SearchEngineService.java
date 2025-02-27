@@ -4,6 +4,7 @@ import com.example.botfightwebserver.gameMatch.GameMatchDTO;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.TeamService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,8 @@ public class SearchEngineService {
 
     private final EntityManager entityManager;
     private final GameMatchService gameMatchService;
+    private final ConversionService conversionService;
+    private final TeamService teamService;
     private SearchSession searchSession;
 
     @PostConstruct
@@ -56,18 +60,21 @@ public class SearchEngineService {
                                          Optional<Long> requiredTeamId,
                                          Optional<MATCH_REASON> reason,
                                          Pageable pageable) {
-        SearchResult<Team> result = searchSession.search(Team.class)
-            .where(f -> f.match()
-                .field("name")
-                .matching(teamSearchparam.get())
-                .fuzzy(2))
-            .fetch(0, 1);
 
-        if (result.hits().isEmpty()) {
-            return Page.empty();
+        Page<GameMatchDTO> results;
+        if (teamSearchparam.isPresent()) {
+            SearchResult<Team> result = searchSession.search(Team.class)
+                .where(f -> f.match()
+                    .field("name")
+                    .matching(teamSearchparam.get())
+                    .fuzzy(2)).fetch(0, 1);
+            results = gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId.get(),  pageable.getPageNumber(),
+                pageable.getPageSize());
+        } else {
+            results = gameMatchService.getPlayedTeamMatches(requiredTeamId.get(),
+                pageable.getPageNumber(),
+                pageable.getPageSize());
         }
-        Page<GameMatchDTO> results = gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId.get(),  pageable.getPageNumber(),
-            pageable.getPageSize());
 
         if (reason.isPresent()) {
             List<GameMatchDTO> filteredContent = results.getContent()
