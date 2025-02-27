@@ -2,6 +2,7 @@ package com.example.botfightwebserver.searchEngine;
 
 import com.example.botfightwebserver.gameMatch.GameMatchDTO;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.team.Team;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -14,6 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,25 +52,38 @@ public class SearchEngineService {
         );
     }
 
-    public Page<GameMatchDTO> searchGame(String teamSearchparam,
-                                         Long requiredTeamId,
+    public Page<GameMatchDTO> searchGame(Optional<String> teamSearchparam,
+                                         Optional<Long> requiredTeamId,
+                                         Optional<MATCH_REASON> reason,
                                          Pageable pageable) {
         SearchResult<Team> result = searchSession.search(Team.class)
             .where(f -> f.match()
                 .field("name")
-                .matching(teamSearchparam)
+                .matching(teamSearchparam.get())
                 .fuzzy(2))
             .fetch(0, 1);
 
-        System.out.println(result.hits());
-        System.out.println(result.total().hitCount());
-        System.out.println(result.hits().get(0).getName());
         if (result.hits().isEmpty()) {
             return Page.empty();
         }
-
-        return gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId,  pageable.getPageNumber(),
+        Page<GameMatchDTO> results = gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId.get(),  pageable.getPageNumber(),
             pageable.getPageSize());
+
+        if (reason.isPresent()) {
+            List<GameMatchDTO> filteredContent = results.getContent()
+                .stream()
+                .filter(gameMatchDTO -> reason.get().equals(gameMatchDTO.getReason()))
+                .collect(Collectors.toList());
+
+            results = new PageImpl<>(
+                filteredContent,
+                results.getPageable(),
+                filteredContent.size()
+            );
+        }
+
+        return results;
+
     }
 
 }

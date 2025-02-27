@@ -49,6 +49,9 @@ public class TeamController {
     public ResponseEntity<TeamDTO> getTeam() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
+        if (!player.isHasTeam()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(teamService.getDTOById(player.getTeamId()));
     }
 

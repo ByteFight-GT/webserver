@@ -2,7 +2,6 @@ package com.example.botfightwebserver.searchEngine;
 
 import com.example.botfightwebserver.gameMatch.GameMatchDTO;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.team.TeamDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,10 +37,13 @@ public class SearchEngineController {
     public ResponseEntity<Page<GameMatchDTO>> searchGame(
         @RequestParam(required = false) String teamSearchParam,
         @RequestParam(required = false) Long requiredTeamId,
+        @RequestParam(required = false) MATCH_REASON reason,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GameMatchDTO> gameSearchResult = searchEngineService.searchGame(teamSearchParam, requiredTeamId, pageable);
+        Page<GameMatchDTO> gameSearchResult =
+            searchEngineService.searchGame(Optional.of(teamSearchParam), Optional.of(requiredTeamId),
+                Optional.of(reason), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 }
