@@ -42,8 +42,8 @@ public class SearchEngineController {
         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GameMatchDTO> gameSearchResult =
-            searchEngineService.searchGame(Optional.of(teamSearchParam), Optional.of(teamId),
-                Optional.of(reason), pageable);
+            searchEngineService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamId),
+                Optional.ofNullable(reason), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 }
