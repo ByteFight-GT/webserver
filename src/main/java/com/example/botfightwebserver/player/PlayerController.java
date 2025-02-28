@@ -96,11 +96,7 @@ public class PlayerController {
         return currentUserId.equals(requestedAuthId.toString());
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProblemDetail handleException(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
+
 
     @GetMapping("/public/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
@@ -110,9 +106,10 @@ public class PlayerController {
 
     @PostMapping("/name")
     public ResponseEntity<Map<String, String>> updateName(@RequestParam String name) {
+        name = name.trim();
         boolean isAvailable = !playerService.isUsernameExist(name);
         if (!isAvailable) {
-            return ResponseEntity.ok(Collections.singletonMap("setName", "Name is Already Taken."));
+            throw new IllegalArgumentException("Name " + name + " is not available");
         }
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
@@ -135,5 +132,11 @@ public class PlayerController {
     public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
         boolean isAvailable = ! playerService.isEmailExist(email);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handleException(Exception e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }

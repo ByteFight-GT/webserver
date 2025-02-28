@@ -56,8 +56,11 @@ public class TeamService {
 
 
     public Team createTeam(String name) {
-        if (teamRepository.existsByName(name)) {
+        if (teamRepository.existsByName(name.trim())) {
             throw new IllegalArgumentException("Team with name " + name + " already exists");
+        }
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
         }
         Team team = new Team();
         team.setName(name);

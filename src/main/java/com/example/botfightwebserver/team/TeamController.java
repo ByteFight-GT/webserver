@@ -128,6 +128,7 @@ public class TeamController {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
+        System.out.println("CAUGHGT EXCEPTION");
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }
