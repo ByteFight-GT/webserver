@@ -13,6 +13,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +54,13 @@ public class ScrimmageMatchController {
             request.getReason(),
             request.getMap());
         return ResponseEntity.ok(scrimmageMatchService.createScrimmageMatchData(match, team));
+    }
+
+    @GetMapping("/remaining-scrimmages")
+    public ResponseEntity<Long> getRemainingScrimmages() {
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
+        return ResponseEntity.ok(scrimmageMatchService.remainingAllowedScrimmages(teamId));
     }
 
     @ExceptionHandler(Exception.class)
