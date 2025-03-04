@@ -43,8 +43,10 @@ public class ScrimmageMatchController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<List<ScrimmageMatch>> createScrimmageMatch(@RequestParam Long team2Id, @RequestParam Integer number, @RequestParam String map) {
+    public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@RequestParam Long team2Id, @RequestParam Integer number, @RequestParam String map) {
+        System.out.println("HERE");
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        System.out.println(authId);
         Long team1Id = playerService.getTeamFromUUID(UUID.fromString(authId));
         Team team = teamService.getReferenceById(team1Id);
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(team1Id);
@@ -59,7 +61,7 @@ public class ScrimmageMatchController {
             throw new IllegalArgumentException("Your team only has " + remainingAllowedScrimmages + " scrimmages allowed at this time");
         }
 
-        List scrimmages = new ArrayList();
+        List<ScrimmageMatchDTO> scrimmages = new ArrayList<ScrimmageMatchDTO>();
         for (int i = 0; i < number; i++) {
             GameMatch match = gameMatchService.submitGameMatch(
                 team1Id,
@@ -68,7 +70,8 @@ public class ScrimmageMatchController {
                 team2CurrentSubmission.get().getId(),
                 MATCH_REASON.SCRIMMAGE,
                 map);
-            scrimmages.add(scrimmageMatchService.createScrimmageMatchData(match, team));
+            ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, team));
+            scrimmages.add(scrimmageMatchDTO);
         }
         return ResponseEntity.ok(scrimmages);
     }
