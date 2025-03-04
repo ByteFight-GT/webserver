@@ -16,7 +16,7 @@ public class ScrimmageMatchService {
     private final TeamService teamService;
     private final GameMatchService gameMatchService;
 
-    private final static Long ALLOWED_IN_PROGRESS_SCRIMMAGES = 10;
+    private final static Long ALLOWED_IN_PROGRESS_SCRIMMAGES = 10L;
 
     public Long remainingAllowedScrimmages(Long teamId) {
         return ALLOWED_IN_PROGRESS_SCRIMMAGES - getInProgressScrimmages(teamId);
