@@ -120,6 +120,11 @@ public class PlayerController {
         return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
     }
 
+    @GetMapping("/team-id")
+    public ResponseEntity<List<PlayerDTO>> getPlayersByTeamId(@RequestParam Long teamId) {
+        return ResponseEntity.ok(playerService.getPlayersByTeam(teamId).stream().map(PlayerDTO::fromEntity).toList());
+    }
+
     @PostMapping("/leave-team")
     public ResponseEntity<Void> leaveTeam() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
@@ -132,6 +137,11 @@ public class PlayerController {
     public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
         boolean isAvailable = ! playerService.isEmailExist(email);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
+    }
+
+    @GetMapping("/public/count")
+    public ResponseEntity<Long> getPlayerCount() {
+        return ResponseEntity.ok(playerService.getNumberPlayers());
     }
 
     @ExceptionHandler(Exception.class)

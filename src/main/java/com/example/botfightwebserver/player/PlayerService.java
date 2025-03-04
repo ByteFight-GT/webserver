@@ -95,5 +95,9 @@ public class PlayerService {
         return player.getTeamId();
     }
 
+    public Long getNumberPlayers() {
+        return playerRepository.count();
+    }
+
 
 }

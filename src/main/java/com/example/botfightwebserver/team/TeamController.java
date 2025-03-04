@@ -79,7 +79,7 @@ public class TeamController {
     }
 
     @PostMapping("/quote")
-    public ResponseEntity<String> setQuote(@RequestParam Long teamId,@RequestParam String quote) {
+    public ResponseEntity<String> setQuote(@RequestParam Long teamId, @RequestParam String quote) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         if (!player.getTeamId().equals(teamId)) {
