@@ -18,12 +18,18 @@ public class RabbitMQService {
     private final RabbitTemplate rabbitTemplate;
 
     public void enqueueGameMatchJob(GameMatchJob job) {
-        int priority = 0;
+        int priority;
         if (job.reason() == MATCH_REASON.VALIDATION) {
-            priority = 1;
+            priority = 6;
+        } else if (job.reason() == MATCH_REASON.TOURNAMENT){
+            priority = 5;
+        } else if (job.reason() == MATCH_REASON.LADDER) {
+            priority = 4;
+        } else {
+            priority = 3;
         }
         rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_QUEUE, job, message -> {
-            message.getMessageProperties().setPriority(1);
+            message.getMessageProperties().setPriority(priority);
             return message;
         });
     }
