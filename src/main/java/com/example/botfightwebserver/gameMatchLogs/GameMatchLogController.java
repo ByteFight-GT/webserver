@@ -48,6 +48,12 @@ public class GameMatchLogController {
         return ResponseEntity.ok(maybeLog.get());
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> getGameMatchLogCount() {
+        return ResponseEntity.ok(gameMatchLogService.getGameMatchLogCount());
+    }
+
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {

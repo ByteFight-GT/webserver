@@ -39,4 +39,8 @@ public class GameMatchLogService {
     public Optional<GameMatchLog> getMatchLogFromGame(Long gameMatchId) {
         return gameMatchLogRepository.findByMatchId(gameMatchId);
     }
+
+    public Long getGameMatchLogCount() {
+        return gameMatchLogRepository.count();
+    }
 }

@@ -184,6 +184,8 @@ public class GameMatchService {
         return pageResponse;
     }
 
+//    public Long countWaitingScrimmages()
+
     }
 
 
