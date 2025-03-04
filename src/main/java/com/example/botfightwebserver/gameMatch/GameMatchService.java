@@ -67,7 +67,6 @@ public class GameMatchService {
             @Override
             public void afterCommit() {
                 GameMatchJob job = GameMatchJob.fromEntity(match);
-                System.out.println(job);
                 rabbitMQService.enqueueGameMatchJob(job);
             }
         });
