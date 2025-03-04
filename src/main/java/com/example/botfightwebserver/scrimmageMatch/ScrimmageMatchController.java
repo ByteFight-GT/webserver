@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,7 +38,7 @@ public class ScrimmageMatchController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<ScrimmageMatch> createScrimmageMatch(@RequestBody MatchSubmissionRequest request, @RequestParam Integer number) {
+    public ResponseEntity<List<ScrimmageMatch>> createScrimmageMatch(@RequestBody MatchSubmissionRequest request, @RequestParam Integer number) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
         Team team = teamService.getReferenceById(teamId);
@@ -46,14 +48,18 @@ public class ScrimmageMatchController {
             throw new IllegalArgumentException("Your team only has " + remainingAllowedScrimmages + " scrimmages allowed at this time");
         }
 
-        GameMatch match = gameMatchService.submitGameMatch(
-            request.getTeam1Id(),
-            request.getTeam2Id(),
-            request.getSubmission1Id(),
-            request.getSubmission2Id(),
-            request.getReason(),
-            request.getMap());
-        return ResponseEntity.ok(scrimmageMatchService.createScrimmageMatchData(match, team));
+        List scrimmages = new ArrayList();
+        for (int i = 0; i < number; i++) {
+            GameMatch match = gameMatchService.submitGameMatch(
+                request.getTeam1Id(),
+                request.getTeam2Id(),
+                request.getSubmission1Id(),
+                request.getSubmission2Id(),
+                request.getReason(),
+                request.getMap());
+            scrimmages.add(scrimmageMatchService.createScrimmageMatchData(match, team));
+        }
+        return ResponseEntity.ok(scrimmages);
     }
 
     @GetMapping("/remaining-scrimmages")
