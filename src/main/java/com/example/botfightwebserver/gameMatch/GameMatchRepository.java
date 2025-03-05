@@ -17,14 +17,14 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status != :status")
-    List<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("status") MATCH_STATUS status);
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status NOT IN :statusList")
+    List<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("statusList") List<MATCH_STATUS> statusList);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status != :status")
-    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("status") MATCH_STATUS status, Pageable pageable);
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.status NOT IN :statusList")
+    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("statusList") List<MATCH_STATUS> statusList, Pageable pageable);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND (gm.teamOne.id = :otherTeamId OR gm.teamTwo.id = :otherTeamId) AND gm.status != :status")
-    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("otherTeamId") Long otherTeamId, @Param("status") MATCH_STATUS status, Pageable pageable);
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND (gm.teamOne.id = :otherTeamId OR gm.teamTwo.id = :otherTeamId) AND gm.status NOT IN :statusList")
+    Page<GameMatch> findTeamMatches(@Param("teamId") Long teamId, @Param("otherTeamId") Long otherTeamId, @Param("statusList") List<MATCH_STATUS> statusList, Pageable pageable);
 
 }
 

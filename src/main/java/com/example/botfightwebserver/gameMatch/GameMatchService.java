@@ -165,13 +165,13 @@ public class GameMatchService {
     }
 
     public List<GameMatchDTO> getPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, MATCH_STATUS.WAITING).stream().map(GameMatchDTO::fromEntity).toList();
+        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED)).stream().map(GameMatchDTO::fromEntity).toList();
     }
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatchDTO> pageResponse = gameMatchRepository.findTeamMatches(teamId,
-            MATCH_STATUS.WAITING, pageable).map(GameMatchDTO::fromEntity);
+            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable).map(GameMatchDTO::fromEntity);
         return pageResponse;
     }
 
@@ -179,7 +179,7 @@ public class GameMatchService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         System.out.println("Team id " + teamId + " other team Id " + otherTeamId);
         Page<GameMatchDTO> pageResponse =
-            gameMatchRepository.findTeamMatches(teamId, otherTeamId, MATCH_STATUS.WAITING, pageable).map(GameMatchDTO::fromEntity);
+            gameMatchRepository.findTeamMatches(teamId, otherTeamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable).map(GameMatchDTO::fromEntity);
         return pageResponse;
     }
 
