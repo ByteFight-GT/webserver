@@ -38,7 +38,6 @@ public class SearchEngineService {
         searchSession = Search.session(entityManager);
     }
 
-    // may not be efficient due to deep page problem but works for now.
     public Page<Team> searchTeamByNameFuzzy(String searchTerm, Pageable pageable) {
         log.info("Searching teams with fuzzy match for name: {}", searchTerm);
 

@@ -3,14 +3,12 @@ package com.example.botfightwebserver.scrimmageMatch;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.MatchSubmissionRequest;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.lucene.index.DocIDMerger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +16,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +39,16 @@ public class ScrimmageMatchController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@RequestParam Long team2Id, @RequestParam Integer number, @RequestParam String map) {
-        System.out.println("HERE");
+    public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@RequestParam Integer number,
+                                                                        @RequestParam String map,
+                                                                        @RequestParam(required = false) Long team2Id) {
+
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        System.out.println(authId);
         Long team1Id = playerService.getTeamFromUUID(UUID.fromString(authId));
+        if (team2Id == null) {
+            // scrimmage against self
+            team2Id = team1Id;
+        }
         Team team = teamService.getReferenceById(team1Id);
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(team1Id);
         Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(team2Id);
