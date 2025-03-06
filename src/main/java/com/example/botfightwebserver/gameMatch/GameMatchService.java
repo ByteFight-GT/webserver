@@ -83,6 +83,11 @@ public class GameMatchService {
         if (!MATCH_STATUS.WAITING.equals(gameMatch.getStatus())) {
             gameMatch.setProcessedAt(LocalDateTime.now(clock));
         }
+        if (status == MATCH_STATUS.TEAM_ONE_WIN) {
+            gameMatch.setWinningTeam(gameMatch.getTeamOne());
+        } else if (status == MATCH_STATUS.TEAM_TWO_WIN) {
+            gameMatch.setWinningTeam(gameMatch.getTeamTwo());
+        }
         gameMatchRepository.save(gameMatch);
     }
 

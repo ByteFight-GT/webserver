@@ -67,6 +67,10 @@ public class GameMatch {
     private LocalDateTime queuedAt;
     private LocalDateTime processedAt;
 
+    @ManyToOne()
+    @JoinColumn(name = "winning_team_id", nullable = true)
+    private Team winningTeam;
+
     private String map;
 
     private Integer timesQueued;

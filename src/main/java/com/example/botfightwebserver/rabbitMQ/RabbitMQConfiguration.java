@@ -43,7 +43,7 @@ public class RabbitMQConfiguration {
     @Bean
     public Queue gameMatchJobQueue() {
         Map<String, Object> args = new HashMap<>();
-        args.put("x-max-priority", 2);
+        args.put("x-max-priority", 10);
         return new Queue(GAME_MATCH_QUEUE, true, false, false, args);
     }
 
