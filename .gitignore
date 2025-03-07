@@ -42,5 +42,5 @@ GcpKey/
 **/.DS_Store
 /logs
 .env*
-GameMatch/
-Team/
+/GameMatch/
+/Team/
