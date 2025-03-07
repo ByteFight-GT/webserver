@@ -26,6 +26,7 @@ public class GameMatchDTO {
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
     private Integer timesQueued;
+    private String map;
 
     // Convert from Entity to DTO
     public static GameMatchDTO fromEntity(GameMatch gameMatch) {
@@ -42,6 +43,7 @@ public class GameMatchDTO {
             .createdAt(gameMatch.getCreatedAt())
             .processedAt(gameMatch.getProcessedAt())
             .timesQueued(gameMatch.getTimesQueued())
+            .map(gameMatch.getMap())
             .build();
     }
 }

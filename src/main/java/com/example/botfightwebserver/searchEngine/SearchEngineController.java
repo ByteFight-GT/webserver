@@ -38,12 +38,13 @@ public class SearchEngineController {
         @RequestParam(required = false) String teamSearchParam,
         @RequestParam(required = false) Long teamId,
         @RequestParam(required = false) MATCH_REASON reason,
+        @RequestParam(required = false) String map,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GameMatchDTO> gameSearchResult =
             searchEngineService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamId),
-                Optional.ofNullable(reason), pageable);
+                Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 }

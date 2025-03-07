@@ -58,6 +58,7 @@ public class SearchEngineService {
     public Page<GameMatchDTO> searchGame(Optional<String> teamSearchparam,
                                          Optional<Long> requiredTeamId,
                                          Optional<MATCH_REASON> reason,
+                                         Optional<String> map,
                                          Pageable pageable) {
 
         Page<GameMatchDTO> results;
@@ -75,12 +76,21 @@ public class SearchEngineService {
                 pageable.getPageSize());
         }
 
+        List<GameMatchDTO> filteredContent = results.getContent();
+
         if (reason.isPresent()) {
-            List<GameMatchDTO> filteredContent = results.getContent()
-                .stream()
+            filteredContent = filteredContent.stream()
                 .filter(gameMatchDTO -> reason.get().equals(gameMatchDTO.getReason()))
                 .collect(Collectors.toList());
+        }
 
+        if (map.isPresent() && !map.get().isEmpty()) {
+            filteredContent = filteredContent.stream()
+                .filter(gameMatchDTO -> map.get().equalsIgnoreCase(gameMatchDTO.getMap()))
+                .collect(Collectors.toList());
+        }
+
+        if (reason.isPresent() || (map.isPresent() && !map.get().isEmpty())) {
             results = new PageImpl<>(
                 filteredContent,
                 results.getPageable(),
