@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
+import com.example.botfightwebserver.gameMatch.GameMatchDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -24,14 +25,14 @@ public class GameMatchLogController {
     private final GameMatchLogService gameMatchLogService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<GameMatchLog>> getGameMatchLogs() {
-        return ResponseEntity.ok(gameMatchLogService.getAllGameMatchLogs());
+    public ResponseEntity<List<GameMatchLogDTO>> getGameMatchLogs() {
+        return ResponseEntity.ok(gameMatchLogService.getAllGameMatchLogs().stream().map(GameMatchLogDTO::fromEntity).toList());
     }
 
     @GetMapping("/id")
-    public ResponseEntity<GameMatchLog> getGameMatchLogsByGameId(@RequestParam Long id) {
+    public ResponseEntity<GameMatchLogDTO> getGameMatchLogsByGameId(@RequestParam Long id) {
         Optional<GameMatchLog> maybeLog = gameMatchLogService.getGameMatchLogById(id);
-        return maybeLog.isPresent() ? ResponseEntity.ok(maybeLog.get()) : ResponseEntity.notFound().build();
+        return maybeLog.isPresent() ? ResponseEntity.ok(GameMatchLogDTO.fromEntity(maybeLog.get())) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/ids")
@@ -40,12 +41,12 @@ public class GameMatchLogController {
     }
 
     @GetMapping("/from-match-id")
-    public ResponseEntity<GameMatchLog> getGameMatchLogFromMatchId(@RequestParam Long id) {
+    public ResponseEntity<GameMatchLogDTO> getGameMatchLogFromMatchId(@RequestParam Long id) {
         Optional<GameMatchLog> maybeLog = gameMatchLogService.getMatchLogFromGame(id);
         if (maybeLog == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(maybeLog.get());
+        return ResponseEntity.ok(GameMatchLogDTO.fromEntity(maybeLog.get()));
     }
 
     @GetMapping("/count")
@@ -57,6 +58,6 @@ public class GameMatchLogController {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.toString());
     }
 }
