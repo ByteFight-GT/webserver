@@ -82,7 +82,6 @@ public class TournamentService {
         Map<String, Object> wrapper = new HashMap<>();
         List<Object> participants = new ArrayList<>();
 
-        System.out.println(sortedTeams.size());
         for (int i = 0; i < sortedTeams.size(); i++) {
             Map<String, Object> participantInfo = new HashMap<>();
             participantInfo.put("name", sortedTeams.get(i).getName());
@@ -190,7 +189,6 @@ public class TournamentService {
 
     private List<ChallongeMatchDTO> processMatchesResponse(Map<String, Object>[] matchesData) {
         List<ChallongeMatchDTO> matches = new ArrayList<>();
-        System.out.println(matchesData);
         if (matchesData == null) return matches;
 
         for (Map<String, Object> matchData : matchesData) {
@@ -218,7 +216,6 @@ public class TournamentService {
 
         String url = CHALLONGE_API_BASE_URL + "/" + tournament.getChallongeId() +
             "/matches.json?api_key=" + apiKey;
-        System.out.println(url);
         Map<String, Object>[] matches = restTemplate.getForObject(url, Map[].class);
         return processMatchesResponse(matches);
     }
@@ -226,7 +223,6 @@ public class TournamentService {
     private String generateUrlSlug(String name) {
         LocalDateTime now = LocalDateTime.now(clockConfig.clock());
         String url = name + now.toString();
-        System.out.println(url);
         return url.toLowerCase()
             .replaceAll("[^a-z0-9]", "_")
             .replaceAll("_+", "_")

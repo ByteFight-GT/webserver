@@ -3,6 +3,7 @@ package com.example.botfightwebserver.gameMatch;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.team.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -95,6 +96,14 @@ public class GameMatchController {
             return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, otherTeamId, page, size));
         }
         return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
+    }
+
+    @GetMapping("/public/stats")
+    public ResponseEntity<StatsDTO> stats(@RequestParam Long teamId, @RequestParam MATCH_REASON reason) {
+        if (teamId == null) {
+            throw new IllegalArgumentException("team id can't be null");
+        }
+        return ResponseEntity.ok(gameMatchService.getTeamStatsByMatchReason(teamId, reason));
     }
 
     @ExceptionHandler(Exception.class)

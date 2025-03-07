@@ -3,6 +3,7 @@ package com.example.botfightwebserver.gameMatch;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.team.StatsDTO;
 import com.example.botfightwebserver.team.TeamService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
@@ -188,8 +189,32 @@ public class GameMatchService {
         return pageResponse;
     }
 
-//    public Long countWaitingScrimmages()
+    public StatsDTO getTeamStatsByMatchReason(Long teamId, MATCH_REASON reason) {
+        List<GameMatch> matches = gameMatchRepository.findTeamMatchesByReason(teamId, List.of(reason));
+        int wins = 0;
+        int losses = 0;
+        int draws = 0;
+        for (GameMatch match : matches) {
+            MATCH_STATUS status = match.getStatus();
+            boolean isTeamOne = match.getTeamOne().getId().equals(teamId);
+            if (status == MATCH_STATUS.DRAW) {
+                draws++;
+            } else if ((isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN) ||
+                (!isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN)) {
+                wins++;
+            } else if ((isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN) ||
+                (!isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN)) {
+                losses++;
+            }
+        }
 
+        return StatsDTO.builder()
+            .numWins(wins)
+            .numLosses(losses)
+            .numDraws(draws)
+            .matchReason(reason)
+            .build();
+    }
     }
 
 
