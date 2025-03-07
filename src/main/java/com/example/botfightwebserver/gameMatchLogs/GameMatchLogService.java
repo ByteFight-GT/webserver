@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
+import com.example.botfightwebserver.gameMatch.GameMatch;
+import com.example.botfightwebserver.gameMatch.GameMatchService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,9 @@ public class GameMatchLogService {
 
     private final GameMatchLogRepository gameMatchLogRepository;
 
-    public GameMatchLog createGameMatchLog(Long gameMatchId, String logs, double team1GlickoChange, double team2GlickoChange) {
+    public GameMatchLog createGameMatchLog(GameMatch gameMatch, String logs, double team1GlickoChange, double team2GlickoChange) {
         GameMatchLog gameMatchLog = new GameMatchLog();
-        gameMatchLog.setMatchId(gameMatchId);
+        gameMatchLog.setGameMatch(gameMatch);
         gameMatchLog.setMatchLog(logs);
         gameMatchLog.setTeam1GlickoChange(team1GlickoChange);
         gameMatchLog.setTeam2GlickoChange(team2GlickoChange);
@@ -37,7 +39,7 @@ public class GameMatchLogService {
     }
 
     public Optional<GameMatchLog> getMatchLogFromGame(Long gameMatchId) {
-        return gameMatchLogRepository.findByMatchId(gameMatchId);
+        return gameMatchLogRepository.findById(gameMatchId);
     }
 
     public Long getGameMatchLogCount() {

@@ -72,7 +72,7 @@ public class GameMatchResultHandler {
             log.info("Can't process match");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
-        gameMatchLogService.createGameMatchLog(gameMatchId, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
+        gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
     }
 
     private void handleLadderResult(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges) {

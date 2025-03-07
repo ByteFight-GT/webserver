@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import lombok.*;
 
@@ -18,10 +19,12 @@ import lombok.*;
 @NoArgsConstructor
 public class GameMatchLog {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long matchId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name="match_id")
+    private GameMatch gameMatch;
 
     @Column(columnDefinition = "TEXT")
     private String matchLog;

@@ -7,6 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface GameMatchLogRepository extends JpaRepository<GameMatchLog, Long> {
-    public Optional<GameMatchLog> findByMatchId(long matchId);
 }
 
