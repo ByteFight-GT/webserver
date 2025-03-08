@@ -2,7 +2,7 @@ package com.example.botfightwebserver.gameMatch;
 
 public enum MAPS {
     PILLARS("pillars"),
-    GREAT_DIVIDE("great_dvide"),
+    GREAT_DIVIDE("great_divide"),
     CAGE("cage"),
     EMPTY("empty");
 

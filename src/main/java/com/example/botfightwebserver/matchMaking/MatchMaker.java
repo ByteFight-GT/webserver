@@ -165,7 +165,7 @@ public class MatchMaker {
     }
 
     private static String randomSelectMap() {
-        return RANKED_MAPS.get(RANDOM.nextInt(RANKED_MAPS.size())).toString();
+        return RANKED_MAPS.get(RANDOM.nextInt(RANKED_MAPS.size())).toMapName();
     }
 }
 
