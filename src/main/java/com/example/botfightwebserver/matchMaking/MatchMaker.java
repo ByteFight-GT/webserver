@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.matchMaking;
 
 import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatch.MAPS;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.player.PlayerService;
@@ -9,6 +10,7 @@ import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Component
@@ -25,6 +28,9 @@ public class MatchMaker {
     private final GameMatchService gameMatchService;
     private final GlickoHistoryService glickoHistoryService;
     private final MatchMakingEventService matchMakingEventService;
+
+    private static final Random RANDOM = new Random();
+    private static final List<MAPS> RANKED_MAPS = List.of(MAPS.PILLARS, MAPS.GREAT_DIVIDE, MAPS.EMPTY, MAPS.CAGE);
 
     public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
@@ -62,7 +68,7 @@ public class MatchMaker {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
             gameMatchService.submitGameMatch(teamOne.getId(), teamTwo.getId(), teamOne.getCurrentSubmission().getId(),
-                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, "pillars");
+                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, randomSelectMap());
         });
     }
 
@@ -156,6 +162,10 @@ public class MatchMaker {
     private static void addEdge(Map<Integer, List<Integer>> adjList, int u, int v) {
         adjList.get(u).add(v);
         adjList.get(v).add(u);
+    }
+
+    private static String randomSelectMap() {
+        return RANKED_MAPS.get(RANDOM.nextInt(RANKED_MAPS.size())).toString();
     }
 }
 
