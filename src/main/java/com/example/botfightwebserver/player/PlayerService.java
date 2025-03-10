@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.player;
 ;
+import com.example.botfightwebserver.permissions.PermissionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final PermissionsService permissionsService;
 
     public List<Player> getPlayers() {
         return playerRepository.findAll()
@@ -30,6 +32,7 @@ public class PlayerService {
     }
 
     public void setName(Long playerId, String name) {
+        permissionsService.validateAllowUpdateProfile();
         if (!playerRepository.existsById(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
@@ -39,6 +42,7 @@ public class PlayerService {
     }
 
     public Player setPlayerTeam(UUID playerId, Long teamId) {
+        permissionsService.validateAllowJoinTeam();
         if (!playerRepository.existsByAuthId(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }

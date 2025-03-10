@@ -19,31 +19,52 @@ public class PermissionsService {
         return latestPermissions;
     }
 
-    public boolean isAllowed(String action) {
-        Permissions permissions = getLatestPermissions();
-        if (action == "newSubmission") {
-            return permissions.getAllowNewSubmission();
+    public void validateAllowNewSubmission() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowSetSubmission()) {
+            throw new IllegalArgumentException("You are not allowed to submit a new submission");
         }
-        if (action == "setSubmission") {
-            return permissions.getAllowSetSubmission();
-        }
-        if (action == "register") {
-            return permissions.getAllowRegister();
-        }
-        if (action == "updateTeam") {
-            return permissions.getAllowUpdateTeam();
-        }
-        if (action == "updateProfile") {
-            return permissions.getAllowUpdateProfile();
-        }
-        if (action == "createTeam") {
-            return permissions.getAllowCreateTeam();
-        }
-        if (action == "joinTeam") {
-            return permissions.getAllowJoinTeam();
-        }
-
-        return false;
     }
 
+    public void validateAllowSetSubmission() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowSetSubmission()) {
+            throw new IllegalArgumentException("You are not allowed to set a new submission");
+        }
+    }
+
+    public void validateAllowRegister() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowRegister()) {
+            throw new IllegalArgumentException("You are not allowed to register");
+        }
+    }
+
+    public void validateAllowUpdateTeam() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowUpdateTeam()) {
+            throw new IllegalArgumentException("You are not allowed to update team");
+        }
+    }
+
+    public void validateAllowUpdateProfile() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowUpdateProfile()) {
+            throw new IllegalArgumentException("You are not allowed to update profile");
+        }
+    }
+
+    public void validateAllowCreateTeam() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowCreateTeam()) {
+            throw new IllegalArgumentException("You are not allowed to create team");
+        }
+    }
+
+    public void validateAllowJoinTeam() {
+        Permissions latest = getLatestPermissions();
+        if (!latest.getAllowJoinTeam()) {
+            throw new IllegalArgumentException("You are not allowed to join team");
+        }
+    }
 }

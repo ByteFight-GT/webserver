@@ -4,6 +4,7 @@ import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
@@ -35,10 +36,15 @@ public class SubmissionController {
     private final GameMatchService gameMatchService;
     private final RabbitMQService rabbitMQService;
     private final PlayerService playerService;
+    private final PermissionsService permissionsService;
 
     @PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
         @RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "false") Boolean isAutoSet) {
+
+
+        permissionsService.validateAllowNewSubmission();
+
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();

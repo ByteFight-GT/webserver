@@ -3,6 +3,7 @@ package com.example.botfightwebserver.team;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
+import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import io.opencensus.stats.Stats;
@@ -36,6 +37,7 @@ public class TeamController {
     private final Clock clock;
     private final GlickoHistoryService glickoHistoryService;
     private final ClockConfig clockConfig;
+    private final PermissionsService permissionsService;
 
     @GetMapping("/teams")
     public List<TeamDTO> getTeams() {
@@ -59,6 +61,7 @@ public class TeamController {
 
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@RequestParam String name) {
+        permissionsService.validateAllowCreateTeam();
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Team team = teamService.createTeam(name);
         playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
@@ -67,6 +70,7 @@ public class TeamController {
 
     @PostMapping("/name")
     public ResponseEntity<Map<String, String>> setName(@RequestParam Long teamId, @RequestParam String name) {
+        permissionsService.validateAllowUpdateTeam();
         boolean isAvailable = !teamService.isNameExist(name);
         if (!isAvailable) {
             return ResponseEntity.ok(Collections.singletonMap("setName", "Name is Already Taken."));
@@ -82,6 +86,7 @@ public class TeamController {
 
     @PostMapping("/quote")
     public ResponseEntity<String> setQuote(@RequestParam Long teamId, @RequestParam String quote) {
+        permissionsService.validateAllowUpdateTeam();
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         if (!player.getTeamId().equals(teamId)) {
@@ -120,6 +125,7 @@ public class TeamController {
 
     @PostMapping("/set-submission")
     public ResponseEntity<Void> setCurrentSubmission(@RequestParam Long submissionId) {
+        permissionsService.validateAllowSetSubmission();
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();

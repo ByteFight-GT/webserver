@@ -31,8 +31,8 @@ public class PermissionsController {
         return ResponseEntity.ok(permissionsDTO);
     }
 
-    @GetMapping("/is-allowed/{action}")
-    public ResponseEntity<Boolean> isAllowed(@PathVariable String action) {
-        return ResponseEntity.ok(permissionsService.isAllowed(action));
+    @GetMapping("/public/get")
+    public ResponseEntity<PermissionsDTO> getPermissions() {
+        return ResponseEntity.ok(PermissionsDTO.fromEntity(permissionsService.getLatestPermissions()));
     }
 }
