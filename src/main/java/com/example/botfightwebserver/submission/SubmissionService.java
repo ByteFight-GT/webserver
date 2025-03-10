@@ -6,7 +6,6 @@ import com.example.botfightwebserver.team.TeamRepository;
 import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,12 +15,20 @@ import java.util.Optional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class SubmissionService {
 
     private final SubmissionRepository submissionRepository;
     private final StorageService storageService;
     private final TeamRepository teamRepository;
+    private final PermissionsService permissionsService;
+
+    public SubmissionService(SubmissionRepository submissionRepository, @Qualifier("gcpStorageServiceImpl") StorageService storageService,
+                             TeamRepository teamRepository, PermissionsService permissionsService) {
+        this.submissionRepository = submissionRepository;
+        this.storageService = storageService;
+        this.teamRepository = teamRepository;
+        this.permissionsService = permissionsService;
+    }
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
