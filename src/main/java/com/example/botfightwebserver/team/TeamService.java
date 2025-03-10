@@ -98,6 +98,7 @@ public class TeamService {
         } else if (isDraw) {
             team.setNumberDraws(team.getNumberDraws() + 1);
         }
+        return teamRepository.save(team);
     }
 
 
