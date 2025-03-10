@@ -21,7 +21,7 @@ public class PermissionsService {
 
     public void validateAllowNewSubmission() {
         Permissions latest = getLatestPermissions();
-        if (!latest.getAllowSetSubmission()) {
+        if (!latest.getAllowNewSubmission()) {
             throw new IllegalArgumentException("You are not allowed to submit a new submission");
         }
     }
