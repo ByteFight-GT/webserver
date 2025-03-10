@@ -4,7 +4,10 @@ public enum MAPS {
     PILLARS("pillars"),
     GREAT_DIVIDE("great_divide"),
     CAGE("cage"),
-    EMPTY("empty");
+    EMPTY("empty"),
+    EMPTY_LARGE("empty_large"),
+    SSSPLINE("ssspline"),
+    COMBUSTIBLE_LEMONS("combustible_lemons"),;
 
     private final String mapName;
 

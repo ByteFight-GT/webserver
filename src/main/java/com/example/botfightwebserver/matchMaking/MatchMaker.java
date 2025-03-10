@@ -30,7 +30,7 @@ public class MatchMaker {
     private final MatchMakingEventService matchMakingEventService;
 
     private static final Random RANDOM = new Random();
-    private static final List<MAPS> RANKED_MAPS = List.of(MAPS.PILLARS, MAPS.GREAT_DIVIDE, MAPS.EMPTY, MAPS.CAGE);
+    private static final List<MAPS> RANKED_MAPS = List.of(MAPS.values());
 
     public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
