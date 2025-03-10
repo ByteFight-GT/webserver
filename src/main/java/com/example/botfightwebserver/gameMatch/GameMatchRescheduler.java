@@ -14,7 +14,7 @@ public class  GameMatchRescheduler {
 
     private final GameMatchService gameMatchService;
 
-//    @Scheduled(cron = "0 30 */2 * * *")
+    @Scheduled(cron = "0 30 */2 * * *")
     public List<GameMatchJob> reschedule() {
         return gameMatchService.rescheduleFailedAndStaleMatches();
     }
