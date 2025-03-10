@@ -276,7 +276,7 @@ class TeamServiceTest extends PersistentTestBase {
         double glickoChange = 15.0;
 
         Team
-            persistedTeam = teamService.updateAfterLadderMatch(initialTeam, glickoChange,0.0,0.0, true, false);
+            persistedTeam = teamService.updateAfterMatch(initialTeam, glickoChange,0.0,0.0, true, false);
 
         assertEquals(1215.0, persistedTeam.getGlicko());
         assertEquals(6, persistedTeam.getMatchesPlayed());
@@ -299,7 +299,7 @@ class TeamServiceTest extends PersistentTestBase {
         double glickoChange = -15.0;
 
         Team
-            persistedTeam = teamService.updateAfterLadderMatch(initialTeam, glickoChange,0.0,0.0, false, false);
+            persistedTeam = teamService.updateAfterMatch(initialTeam, glickoChange,0.0,0.0, false, false);
 
         assertEquals(1185.0, persistedTeam.getGlicko());
         assertEquals(6, persistedTeam.getMatchesPlayed());
@@ -322,7 +322,7 @@ class TeamServiceTest extends PersistentTestBase {
         double glickoChange = 0.0;
 
         Team
-            persistedTeam = teamService.updateAfterLadderMatch(initialTeam, glickoChange,0.0,0.0, false, true);
+            persistedTeam = teamService.updateAfterMatch(initialTeam, glickoChange,0.0,0.0, false, true);
 
         assertEquals(1200.0, persistedTeam.getGlicko());
         assertEquals(6, persistedTeam.getMatchesPlayed());
@@ -345,7 +345,7 @@ class TeamServiceTest extends PersistentTestBase {
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> teamService.updateAfterLadderMatch(initialTeam, 15.0,0.0,0.0, true, true)
+            () -> teamService.updateAfterMatch(initialTeam, 15.0,0.0,0.0, true, true)
         );
 
         assertEquals("Result can't be a win and a draw", exception.getMessage());

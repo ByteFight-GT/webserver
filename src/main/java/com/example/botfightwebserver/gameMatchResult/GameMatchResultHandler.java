@@ -68,7 +68,11 @@ public class GameMatchResultHandler {
         } else if (gameMatch.getReason() == MATCH_REASON.TOURNAMENT) {
             log.info("Processing tournament match for team1 {} team2 {}", team1.getId(), team2.getId());
             handleTournamentResult(team1, team2, status, gameMatch.getId());
-        } else {
+        } else if (gameMatch.getReason() == MATCH_REASON.SCRIMMAGE) {
+            log.info("Processing Scrimmage match for team1 {} team2 {}", team1.getId(), team2.getId());
+            handleScrimmageResult(team1, team2, status);
+        }
+        else {
             log.info("Can't process match");
         }
         gameMatchService.setGameMatchStatus(gameMatchId, status);
@@ -76,15 +80,23 @@ public class GameMatchResultHandler {
     }
 
     private void handleLadderResult(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges) {
+        updateTeamStats(team1, team2, status, glickoChanges);
+    }
+
+    private void handleScrimmageResult(Team team1, Team team2, MATCH_STATUS status) {
+        updateTeamStats(team1, team2, status, new GlickoChanges());
+    }
+
+    private void updateTeamStats(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges) {
         if (status == MATCH_STATUS.TEAM_ONE_WIN) {
-            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
-            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
+            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
+            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
         } else if (status == MATCH_STATUS.TEAM_TWO_WIN) {
-            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
-            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
+            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
+            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
         } else if (status == MATCH_STATUS.DRAW) {
-            teamService.updateAfterLadderMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
-            teamService.updateAfterLadderMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
+            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
+            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
         }
     }
 
@@ -105,6 +117,7 @@ public class GameMatchResultHandler {
             throw new IllegalArgumentException("MATCH " + matchId + " ended in a draw");
         }
         tournamentGameMatch.setState(TOURNAMENT_MATCH_STATES.COMPLETE);
+        updateTeamStats(team1, team2, status, new GlickoChanges());
         tournamentGameMatchService.save(tournamentGameMatch);
     }
 

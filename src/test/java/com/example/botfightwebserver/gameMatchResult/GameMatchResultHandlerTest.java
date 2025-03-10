@@ -90,8 +90,8 @@ class GameMatchResultHandlerTest {
 
         gameMatchResultHandler.handleGameMatchResult(result);
 
-        verify(teamService).updateAfterLadderMatch(team1, 15,0.0,0.0, true, false);
-        verify(teamService).updateAfterLadderMatch(team2, -15, 0.0,0.0, false, false);
+        verify(teamService).updateAfterMatch(team1, 15,0.0,0.0, true, false);
+        verify(teamService).updateAfterMatch(team2, -15, 0.0,0.0, false, false);
         verify(gameMatchService).setGameMatchStatus(1L, MATCH_STATUS.TEAM_ONE_WIN);
         verify(gameMatchLogService).createGameMatchLog(1L, "match log", 15, -15);
     }

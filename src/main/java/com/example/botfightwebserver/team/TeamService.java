@@ -76,7 +76,7 @@ public class TeamService {
         }
     }
 
-    public Team updateAfterLadderMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
+    public Team updateAfterMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
                                        boolean isWin, boolean isDraw) {
         if (isWin && isDraw) {
             throw new IllegalArgumentException("Result can't be a win and a draw");
@@ -98,8 +98,8 @@ public class TeamService {
         } else if (isDraw) {
             team.setNumberDraws(team.getNumberDraws() + 1);
         }
-        return teamRepository.save(team);
     }
+
 
     public void setCurrentSubmission(Long teamId, Long submissionId) {
         if (!submissionService.isSubmissionValid(submissionId)) {
