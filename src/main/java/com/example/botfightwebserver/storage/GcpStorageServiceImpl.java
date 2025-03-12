@@ -1,9 +1,6 @@
 package com.example.botfightwebserver.storage;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -51,6 +48,21 @@ public class GcpStorageServiceImpl implements StorageService {
             storage.get(bucketName);
         } catch (Exception e) {
             throw new RuntimeException("Cannot access bucket: " + bucketName + ". Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteFile(String filePath) {
+        try {
+            BlobId blobId = BlobId.of(bucketName, filePath);
+            boolean deleted = storage.delete(blobId);
+            if (!deleted) {
+                throw new RuntimeException("File not found or could not be deleted: " + filePath);
+            }
+            log.info("File deleted successfully: {}", filePath);
+        } catch (StorageException e) {
+            log.error("Failed to delete file: {}, error: {}", filePath, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete file: " + filePath, e);
         }
     }
 

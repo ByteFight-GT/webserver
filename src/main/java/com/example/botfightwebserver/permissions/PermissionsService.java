@@ -26,6 +26,13 @@ public class PermissionsService {
         }
     }
 
+//    public void validateAllowDeleteSubmission() {
+//        Permissions latest = getLatestPermissions();
+//        if (!latest.getAllowDeleteSubmission()) {
+//            throw new IllegalArgumentException("You are not allowed to delete a submission");
+//        }
+//    }
+
     public void validateAllowSetSubmission() {
         Permissions latest = getLatestPermissions();
         if (!latest.getAllowSetSubmission()) {

@@ -33,6 +33,9 @@ public class Permissions {
     @Builder.Default
     private Boolean allowSetSubmission = false;
 
+//    @Builder.Default
+//    private Boolean allowDeleteSubmission = false;
+
     @Builder.Default
     private Boolean allowRegister = false;
 

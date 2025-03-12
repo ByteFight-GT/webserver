@@ -8,4 +8,6 @@ public interface StorageService {
     public String uploadFile(Long teamId, MultipartFile file);
 
     public void verifyAccess();
+
+    void deleteFile(String filePath);
 }
