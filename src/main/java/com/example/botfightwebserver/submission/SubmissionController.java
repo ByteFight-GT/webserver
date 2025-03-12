@@ -15,13 +15,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -63,6 +57,20 @@ public class SubmissionController {
         Long teamId = player.getTeamId();
         return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
     }
+
+    @DeleteMapping("")
+    public ResponseEntity<SubmissionDTO> deleteSubmission(@RequestParam Long submissionId) {
+//        permissionsService.validateAllowDeleteSubmission();
+
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Long teamId = player.getTeamId();
+
+        Submission deleted = submissionService.deleteSubmission(submissionId, teamId);
+
+        return ResponseEntity.ok(SubmissionDTO.fromEntity(deleted));
+    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

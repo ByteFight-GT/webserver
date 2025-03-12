@@ -16,6 +16,7 @@ public class PermissionsDTO {
 
     private Boolean allowNewSubmission;
     private Boolean allowSetSubmission;
+//    private Boolean allowDeleteSubmission;
     private Boolean allowRegister;
     private Boolean allowUpdateTeam;
     private Boolean allowUpdateProfile;
@@ -26,6 +27,7 @@ public class PermissionsDTO {
         return PermissionsDTO.builder()
             .allowNewSubmission(permissions.getAllowNewSubmission())
             .allowSetSubmission(permissions.getAllowSetSubmission())
+//            .allowDeleteSubmission(permissions.getAllowDeleteSubmission())
             .allowRegister(permissions.getAllowRegister())
             .allowUpdateTeam(permissions.getAllowUpdateTeam())
             .allowUpdateProfile(permissions.getAllowUpdateProfile())
@@ -38,6 +40,7 @@ public class PermissionsDTO {
         return Permissions.builder()
             .allowNewSubmission(dto.allowNewSubmission)
             .allowSetSubmission(dto.allowSetSubmission)
+//            .allowDeleteSubmission(dto.allowDeleteSubmission)
             .allowRegister(dto.allowRegister)
             .allowUpdateProfile(dto.allowUpdateTeam)
             .allowUpdateProfile(dto.allowUpdateProfile)

@@ -30,4 +30,7 @@ public class MockStorageServiceImpl implements  StorageService {
     public void verifyAccess() {
         return;
     }
+
+    @Override
+    public void deleteFile(String filePath) {return;}
 }

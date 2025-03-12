@@ -54,6 +54,24 @@ public class SubmissionService {
         return submissionRepository.getReferenceById(id);
     }
 
+    public Submission deleteSubmission(Long submissionId, Long teamId) {
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new EntityNotFoundException("Submission not found with id: " + submissionId));
+
+        if (!submission.getTeamId().equals(teamId)) {
+            throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
+        }
+
+        storageService.deleteFile(submission.getStoragePath());
+
+        submission.setTeamId(null);
+        submission.setStoragePath(null);
+
+        submissionRepository.save(submission);
+
+        return submission;
+    }
+
     public void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
