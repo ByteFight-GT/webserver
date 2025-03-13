@@ -109,7 +109,7 @@ public class SubmissionService {
 
     public List<SubmissionDTO> getTeamSubmissions(Long teamId) {
         List<Submission> submissions =submissionRepository.findSubmissionsByTeamIdOrderByCreatedAtDesc(teamId);
-        return submissions.stream().map(SubmissionDTO::fromEntity).toList();
+        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::fromEntity).toList();
     }
 
 }
