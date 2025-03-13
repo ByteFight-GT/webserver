@@ -62,10 +62,7 @@ public class SubmissionService {
             throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
         }
 
-        storageService.deleteFile(submission.getStoragePath());
-
-        submission.setTeamId(null);
-        submission.setStoragePath(null);
+        submission.setIsDeleted(true);
 
         submissionRepository.save(submission);
 

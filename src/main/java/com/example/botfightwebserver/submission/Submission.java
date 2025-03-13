@@ -48,6 +48,9 @@ public class Submission {
 
     private Boolean isAutoSet;
 
+    @Builder.Default
+    private Boolean isDeleted=false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now(clock);
