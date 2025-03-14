@@ -195,6 +195,9 @@ public class GameMatchService {
         int losses = 0;
         int draws = 0;
         for (GameMatch match : matches) {
+            if(reason == MATCH_REASON.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
+                continue;
+            }
             MATCH_STATUS status = match.getStatus();
             boolean isTeamOne = match.getTeamOne().getId().equals(teamId);
             if (status == MATCH_STATUS.DRAW) {
