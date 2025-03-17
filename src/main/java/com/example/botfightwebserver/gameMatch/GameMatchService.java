@@ -187,6 +187,7 @@ public class GameMatchService {
         GameMatchJob job = GameMatchJob.fromEntity(gameMatch);
         rabbitMQService.enqueueGameMatchJob(job);
         gameMatchRepository.save(gameMatch);
+        log.info("rescheduled match {}", job);
         return job;
     }
 

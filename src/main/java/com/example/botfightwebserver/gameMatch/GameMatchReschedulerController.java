@@ -30,7 +30,7 @@ public class GameMatchReschedulerController {
     }
 
 
-    @PostMapping("/reschedule/{match_id}")
+    @PostMapping("/reschedule/{matchId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> rescheduleMatch(@PathVariable Long matchId) {
         if (!gameMatchService.isGameMatchIdExist(matchId)) {
