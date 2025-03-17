@@ -136,6 +136,26 @@ public class GameMatchService {
             .toList();
     }
 
+    public List<GameMatchJob> rescheduleStaleMatches() {
+        List<GameMatch> matchesToReschedule = getStaleWaitingMatches();
+        log.info("Found {} matches to reschedule", matchesToReschedule.size());
+
+        List<GameMatchJob> rescheduledJobs = new ArrayList<>();
+
+        for (GameMatch match : matchesToReschedule) {
+            try {
+                log.info("Rescheduling match {}", match.getId());
+                rescheduledJobs.add(rescheduleMatch(match));
+            } catch (Exception e) {
+                log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
+            }
+        }
+
+        log.info("Rescheduling completed");
+        return rescheduledJobs;
+    }
+
+
     public List<GameMatchJob> rescheduleFailedAndStaleMatches() {
         List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
             getStaleWaitingMatches().stream()).toList();
