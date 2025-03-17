@@ -183,7 +183,7 @@ class GameMatchServiceTest {
 
         // Act & Assert
         Exception exception = assertThrows(IllegalStateException.class,
-                () -> gameMatchService.rescheduleMatch(gameMatch));
+                () -> gameMatchService.rescheduleMatch(gameMatch, false));
         assertTrue(exception.getMessage().contains("exceeded maximum retry attempts"));
     }
 
@@ -216,7 +216,7 @@ class GameMatchServiceTest {
         doNothing().when(rabbitMQService).enqueueGameMatchJob(any(GameMatchJob.class));
 
         // Act
-        GameMatchJob result = gameMatchService.rescheduleMatch(gameMatch);
+        GameMatchJob result = gameMatchService.rescheduleMatch(gameMatch, false);
 
         // Assert
         assertNotNull(result);

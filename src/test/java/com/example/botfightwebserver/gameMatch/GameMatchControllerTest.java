@@ -138,13 +138,13 @@ class GameMatchControllerTest {
                 MATCH_REASON.LADDER, "RescheduleMap1")
         );
 
-        when(gameMatchService.rescheduleFailedAndStaleMatches()).thenReturn(rescheduledJobs);
+        when(gameMatchService.rescheduleFailedAndStaleMatches(false)).thenReturn(rescheduledJobs);
 
         // Act and Assert
         mockMvc.perform(post("/api/v1/game-match/reschedule/all").with(csrf())
                 .contentType(MediaType.APPLICATION_JSON));
 
-        verify(gameMatchService).rescheduleFailedAndStaleMatches();
+        verify(gameMatchService).rescheduleFailedAndStaleMatches(false);
     }
 
 }

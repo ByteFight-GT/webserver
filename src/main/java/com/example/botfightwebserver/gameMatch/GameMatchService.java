@@ -136,7 +136,7 @@ public class GameMatchService {
             .toList();
     }
 
-    public List<GameMatchJob> rescheduleStaleMatches() {
+    public List<GameMatchJob> rescheduleStaleMatches(boolean isIgnoreLimit) {
         List<GameMatch> matchesToReschedule = getStaleWaitingMatches();
         log.info("Found {} matches to reschedule", matchesToReschedule.size());
 
@@ -145,7 +145,7 @@ public class GameMatchService {
         for (GameMatch match : matchesToReschedule) {
             try {
                 log.info("Rescheduling match {}", match.getId());
-                rescheduledJobs.add(rescheduleMatch(match));
+                rescheduledJobs.add(rescheduleMatch(match, isIgnoreLimit));
             } catch (Exception e) {
                 log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
             }
@@ -156,7 +156,7 @@ public class GameMatchService {
     }
 
 
-    public List<GameMatchJob> rescheduleFailedAndStaleMatches() {
+    public List<GameMatchJob> rescheduleFailedAndStaleMatches(boolean isIgnoreLimit) {
         List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
             getStaleWaitingMatches().stream()).toList();
         log.info("Found {} matches to reschedule", matchesToReschedule.size());
@@ -166,7 +166,7 @@ public class GameMatchService {
         for (GameMatch match : matchesToReschedule) {
             try {
                 log.info("Rescheduling match {}", match.getId());
-                rescheduledJobs.add(rescheduleMatch(match));
+                rescheduledJobs.add(rescheduleMatch(match, isIgnoreLimit));
             } catch (Exception e) {
                 log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
             }
@@ -176,9 +176,9 @@ public class GameMatchService {
         return rescheduledJobs;
     }
 
-    public GameMatchJob rescheduleMatch(GameMatch gameMatch) {
+    public GameMatchJob rescheduleMatch(GameMatch gameMatch, boolean isIgnoreLimit) {
         Integer timesQueued = gameMatch.getTimesQueued();
-        if (timesQueued == 3) {
+        if (!isIgnoreLimit && timesQueued == 3) {
             throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
         }
         gameMatch.setQueuedAt(LocalDateTime.now(clock));

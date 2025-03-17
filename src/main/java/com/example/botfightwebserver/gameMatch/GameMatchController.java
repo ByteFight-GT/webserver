@@ -63,7 +63,7 @@ public class GameMatchController {
     @PostMapping("/reschedule/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
-        List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches();
+        List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches(true);
         return ResponseEntity.ok(jobs);
     }
 
