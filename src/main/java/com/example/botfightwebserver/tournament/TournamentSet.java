@@ -2,6 +2,8 @@ package com.example.botfightwebserver.tournament;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,6 +45,7 @@ public class TournamentSet {
 
     private Long winnerId;
 
+    @Enumerated(EnumType.STRING)
     private TOURNAMENT_SET_STATES state;
 
     @OneToMany(mappedBy = "tournamentSet")
