@@ -90,6 +90,7 @@ public class TournamentController {
                 .state(TOURNAMENT_SET_STATES.PENDING)
                 .teamOneScore(0)
                 .teamTwoScore(0)
+                .tournament(tournament)
                 .build());
 
             tournamentGameMatchService.save(TournamentGameMatch.builder()

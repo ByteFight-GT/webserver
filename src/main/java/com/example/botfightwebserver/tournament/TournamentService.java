@@ -26,6 +26,7 @@ import java.util.Map;
 public class TournamentService {
 
     private final String CHALLONGE_API_BASE_URL = "https://api.challonge.com/v1/tournaments";
+    private final String REPLAYER_URL = "https://bytefight.org/match/";
     private final RestTemplate restTemplate = new RestTemplate();
     private final TournamentGameMatchService tournamentGameMatchService;
     private final TournamentSetService tournamentSetService;
@@ -37,7 +38,7 @@ public class TournamentService {
     private final TournamentRepository tournamentRepository;
     private final PlayerService playerService;
     private final TournamentTeamService tournamentTeamService;
-    private static final Integer MATCHES_TO_WIN = 2;
+    private static final Integer MATCHES_TO_WIN = 4;
 
     public Tournament getTournament(Long tournamentId) {
         return tournamentRepository.findById(tournamentId).orElse(null);
@@ -182,7 +183,9 @@ public class TournamentService {
         } else if (matchStatus == MATCH_STATUS.DRAW) {
             throw new IllegalArgumentException("Match " + tournamentMatchId + " has ended in a draw");
         }
+
         tournamentSet = updateChallongeSet(tournament, tournamentSet);
+        addAttachment(tournamentSet, REPLAYER_URL + tournamentGameMatch.getId());
 
         GameMatch gameMatch = tournamentGameMatch.getGameMatch();
         if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
@@ -191,6 +194,26 @@ public class TournamentService {
                 "pillars");
         }
         tournamentSetService.save(tournamentSet);
+    }
+
+    public void addAttachment(TournamentSet set, String textAttachment) {
+        Long tournamentId = set.getTournament().getChallongeId();
+        String matchId = set.getChallongeMatchId();
+
+        Map<String, Object> attachmentData = new HashMap<>();
+        Map<String, Object> wrapper = new HashMap<>();
+
+        wrapper.put("api_key", apiKey);
+        attachmentData.put("description", textAttachment);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(attachmentData, headers);
+
+        String url = CHALLONGE_API_BASE_URL + "/" + tournamentId + "/matches/" + matchId + "/attachments.json";
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
     }
 
     public TournamentSet updateChallongeSet(Tournament tournament, TournamentSet tournamentSet) {

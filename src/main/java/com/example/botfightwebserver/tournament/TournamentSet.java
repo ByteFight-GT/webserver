@@ -1,9 +1,12 @@
 package com.example.botfightwebserver.tournament;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,7 +45,12 @@ public class TournamentSet {
 
     private TOURNAMENT_SET_STATES state;
 
-    @OneToMany
-    List<TournamentGameMatch> matches = new ArrayList<>();
+    @OneToMany(mappedBy = "tournamentSet")
+    @Builder.Default
+    @JsonIgnore
+    private List<TournamentGameMatch> matches = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
 }
