@@ -78,10 +78,10 @@ public class TournamentController {
             Team team2 = tournamentTeam2.getTeam();
 
             GameMatch
-                match =
-                gameMatchService.submitGameMatch(team1.getId(), team2.getId(), team2.getCurrentSubmission().getId(),
-                    team2.getCurrentSubmission().getId(), MATCH_REASON.TOURNAMENT, TOURNEY_MAP.getRandomMap()
-                        .toMapName());
+                match =  gameMatchService.submitGameMatch(team1.getId(), team2.getId(), team1.getCurrentSubmission().getId(),
+                team2.getCurrentSubmission().getId(), MATCH_REASON.TOURNAMENT, TOURNEY_MAP.getRandomMap()
+                    .toMapName());
+
 
             TournamentSet tournamentSet = tournamentSetService.save(TournamentSet.builder()
                 .round(challongeMatch.getRound())

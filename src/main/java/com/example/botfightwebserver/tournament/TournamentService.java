@@ -181,7 +181,8 @@ public class TournamentService {
         } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
             tournamentSet.setTeamTwoScore(tournamentSet.getTeamTwoScore() + 1);
         } else if (matchStatus == MATCH_STATUS.DRAW) {
-            throw new IllegalArgumentException("Match " + tournamentMatchId + " has ended in a draw");
+            tournamentSet.setTeamOneScore(tournamentSet.getTeamOneScore() + 1);
+            tournamentSet.setTeamTwoScore(tournamentSet.getTeamTwoScore() + 1);
         }
 
         tournamentSet = updateChallongeSet(tournament, tournamentSet);
@@ -189,9 +190,15 @@ public class TournamentService {
 
         GameMatch gameMatch = tournamentGameMatch.getGameMatch();
         if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
-            gameMatchService.submitGameMatch(gameMatch.getTeamOne().getId(), gameMatch.getTeamTwo().getId(),
+            GameMatch match = gameMatchService.submitGameMatch(gameMatch.getTeamOne().getId(), gameMatch.getTeamTwo().getId(),
                 gameMatch.getSubmissionOne().getId(), gameMatch.getSubmissionTwo().getId(), gameMatch.getReason(),
-                "pillars");
+                TOURNEY_MAP.getRandomMap().toMapName());
+
+            tournamentGameMatchService.save(TournamentGameMatch.builder()
+                .gameMatch(match)
+                .tournament(tournament)
+                .tournamentSet(tournamentSet)
+                .build());
         }
         tournamentSetService.save(tournamentSet);
     }
@@ -205,11 +212,12 @@ public class TournamentService {
 
         wrapper.put("api_key", apiKey);
         attachmentData.put("description", textAttachment);
+        wrapper.put("match_attachment", attachmentData);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(attachmentData, headers);
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(wrapper, headers);
 
         String url = CHALLONGE_API_BASE_URL + "/" + tournamentId + "/matches/" + matchId + "/attachments.json";
 
@@ -244,7 +252,10 @@ public class TournamentService {
         String url = CHALLONGE_API_BASE_URL + "/" + tournament.getChallongeId() +
             "/matches/" + challongeMatchId + ".json";
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+        System.out.println(url);
+        System.out.println(requestEntity.toString());
+
+        restTemplate.put(url, requestEntity, String.class);
         return tournamentSet;
     }
 
