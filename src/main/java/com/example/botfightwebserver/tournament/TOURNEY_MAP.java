@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 public enum TOURNEY_MAP {
-//    arena, ladder, compasss, recurve, diamonds, ssspiral, attrition
     ARENA("arena"),
     LADDER("ladder"),
     COMPASSS("compasss"),

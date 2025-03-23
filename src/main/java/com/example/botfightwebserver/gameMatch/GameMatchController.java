@@ -67,13 +67,6 @@ public class GameMatchController {
         return ResponseEntity.ok(jobs);
     }
 
-    @GetMapping("/my-logs")
-    public ResponseEntity<List<GameMatchDTO>> myLogs() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
-        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId));
-    }
-
     @GetMapping("/my-logs/paginated")
     public ResponseEntity<Page<GameMatchDTO>> myLogs(
         @RequestParam(defaultValue = "0") int page,
