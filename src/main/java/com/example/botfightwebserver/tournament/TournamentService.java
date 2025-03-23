@@ -18,8 +18,12 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -191,10 +195,13 @@ public class TournamentService {
         addAttachment(tournamentSet, REPLAYER_URL + tournamentGameMatch.getId() + "?teamOne=" +  teamOneName + "&teamTwo=" +  teamTwoName );
 
         GameMatch gameMatch = tournamentGameMatch.getGameMatch();
+
+        Random random = new Random();
+
         if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
             GameMatch match = gameMatchService.submitGameMatch(gameMatch.getTeamOne().getId(), gameMatch.getTeamTwo().getId(),
                 gameMatch.getSubmissionOne().getId(), gameMatch.getSubmissionTwo().getId(), gameMatch.getReason(),
-                TOURNEY_MAP.getRandomMap().toMapName());
+                getRandomUnplayedMap(tournamentSet, random).toMapName());
 
             tournamentGameMatchService.save(TournamentGameMatch.builder()
                 .gameMatch(match)
@@ -203,6 +210,23 @@ public class TournamentService {
                 .build());
         }
         tournamentSetService.save(tournamentSet);
+    }
+
+    private TOURNEY_MAP getRandomUnplayedMap(TournamentSet tournamentSet, Random random) {
+        List<TOURNEY_MAP> unplayedMaps = new ArrayList<>();
+        Set<TOURNEY_MAP> playedMaps = tournamentSet.getMatches().stream().map(match -> TOURNEY_MAP.fromMapName(match.getGameMatch().getMap())).collect(
+            Collectors.toSet());
+
+        for (TOURNEY_MAP map : TOURNEY_MAP.values()) {
+            if (playedMaps.contains(map)) {
+                continue;
+            }
+            unplayedMaps.add(map);
+        }
+
+        int randomIndex = random.nextInt(unplayedMaps.size());
+        TOURNEY_MAP selectedMap = unplayedMaps.get(randomIndex);
+        return selectedMap;
     }
 
     public void addAttachment(TournamentSet set, String textAttachment) {
