@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,6 +55,8 @@ public class TournamentService {
         tournamentData.put("description", tournament.getDescription());
         tournamentData.put("url", generateUrlSlug(tournament.getName()));
         tournamentData.put("tournament_type", tournament.getTournamentType().toChallongeType());
+        tournamentData.put("pts_for_match_win", MATCHES_TO_WIN);
+        tournamentData.put("accept_attachments", true);
 
         wrapper.put("tournament", tournamentData);
         wrapper.put("api_key", apiKey);
@@ -206,6 +209,7 @@ public class TournamentService {
             tournamentSet.setState(TOURNAMENT_SET_STATES.COMPLETE);
         }
 
+
         wrapper.put("api_key", apiKey);
         wrapper.put("match", matchData);
 
@@ -217,7 +221,7 @@ public class TournamentService {
         String url = CHALLONGE_API_BASE_URL + "/" + tournament.getChallongeId() +
             "/matches/" + challongeMatchId + ".json";
 
-        restTemplate.put(url, requestEntity);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
         return tournamentSet;
     }
 
