@@ -30,7 +30,6 @@ public class MatchMaker {
     private final MatchMakingEventService matchMakingEventService;
 
     private static final Random RANDOM = new Random();
-    private static final List<MAPS> RANKED_MAPS = List.of(MAPS.values());
 
     public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
@@ -68,7 +67,7 @@ public class MatchMaker {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
             gameMatchService.submitGameMatch(teamOne.getId(), teamTwo.getId(), teamOne.getCurrentSubmission().getId(),
-                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, randomSelectMap());
+                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, MAPS.getRandomMap().toMapName());
         });
     }
 
@@ -162,10 +161,6 @@ public class MatchMaker {
     private static void addEdge(Map<Integer, List<Integer>> adjList, int u, int v) {
         adjList.get(u).add(v);
         adjList.get(v).add(u);
-    }
-
-    private static String randomSelectMap() {
-        return RANKED_MAPS.get(RANDOM.nextInt(RANKED_MAPS.size())).toMapName();
     }
 }
 

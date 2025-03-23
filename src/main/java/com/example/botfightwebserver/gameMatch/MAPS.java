@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
+import java.util.Random;
+
 public enum MAPS {
     PILLARS("pillars"),
     GREAT_DIVIDE("great_divide"),
@@ -10,6 +12,7 @@ public enum MAPS {
     COMBUSTIBLE_LEMONS("combustible_lemons"),;
 
     private final String mapName;
+    private static final Random random = new Random();
 
     MAPS(String mapName) {
         this.mapName = mapName;
@@ -26,5 +29,10 @@ public enum MAPS {
             }
         }
         throw new IllegalArgumentException("Invalid map name: " + mapName);
+    }
+
+    public static MAPS getRandomMap() {
+        MAPS[] maps = MAPS.values();
+        return maps[random.nextInt(maps.length)];
     }
 }
