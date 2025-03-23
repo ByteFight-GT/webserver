@@ -202,9 +202,9 @@ public class GameMatchService {
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
-            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable);
+            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
-        return processMatches(matches, pageable);
+        return matches.map(GameMatchDTO::fromEntity);
     }
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
@@ -214,9 +214,10 @@ public class GameMatchService {
             teamId,
             otherTeamId,
             List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED),
+            List.of(MATCH_REASON.TOURNAMENT),
             pageable);
 
-        return processMatches(matches, pageable);
+        return matches.map(GameMatchDTO::fromEntity);
     }
 
     private Page<GameMatchDTO> processMatches(Page<GameMatch> matches, PageRequest pageable) {
