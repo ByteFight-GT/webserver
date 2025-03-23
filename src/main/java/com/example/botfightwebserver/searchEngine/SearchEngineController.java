@@ -28,6 +28,7 @@ public class SearchEngineController {
                                                     @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
+        System.out.println("searchTeam");
         Page<TeamDTO> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable)
             .map(TeamDTO::fromEntity);
         return ResponseEntity.ok(teamSearchResult);
@@ -41,6 +42,7 @@ public class SearchEngineController {
         @RequestParam(required = false) String map,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
+        System.out.println("searchGame");
         Pageable pageable = PageRequest.of(page, size);
         Page<GameMatchDTO> gameSearchResult =
             searchEngineService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamId),

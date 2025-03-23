@@ -61,45 +61,49 @@ public class SearchEngineService {
                                          Optional<String> map,
                                          Pageable pageable) {
 
-        Page<GameMatchDTO> results;
+        List<GameMatchDTO> allMatches = gameMatchService.getAllPlayedTeamMatches(requiredTeamId.get());
         if (teamSearchparam.isPresent()) {
             SearchResult<Team> result = searchSession.search(Team.class)
                 .where(f -> f.match()
                     .field("name")
                     .matching(teamSearchparam.get())
                     .fuzzy(2)).fetch(0, 1);
-            results = gameMatchService.getPlayedTeamMatches(result.hits().get(0).getId(), requiredTeamId.get(),  pageable.getPageNumber(),
-                pageable.getPageSize());
-        } else {
-            results = gameMatchService.getPlayedTeamMatches(requiredTeamId.get(),
-                pageable.getPageNumber(),
-                pageable.getPageSize());
+            if (!result.hits().isEmpty()) {
+                Long teamId = result.hits().get(0).getId();
+                allMatches = allMatches.stream()
+                    .filter(gameMatchDTO ->
+                        teamId.equals(gameMatchDTO.getTeamOneId()) ||
+                            teamId.equals(gameMatchDTO.getTeamTwoId()))
+                    .toList();
+            } else {
+                allMatches = List.of();
+            }
         }
 
-        List<GameMatchDTO> filteredContent = results.getContent();
-
         if (reason.isPresent()) {
-            filteredContent = filteredContent.stream()
+            allMatches = allMatches.stream()
                 .filter(gameMatchDTO -> reason.get().equals(gameMatchDTO.getReason()))
                 .collect(Collectors.toList());
         }
 
         if (map.isPresent() && !map.get().isEmpty()) {
-            filteredContent = filteredContent.stream()
+            allMatches = allMatches.stream()
                 .filter(gameMatchDTO -> map.get().equalsIgnoreCase(gameMatchDTO.getMap()))
                 .collect(Collectors.toList());
         }
 
-        if (reason.isPresent() || (map.isPresent() && !map.get().isEmpty())) {
-            results = new PageImpl<>(
-                filteredContent,
-                results.getPageable(),
-                filteredContent.size()
-            );
-        }
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allMatches.size());
 
-        return results;
+        List<GameMatchDTO> pagedContent = start < end ?
+            allMatches.subList(start, end) :
+            List.of();
 
+        return new PageImpl<>(
+            pagedContent,
+            pageable,
+            allMatches.size()
+        );
     }
 
 }

@@ -192,6 +192,13 @@ public class GameMatchService {
         return job;
     }
 
+    public List<GameMatchDTO> getAllPlayedTeamMatches(Long teamId) {
+        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED)).stream()
+            .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
+            .map(GameMatchDTO::fromEntity)
+            .toList();
+    }
+
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
