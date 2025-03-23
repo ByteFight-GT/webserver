@@ -186,7 +186,9 @@ public class TournamentService {
         }
 
         tournamentSet = updateChallongeSet(tournament, tournamentSet);
-        addAttachment(tournamentSet, REPLAYER_URL + tournamentGameMatch.getId());
+        String teamOneName =  tournamentGameMatch.getGameMatch().getTeamOne().getName();
+        String teamTwoName =  tournamentGameMatch.getGameMatch().getTeamTwo().getName();
+        addAttachment(tournamentSet, REPLAYER_URL + tournamentGameMatch.getId() + "?teamOne=" +  teamOneName + "&teamTwo=" +  teamTwoName );
 
         GameMatch gameMatch = tournamentGameMatch.getGameMatch();
         if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
