@@ -192,31 +192,16 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatchDTO> getPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED))
-            .stream()
-            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
-    }
-
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
             List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable);
 
-        List<GameMatchDTO> filteredMatches = matches.getContent()
-            .stream()
-            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
-
-        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
+        return processMatches(matches, pageable);
     }
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        System.out.println("Team id " + teamId + " other team Id " + otherTeamId);
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
             teamId,
@@ -224,6 +209,10 @@ public class GameMatchService {
             List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED),
             pageable);
 
+        return processMatches(matches, pageable);
+    }
+
+    private Page<GameMatchDTO> processMatches(Page<GameMatch> matches, PageRequest pageable) {
         List<GameMatchDTO> filteredMatches = matches.getContent()
             .stream()
             .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
@@ -232,6 +221,7 @@ public class GameMatchService {
 
         return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
     }
+
     public StatsDTO getTeamStatsByMatchReason(Long teamId, MATCH_REASON reason) {
         List<GameMatch> matches = gameMatchRepository.findTeamMatchesByReason(teamId, List.of(reason));
         int wins = 0;
