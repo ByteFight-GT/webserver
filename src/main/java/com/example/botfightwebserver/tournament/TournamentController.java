@@ -31,6 +31,7 @@ public class TournamentController {
     private final ClockConfig clockConfig;
     private final GameMatchService gameMatchService;
     private final TournamentGameMatchService tournamentGameMatchService;
+    private final TournamentSetService tournamentSetService;
     private final TournamentTeamService tournamentTeamService;
 
     @PostMapping("/create")
@@ -81,17 +82,21 @@ public class TournamentController {
                 gameMatchService.submitGameMatch(team1.getId(), team2.getId(), team2.getCurrentSubmission().getId(),
                     team2.getCurrentSubmission().getId(), MATCH_REASON.TOURNAMENT, "pillars");
 
-            TournamentGameMatch tournamentGameMatch = TournamentGameMatch.builder()
+            TournamentSet tournamentSet = tournamentSetService.save(TournamentSet.builder()
                 .round(challongeMatch.getRound())
-                .state(TOURNAMENT_MATCH_STATES.PENDING)
+                .challongePlayer1Id(challongeMatch.getChallongePlayer1Id())
+                .challongePlayer2Id(challongeMatch.getChallongePlayer2Id())
                 .challongeMatchId(challongeMatch.getMatchId())
-                .challongePlayer1Id(player1ChallongeId)
-                .challongePlayer2Id(player2ChallongeId)
+                .state(TOURNAMENT_SET_STATES.PENDING)
+                .teamOneScore(0)
+                .teamTwoScore(0)
+                .build());
+
+            tournamentGameMatchService.save(TournamentGameMatch.builder()
                 .gameMatch(match)
                 .tournament(tournament)
-                .build();
-
-            tournamentGameMatchService.save(tournamentGameMatch);
+                .tournamentSet(tournamentSet)
+                .build());
         }
         tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         tournamentService.saveTournament(tournament);

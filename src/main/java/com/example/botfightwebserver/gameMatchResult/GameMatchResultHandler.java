@@ -13,7 +13,7 @@ import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
-import com.example.botfightwebserver.tournament.TOURNAMENT_MATCH_STATES;
+import com.example.botfightwebserver.tournament.TOURNAMENT_SET_STATES;
 import com.example.botfightwebserver.tournament.TournamentGameMatch;
 import com.example.botfightwebserver.tournament.TournamentGameMatchService;
 import com.example.botfightwebserver.tournament.TournamentService;
@@ -67,7 +67,7 @@ public class GameMatchResultHandler {
             log.info("Validation match handled");
         } else if (gameMatch.getReason() == MATCH_REASON.TOURNAMENT) {
             log.info("Processing tournament match for team1 {} team2 {}", team1.getId(), team2.getId());
-            handleTournamentResult(team1, team2, status, gameMatch.getId());
+            handleTournamentResult(gameMatch.getId(), status, team1, team2);
         } else if (gameMatch.getReason() == MATCH_REASON.SCRIMMAGE) {
             log.info("Processing Scrimmage match for team1 {} team2 {}", team1.getId(), team2.getId());
             handleScrimmageResult(team1, team2, status);
@@ -100,26 +100,13 @@ public class GameMatchResultHandler {
         }
     }
 
-    private void handleTournamentResult(Team team1, Team team2, MATCH_STATUS status, Long matchId) {
-        TournamentGameMatch tournamentGameMatch = tournamentGameMatchService.findById(matchId);
-        Long challongePlayer1Id = tournamentGameMatch.getChallongePlayer1Id();
-        Long challongePlayer2Id = tournamentGameMatch.getChallongePlayer2Id();
-        Long tournamentId = tournamentGameMatch.getTournament().getId();
-        if (status == MATCH_STATUS.TEAM_ONE_WIN) {
-            tournamentService.updateMatchResult(tournamentId, Long.parseLong(tournamentGameMatch.getChallongeMatchId()), 1, 0,
-                challongePlayer1Id.toString());
-            tournamentGameMatch.setWinnerId(challongePlayer1Id);
-        } else if (status == MATCH_STATUS.TEAM_TWO_WIN) {
-            tournamentService.updateMatchResult(tournamentId, Long.parseLong(tournamentGameMatch.getChallongeMatchId()), 0, 1,
-                challongePlayer2Id.toString());
-            tournamentGameMatch.setWinnerId(challongePlayer2Id);
-        } else if (status == MATCH_STATUS.DRAW) {
-            throw new IllegalArgumentException("MATCH " + matchId + " ended in a draw");
-        }
-        tournamentGameMatch.setState(TOURNAMENT_MATCH_STATES.COMPLETE);
-        updateTeamStats(team1, team2, status, new GlickoChanges());
+    private void handleTournamentResult(Long gameMatchId, MATCH_STATUS status, Team team1, Team team2) {
+        TournamentGameMatch tournamentGameMatch = tournamentGameMatchService.findById(gameMatchId);
+        tournamentService.updateMatchResult(gameMatchId, status);
+//        updateTeamStats(team1, team2, status, new GlickoChanges());
         tournamentGameMatchService.save(tournamentGameMatch);
     }
+
 
     public void submitGameMatchResults(GameMatchResult result) {
         if (!gameMatchService.isGameMatchIdExist(result.matchId())) {

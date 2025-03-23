@@ -1,9 +1,11 @@
 package com.example.botfightwebserver.tournament;
 
 import com.example.botfightwebserver.config.ClockConfig;
+import com.example.botfightwebserver.gameMatch.GameMatch;
+import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.team.Team;
-import com.google.type.DateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,6 +26,9 @@ public class TournamentService {
 
     private final String CHALLONGE_API_BASE_URL = "https://api.challonge.com/v1/tournaments";
     private final RestTemplate restTemplate = new RestTemplate();
+    private final TournamentGameMatchService tournamentGameMatchService;
+    private final TournamentSetService tournamentSetService;
+    private final GameMatchService gameMatchService;
     @Value("${CHALLONGE_API_KEY}")
     private String apiKey;
 
@@ -31,6 +36,7 @@ public class TournamentService {
     private final TournamentRepository tournamentRepository;
     private final PlayerService playerService;
     private final TournamentTeamService tournamentTeamService;
+    private static final Integer MATCHES_TO_WIN = 2;
 
     public Tournament getTournament(Long tournamentId) {
         return tournamentRepository.findById(tournamentId).orElse(null);
@@ -162,16 +168,43 @@ public class TournamentService {
         return tournamentRepository.save(tournament);
     }
 
-    public void updateMatchResult(Long tournamentId, Long challongeMatchId, int player1Score, int player2Score, String winnerId) {
-        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(
-            () -> new IllegalArgumentException("Invalid tournament id: " + tournamentId)
-        );
+    public void updateMatchResult(Long tournamentMatchId, MATCH_STATUS matchStatus) {
+        TournamentGameMatch tournamentGameMatch = tournamentGameMatchService.findById(tournamentMatchId);
+        TournamentSet tournamentSet = tournamentGameMatch.getTournamentSet();
+        Tournament tournament = tournamentGameMatch.getTournament();
+        if (matchStatus == MATCH_STATUS.TEAM_ONE_WIN) {
+            tournamentSet.setTeamOneScore(tournamentSet.getTeamOneScore() + 1);
+        } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
+            tournamentSet.setTeamTwoScore(tournamentSet.getTeamTwoScore() + 1);
+        } else if (matchStatus == MATCH_STATUS.DRAW) {
+            throw new IllegalArgumentException("Match " + tournamentMatchId + " has ended in a draw");
+        }
+        tournamentSet = updateChallongeSet(tournament, tournamentSet);
 
+        GameMatch gameMatch = tournamentGameMatch.getGameMatch();
+        if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
+            gameMatchService.submitGameMatch(gameMatch.getTeamOne().getId(), gameMatch.getTeamTwo().getId(),
+                gameMatch.getSubmissionOne().getId(), gameMatch.getSubmissionTwo().getId(), gameMatch.getReason(),
+                "pillars");
+        }
+        tournamentSetService.save(tournamentSet);
+    }
+
+    public TournamentSet updateChallongeSet(Tournament tournament, TournamentSet tournamentSet) {
         Map<String, Object> matchData = new HashMap<>();
         Map<String, Object> wrapper = new HashMap<>();
+        int teamOneScore = tournamentSet.getTeamOneScore();
+        int teamTwoScore = tournamentSet.getTeamTwoScore();
+        String challongeMatchId = tournamentSet.getChallongeMatchId();
 
-        matchData.put("scores_csv", player1Score + "-" + player2Score);
-        matchData.put("winner_id", winnerId);
+        matchData.put("scores_csv", teamOneScore + "-" + teamTwoScore);
+        if (teamOneScore == MATCHES_TO_WIN) {
+            matchData.put("winner_id", tournamentSet.getChallongePlayer1Id());
+            tournamentSet.setState(TOURNAMENT_SET_STATES.COMPLETE);
+        } else if (teamTwoScore == MATCHES_TO_WIN) {
+            matchData.put("winner_id", tournamentSet.getChallongePlayer2Id());
+            tournamentSet.setState(TOURNAMENT_SET_STATES.COMPLETE);
+        }
 
         wrapper.put("api_key", apiKey);
         wrapper.put("match", matchData);
@@ -185,6 +218,7 @@ public class TournamentService {
             "/matches/" + challongeMatchId + ".json";
 
         restTemplate.put(url, requestEntity);
+        return tournamentSet;
     }
 
     private List<ChallongeMatchDTO> processMatchesResponse(Map<String, Object>[] matchesData) {
@@ -199,7 +233,7 @@ public class TournamentService {
                     .matchId(match.get("id").toString())
                     .challongePlayer1Id(Long.parseLong(match.get("player1_id").toString()))
                     .challongePlayer2Id(Long.parseLong(match.get("player2_id").toString()))
-                    .state(TOURNAMENT_MATCH_STATES.fromString((String) match.get("state")))
+                    .state(TOURNAMENT_SET_STATES.fromString((String) match.get("state")))
                     .build());
             }
         }

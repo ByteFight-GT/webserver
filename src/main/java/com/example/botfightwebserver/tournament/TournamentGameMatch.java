@@ -39,16 +39,8 @@ public class TournamentGameMatch {
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
-    private Integer round;
-
-    private String challongeMatchId;
-
-    private Long challongePlayer1Id;
-
-    private Long challongePlayer2Id;
-
-    private Long winnerId;
-
-    private TOURNAMENT_MATCH_STATES state;
+    @ManyToOne
+    @JoinColumn(name = "tournament_set")
+    private TournamentSet tournamentSet;
 
 }

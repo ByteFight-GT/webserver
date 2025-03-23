@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -192,24 +193,45 @@ public class GameMatchService {
     }
 
     public List<GameMatchDTO> getPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED)).stream().map(GameMatchDTO::fromEntity).toList();
+        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED))
+            .stream()
+            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
+            .map(GameMatchDTO::fromEntity)
+            .toList();
     }
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        Page<GameMatchDTO> pageResponse = gameMatchRepository.findTeamMatches(teamId,
-            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable).map(GameMatchDTO::fromEntity);
-        return pageResponse;
+        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
+            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable);
+
+        List<GameMatchDTO> filteredMatches = matches.getContent()
+            .stream()
+            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
+            .map(GameMatchDTO::fromEntity)
+            .toList();
+
+        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
     }
 
     public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         System.out.println("Team id " + teamId + " other team Id " + otherTeamId);
-        Page<GameMatchDTO> pageResponse =
-            gameMatchRepository.findTeamMatches(teamId, otherTeamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), pageable).map(GameMatchDTO::fromEntity);
-        return pageResponse;
-    }
 
+        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
+            teamId,
+            otherTeamId,
+            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED),
+            pageable);
+
+        List<GameMatchDTO> filteredMatches = matches.getContent()
+            .stream()
+            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
+            .map(GameMatchDTO::fromEntity)
+            .toList();
+
+        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
+    }
     public StatsDTO getTeamStatsByMatchReason(Long teamId, MATCH_REASON reason) {
         List<GameMatch> matches = gameMatchRepository.findTeamMatchesByReason(teamId, List.of(reason));
         int wins = 0;

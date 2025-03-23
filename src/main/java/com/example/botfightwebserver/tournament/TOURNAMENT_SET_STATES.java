@@ -1,13 +1,13 @@
 package com.example.botfightwebserver.tournament;
 
-public enum TOURNAMENT_MATCH_STATES {
+public enum TOURNAMENT_SET_STATES {
     PENDING("pending"),
     OPEN("open"),
     COMPLETE("complete");
 
     private final String state;
 
-    TOURNAMENT_MATCH_STATES(String state) {
+    TOURNAMENT_SET_STATES(String state) {
         this.state = state;
     }
 
@@ -15,8 +15,8 @@ public enum TOURNAMENT_MATCH_STATES {
         return state;
     }
 
-    public static TOURNAMENT_MATCH_STATES fromString(String text) {
-        for (TOURNAMENT_MATCH_STATES state : TOURNAMENT_MATCH_STATES.values()) {
+    public static TOURNAMENT_SET_STATES fromString(String text) {
+        for (TOURNAMENT_SET_STATES state : TOURNAMENT_SET_STATES.values()) {
             if (state.state.equalsIgnoreCase(text)) {
                 return state;
             }
