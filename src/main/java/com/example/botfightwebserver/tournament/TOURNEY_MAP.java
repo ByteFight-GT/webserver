@@ -9,6 +9,7 @@ public enum TOURNEY_MAP {
     COMPASSS("compasss"),
     RECURVE("recurve"),
     SSSPIRAL("ssspiral"),
+    DIAMONDS("diamonds"),
     ATTRITION("attrition");
 
     private final String mapName;

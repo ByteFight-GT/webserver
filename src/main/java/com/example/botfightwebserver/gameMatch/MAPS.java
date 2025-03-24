@@ -9,7 +9,14 @@ public enum MAPS {
     EMPTY("empty"),
     EMPTY_LARGE("empty_large"),
     SSSPLINE("ssspline"),
-    COMBUSTIBLE_LEMONS("combustible_lemons"),;
+    COMBUSTIBLE_LEMONS("combustible_lemons"),
+    ARENA("arena"),
+    LADDER("ladder"),
+    COMPASSS("compasss"),
+    RECURVE("recurve"),
+    SSSPIRAL("ssspiral"),
+    DIAMONDS("diamonds"),
+    ATTRITION("attrition");
 
     private final String mapName;
     private static final Random random = new Random();
