@@ -1,19 +1,15 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.team.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,7 +71,7 @@ public class GameMatchController {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeamId();
-        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
+        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
     }
 
     @GetMapping("/public/logs/paginated")
@@ -86,9 +82,9 @@ public class GameMatchController {
         @RequestParam(required = false) Long otherTeamId
     ) {
         if (otherTeamId != null) {
-            return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, otherTeamId, page, size));
+            return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, otherTeamId, page, size));
         }
-        return ResponseEntity.ok(gameMatchService.getPlayedTeamMatches(teamId, page, size));
+        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
     }
 
     @GetMapping("/public/stats")

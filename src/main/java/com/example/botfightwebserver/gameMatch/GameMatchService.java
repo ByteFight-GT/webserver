@@ -9,7 +9,6 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -192,28 +191,28 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatchDTO> getAllPlayedTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED)).stream()
+    public List<GameMatchDTO> getAllTeamMatches(Long teamId) {
+        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.FAILED)).stream()
             .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
             .map(GameMatchDTO::fromEntity)
             .toList();
     }
 
-    public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
-            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
+            List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
 
-    public Page<GameMatchDTO> getPlayedTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
             teamId,
             otherTeamId,
-            List.of(MATCH_STATUS.WAITING, MATCH_STATUS.FAILED),
+            List.of(MATCH_STATUS.FAILED),
             List.of(MATCH_REASON.TOURNAMENT),
             pageable);
 

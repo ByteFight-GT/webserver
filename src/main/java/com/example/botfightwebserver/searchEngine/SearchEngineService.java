@@ -61,7 +61,7 @@ public class SearchEngineService {
                                          Optional<String> map,
                                          Pageable pageable) {
 
-        List<GameMatchDTO> allMatches = gameMatchService.getAllPlayedTeamMatches(requiredTeamId.get());
+        List<GameMatchDTO> allMatches = gameMatchService.getAllTeamMatches(requiredTeamId.get());
         if (teamSearchparam.isPresent()) {
             SearchResult<Team> result = searchSession.search(Team.class)
                 .where(f -> f.match()
