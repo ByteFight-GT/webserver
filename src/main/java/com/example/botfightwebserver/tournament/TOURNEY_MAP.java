@@ -3,14 +3,15 @@ package com.example.botfightwebserver.tournament;
 import java.util.Arrays;
 import java.util.Random;
 
+
 public enum TOURNEY_MAP {
-    ARENA("arena"),
-    LADDER("ladder"),
-    COMPASSS("compasss"),
-    RECURVE("recurve"),
-    SSSPIRAL("ssspiral"),
-    DIAMONDS("diamonds"),
-    ATTRITION("attrition");
+    TALL_GRASS("tall_grass"),
+    ZIGGURAT("ziggurat"),
+    RIFT("rift"),
+    TICTACTOE("tictactoe"),
+    STEPS("steps"),
+    MIRROR("mirror"),
+    MAZE("maze");
 
     private final String mapName;
     private static final Random random = new Random();
