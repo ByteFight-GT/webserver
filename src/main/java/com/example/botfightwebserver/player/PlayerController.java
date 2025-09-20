@@ -85,9 +85,8 @@ public class PlayerController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<PlayerDTO> getMe() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(UUID.fromString(authId))));
+    public ResponseEntity<PlayerDTO> getMe(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(user)));
     }
 
 

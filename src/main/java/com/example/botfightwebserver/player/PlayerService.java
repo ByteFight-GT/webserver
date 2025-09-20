@@ -80,6 +80,10 @@ public class PlayerService {
         return playerRepository.findByUserUuid(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
     }
 
+    public Player getPlayer(User user) {
+        return playerRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Player not found"));
+    }
+
     public boolean isUsernameExist(String username) {
         System.out.println(username);
         return playerRepository.existsByName(username);
