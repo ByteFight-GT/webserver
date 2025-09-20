@@ -1,18 +1,10 @@
 package com.example.botfightwebserver.player;
 
+import com.example.botfightwebserver.auth.User;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.team.Team;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,17 +26,15 @@ import java.util.UUID;
 @Setter
 @Builder
 public class Player {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private UUID authId;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     private String name;
-
-    private String email;
 
     private Long teamId;
 

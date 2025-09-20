@@ -25,7 +25,7 @@ public class PlayerDTO {
         return PlayerDTO.builder()
             .id(player.getId())
             .name(player.getName())
-            .email(player.getEmail())
+            .email(player.getUser().getEmail())
             .teamId(player.getTeamId())
             .hasTeam(player.isHasTeam())
             .creationDateTime(player.getCreationDateTime())

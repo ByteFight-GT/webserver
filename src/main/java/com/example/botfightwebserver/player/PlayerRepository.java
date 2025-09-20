@@ -9,9 +9,9 @@ import java.util.UUID;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-    boolean existsByEmail(String email);
+    boolean existsByUserEmail(String email);
     List<Player> findByTeamId(Long teamId);
-    Optional<Player> findByAuthId(UUID authId);
-    boolean existsByAuthId(UUID authId);
+    Optional<Player> findByUserUuid(UUID authId);
+    boolean existsByUserUuid(UUID authId);
     boolean existsByName(String name);
 }

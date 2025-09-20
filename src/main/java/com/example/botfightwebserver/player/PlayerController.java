@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.player;
 
+import com.example.botfightwebserver.auth.User;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,18 +35,17 @@ public class PlayerController {
     @GetMapping("/players")
     public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
         return ResponseEntity.ok(playerService.getPlayers().stream()
-            .map(PlayerDTO::fromEntity)
-            .toList());
+                .map(PlayerDTO::fromEntity)
+                .toList());
     }
 
     @PostMapping("/create")
     public ResponseEntity<PlayerDTO> createPlayer(
-        @RequestParam String name,
-        @RequestParam String email,
-        @RequestParam(required = false) Long teamId) {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            @AuthenticationPrincipal User user,
+            @RequestParam String name,
+            @RequestParam(required = false) Long teamId) {
         return ResponseEntity.ok(PlayerDTO.fromEntity(
-            playerService.createPlayer(name, email, UUID.fromString(authId), teamId)));
+                playerService.createPlayer(user, name, teamId)));
     }
 
     @PostMapping("/team")
@@ -57,7 +58,7 @@ public class PlayerController {
         Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
         teamService.incrementTeamMembers(teamId);
         return ResponseEntity.ok(PlayerDTO.fromEntity(player
-            ));
+        ));
     }
 
     @PostMapping("/join-team")
@@ -97,7 +98,6 @@ public class PlayerController {
     }
 
 
-
     @GetMapping("/public/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean isAvailable = !playerService.isUsernameExist(username);
@@ -135,7 +135,7 @@ public class PlayerController {
 
     @GetMapping("/public/check-email/{email}")
     public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
-        boolean isAvailable = ! playerService.isEmailExist(email);
+        boolean isAvailable = !playerService.isEmailExist(email);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
 

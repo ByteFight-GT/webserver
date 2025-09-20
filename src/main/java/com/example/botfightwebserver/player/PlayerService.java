@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.player;
 ;
+import com.example.botfightwebserver.auth.User;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,11 @@ public class PlayerService {
             .toList();
     }
 
-    public Player createPlayer(String name, String email, UUID authId, Long teamId) {
-        if (playerRepository.existsByEmail(email)) {throw new IllegalArgumentException("Player with email " + email + " already exists");
-        }
+    public Player createPlayer(User user, String name, Long teamId) {
         Player player = new Player();
         player.setName(name);
-        player.setEmail(email);
         player.setTeamId(teamId);
-        player.setAuthId(authId);
+        player.setUser(user);
         return playerRepository.save(player);
     }
 
@@ -43,20 +41,20 @@ public class PlayerService {
 
     public Player setPlayerTeam(UUID playerId, Long teamId) {
         permissionsService.validateAllowJoinTeam();
-        if (!playerRepository.existsByAuthId(playerId)) {
+        if (!playerRepository.existsByUserUuid(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
-        Player player = playerRepository.findByAuthId(playerId).orElse(null);
+        Player player = playerRepository.findByUserUuid(playerId).orElse(null);
         player.setTeamId(teamId);
         player.setHasTeam(true);
         return playerRepository.save(player);
     }
 
     public Long leaveTeam(UUID playerId) {
-        if (!playerRepository.existsByAuthId(playerId)) {
+        if (!playerRepository.existsByUserUuid(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
-        Player player = playerRepository.findByAuthId(playerId).orElse(null);
+        Player player = playerRepository.findByUserUuid(playerId).orElse(null);
         Long oldTeamId = player.getTeamId();
         player.setHasTeam(false);
         player.setTeamId(null);
@@ -79,7 +77,7 @@ public class PlayerService {
         if (authId == null) {
             throw new IllegalArgumentException("Auth id cannot be null");
         }
-        return playerRepository.findByAuthId(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
+        return playerRepository.findByUserUuid(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
     }
 
     public boolean isUsernameExist(String username) {
@@ -88,7 +86,7 @@ public class PlayerService {
     }
 
     public boolean isEmailExist(String email) {
-        return playerRepository.existsByEmail(email);
+        return playerRepository.existsByUserEmail(email);
     }
 
     public Long getTeamFromUUID(UUID uuid) {
