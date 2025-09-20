@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.security;
 
+import com.example.botfightwebserver.auth.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,13 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -34,50 +40,50 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private final HandlerExceptionResolver handlerExceptionResolver;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
-    @Value("${JWT_SECRET}")
-    private String jwtSecret;
-
-    @Value("${ADMINS}")
-    private String admins;
-
-    private Set<String> adminIds;
-
-    @PostConstruct  // Load admins when bean is created
-    public void loadAdmins() {
-        adminIds=Arrays.stream(StringUtils.trimAllWhitespace(admins).split(",")).collect(Collectors.toSet());
+    public JwtAuthFilter(HandlerExceptionResolver handlerExceptionResolver, JwtService jwtService, UserDetailsService userDetailsService) {
+        this.handlerExceptionResolver = handlerExceptionResolver;
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
     }
-
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-            try {
-                Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-                String userId = claims.getSubject();
-                List<String> roles = new ArrayList<>();
-                roles.add("USER");
-                if (adminIds.contains(userId)) {
-                    roles.add("ADMIN");
-                }
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring Security expects "ROLE_" prefix
-                    .toList();
-                SecurityContext context = SecurityContextHolder.createEmptyContext();
-                context.setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, authorities));
-                SecurityContextHolder.setContext(context);
-            } catch (JwtException e) {
-                System.out.println("blocked because try fail" + e.getMessage());
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "idk whats happening " + e.getMessage());
-                return;
-            }
+            throws ServletException, IOException {
+        final String authHeader = request.getHeader("Authorization");
+
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
-        filterChain.doFilter(request, response);
+
+        try {
+            final String jwt = authHeader.substring(7);
+            final String userEmail = jwtService.extractUsername(jwt);
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (userEmail != null && authentication == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+                if(jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+
+            filterChain.doFilter(request, response);
+        } catch(Exception exception) {
+            handlerExceptionResolver.resolveException(request, response, null, exception);
+        }
     }
 }

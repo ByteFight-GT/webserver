@@ -52,8 +52,11 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.18.3")
     testImplementation("org.testcontainers:junit-jupiter:1.18.3")
     testImplementation("org.postgresql:postgresql")
-    testImplementation("com.h2database:h2")
+    runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.security:spring-security-test")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
 dependencyManagement {
