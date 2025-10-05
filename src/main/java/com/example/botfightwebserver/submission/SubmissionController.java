@@ -40,7 +40,7 @@ public class SubmissionController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(defaultValue = "false") Boolean isAutoSet
     ) {
-//        permissionsService.validateAllowNewSubmission();
+        permissionsService.validateAllowNewSubmission();
 
         Player player = playerService.getPlayer(user);
         Long teamId = player.getTeamId();

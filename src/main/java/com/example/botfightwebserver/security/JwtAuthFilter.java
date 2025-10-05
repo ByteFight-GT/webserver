@@ -1,6 +1,8 @@
 package com.example.botfightwebserver.security;
 
 import com.example.botfightwebserver.auth.JwtService;
+import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,13 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,11 +39,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
-    public JwtAuthFilter(HandlerExceptionResolver handlerExceptionResolver, JwtService jwtService, UserDetailsService userDetailsService) {
-        this.handlerExceptionResolver = handlerExceptionResolver;
-        this.jwtService = jwtService;
+    @Value("${ADMINS}")
+    private String admins;
+
+    private Set<String> adminIds;
+
+    @PostConstruct  // Load admins when bean is created
+    public void loadAdmins() {
+        adminIds=Arrays.stream(StringUtils.trimAllWhitespace(admins).split(",")).collect(Collectors.toSet());
+    }
+
+    public JwtAuthFilter(UserRepository userRepository, UserDetailsService userDetailsService, JwtService jwtService, HandlerExceptionResolver handlerExceptionResolver) {
+        this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
+        this.jwtService = jwtService;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
@@ -69,11 +77,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
+                Optional<User> user = userRepository.findByEmail(userEmail);
+                List<String> roles = new ArrayList<>();
+                roles.add("USER");
+                if (user.isPresent() && adminIds.contains(user.get().getUuid().toString())) {
+                    roles.add("ADMIN");
+                }
+
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring Security expects "ROLE_" prefix
+                        .toList();
+
                 if(jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
+                            authorities
                     );
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

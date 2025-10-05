@@ -62,8 +62,7 @@ public class TeamController {
 
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
-//        permissionsService.validateAllowCreateTeam();
-//        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        permissionsService.validateAllowCreateTeam();
         Team team = teamService.createTeam(name);
         playerService.setPlayerTeam(user.getUuid(), team.getId());
         return ResponseEntity.ok(TeamDTO.fromEntity(team));
