@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.scrimmageMatch;
 
+import com.example.botfightwebserver.auth.User;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,14 +41,13 @@ public class ScrimmageMatchController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@RequestParam Integer number,
+    public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@AuthenticationPrincipal User user,
+                                                                        @RequestParam Integer number,
                                                                         @RequestParam String map,
                                                                         @RequestParam(required = false) Long team2Id) {
 
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long team1Id = playerService.getTeamFromUUID(UUID.fromString(authId));
+        Long team1Id = playerService.getTeamFromUUID(user.getUuid());
         if (team2Id == null) {
-            // scrimmage against self
             team2Id = team1Id;
         }
         Team team = teamService.getReferenceById(team1Id);
