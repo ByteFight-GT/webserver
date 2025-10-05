@@ -40,7 +40,7 @@ public class PlayerService {
     }
 
     public Player setPlayerTeam(UUID playerId, Long teamId) {
-        permissionsService.validateAllowJoinTeam();
+//        permissionsService.validateAllowJoinTeam();
         if (!playerRepository.existsByUserUuid(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }

@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team;
 
+import com.example.botfightwebserver.auth.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,9 +52,8 @@ public class TeamController {
     }
 
     @GetMapping("/my-team")
-    public ResponseEntity<TeamDTO> getTeam() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
+    public ResponseEntity<TeamDTO> getTeam(@AuthenticationPrincipal User user) {
+        Player player = playerService.getPlayer(user);
         if (!player.isHasTeam()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -60,11 +61,11 @@ public class TeamController {
     }
 
     @PostMapping
-    public ResponseEntity<TeamDTO> createTeam(@RequestParam String name) {
-        permissionsService.validateAllowCreateTeam();
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+    public ResponseEntity<TeamDTO> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
+//        permissionsService.validateAllowCreateTeam();
+//        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Team team = teamService.createTeam(name);
-        playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
+        playerService.setPlayerTeam(user.getUuid(), team.getId());
         return ResponseEntity.ok(TeamDTO.fromEntity(team));
     }
 
@@ -107,9 +108,8 @@ public class TeamController {
     }
 
     @GetMapping("/my-glicko-history")
-    public ResponseEntity<List<GlickoHistoryDTO>> getMyGlickoHistory() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
+    public ResponseEntity<List<GlickoHistoryDTO>> getMyGlickoHistory(@AuthenticationPrincipal User user) {
+        Long teamId = playerService.getTeamFromUUID(user.getUuid());
         Team team = teamService.getReferenceById(teamId);
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
             glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
