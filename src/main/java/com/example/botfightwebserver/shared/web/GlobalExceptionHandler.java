@@ -3,6 +3,8 @@ package com.example.botfightwebserver.shared.web;
 import com.example.botfightwebserver.auth.domain.RegistrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -35,9 +37,13 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-
     @ExceptionHandler(RegistrationException.class)
     ProblemDetail handleRegistration(RegistrationException ex) {
         return problem(HttpStatus.CONFLICT, "Registration Error", ex.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    ProblemDetail handleAuth(BadCredentialsException ex) {
+        return problem(HttpStatus.UNAUTHORIZED, "Login Failed", "Invalid credentials.");
     }
 }

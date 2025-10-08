@@ -3,6 +3,7 @@ package com.example.botfightwebserver.auth.application;
 import com.example.botfightwebserver.auth.domain.*;
 import com.example.botfightwebserver.auth.infra.UserRepository;
 import com.example.botfightwebserver.player.PlayerRepository;
+import com.example.botfightwebserver.player.PlayerService;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ public class AuthenticationService {
     private final PlayerRepository playerRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final PlayerService playerService;
 
     static String normalize(String raw) {
         return raw == null ? null : raw.trim().toLowerCase();
@@ -38,7 +40,11 @@ public class AuthenticationService {
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(input.getPassword()));
 
-        return userRepository.save(user);
+        user = userRepository.save(user);
+
+        playerService.createPlayer(user, input.getName(), null);
+
+        return user;
     }
 
     public User authenticate(LoginUserDto input) {

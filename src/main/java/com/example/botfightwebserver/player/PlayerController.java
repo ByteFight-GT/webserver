@@ -39,15 +39,6 @@ public class PlayerController {
                 .toList());
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<PlayerDTO> createPlayer(
-            @AuthenticationPrincipal User user,
-            @RequestParam String name,
-            @RequestParam(required = false) Long teamId) {
-        return ResponseEntity.ok(PlayerDTO.fromEntity(
-                playerService.createPlayer(user, name, teamId)));
-    }
-
     @PostMapping("/team")
     public ResponseEntity<PlayerDTO> assignTeam(@RequestParam Long teamId) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();

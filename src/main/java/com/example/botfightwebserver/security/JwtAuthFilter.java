@@ -92,8 +92,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
-        } catch(Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
+        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
         }
     }
 }
