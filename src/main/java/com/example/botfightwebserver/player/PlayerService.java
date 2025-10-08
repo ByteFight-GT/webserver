@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.player;
 ;
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

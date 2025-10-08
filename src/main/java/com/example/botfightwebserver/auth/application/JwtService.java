@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.auth;
+package com.example.botfightwebserver.auth.application;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

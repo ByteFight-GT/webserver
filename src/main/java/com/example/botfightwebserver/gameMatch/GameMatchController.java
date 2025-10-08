@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.team.StatsDTO;
@@ -11,7 +11,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor

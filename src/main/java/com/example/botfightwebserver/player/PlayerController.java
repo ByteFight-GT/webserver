@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.player;
 
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;

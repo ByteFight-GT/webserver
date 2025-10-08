@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.config;
 
-import com.example.botfightwebserver.auth.UserRepository;
+import com.example.botfightwebserver.auth.infra.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

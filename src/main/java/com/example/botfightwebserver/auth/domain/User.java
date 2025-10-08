@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.auth;
+package com.example.botfightwebserver.auth.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class User implements UserDetails {
     @JdbcTypeCode(SqlTypes.UUID)
     private java.util.UUID uuid;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)

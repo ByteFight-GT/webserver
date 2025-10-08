@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.scrimmageMatch;
 
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;

@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.submission;
 
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
@@ -16,7 +16,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

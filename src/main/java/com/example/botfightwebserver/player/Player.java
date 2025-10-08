@@ -1,8 +1,6 @@
 package com.example.botfightwebserver.player;
 
-import com.example.botfightwebserver.auth.User;
-import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.auth.domain.User;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,13 +8,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table
@@ -34,6 +32,7 @@ public class Player {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    @Unique
     private String name;
 
     private Long teamId;

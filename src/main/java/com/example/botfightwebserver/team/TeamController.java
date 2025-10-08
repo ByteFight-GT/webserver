@@ -1,13 +1,12 @@
 package com.example.botfightwebserver.team;
 
-import com.example.botfightwebserver.auth.User;
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.Player;
 import com.example.botfightwebserver.player.PlayerService;
-import io.opencensus.stats.Stats;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

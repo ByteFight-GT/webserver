@@ -1,24 +1,25 @@
-package com.example.botfightwebserver.auth;
+package com.example.botfightwebserver.auth.infra;
 
+import com.example.botfightwebserver.auth.application.AuthenticationService;
+import com.example.botfightwebserver.auth.application.JwtService;
+import com.example.botfightwebserver.auth.domain.LoginUserDto;
+import com.example.botfightwebserver.auth.domain.RegisterUserDto;
+import com.example.botfightwebserver.auth.domain.User;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/v1/auth")
 @RestController
+@RequiredArgsConstructor
 public class AuthenticationController {
     private final JwtService jwtService;
-
     private final AuthenticationService authenticationService;
 
     public record LoginResponse(String token, long expiresIn) {
 
-    }
-
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
     }
 
     @GetMapping("/me")
