@@ -32,16 +32,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
 
-    @Value("${ADMINS}")
-    private String admins;
-
-    private Set<String> adminIds;
-
-    @PostConstruct  // Load admins when bean is created
-    public void loadAdmins() {
-        adminIds=Arrays.stream(StringUtils.trimAllWhitespace(admins).split(",")).collect(Collectors.toSet());
-    }
-
     public JwtAuthFilter(UserRepository userRepository, UserDetailsService userDetailsService, JwtService jwtService, HandlerExceptionResolver handlerExceptionResolver) {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
@@ -68,11 +58,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                Optional<User> user = userRepository.findByEmail(userEmail);
+                Optional<User> userOpt = userRepository.findByEmail(userEmail);
                 List<String> roles = new ArrayList<>();
-                roles.add("USER");
-                if (user.isPresent() && adminIds.contains(user.get().getUuid().toString())) {
-                    roles.add("ADMIN");
+
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    if(user.isAdmin()) roles.add("ADMIN");
                 }
 
                 List<SimpleGrantedAuthority> authorities = roles.stream()
