@@ -4,26 +4,38 @@ import com.example.botfightwebserver.auth.domain.*;
 import com.example.botfightwebserver.auth.infra.UserRepository;
 import com.example.botfightwebserver.player.PlayerRepository;
 import com.example.botfightwebserver.player.PlayerService;
-import jakarta.validation.constraints.Email;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class UserService {
     private final UserRepository userRepository;
     private final PlayerRepository playerRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final PlayerService playerService;
+    private final SupabaseService supabaseService;
 
     static String normalize(String raw) {
         return raw == null ? null : raw.trim().toLowerCase();
     }
 
+    @Transactional
+    public User createFromJwt(Jwt jwt) {
+        UUID uuid = UUID.fromString(jwt.getSubject());
+        String email = (String) jwt.getClaims().get("email");
+
+        User u = new User();
+        u.setUuid(uuid);
+        u.setEmail(email.toLowerCase());
+        return userRepository.save(u);
+    }
+
+    @Transactional
     public User signup(RegisterUserDto input) {
         String normalizedEmail = normalize(input.getEmail());
         String normalizedUsername = normalize(input.getName());
@@ -36,26 +48,19 @@ public class AuthenticationService {
             throw new UsernameAlreadyExistsException(input.getName());
         }
 
-        User user = new User();
-        user.setEmail(normalizedEmail);
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
+        try {
+            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), true, Map.of(), Map.of());
 
-        user = userRepository.save(user);
+            User user = new User();
+            user.setUuid(UUID.fromString(supabaseUser.id()));
+            user.setEmail(normalizedEmail);
+            user = userRepository.save(user);
 
-        playerService.createPlayer(user, input.getName(), null);
+            playerService.createPlayer(user, input.getName(), null);
 
-        return user;
-    }
-
-    public User authenticate(LoginUserDto input) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.email(),
-                        input.password()
-                )
-        );
-
-        return userRepository.findByEmail(input.email())
-                .orElseThrow();
+            return user;
+        } catch(SupabaseService.SupabaseServiceException e) {
+            throw new RegistrationException(e.getMessage());
+        }
     }
 }
