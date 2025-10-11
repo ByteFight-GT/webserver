@@ -1,8 +1,6 @@
 package com.example.botfightwebserver.auth.infra;
 
-import com.example.botfightwebserver.auth.application.AuthenticationService;
-import com.example.botfightwebserver.auth.application.JwtService;
-import com.example.botfightwebserver.auth.domain.LoginUserDto;
+import com.example.botfightwebserver.auth.application.UserService;
 import com.example.botfightwebserver.auth.domain.RegisterUserDto;
 import com.example.botfightwebserver.auth.domain.User;
 import jakarta.validation.Valid;
@@ -15,12 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
-
-    public record LoginResponse(String token, long expiresIn) {
-
-    }
+    private final UserService userService;
 
     @GetMapping("/me")
     public ResponseEntity<User> me(@AuthenticationPrincipal User user) {
@@ -29,17 +22,8 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+        userService.signup(registerUserDto);
 
-        return ResponseEntity.ok(registeredUser);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(null);
     }
 }
