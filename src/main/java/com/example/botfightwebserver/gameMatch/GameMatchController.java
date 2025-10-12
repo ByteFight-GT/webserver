@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

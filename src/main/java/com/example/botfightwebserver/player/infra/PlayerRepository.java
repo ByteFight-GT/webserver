@@ -1,6 +1,7 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.player.domain.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

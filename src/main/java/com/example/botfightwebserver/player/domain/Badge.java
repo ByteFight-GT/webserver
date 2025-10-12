@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.domain;
 
 public enum Badge {
     TOURNAMENT_WINNER(1, "Tournament Winner"),

@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.domain;
 
 import com.example.botfightwebserver.auth.domain.User;
 import com.google.common.annotations.VisibleForTesting;

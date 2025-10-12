@@ -2,8 +2,8 @@ package com.example.botfightwebserver.auth.application;
 
 import com.example.botfightwebserver.auth.domain.*;
 import com.example.botfightwebserver.auth.infra.UserRepository;
-import com.example.botfightwebserver.player.PlayerRepository;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.player.infra.PlayerRepository;
+import com.example.botfightwebserver.player.application.PlayerService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;

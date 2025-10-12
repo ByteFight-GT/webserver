@@ -1,7 +1,9 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.application;
 ;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.infra.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
