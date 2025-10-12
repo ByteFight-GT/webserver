@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.auth.domain;
 
+import com.example.botfightwebserver.player.domain.PlayerUsername;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,11 +17,6 @@ public class RegisterUserDto {
     @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 20, message = "Username must be 3–20 characters")
-    @Pattern(
-            regexp = "^[A-Za-z0-9_]+$",
-            message = "Username can only contain letters, numbers, and underscores"
-    )
+    @PlayerUsername
     private String name;
 }
