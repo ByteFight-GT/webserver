@@ -25,9 +25,7 @@ public class JwtToUserAuthenticationConverter implements Converter<Jwt, Abstract
     public AbstractAuthenticationToken convert(Jwt jwt) {
         UUID sub = UUID.fromString(jwt.getSubject());
 
-        User user = userRepository.findByUuid(sub).orElseGet(() ->
-                userService.createFromJwt(jwt)
-        );
+        User user = userRepository.findByUuid(sub).orElseThrow();
 
         List<GrantedAuthority> auths = new ArrayList<>();
         auths.add(new SimpleGrantedAuthority("ROLE_USER"));

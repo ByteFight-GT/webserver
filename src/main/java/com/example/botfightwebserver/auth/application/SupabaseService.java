@@ -1,4 +1,3 @@
-// SupabaseService.java
 package com.example.botfightwebserver.auth.application;
 
 import com.example.botfightwebserver.auth.infra.SupabaseProperties;
