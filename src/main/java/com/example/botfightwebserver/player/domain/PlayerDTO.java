@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

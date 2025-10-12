@@ -1,6 +1,10 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.domain.PlayerDTO;
+import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.PlayerUsername;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -95,14 +99,13 @@ public class PlayerController {
     }
 
     @PostMapping("/name")
-    public ResponseEntity<Map<String, String>> updateName(@RequestParam String name) {
+    public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
         name = name.trim();
         boolean isAvailable = !playerService.isUsernameExist(name);
         if (!isAvailable) {
             throw new IllegalArgumentException("Name " + name + " is not available");
         }
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Player player = playerService.getPlayer(user);
         if (player.getName().equals(name)) {
             return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
         }
