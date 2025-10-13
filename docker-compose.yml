@@ -31,12 +31,6 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/test
-      SPRING_DATASOURCE_USERNAME: test
-      SPRING_DATASOURCE_PASSWORD: password
-      RABBIT_HOST: amqp://guest:guest@rabbit:5672
     ports:
       - "8080:8080"
 
