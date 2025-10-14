@@ -3,7 +3,8 @@ package com.example.botfightwebserver.player.domain;
 public enum Badge {
     TOURNAMENT_WINNER(1, "Tournament Winner"),
     EARLY_ADOPTER(1 << 1, "Early Adopter"),
-    TOP_CONTRIBUTOR(1 << 2, "Top Contributor");
+    TOP_CONTRIBUTOR(1 << 2, "Top Contributor"),
+    ADMIN(1 << 3, "ADMIN")    ;
 
     private final int bitFlag;
     private final String displayName;
