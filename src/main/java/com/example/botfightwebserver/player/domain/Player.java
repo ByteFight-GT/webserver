@@ -76,6 +76,11 @@ public class Player {
                 badges.add(badge.getDisplayName());
             }
         }
+
+        if(user.isAdmin()) {
+            badges.add(Badge.ADMIN.getDisplayName());
+        }
+
         return badges;
     }
 }
