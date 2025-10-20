@@ -2,9 +2,10 @@ package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.player.domain.Player;
-import com.example.botfightwebserver.player.domain.PlayerDTO;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.PlayerUsername;
+import com.example.botfightwebserver.player.domain.PublicPlayerDto;
+import com.example.botfightwebserver.player.domain.SelfPlayerDto;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -34,19 +35,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Validated
 public class PlayerController {
-
     private final PlayerService playerService;
     private final TeamService teamService;
 
-    @GetMapping("/players")
-    public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
-        return ResponseEntity.ok(playerService.getPlayers().stream()
-                .map(PlayerDTO::fromEntity)
-                .toList());
-    }
-
     @PostMapping("/team")
-    public ResponseEntity<PlayerDTO> assignTeam(@RequestParam Long teamId) {
+    public ResponseEntity<PublicPlayerDto> assignTeam(@RequestParam Long teamId) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Team team = teamService.getReferenceById(teamId);
         if (!teamService.isTeamJoinable(team)) {
@@ -54,44 +47,30 @@ public class PlayerController {
         }
         Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
         teamService.incrementTeamMembers(teamId);
-        return ResponseEntity.ok(PlayerDTO.fromEntity(player
+        return ResponseEntity.ok(PublicPlayerDto.from(player
         ));
     }
 
     @PostMapping("/join-team")
-    public ResponseEntity<PlayerDTO> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
+    public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
         Team team = teamService.findTeamByCode(teamCode);
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
         Player player = playerService.setPlayerTeam(user.getUuid(), team.getId());
         teamService.incrementTeamMembers(team.getId());
-        return ResponseEntity.ok(PlayerDTO.fromEntity(player));
+        return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
 
     @GetMapping("/player")
-    public ResponseEntity<PlayerDTO> getPlayerById(@RequestParam Long id) {
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(id)));
+    public ResponseEntity<PublicPlayerDto> getPlayerById(@RequestParam Long id) {
+        return ResponseEntity.ok(PublicPlayerDto.from(playerService.getPlayer(id)));
     }
-
-    @GetMapping("/player-auth")
-    public ResponseEntity<PlayerDTO> getPlayerByAuthId(@RequestParam String authId) {
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(UUID.fromString(authId))));
-    }
-
 
     @GetMapping("/me")
-    public ResponseEntity<PlayerDTO> getMe(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(user)));
+    public ResponseEntity<SelfPlayerDto> getMe(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(SelfPlayerDto.from(playerService.getPlayer(user)));
     }
-
-
-    public boolean hasAccess(UUID requestedAuthId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = (String) auth.getPrincipal();
-        return currentUserId.equals(requestedAuthId.toString());
-    }
-
 
     @GetMapping("/public/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
@@ -115,14 +94,13 @@ public class PlayerController {
     }
 
     @GetMapping("/team-id")
-    public ResponseEntity<List<PlayerDTO>> getPlayersByTeamId(@RequestParam Long teamId) {
-        return ResponseEntity.ok(playerService.getPlayersByTeam(teamId).stream().map(PlayerDTO::fromEntity).toList());
+    public ResponseEntity<List<PublicPlayerDto>> getPlayersByTeamId(@RequestParam Long teamId) {
+        return ResponseEntity.ok(playerService.getPlayersByTeam(teamId).stream().map(PublicPlayerDto::from).toList());
     }
 
     @PostMapping("/leave-team")
-    public ResponseEntity<Void> leaveTeam() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long oldTeamId = playerService.leaveTeam(UUID.fromString(authId));
+    public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
+        Long oldTeamId = playerService.leaveTeam(user.getUuid());
         teamService.decrementTeamMembers(oldTeamId);
         return ResponseEntity.ok().build();
     }
