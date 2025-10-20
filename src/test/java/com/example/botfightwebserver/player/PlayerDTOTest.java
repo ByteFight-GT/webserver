@@ -1,8 +1,9 @@
 package com.example.botfightwebserver.player;
 
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.domain.PlayerDTO;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 

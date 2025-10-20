@@ -4,7 +4,6 @@ import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MAPS;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.player.PlayerService;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Component

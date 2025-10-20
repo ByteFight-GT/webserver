@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.5"
+    id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.6"
 }
 
@@ -52,8 +52,15 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.18.3")
     testImplementation("org.testcontainers:junit-jupiter:1.18.3")
     testImplementation("org.postgresql:postgresql")
-    testImplementation("com.h2database:h2")
+    runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.security:spring-security-test")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 dependencyManagement {

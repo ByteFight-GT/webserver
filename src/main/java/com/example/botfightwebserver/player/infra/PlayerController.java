@@ -1,5 +1,10 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.infra;
 
+import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.domain.PlayerDTO;
+import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.PlayerUsername;
 import com.example.botfightwebserver.team.Team;
 import com.example.botfightwebserver.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +32,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/player")
 @RequiredArgsConstructor
+@Validated
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -33,18 +41,8 @@ public class PlayerController {
     @GetMapping("/players")
     public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
         return ResponseEntity.ok(playerService.getPlayers().stream()
-            .map(PlayerDTO::fromEntity)
-            .toList());
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<PlayerDTO> createPlayer(
-        @RequestParam String name,
-        @RequestParam String email,
-        @RequestParam(required = false) Long teamId) {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return ResponseEntity.ok(PlayerDTO.fromEntity(
-            playerService.createPlayer(name, email, UUID.fromString(authId), teamId)));
+                .map(PlayerDTO::fromEntity)
+                .toList());
     }
 
     @PostMapping("/team")
@@ -57,17 +55,16 @@ public class PlayerController {
         Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
         teamService.incrementTeamMembers(teamId);
         return ResponseEntity.ok(PlayerDTO.fromEntity(player
-            ));
+        ));
     }
 
     @PostMapping("/join-team")
-    public ResponseEntity<PlayerDTO> joinTeam(@RequestParam String teamCode) {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+    public ResponseEntity<PlayerDTO> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
         Team team = teamService.findTeamByCode(teamCode);
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
-        Player player = playerService.setPlayerTeam(UUID.fromString(authId), team.getId());
+        Player player = playerService.setPlayerTeam(user.getUuid(), team.getId());
         teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PlayerDTO.fromEntity(player));
     }
@@ -84,9 +81,8 @@ public class PlayerController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<PlayerDTO> getMe() {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(UUID.fromString(authId))));
+    public ResponseEntity<PlayerDTO> getMe(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(PlayerDTO.fromEntity(playerService.getPlayer(user)));
     }
 
 
@@ -97,7 +93,6 @@ public class PlayerController {
     }
 
 
-
     @GetMapping("/public/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean isAvailable = !playerService.isUsernameExist(username);
@@ -105,14 +100,13 @@ public class PlayerController {
     }
 
     @PostMapping("/name")
-    public ResponseEntity<Map<String, String>> updateName(@RequestParam String name) {
+    public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
         name = name.trim();
         boolean isAvailable = !playerService.isUsernameExist(name);
         if (!isAvailable) {
             throw new IllegalArgumentException("Name " + name + " is not available");
         }
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Player player = playerService.getPlayer(user);
         if (player.getName().equals(name)) {
             return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
         }
@@ -135,7 +129,7 @@ public class PlayerController {
 
     @GetMapping("/public/check-email/{email}")
     public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
-        boolean isAvailable = ! playerService.isEmailExist(email);
+        boolean isAvailable = !playerService.isEmailExist(email);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
 
