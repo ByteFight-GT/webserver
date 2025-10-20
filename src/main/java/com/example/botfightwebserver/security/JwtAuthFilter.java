@@ -55,6 +55,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
+            //System.out.println("[JwtAuthFilter.doFilterInternal] jwt secret: " + jwtSecret);
+            //System.out.println("[JwtAuthFilter.doFilterInternal] token: " + token);
             try {
                 Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))                    .build()
@@ -73,7 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 context.setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, authorities));
                 SecurityContextHolder.setContext(context);
             } catch (JwtException e) {
-                System.out.println("blocked because try fail" + e.getMessage());
+                System.out.println("[JwtAuthFilter.doFilterInternal] blocked because exception caught: " + e.getMessage() + " stack: " + Arrays.deepToString(e.getStackTrace()));
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "idk whats happening " + e.getMessage());
                 return;
             }
