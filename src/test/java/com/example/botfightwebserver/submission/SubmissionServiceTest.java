@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.submission;
 
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamRepository;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.infra.TeamRepository;
 import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

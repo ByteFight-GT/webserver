@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.team;
+package com.example.botfightwebserver.team.infra;
 
+import com.example.botfightwebserver.team.domain.Team;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

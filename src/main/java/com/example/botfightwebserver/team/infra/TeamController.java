@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.team;
+package com.example.botfightwebserver.team.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
@@ -7,6 +7,10 @@ import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.SelfTeamDto;
+import com.example.botfightwebserver.team.domain.Team;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,31 +43,21 @@ public class TeamController {
     private final ClockConfig clockConfig;
     private final PermissionsService permissionsService;
 
-    @GetMapping("/teams")
-    public List<TeamDTO> getTeams() {
-        return teamService.getTeams().stream().map(TeamDTO::fromEntity).toList();
-    }
-
-    @GetMapping("/public/team")
-    public ResponseEntity<TeamDTO> getTeam(@RequestParam Long teamId) {
-        return ResponseEntity.ok(teamService.getDTOById(teamId));
-    }
-
     @GetMapping("/my-team")
-    public ResponseEntity<TeamDTO> getTeam(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SelfTeamDto> getTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
         if (!player.isHasTeam()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.ok(teamService.getDTOById(player.getTeamId()));
+        return ResponseEntity.ok(SelfTeamDto.from(teamService.getTeamById(player.getTeamId())));
     }
 
     @PostMapping
-    public ResponseEntity<TeamDTO> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
+    public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
         permissionsService.validateAllowCreateTeam();
         Team team = teamService.createTeam(name);
         playerService.setPlayerTeam(user.getUuid(), team.getId());
-        return ResponseEntity.ok(TeamDTO.fromEntity(team));
+        return ResponseEntity.ok(SelfTeamDto.from(team));
     }
 
     @PostMapping("/name")
@@ -94,30 +88,15 @@ public class TeamController {
         return ResponseEntity.ok(quote);
     }
 
-    @GetMapping("/public/glicko-history")
-    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@RequestParam Long teamId) {
-        Team team = teamService.getReferenceById(teamId);
-        List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
-            glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
-        glickoHistories.add(GlickoHistoryDTO.builder().teamId(teamId).glicko(team.getGlicko())
-            .saveDate(LocalDateTime.now(clockConfig.clock())).build());
-        return ResponseEntity.ok(glickoHistories);
-    }
-
     @GetMapping("/my-glicko-history")
     public ResponseEntity<List<GlickoHistoryDTO>> getMyGlickoHistory(@AuthenticationPrincipal User user) {
         Long teamId = playerService.getTeamFromUUID(user.getUuid());
-        Team team = teamService.getReferenceById(teamId);
+        Team team = teamService.getTeamById(teamId);
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
             glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
         glickoHistories.add(GlickoHistoryDTO.builder().teamId(teamId).glicko(team.getGlicko())
             .saveDate(LocalDateTime.now(clockConfig.clock())).build());
         return ResponseEntity.ok(glickoHistories);
-    }
-
-    @GetMapping("/public/teams-with-submission")
-    public ResponseEntity<Integer> countTeamsWithSubmission() {
-           return ResponseEntity.ok((teamService.countTeamsWithSubmission()));
     }
 
     @PostMapping("/set-submission")

@@ -1,7 +1,5 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.team.TeamDTO;
-import com.example.botfightwebserver.submission.SubmissionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

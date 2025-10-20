@@ -1,12 +1,10 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamDTO;
+import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 

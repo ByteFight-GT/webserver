@@ -3,7 +3,7 @@ package com.example.botfightwebserver.gameMatch;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.team.StatsDTO;
+import com.example.botfightwebserver.team.domain.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

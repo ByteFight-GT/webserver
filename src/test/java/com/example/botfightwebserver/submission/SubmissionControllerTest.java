@@ -5,7 +5,7 @@
 //import com.example.botfightwebserver.gameMatch.GameMatchService;
 //import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 //import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
-//import com.example.botfightwebserver.team.Team;
+//import com.example.botfightwebserver.team.domain.Team;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
