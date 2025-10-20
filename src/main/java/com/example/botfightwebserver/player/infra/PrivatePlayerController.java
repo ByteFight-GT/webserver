@@ -12,13 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,7 +31,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/player")
 @RequiredArgsConstructor
 @Validated
-public class PlayerController {
+public class PrivatePlayerController {
     private final PlayerService playerService;
     private final TeamService teamService;
 
@@ -72,12 +69,6 @@ public class PlayerController {
         return ResponseEntity.ok(SelfPlayerDto.from(playerService.getPlayer(user)));
     }
 
-    @GetMapping("/public/check-username/{username}")
-    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
-        boolean isAvailable = !playerService.isUsernameExist(username);
-        return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
-    }
-
     @PostMapping("/name")
     public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
         name = name.trim();
@@ -93,27 +84,11 @@ public class PlayerController {
         return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
     }
 
-    @GetMapping("/team-id")
-    public ResponseEntity<List<PublicPlayerDto>> getPlayersByTeamId(@RequestParam Long teamId) {
-        return ResponseEntity.ok(playerService.getPlayersByTeam(teamId).stream().map(PublicPlayerDto::from).toList());
-    }
-
     @PostMapping("/leave-team")
     public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
         Long oldTeamId = playerService.leaveTeam(user.getUuid());
         teamService.decrementTeamMembers(oldTeamId);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/public/check-email/{email}")
-    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
-        boolean isAvailable = !playerService.isEmailExist(email);
-        return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
-    }
-
-    @GetMapping("/public/count")
-    public ResponseEntity<Long> getPlayerCount() {
-        return ResponseEntity.ok(playerService.getNumberPlayers());
     }
 
     @ExceptionHandler(Exception.class)
