@@ -2,6 +2,7 @@ package com.example.botfightwebserver.auth.infra;
 
 import com.example.botfightwebserver.auth.application.UserService;
 import com.example.botfightwebserver.auth.domain.RegisterUserDto;
+import com.example.botfightwebserver.auth.domain.SelfUserDto;
 import com.example.botfightwebserver.auth.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +17,14 @@ public class AuthenticationController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<User> me(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(user);
+    public ResponseEntity<SelfUserDto> me(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(SelfUserDto.from(user));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
         userService.signup(registerUserDto);
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok().build();
     }
 }
