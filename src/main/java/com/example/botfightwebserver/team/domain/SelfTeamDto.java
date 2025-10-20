@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.team.domain;
 
 import com.example.botfightwebserver.submission.SubmissionDTO;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,17 +11,18 @@ import java.time.LocalDateTime;
 public class SelfTeamDto {
     Long id;
     String name;
-    LocalDateTime creationDateTime;
-    LocalDateTime lastModifiedDate;
     Double glicko;
     Integer matchesPlayed;
     Integer numberWins;
     Integer numberLosses;
     Integer numberDraws;
     String quote;
-    Integer numberOfPlayers;
+    @NotNull Integer numberOfPlayers;
     SubmissionDTO currentSubmissionDTO;
     String teamCode;
+    @NotNull LocalDateTime creationDateTime;
+    @NotNull LocalDateTime lastModifiedDate;
+
 
     public static SelfTeamDto from(Team team) {
         return SelfTeamDto.builder()

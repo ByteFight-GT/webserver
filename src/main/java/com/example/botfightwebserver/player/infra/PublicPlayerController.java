@@ -2,6 +2,7 @@ package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.PublicPlayerDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Player (Public)")
 @RestController
 @RequestMapping("/api/v1/public/player")
 @RequiredArgsConstructor

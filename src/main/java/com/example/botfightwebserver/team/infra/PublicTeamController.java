@@ -6,6 +6,7 @@ import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "Teams (Public)", description = "Public read-only team endpoints")
 @RestController
 @RequestMapping("/api/v1/public/team")
 @RequiredArgsConstructor

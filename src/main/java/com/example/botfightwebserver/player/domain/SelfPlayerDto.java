@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.player.domain;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
@@ -10,13 +11,13 @@ import java.util.UUID;
 @Value
 @Builder
 public class SelfPlayerDto {
-    String uuid;
-    String name;
-    String email;
+    @NotNull String uuid;
+    @NotNull String name;
+    @NotNull String email;
     long teamId;
-    boolean hasTeam;
-    List<String> badges;
-    LocalDateTime creationDateTime;
+    @NotNull boolean hasTeam;
+    @NotNull List<String> badges;
+    @NotNull LocalDateTime creationDateTime;
 
     public static SelfPlayerDto from(Player player) {
         return SelfPlayerDto.builder()
