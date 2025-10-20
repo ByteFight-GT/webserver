@@ -1,7 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -9,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,12 +35,12 @@ public class GameMatchController {
     public ResponseEntity<GameMatchDTO> submitMatch(@RequestBody MatchSubmissionRequest request) {
         // add validation logic here for match reason
         GameMatch match = gameMatchService.submitGameMatch(
-            request.getTeam1Id(),
-            request.getTeam2Id(),
-            request.getSubmission1Id(),
-            request.getSubmission2Id(),
-            request.getReason(),
-            request.getMap()
+                request.getTeam1Id(),
+                request.getTeam2Id(),
+                request.getSubmission1Id(),
+                request.getSubmission2Id(),
+                request.getReason(),
+                request.getMap()
         );
         return ResponseEntity.ok(GameMatchDTO.fromEntity(match));
     }
@@ -65,21 +65,21 @@ public class GameMatchController {
 
     @GetMapping("/my-logs/paginated")
     public ResponseEntity<Page<GameMatchDTO>> myLogs(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
+        Player player = playerService.getPlayer(user);
         Long teamId = player.getTeamId();
         return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
     }
 
     @GetMapping("/public/logs/paginated")
     public ResponseEntity<Page<GameMatchDTO>> logs(
-        @RequestParam Long teamId,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) Long otherTeamId
+            @RequestParam Long teamId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long otherTeamId
     ) {
         if (otherTeamId != null) {
             return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, otherTeamId, page, size));

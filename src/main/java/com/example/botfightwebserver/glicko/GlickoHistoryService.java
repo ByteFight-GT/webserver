@@ -1,17 +1,12 @@
 package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.config.ClockConfig;
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.player.application.PlayerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

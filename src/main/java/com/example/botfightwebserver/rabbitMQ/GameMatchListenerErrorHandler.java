@@ -17,10 +17,4 @@ public class GameMatchListenerErrorHandler implements RabbitListenerErrorHandler
         log.error("Error in GameMatchListenerErrorHandler", exception);
         return null;
     }
-
-    @Override
-    public Object handleError(Message message, org.springframework.messaging.Message<?> message1,
-                              ListenerExecutionFailedException e) throws Exception {
-        return null;
-    }
 }

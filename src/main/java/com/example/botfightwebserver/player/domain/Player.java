@@ -1,30 +1,20 @@
-package com.example.botfightwebserver.player;
+package com.example.botfightwebserver.player.domain;
 
-import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.auth.domain.User;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table
@@ -34,17 +24,16 @@ import java.util.UUID;
 @Setter
 @Builder
 public class Player {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private UUID authId;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
+    @Unique
     private String name;
-
-    private String email;
 
     private Long teamId;
 
@@ -87,6 +76,11 @@ public class Player {
                 badges.add(badge.getDisplayName());
             }
         }
+
+        if(user.isAdmin()) {
+            badges.add(Badge.ADMIN.getDisplayName());
+        }
+
         return badges;
     }
 }
