@@ -5,7 +5,7 @@ import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

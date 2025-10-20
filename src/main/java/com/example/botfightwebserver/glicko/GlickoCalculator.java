@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

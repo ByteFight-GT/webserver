@@ -6,8 +6,8 @@ import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.PlayerUsername;
 import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.player.domain.SelfPlayerDto;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -38,7 +38,7 @@ public class PrivatePlayerController {
     @PostMapping("/team")
     public ResponseEntity<PublicPlayerDto> assignTeam(@RequestParam Long teamId) {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Team team = teamService.getReferenceById(teamId);
+        Team team = teamService.getTeamById(teamId);
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + teamId + " is not joinable");
         }

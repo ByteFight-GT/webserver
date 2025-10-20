@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.Submission;

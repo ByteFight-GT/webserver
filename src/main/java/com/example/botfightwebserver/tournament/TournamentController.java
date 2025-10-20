@@ -4,13 +4,12 @@ import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.gameMatch.GameMatch;
 import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamDTO;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,10 +43,10 @@ public class TournamentController {
     }
 
     @PostMapping("/add-eligible-players/{tournamentId}")
-    public ResponseEntity<List<TeamDTO>> addPlayers(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<PublicTeamDto>> addPlayers(@PathVariable Long tournamentId) {
         List<Team> eligibleTeams = teamService.getTeamsWithSubmission();
         tournamentService.addPlayers(tournamentId, eligibleTeams);
-        return ResponseEntity.ok(eligibleTeams.stream().map(TeamDTO::fromEntity).toList());
+        return ResponseEntity.ok(eligibleTeams.stream().map(PublicTeamDto::from).toList());
     }
 
     @PostMapping("/start/{tournamentId}")

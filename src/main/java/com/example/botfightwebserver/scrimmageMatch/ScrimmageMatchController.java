@@ -6,8 +6,8 @@ import com.example.botfightwebserver.gameMatch.GameMatchService;
 import com.example.botfightwebserver.gameMatch.MATCH_REASON;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -50,7 +50,7 @@ public class ScrimmageMatchController {
         if (team2Id == null) {
             team2Id = team1Id;
         }
-        Team team = teamService.getReferenceById(team1Id);
+        Team team = teamService.getTeamById(team1Id);
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(team1Id);
         Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(team2Id);
 
