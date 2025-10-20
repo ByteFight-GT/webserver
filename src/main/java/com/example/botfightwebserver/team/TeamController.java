@@ -46,7 +46,13 @@ public class TeamController {
 
     @GetMapping("/public/team")
     public ResponseEntity<TeamDTO> getTeam(@RequestParam Long teamId) {
-        return ResponseEntity.ok(teamService.getDTOById(teamId));
+        TeamDTO dto = teamService.getDTOById(teamId);
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
+        if (!player.getTeamId().equals(teamId)) {
+            dto.setTeamCode(null);
+        }
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/my-team")
