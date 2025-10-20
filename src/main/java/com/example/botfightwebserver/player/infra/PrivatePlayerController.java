@@ -8,6 +8,8 @@ import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.player.domain.SelfPlayerDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -27,6 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+@Tag(name = "Player (Private)")
 @RestController
 @RequestMapping("/api/v1/player")
 @RequiredArgsConstructor
@@ -64,8 +67,12 @@ public class PrivatePlayerController {
         return ResponseEntity.ok(PublicPlayerDto.from(playerService.getPlayer(id)));
     }
 
+    @Operation(
+            operationId = "getCurrentPlayer",
+            summary = "Get current player profile"
+    )
     @GetMapping("/me")
-    public ResponseEntity<SelfPlayerDto> getMe(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SelfPlayerDto> getCurrentPlayer(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(SelfPlayerDto.from(playerService.getPlayer(user)));
     }
 

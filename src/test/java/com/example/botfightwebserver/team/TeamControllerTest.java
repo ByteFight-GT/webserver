@@ -7,7 +7,7 @@ import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
-import com.example.botfightwebserver.team.infra.TeamController;
+import com.example.botfightwebserver.team.infra.PrivateTeamController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(value = TeamController.class, excludeFilters = {
+@WebMvcTest(value = PrivateTeamController.class, excludeFilters = {
     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
 })
 @Import({SecurityTestConfig.class, TestJwtFilter.class})

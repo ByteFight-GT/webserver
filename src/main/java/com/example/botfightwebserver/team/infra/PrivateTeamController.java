@@ -8,9 +8,10 @@ import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,11 +31,12 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Tag(name = "Teams (Private)")
 @RestController
 @RequestMapping("/api/v1/team")
 @RequiredArgsConstructor
 @Transactional
-public class TeamController {
+public class PrivateTeamController {
 
     private final TeamService teamService;
     private final PlayerService playerService;
@@ -43,8 +45,12 @@ public class TeamController {
     private final ClockConfig clockConfig;
     private final PermissionsService permissionsService;
 
+    @Operation(
+            operationId = "getCurrentTeam",
+            summary = "Get current user's team"
+    )
     @GetMapping("/my-team")
-    public ResponseEntity<SelfTeamDto> getTeam(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SelfTeamDto> getCurrentTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
         if (!player.isHasTeam()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
