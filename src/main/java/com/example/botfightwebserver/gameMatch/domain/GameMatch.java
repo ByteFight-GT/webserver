@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.Submission;

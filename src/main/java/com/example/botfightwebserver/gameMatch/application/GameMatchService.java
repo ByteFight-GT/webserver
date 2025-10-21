@@ -1,5 +1,7 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.application;
 
+import com.example.botfightwebserver.gameMatch.domain.*;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
@@ -124,16 +126,16 @@ public class GameMatchService {
         LocalDateTime thresholdTime = LocalDateTime.now(clock).minusMinutes(STALE_THRESHOLD_MINUTES);
 
         return gameMatchRepository
-            .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
-            .stream()
-            .toList();
+                .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
+                .stream()
+                .toList();
     }
 
     public List<GameMatch> getFailedMatches() {
         return gameMatchRepository
-            .findByStatus(MATCH_STATUS.FAILED)
-            .stream()
-            .toList();
+                .findByStatus(MATCH_STATUS.FAILED)
+                .stream()
+                .toList();
     }
 
     public List<GameMatchJob> rescheduleStaleMatches(boolean isIgnoreLimit) {
@@ -158,7 +160,7 @@ public class GameMatchService {
 
     public List<GameMatchJob> rescheduleFailedAndStaleMatches(boolean isIgnoreLimit) {
         List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
-            getStaleWaitingMatches().stream()).toList();
+                getStaleWaitingMatches().stream()).toList();
         log.info("Found {} matches to reschedule", matchesToReschedule.size());
 
         List<GameMatchJob> rescheduledJobs = new ArrayList<>();
@@ -193,15 +195,15 @@ public class GameMatchService {
 
     public List<GameMatchDTO> getAllTeamMatches(Long teamId) {
         return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.FAILED)).stream()
-            .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
+                .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
+                .map(GameMatchDTO::fromEntity)
+                .toList();
     }
 
     public Page<GameMatchDTO> getTeamMatches(Long teamId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
-            List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
+                List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
@@ -210,21 +212,21 @@ public class GameMatchService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
-            teamId,
-            otherTeamId,
-            List.of(MATCH_STATUS.FAILED),
-            List.of(MATCH_REASON.TOURNAMENT),
-            pageable);
+                teamId,
+                otherTeamId,
+                List.of(MATCH_STATUS.FAILED),
+                List.of(MATCH_REASON.TOURNAMENT),
+                pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
 
     private Page<GameMatchDTO> processMatches(Page<GameMatch> matches, PageRequest pageable) {
         List<GameMatchDTO> filteredMatches = matches.getContent()
-            .stream()
-            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
+                .stream()
+                .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
+                .map(GameMatchDTO::fromEntity)
+                .toList();
 
         return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
     }
@@ -235,7 +237,7 @@ public class GameMatchService {
         int losses = 0;
         int draws = 0;
         for (GameMatch match : matches) {
-            if(reason == MATCH_REASON.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
+            if (reason == MATCH_REASON.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
                 continue;
             }
             MATCH_STATUS status = match.getStatus();
@@ -243,21 +245,21 @@ public class GameMatchService {
             if (status == MATCH_STATUS.DRAW) {
                 draws++;
             } else if ((isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN) ||
-                (!isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN)) {
+                    (!isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN)) {
                 wins++;
             } else if ((isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN) ||
-                (!isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN)) {
+                    (!isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN)) {
                 losses++;
             }
         }
 
         return StatsDTO.builder()
-            .numWins(wins)
-            .numLosses(losses)
-            .numDraws(draws)
-            .matchReason(reason)
-            .build();
+                .numWins(wins)
+                .numLosses(losses)
+                .numDraws(draws)
+                .matchReason(reason)
+                .build();
     }
-    }
+}
 
 

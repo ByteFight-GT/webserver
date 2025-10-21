@@ -8,6 +8,7 @@ import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.team.domain.EditTeamDto;
 import com.example.botfightwebserver.team.domain.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,13 +20,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -66,43 +61,21 @@ public class PrivateTeamController {
         return ResponseEntity.ok(SelfTeamDto.from(team));
     }
 
-    @PostMapping("/name")
-    public ResponseEntity<Map<String, String>> setName(@RequestParam Long teamId, @RequestParam String name) {
+    @PostMapping("/edit")
+    public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody EditTeamDto edit) {
         permissionsService.validateAllowUpdateTeam();
-        boolean isAvailable = !teamService.isNameExist(name);
+        boolean isAvailable = !teamService.isNameExist(edit.getName());
         if (!isAvailable) {
-            return ResponseEntity.ok(Collections.singletonMap("setName", "Name is Already Taken."));
+            throw new IllegalArgumentException("Name is Already Taken.");
         }
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
-        if (!player.getTeamId().equals(teamId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        teamService.setName(teamId, name);
-        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
-    }
 
-    @PostMapping("/quote")
-    public ResponseEntity<String> setQuote(@RequestParam Long teamId, @RequestParam String quote) {
-        permissionsService.validateAllowUpdateTeam();
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
-        if (!player.getTeamId().equals(teamId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        teamService.setQuote(teamId, quote);
-        return ResponseEntity.ok(quote);
-    }
+        Player player = playerService.getPlayer(user.getUuid());
+        Team team = teamService.getTeamById(player.getTeamId());
 
-    @GetMapping("/my-glicko-history")
-    public ResponseEntity<List<GlickoHistoryDTO>> getMyGlickoHistory(@AuthenticationPrincipal User user) {
-        Long teamId = playerService.getTeamFromUUID(user.getUuid());
-        Team team = teamService.getTeamById(teamId);
-        List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
-            glickoHistoryService.getTeamHistory(teamId).stream().map(GlickoHistoryDTO::fromEntity).toList());
-        glickoHistories.add(GlickoHistoryDTO.builder().teamId(teamId).glicko(team.getGlicko())
-            .saveDate(LocalDateTime.now(clockConfig.clock())).build());
-        return ResponseEntity.ok(glickoHistories);
+        teamService.setName(team.getId(), edit.getName());
+        teamService.setQuote(team.getId(), edit.getQuote());
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/set-submission")

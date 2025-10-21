@@ -1,10 +1,10 @@
 package com.example.botfightwebserver.gameMatchResult;
 
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;

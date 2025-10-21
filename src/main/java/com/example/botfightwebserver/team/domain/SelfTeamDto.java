@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class SelfTeamDto {
-    Long id;
-    String name;
-    Double glicko;
-    Integer matchesPlayed;
-    Integer numberWins;
-    Integer numberLosses;
-    Integer numberDraws;
-    String quote;
+    @NotNull Long id;
+    @NotNull String name;
+    @NotNull Double glicko;
+    @NotNull Integer matchesPlayed;
+    @NotNull Integer numberWins;
+    @NotNull Integer numberLosses;
+    @NotNull Integer numberDraws;
+    @NotNull String quote;
     @NotNull Integer numberOfPlayers;
     SubmissionDTO currentSubmissionDTO;
     String teamCode;

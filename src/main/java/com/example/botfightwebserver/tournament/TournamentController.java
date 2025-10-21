@@ -1,9 +1,9 @@
 package com.example.botfightwebserver.tournament;
 
 import com.example.botfightwebserver.config.ClockConfig;
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;

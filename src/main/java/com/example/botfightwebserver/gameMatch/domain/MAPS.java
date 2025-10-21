@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
 import java.util.Random;
 

@@ -1,10 +1,10 @@
 package com.example.botfightwebserver.submission;
 
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
