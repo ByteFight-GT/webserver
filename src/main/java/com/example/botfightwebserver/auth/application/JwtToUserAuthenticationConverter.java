@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,7 +26,11 @@ public class JwtToUserAuthenticationConverter implements Converter<Jwt, Abstract
     public AbstractAuthenticationToken convert(Jwt jwt) {
         UUID sub = UUID.fromString(jwt.getSubject());
 
-        User user = userRepository.findByUuid(sub).orElseThrow();
+        Optional<User> userOptional = userRepository.findByUuid(sub);
+
+        if(userOptional.isEmpty()) return null;
+
+        User user = userOptional.get();
 
         List<GrantedAuthority> auths = new ArrayList<>();
         auths.add(new SimpleGrantedAuthority("ROLE_USER"));
