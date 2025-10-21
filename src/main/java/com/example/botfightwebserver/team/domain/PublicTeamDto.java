@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 @Builder
 public class PublicTeamDto {
     @NotNull String uuid;
-    String name;
-    LocalDateTime creationDateTime;
-    Double glicko;
-    Integer matchesPlayed;
-    Integer numberWins;
-    Integer numberLosses;
-    Integer numberDraws;
-    String quote;
-    Integer numberOfPlayers;
+    @NotNull String name;
+    @NotNull LocalDateTime creationDateTime;
+    @NotNull Double glicko;
+    @NotNull Integer matchesPlayed;
+    @NotNull Integer numberWins;
+    @NotNull Integer numberLosses;
+    @NotNull Integer numberDraws;
+    @NotNull String quote;
+    @NotNull Integer numberOfPlayers;
     SubmissionDTO currentSubmissionDTO;
 
     public static PublicTeamDto from(Team team) {

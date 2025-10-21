@@ -14,7 +14,7 @@ public class SelfPlayerDto {
     @NotNull String uuid;
     @NotNull String name;
     @NotNull String email;
-    long teamId;
+    String teamUuid;
     @NotNull boolean hasTeam;
     @NotNull List<String> badges;
     @NotNull LocalDateTime creationDateTime;
@@ -24,7 +24,7 @@ public class SelfPlayerDto {
                 .uuid(player.getUser().getUuid().toString())
                 .name(player.getName())
                 .email(player.getUser().getEmail())
-                .teamId(player.getTeamId())
+                .teamUuid(player.getTeam().getUuid().toString())
                 .hasTeam(player.isHasTeam())
                 .creationDateTime(player.getCreationDateTime())
                 .badges(player.getBadgeList())
