@@ -1,10 +1,7 @@
 package com.example.botfightwebserver.glicko;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.botfightwebserver.team.domain.Team;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +22,9 @@ public class GlickoHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long teamId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     private Double glicko;
 
