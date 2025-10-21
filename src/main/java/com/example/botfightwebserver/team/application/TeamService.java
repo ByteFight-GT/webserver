@@ -6,6 +6,7 @@ import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.team.domain.EditTeamDto;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import com.example.botfightwebserver.team.domain.Team;
 import jakarta.transaction.Transactional;
@@ -147,21 +148,16 @@ public class TeamService {
         return teamPage.getContent();
     }
 
-    public void setName(Long teamId, String name) {
+    @Transactional
+    public void editTeam(Long teamId, EditTeamDto editTeamDto) {
         if (!teamRepository.existsById(teamId)) {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
-        team.setName(name);
-        teamRepository.save(team);
-    }
+        if(editTeamDto.getName() != null) team.setName(editTeamDto.getName());
+        if(editTeamDto.getQuote() != null) team.setQuote(editTeamDto.getQuote());
+        team.setDisplayMembers(editTeamDto.isDisplayMembers());
 
-    public void setQuote(Long teamId, String quote) {
-        if (!teamRepository.existsById(teamId)) {
-            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
-        }
-        Team team = teamRepository.findById(teamId).get();
-        team.setQuote(quote);
         teamRepository.save(team);
     }
 
