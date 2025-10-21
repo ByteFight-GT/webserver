@@ -3,13 +3,11 @@ package com.example.botfightwebserver.team.domain;
 import com.example.botfightwebserver.submission.SubmissionDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Getter
-@EqualsAndHashCode
-@SuperBuilder
+@Value
+@Builder
 public class PublicTeamDto {
     @NotNull String uuid;
     @NotNull String name;
