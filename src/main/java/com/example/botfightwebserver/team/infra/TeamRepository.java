@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -17,4 +18,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("SELECT t FROM Team t WHERE t.currentSubmission IS NOT NULL")
     Page<Team> findAllTeamsWithCurrentSubmission(Pageable pageable);
     Optional<Team> findByTeamCode(String teamCode);
+    Optional<Team> findByUuid(UUID uuid);
 }

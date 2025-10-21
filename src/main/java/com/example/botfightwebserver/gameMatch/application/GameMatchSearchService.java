@@ -35,11 +35,11 @@ public class GameMatchSearchService {
     }
 
     public Page<GameMatchDTO> searchGame(Optional<String> teamSearchparam,
-                                         Optional<Long> requiredTeamId,
+                                         Optional<String> requiredTeamUuid,
                                          Optional<MATCH_REASON> reason,
                                          Optional<String> map,
                                          Pageable pageable) {
-        List<GameMatchDTO> allMatches = gameMatchService.getAllTeamMatches(requiredTeamId.get());
+        List<GameMatchDTO> allMatches = gameMatchService.getAllTeamMatches(requiredTeamUuid.get());
         if (teamSearchparam.isPresent()) {
             SearchResult<Team> result = searchSession.search(Team.class)
                     .where(f -> f.match()
@@ -47,11 +47,11 @@ public class GameMatchSearchService {
                             .matching(teamSearchparam.get())
                             .fuzzy(2)).fetch(0, 1);
             if (!result.hits().isEmpty()) {
-                Long teamId = result.hits().get(0).getId();
+                String teamUuid = result.hits().get(0).getUuid().toString();
                 allMatches = allMatches.stream()
                         .filter(gameMatchDTO ->
-                                teamId.equals(gameMatchDTO.getTeamOneId()) ||
-                                        teamId.equals(gameMatchDTO.getTeamTwoId()))
+                                teamUuid.equals(gameMatchDTO.getTeamOneUuid()) ||
+                                        teamUuid.equals(gameMatchDTO.getTeamTwoUuid()))
                         .toList();
             } else {
                 allMatches = List.of();

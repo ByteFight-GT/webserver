@@ -38,19 +38,6 @@ public class PrivatePlayerController {
     private final PlayerService playerService;
     private final TeamService teamService;
 
-    @PostMapping("/team")
-    public ResponseEntity<PublicPlayerDto> assignTeam(@RequestParam Long teamId) {
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Team team = teamService.getTeamById(teamId);
-        if (!teamService.isTeamJoinable(team)) {
-            throw new IllegalArgumentException("Team " + teamId + " is not joinable");
-        }
-        Player player = playerService.setPlayerTeam(UUID.fromString(authId), teamId);
-        teamService.incrementTeamMembers(teamId);
-        return ResponseEntity.ok(PublicPlayerDto.from(player
-        ));
-    }
-
     @PostMapping("/join-team")
     public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
         Team team = teamService.findTeamByCode(teamCode);

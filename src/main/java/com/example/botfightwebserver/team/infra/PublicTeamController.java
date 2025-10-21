@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "Teams (Public)", description = "Public read-only team endpoints")
 @RestController
@@ -30,17 +31,24 @@ public class PublicTeamController {
         return teamService.getTeams().stream().map(PublicTeamDto::from).toList();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PublicTeamDto> getTeam(@PathVariable Long id) {
-        return ResponseEntity.ok(PublicTeamDto.from(teamService.getTeamById(id)));
+    @GetMapping("/{uuid}")
+    public ResponseEntity<PublicTeamDto> getTeam(@PathVariable String uuid) {
+        Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
+
+        return teamOptional.map(team -> ResponseEntity.ok(PublicTeamDto.from(team))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/glicko-history/{id}")
-    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@PathVariable Long id) {
-        Team team = teamService.getTeamById(id);
+    @GetMapping("/glicko-history/{uuid}")
+    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@PathVariable String uuid) {
+        Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
+
+        if (teamOptional.isEmpty()) return ResponseEntity.notFound().build();
+
+        Team team = teamOptional.get();
+
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
-                glickoHistoryService.getTeamHistory(id).stream().map(GlickoHistoryDTO::fromEntity).toList());
-        glickoHistories.add(GlickoHistoryDTO.builder().teamId(id).glicko(team.getGlicko())
+                glickoHistoryService.getTeamHistory(uuid).stream().map(GlickoHistoryDTO::fromEntity).toList());
+        glickoHistories.add(GlickoHistoryDTO.builder().teamUuid(team.getUuid().toString()).glicko(team.getGlicko())
                 .saveDate(LocalDateTime.now(clockConfig.clock())).build());
         return ResponseEntity.ok(glickoHistories);
     }

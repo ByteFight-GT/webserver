@@ -34,7 +34,7 @@ public class MatchMaker {
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
 
         if (saveHistory) {
-            playableTeams.forEach(team -> glickoHistoryService.save(team.getId(), team.getGlicko()));
+            playableTeams.forEach(team -> glickoHistoryService.save(team, team.getGlicko()));
         }
 
         List<int[]> edges;

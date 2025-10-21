@@ -16,8 +16,8 @@ public class GameMatchDTO {
     private Long id;
     @NotNull private String teamOneName;
     @NotNull private String teamTwoName;
-    @NotNull private Long teamOneId;
-    @NotNull private Long teamTwoId;
+    @NotNull private String teamOneUuid;
+    @NotNull private String teamTwoUuid;
     private String submissionOneName;
     private String submissionTwoName;
     private MATCH_STATUS status;
@@ -33,8 +33,8 @@ public class GameMatchDTO {
             .id(gameMatch.getId())
             .teamOneName(gameMatch.getTeamOne().getName())
             .teamTwoName(gameMatch.getTeamTwo().getName())
-            .teamOneId(gameMatch.getTeamOne().getId())
-            .teamTwoId(gameMatch.getTeamTwo().getId())
+            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())
+            .teamTwoUuid(gameMatch.getTeamTwo().getUuid().toString())
             .submissionOneName(gameMatch.getSubmissionOne().getName())
             .submissionTwoName(gameMatch.getSubmissionTwo().getName())
             .status(gameMatch.getStatus())
