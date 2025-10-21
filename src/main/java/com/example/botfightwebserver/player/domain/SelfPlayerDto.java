@@ -24,7 +24,7 @@ public class SelfPlayerDto {
                 .uuid(player.getUser().getUuid().toString())
                 .name(player.getName())
                 .email(player.getUser().getEmail())
-                .teamUuid(player.getTeam().getUuid().toString())
+                .teamUuid(player.getTeam() != null ? player.getTeam().getUuid().toString() : null)
                 .hasTeam(player.isHasTeam())
                 .creationDateTime(player.getCreationDateTime())
                 .badges(player.getBadgeList())
