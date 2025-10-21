@@ -38,15 +38,15 @@ public class TeamService {
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
-            .stream()
-            .collect(Collectors.toUnmodifiableList());
+                .stream()
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public List<Team> getTeamsWithSubmission() {
         return teamRepository.findAll()
-            .stream()
-            .filter(team -> team.getCurrentSubmission() != null)
-            .toList();
+                .stream()
+                .filter(team -> team.getCurrentSubmission() != null)
+                .toList();
     }
 
     public Team getTeamById(Long id) {
@@ -79,7 +79,7 @@ public class TeamService {
     }
 
     public Team updateAfterMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
-                                       boolean isWin, boolean isDraw) {
+                                 boolean isWin, boolean isDraw) {
         if (isWin && isDraw) {
             throw new IllegalArgumentException("Result can't be a win and a draw");
         }
@@ -114,7 +114,7 @@ public class TeamService {
 
     public Optional<Submission> getCurrentSubmission(Long teamId) {
         Optional<Submission> submission = teamRepository.findById(teamId)
-            .map(Team::getCurrentSubmission);
+                .map(Team::getCurrentSubmission);
         return submission;
     }
 
@@ -154,8 +154,8 @@ public class TeamService {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
-        if(editTeamDto.getName() != null) team.setName(editTeamDto.getName());
-        if(editTeamDto.getQuote() != null) team.setQuote(editTeamDto.getQuote());
+        if (editTeamDto.getName() != null) team.setName(editTeamDto.getName());
+        if (editTeamDto.getQuote() != null) team.setQuote(editTeamDto.getQuote());
         team.setDisplayMembers(editTeamDto.isDisplayMembers());
 
         teamRepository.save(team);
@@ -168,10 +168,10 @@ public class TeamService {
     public List<LeaderboardDTO> getLeaderboard() {
         AtomicInteger rank = new AtomicInteger(1);
         List<LeaderboardDTO> leaderboard = teamRepository.findAll().stream()
-            .filter(team -> team.getCurrentSubmission() != null)
-            .sorted(Comparator.comparing(Team::getGlicko).reversed())
-            .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
-            .collect(Collectors.toList());
+                .filter(team -> team.getCurrentSubmission() != null)
+                .sorted(Comparator.comparing(Team::getGlicko).reversed())
+                .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
+                .collect(Collectors.toList());
         return leaderboard;
     }
 
@@ -185,15 +185,20 @@ public class TeamService {
     private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank) {
         List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
         List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
-        return LeaderboardDTO.builder()
-            .teamId(team.getId())
-            .rank(rank)
-            .glicko(team.getGlicko())
-            .teamName(team.getName())
-            .createdAt(team.getCreationDateTime())
-            .quote(team.getQuote())
-            .members(playerNames)
-            .build();
+
+        LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
+        builder.teamId(team.getId())
+                .rank(rank)
+                .glicko(team.getGlicko())
+                .teamName(team.getName())
+                .createdAt(team.getCreationDateTime())
+                .quote(team.getQuote());
+
+        if (team.isDisplayMembers()) {
+            builder.members(playerNames);
+        }
+
+        return builder.build();
     }
 
     public Team findTeamByCode(String code) {
@@ -224,8 +229,8 @@ public class TeamService {
 
 
     public boolean isNameExist(String name) {
-    return teamRepository.existsByName(name);
-}
+        return teamRepository.existsByName(name);
+    }
 }
 
 
