@@ -187,7 +187,7 @@ public class TeamService {
         List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
 
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
-        builder.teamId(team.getId())
+        builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
                 .glicko(team.getGlicko())
                 .teamName(team.getName())
