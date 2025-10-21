@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import org.junit.jupiter.api.BeforeEach;

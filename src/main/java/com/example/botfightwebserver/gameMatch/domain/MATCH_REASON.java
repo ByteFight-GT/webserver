@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
 public enum MATCH_REASON {
     VALIDATION,

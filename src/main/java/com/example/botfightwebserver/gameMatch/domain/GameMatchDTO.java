@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,16 +14,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GameMatchDTO {
     private Long id;
-    private String teamOneName;
-    private String teamTwoName;
-    private Long teamOneId;
-    private Long teamTwoId;
+    @NotNull private String teamOneName;
+    @NotNull private String teamTwoName;
+    @NotNull private Long teamOneId;
+    @NotNull private Long teamTwoId;
     private String submissionOneName;
     private String submissionTwoName;
     private MATCH_STATUS status;
     private MATCH_REASON reason;
-    private LocalDateTime createdAt;
-    private LocalDateTime processedAt;
+    @NotNull private LocalDateTime createdAt;
+    @NotNull private LocalDateTime processedAt;
     private Integer timesQueued;
     private String map;
 

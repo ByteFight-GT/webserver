@@ -1,8 +1,7 @@
 package com.example.botfightwebserver.gameMatchResult;
 
 import com.example.botfightwebserver.SecurityTestConfig;
-import com.example.botfightwebserver.gameMatch.GameMatchController;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatch.TestJwtFilter;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;

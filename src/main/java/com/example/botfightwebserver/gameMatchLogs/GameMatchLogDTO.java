@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
-import com.example.botfightwebserver.gameMatch.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
 import lombok.Builder;
 import lombok.Data;
 

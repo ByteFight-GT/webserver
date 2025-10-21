@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.searchEngine;
 
-import com.example.botfightwebserver.gameMatch.GameMatchDTO;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.annotation.PostConstruct;
@@ -54,56 +54,4 @@ public class SearchEngineService {
             result.total().hitCount()
         );
     }
-
-    public Page<GameMatchDTO> searchGame(Optional<String> teamSearchparam,
-                                         Optional<Long> requiredTeamId,
-                                         Optional<MATCH_REASON> reason,
-                                         Optional<String> map,
-                                         Pageable pageable) {
-
-        List<GameMatchDTO> allMatches = gameMatchService.getAllTeamMatches(requiredTeamId.get());
-        if (teamSearchparam.isPresent()) {
-            SearchResult<Team> result = searchSession.search(Team.class)
-                .where(f -> f.match()
-                    .field("name")
-                    .matching(teamSearchparam.get())
-                    .fuzzy(2)).fetch(0, 1);
-            if (!result.hits().isEmpty()) {
-                Long teamId = result.hits().get(0).getId();
-                allMatches = allMatches.stream()
-                    .filter(gameMatchDTO ->
-                        teamId.equals(gameMatchDTO.getTeamOneId()) ||
-                            teamId.equals(gameMatchDTO.getTeamTwoId()))
-                    .toList();
-            } else {
-                allMatches = List.of();
-            }
-        }
-
-        if (reason.isPresent()) {
-            allMatches = allMatches.stream()
-                .filter(gameMatchDTO -> reason.get().equals(gameMatchDTO.getReason()))
-                .collect(Collectors.toList());
-        }
-
-        if (map.isPresent() && !map.get().isEmpty()) {
-            allMatches = allMatches.stream()
-                .filter(gameMatchDTO -> map.get().equalsIgnoreCase(gameMatchDTO.getMap()))
-                .collect(Collectors.toList());
-        }
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), allMatches.size());
-
-        List<GameMatchDTO> pagedContent = start < end ?
-            allMatches.subList(start, end) :
-            List.of();
-
-        return new PageImpl<>(
-            pagedContent,
-            pageable,
-            allMatches.size()
-        );
-    }
-
 }
