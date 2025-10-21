@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.glicko;
 
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.team.domain.Team;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

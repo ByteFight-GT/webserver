@@ -1,9 +1,11 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.*;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.team.StatsDTO;
+import com.example.botfightwebserver.team.domain.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -61,30 +63,6 @@ public class GameMatchController {
     public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
         List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches(true);
         return ResponseEntity.ok(jobs);
-    }
-
-    @GetMapping("/my-logs/paginated")
-    public ResponseEntity<Page<GameMatchDTO>> myLogs(
-            @AuthenticationPrincipal User user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeamId();
-        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
-    }
-
-    @GetMapping("/public/logs/paginated")
-    public ResponseEntity<Page<GameMatchDTO>> logs(
-            @RequestParam Long teamId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long otherTeamId
-    ) {
-        if (otherTeamId != null) {
-            return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, otherTeamId, page, size));
-        }
-        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
     }
 
     @GetMapping("/public/stats")

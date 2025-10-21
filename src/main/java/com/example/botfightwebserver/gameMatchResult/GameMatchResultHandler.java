@@ -1,19 +1,18 @@
 package com.example.botfightwebserver.gameMatchResult;
 
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.Submission;
 import com.example.botfightwebserver.submission.SubmissionService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
-import com.example.botfightwebserver.tournament.TOURNAMENT_SET_STATES;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.tournament.TournamentGameMatch;
 import com.example.botfightwebserver.tournament.TournamentGameMatchService;
 import com.example.botfightwebserver.tournament.TournamentService;
