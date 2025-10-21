@@ -69,6 +69,9 @@ public class Team {
     @Builder.Default
     private Integer numberPlayers=1;
 
+    @Column(nullable = false)
+    private boolean displayMembers = false;
+
     @OneToMany(mappedBy = "teamOne")
     @Builder.Default
     @JsonIgnore
