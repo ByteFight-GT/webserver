@@ -1,20 +1,15 @@
 package com.example.botfightwebserver.team.infra;
 
-import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.PublicTeamDto;
-import com.example.botfightwebserver.team.domain.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -27,7 +22,6 @@ import java.util.Optional;
 @RequestMapping("/api/v1/public/team")
 @RequiredArgsConstructor
 public class PublicTeamController {
-    private final PlayerService playerService;
     private final TeamService teamService;
     private final GlickoHistoryService glickoHistoryService;
     private final ClockConfig clockConfig;
@@ -38,21 +32,10 @@ public class PublicTeamController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<? extends PublicTeamDto> getTeam(@AuthenticationPrincipal User user, @PathVariable String uuid) {
+    public ResponseEntity<PublicTeamDto> getTeam(@PathVariable String uuid) {
         Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
 
-        if(teamOptional.isEmpty()) return ResponseEntity.notFound().build();
-
-        Team team = teamOptional.get();
-
-        if(user != null) {
-            Player player = playerService.getPlayer(user.getUuid());
-            if(player.getTeam().equals(team)) {
-                return ResponseEntity.ok(SelfTeamDto.from(team));
-            }
-        }
-
-        return ResponseEntity.ok(PublicTeamDto.from(team));
+        return teamOptional.map(team -> ResponseEntity.ok(PublicTeamDto.from(team))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/glicko-history/{uuid}")

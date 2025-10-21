@@ -3,16 +3,26 @@ package com.example.botfightwebserver.team.domain;
 import com.example.botfightwebserver.submission.SubmissionDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
 @Value
-@SuperBuilder
-public class SelfTeamDto extends PublicTeamDto {
-    @NotNull String teamCode;
+@Builder
+public class SelfTeamDto {
+    @NotNull String uuid;
+    @NotNull String name;
+    @NotNull Double glicko;
+    @NotNull Integer matchesPlayed;
+    @NotNull Integer numberWins;
+    @NotNull Integer numberLosses;
+    @NotNull Integer numberDraws;
+    @NotNull String quote;
+    @NotNull Integer numberOfPlayers;
+    SubmissionDTO currentSubmissionDTO;
+    String teamCode;
+    @NotNull LocalDateTime creationDateTime;
     @NotNull LocalDateTime lastModifiedDate;
+
 
     public static SelfTeamDto from(Team team) {
         return SelfTeamDto.builder()

@@ -72,8 +72,7 @@ public class PrivateTeamController {
         Player player = playerService.getPlayer(user.getUuid());
         Team team = player.getTeam();
 
-        teamService.setName(team.getId(), edit.getName());
-        teamService.setQuote(team.getId(), edit.getQuote());
+        teamService.editTeam(team.getId(), edit);
 
         return ResponseEntity.ok().build();
     }
