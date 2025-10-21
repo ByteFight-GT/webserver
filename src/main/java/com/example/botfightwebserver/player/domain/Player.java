@@ -36,8 +36,8 @@ public class Player {
     @Unique
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
     private Team team;
 
     private boolean hasTeam;
