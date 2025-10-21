@@ -1,12 +1,10 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 

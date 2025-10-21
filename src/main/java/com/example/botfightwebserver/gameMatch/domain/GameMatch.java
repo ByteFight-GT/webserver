@@ -1,6 +1,6 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.Submission;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.Entity;
@@ -10,8 +10,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -21,9 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
 import java.time.LocalDateTime;

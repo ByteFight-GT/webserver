@@ -55,4 +55,10 @@ public class GlobalExceptionHandler {
     ProblemDetail handleRegistration(RegistrationException ex) {
         return problem(HttpStatus.CONFLICT, "Registration Error", ex.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+        return problem(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    }
 }

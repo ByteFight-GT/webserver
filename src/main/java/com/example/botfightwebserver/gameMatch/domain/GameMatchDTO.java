@@ -1,7 +1,6 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
-import com.example.botfightwebserver.team.TeamDTO;
-import com.example.botfightwebserver.submission.SubmissionDTO;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,16 +14,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GameMatchDTO {
     private Long id;
-    private String teamOneName;
-    private String teamTwoName;
-    private Long teamOneId;
-    private Long teamTwoId;
+    @NotNull private String teamOneName;
+    @NotNull private String teamTwoName;
+    @NotNull private String teamOneUuid;
+    @NotNull private String teamTwoUuid;
     private String submissionOneName;
     private String submissionTwoName;
     private MATCH_STATUS status;
     private MATCH_REASON reason;
-    private LocalDateTime createdAt;
-    private LocalDateTime processedAt;
+    @NotNull private LocalDateTime createdAt;
+    @NotNull private LocalDateTime processedAt;
     private Integer timesQueued;
     private String map;
 
@@ -34,8 +33,8 @@ public class GameMatchDTO {
             .id(gameMatch.getId())
             .teamOneName(gameMatch.getTeamOne().getName())
             .teamTwoName(gameMatch.getTeamTwo().getName())
-            .teamOneId(gameMatch.getTeamOne().getId())
-            .teamTwoId(gameMatch.getTeamTwo().getId())
+            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())
+            .teamTwoUuid(gameMatch.getTeamTwo().getUuid().toString())
             .submissionOneName(gameMatch.getSubmissionOne().getName())
             .submissionTwoName(gameMatch.getSubmissionTwo().getName())
             .status(gameMatch.getStatus())

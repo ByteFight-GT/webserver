@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.leaderboard;
 
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

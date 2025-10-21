@@ -1,10 +1,12 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.application;
 
+import com.example.botfightwebserver.gameMatch.domain.*;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.SubmissionService;
-import com.example.botfightwebserver.team.StatsDTO;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.StatsDTO;
+import com.example.botfightwebserver.team.application.TeamService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -50,8 +53,8 @@ public class GameMatchService {
         teamService.validateTeams(team1Id, team2Id);
         submissionService.validateSubmissions(submission1Id, submission2Id);
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setTeamOne(teamService.getReferenceById(team1Id));
-        gameMatch.setTeamTwo(teamService.getReferenceById(team2Id));
+        gameMatch.setTeamOne(teamService.getTeamById(team1Id));
+        gameMatch.setTeamTwo(teamService.getTeamById(team2Id));
         gameMatch.setSubmissionOne(submissionService.getSubmissionReferenceById(submission1Id));
         gameMatch.setSubmissionTwo(submissionService.getSubmissionReferenceById(submission2Id));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
@@ -124,16 +127,16 @@ public class GameMatchService {
         LocalDateTime thresholdTime = LocalDateTime.now(clock).minusMinutes(STALE_THRESHOLD_MINUTES);
 
         return gameMatchRepository
-            .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
-            .stream()
-            .toList();
+                .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
+                .stream()
+                .toList();
     }
 
     public List<GameMatch> getFailedMatches() {
         return gameMatchRepository
-            .findByStatus(MATCH_STATUS.FAILED)
-            .stream()
-            .toList();
+                .findByStatus(MATCH_STATUS.FAILED)
+                .stream()
+                .toList();
     }
 
     public List<GameMatchJob> rescheduleStaleMatches(boolean isIgnoreLimit) {
@@ -158,7 +161,7 @@ public class GameMatchService {
 
     public List<GameMatchJob> rescheduleFailedAndStaleMatches(boolean isIgnoreLimit) {
         List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
-            getStaleWaitingMatches().stream()).toList();
+                getStaleWaitingMatches().stream()).toList();
         log.info("Found {} matches to reschedule", matchesToReschedule.size());
 
         List<GameMatchJob> rescheduledJobs = new ArrayList<>();
@@ -191,40 +194,40 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatchDTO> getAllTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.FAILED)).stream()
-            .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
+    public List<GameMatchDTO> getAllTeamMatches(String teamUuid) {
+        return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid), List.of(MATCH_STATUS.FAILED)).stream()
+                .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
+                .map(GameMatchDTO::fromEntity)
+                .toList();
     }
 
-    public Page<GameMatchDTO> getTeamMatches(Long teamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(String teamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
-            List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
+        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
+                List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
 
-    public Page<GameMatchDTO> getTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(String teamUuid, String otherTeamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
-            teamId,
-            otherTeamId,
-            List.of(MATCH_STATUS.FAILED),
-            List.of(MATCH_REASON.TOURNAMENT),
-            pageable);
+                UUID.fromString(teamUuid),
+                UUID.fromString(otherTeamUuid),
+                List.of(MATCH_STATUS.FAILED),
+                List.of(MATCH_REASON.TOURNAMENT),
+                pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
 
     private Page<GameMatchDTO> processMatches(Page<GameMatch> matches, PageRequest pageable) {
         List<GameMatchDTO> filteredMatches = matches.getContent()
-            .stream()
-            .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
-            .map(GameMatchDTO::fromEntity)
-            .toList();
+                .stream()
+                .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
+                .map(GameMatchDTO::fromEntity)
+                .toList();
 
         return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
     }
@@ -235,7 +238,7 @@ public class GameMatchService {
         int losses = 0;
         int draws = 0;
         for (GameMatch match : matches) {
-            if(reason == MATCH_REASON.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
+            if (reason == MATCH_REASON.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
                 continue;
             }
             MATCH_STATUS status = match.getStatus();
@@ -243,21 +246,21 @@ public class GameMatchService {
             if (status == MATCH_STATUS.DRAW) {
                 draws++;
             } else if ((isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN) ||
-                (!isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN)) {
+                    (!isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN)) {
                 wins++;
             } else if ((isTeamOne && status == MATCH_STATUS.TEAM_TWO_WIN) ||
-                (!isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN)) {
+                    (!isTeamOne && status == MATCH_STATUS.TEAM_ONE_WIN)) {
                 losses++;
             }
         }
 
         return StatsDTO.builder()
-            .numWins(wins)
-            .numLosses(losses)
-            .numDraws(draws)
-            .matchReason(reason)
-            .build();
+                .numWins(wins)
+                .numLosses(losses)
+                .numDraws(draws)
+                .matchReason(reason)
+                .build();
     }
-    }
+}
 
 

@@ -1,6 +1,6 @@
-package com.example.botfightwebserver.team;
+package com.example.botfightwebserver.team.domain;
 
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import lombok.Builder;
 import lombok.Data;
 

@@ -1,7 +1,6 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
 import com.example.botfightwebserver.SecurityTestConfig;
-import com.example.botfightwebserver.gameMatch.GameMatchController;
 import com.example.botfightwebserver.gameMatch.TestJwtFilter;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import org.junit.jupiter.api.Test;

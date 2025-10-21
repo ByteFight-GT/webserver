@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.gameMatch;
+package com.example.botfightwebserver.gameMatch.domain;
 
 import com.example.botfightwebserver.submission.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.Submission;
