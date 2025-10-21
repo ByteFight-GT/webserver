@@ -6,4 +6,5 @@ import lombok.Value;
 public class EditTeamDto {
     String name;
     String quote;
+    boolean displayMembers = false;
 }
