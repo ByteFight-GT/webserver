@@ -1,6 +1,5 @@
 package com.example.botfightwebserver.matchMaking;
 
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

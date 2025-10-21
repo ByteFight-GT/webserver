@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.scrimmageMatch;
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.team.domain.Team;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;

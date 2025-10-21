@@ -1,12 +1,13 @@
 package com.example.botfightwebserver.team;
 
 import com.example.botfightwebserver.SecurityTestConfig;
-import com.example.botfightwebserver.gameMatch.GameMatchController;
 import com.example.botfightwebserver.gameMatch.TestJwtFilter;
-import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
-import com.example.botfightwebserver.player.Player;
-import com.example.botfightwebserver.player.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.security.JwtAuthFilter;
+import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.infra.PrivateTeamController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,13 +19,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(value = TeamController.class, excludeFilters = {
+@WebMvcTest(value = PrivateTeamController.class, excludeFilters = {
     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class)
 })
 @Import({SecurityTestConfig.class, TestJwtFilter.class})
