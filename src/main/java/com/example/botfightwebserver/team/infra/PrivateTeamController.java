@@ -50,14 +50,14 @@ public class PrivateTeamController {
         if (!player.isHasTeam()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.ok(SelfTeamDto.from(teamService.getTeamById(player.getTeamId())));
+        return ResponseEntity.ok(SelfTeamDto.from(player.getTeam()));
     }
 
     @PostMapping("/new")
     public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
         permissionsService.validateAllowCreateTeam();
         Team team = teamService.createTeam(name);
-        playerService.setPlayerTeam(user.getUuid(), team.getId());
+        playerService.setPlayerTeam(user.getUuid(), team);
         return ResponseEntity.ok(SelfTeamDto.from(team));
     }
 
@@ -70,7 +70,7 @@ public class PrivateTeamController {
         }
 
         Player player = playerService.getPlayer(user.getUuid());
-        Team team = teamService.getTeamById(player.getTeamId());
+        Team team = player.getTeam();
 
         teamService.setName(team.getId(), edit.getName());
         teamService.setQuote(team.getId(), edit.getQuote());
@@ -83,7 +83,7 @@ public class PrivateTeamController {
         permissionsService.validateAllowSetSubmission();
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
-        Long teamId = player.getTeamId();
+        Long teamId = player.getTeam().getId();
         teamService.setCurrentSubmission(teamId, submissionId);
         return ResponseEntity.ok().build();
     }

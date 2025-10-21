@@ -11,7 +11,7 @@ import java.util.List;
 public class PublicPlayerDto {
     String uuid;
     String name;
-    long teamId;
+    String teamUuid;
     boolean hasTeam;
     List<String> badges;
     LocalDateTime creationDateTime;
@@ -20,7 +20,7 @@ public class PublicPlayerDto {
         return PublicPlayerDto.builder()
                 .uuid(player.getUser().getUuid().toString())
                 .name(player.getName())
-                .teamId(player.getTeamId())
+                .teamUuid(player.getTeam().getUuid().toString())
                 .hasTeam(player.isHasTeam())
                 .creationDateTime(player.getCreationDateTime())
                 .badges(player.getBadgeList())

@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.player.domain;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.team.domain.Team;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,9 @@ public class Player {
     @Unique
     private String name;
 
-    private Long teamId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     private boolean hasTeam;
 

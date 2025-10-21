@@ -42,7 +42,7 @@ public class SubmissionController {
         permissionsService.validateAllowNewSubmission();
 
         Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeamId();
+        Long teamId = player.getTeam().getId();
         SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file, isAutoSet));
         GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
                 MATCH_REASON.VALIDATION,
@@ -54,7 +54,7 @@ public class SubmissionController {
     @GetMapping("/team")
     public ResponseEntity<List<SubmissionDTO>> getTeamSubmissions(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeamId();
+        Long teamId = player.getTeam().getId();
         return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
     }
 
@@ -64,7 +64,7 @@ public class SubmissionController {
 
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
-        Long teamId = player.getTeamId();
+        Long teamId = player.getTeam().getId();
 
         Submission deleted = submissionService.deleteSubmission(submissionId, teamId);
 

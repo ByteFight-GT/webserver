@@ -44,7 +44,7 @@ public class PrivatePlayerController {
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
-        Player player = playerService.setPlayerTeam(user.getUuid(), team.getId());
+        Player player = playerService.setPlayerTeam(user.getUuid(), team);
         teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
@@ -80,8 +80,9 @@ public class PrivatePlayerController {
 
     @PostMapping("/leave-team")
     public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
-        Long oldTeamId = playerService.leaveTeam(user.getUuid());
-        teamService.decrementTeamMembers(oldTeamId);
+        Player player = playerService.getPlayer(user);
+        Team oldTeam = playerService.leaveTeam(player);
+        teamService.decrementTeamMembers(oldTeam.getId());
         return ResponseEntity.ok().build();
     }
 
