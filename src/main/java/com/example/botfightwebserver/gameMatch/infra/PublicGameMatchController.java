@@ -26,28 +26,28 @@ public class PublicGameMatchController {
     @GetMapping("/search")
     public ResponseEntity<Page<GameMatchDTO>> searchGameMatches(
             @RequestParam(required = false) String teamSearchParam,
-            @RequestParam(required = false) Long teamId,
+            @RequestParam(required = false) String teamUuid,
             @RequestParam(required = false) MATCH_REASON reason,
             @RequestParam(required = false) String map,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         System.out.println("searchGame");
         Pageable pageable = PageRequest.of(page, size);
-        Page<GameMatchDTO> gameSearchResult = searchService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamId),
-                        Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
+        Page<GameMatchDTO> gameSearchResult = searchService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamUuid),
+                Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 
     @GetMapping("/logs/paginated")
     public ResponseEntity<Page<GameMatchDTO>> paginateGameMatches(
-            @RequestParam Long teamId,
+            @RequestParam String teamUuid,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long otherTeamId
+            @RequestParam(required = false) String otherTeamId
     ) {
         if (otherTeamId != null) {
-            return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, otherTeamId, page, size));
+            return ResponseEntity.ok(gameMatchService.getTeamMatches(teamUuid, otherTeamId, page, size));
         }
-        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamId, page, size));
+        return ResponseEntity.ok(gameMatchService.getTeamMatches(teamUuid, page, size));
     }
 }

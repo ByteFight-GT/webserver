@@ -4,17 +4,7 @@ import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.submission.Submission;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +19,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Entity
 @Table
@@ -39,10 +30,12 @@ import java.util.Random;
 @Builder
 @Indexed
 public class Team {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    private UUID uuid;
 
     @FullTextField
     private String name;
@@ -99,6 +92,7 @@ public class Team {
         creationDateTime = LocalDateTime.now(clock);
         lastModifiedDate = LocalDateTime.now(clock);
         teamCode = generateCode();
+        uuid = UUID.randomUUID();
     }
 
     private String generateCode() {

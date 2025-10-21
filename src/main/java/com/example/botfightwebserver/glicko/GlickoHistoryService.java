@@ -2,11 +2,13 @@ package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +18,9 @@ public class GlickoHistoryService {
     private final ClockConfig clockConfig;
     private final PlayerService playerService;
 
-    public GlickoHistory save(long teamId, Double glicko) {
+    public GlickoHistory save(Team team, Double glicko) {
         GlickoHistory glickoHistory = GlickoHistory.builder()
-            .teamId(teamId)
+            .team(team)
             .glicko(glicko)
             .saveDate(LocalDateTime.now(clockConfig.clock()))
             .build();
@@ -26,7 +28,7 @@ public class GlickoHistoryService {
         return glickoHistory;
     }
 
-    public List<GlickoHistory> getTeamHistory(long teamId) {
-        return glickoHistoryRepository.findByTeamId(teamId);
+    public List<GlickoHistory> getTeamHistory(String teamUuid) {
+        return glickoHistoryRepository.findByTeamUuid(UUID.fromString(teamUuid));
     }
 }

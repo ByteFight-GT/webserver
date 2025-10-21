@@ -16,9 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,10 @@ public class TeamService {
 
     public Team getTeamById(Long id) {
         return teamRepository.getReferenceById(id);
+    }
+
+    public Optional<Team> getTeamByUuid(String uuid) {
+        return teamRepository.findByUuid(UUID.fromString(uuid));
     }
 
     public Team createTeam(String name) {

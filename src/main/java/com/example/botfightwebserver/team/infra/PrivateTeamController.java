@@ -53,7 +53,7 @@ public class PrivateTeamController {
         return ResponseEntity.ok(SelfTeamDto.from(teamService.getTeamById(player.getTeamId())));
     }
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
         permissionsService.validateAllowCreateTeam();
         Team team = teamService.createTeam(name);
@@ -86,11 +86,5 @@ public class PrivateTeamController {
         Long teamId = player.getTeamId();
         teamService.setCurrentSubmission(teamId, submissionId);
         return ResponseEntity.ok().build();
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProblemDetail handleException(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }

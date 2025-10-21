@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -193,27 +194,27 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatchDTO> getAllTeamMatches(Long teamId) {
-        return gameMatchRepository.findTeamMatches(teamId, List.of(MATCH_STATUS.FAILED)).stream()
+    public List<GameMatchDTO> getAllTeamMatches(String teamUuid) {
+        return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid), List.of(MATCH_STATUS.FAILED)).stream()
                 .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
                 .map(GameMatchDTO::fromEntity)
                 .toList();
     }
 
-    public Page<GameMatchDTO> getTeamMatches(Long teamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(String teamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(teamId,
+        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
                 List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
         return matches.map(GameMatchDTO::fromEntity);
     }
 
-    public Page<GameMatchDTO> getTeamMatches(Long teamId, Long otherTeamId, int page, int size) {
+    public Page<GameMatchDTO> getTeamMatches(String teamUuid, String otherTeamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
-                teamId,
-                otherTeamId,
+                UUID.fromString(teamUuid),
+                UUID.fromString(otherTeamUuid),
                 List.of(MATCH_STATUS.FAILED),
                 List.of(MATCH_REASON.TOURNAMENT),
                 pageable);
