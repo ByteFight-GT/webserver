@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.submission;
+package com.example.botfightwebserver.submission.domain;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,22 +13,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubmissionDTO {
-    private Long id;
-    private Long teamId;
-    private SUBMISSION_VALIDITY validity;
-    private LocalDateTime createdAt;
-    private String name;
-    private String storagePath;
-    private Boolean isAutoSet;
+    @NotNull private Long id;
+    @NotNull private String teamUuid;
+    @NotNull private SUBMISSION_VALIDITY validity;
+    @NotNull private LocalDateTime createdAt;
+    @NotNull private String name;
+    @NotNull private Boolean isAutoSet;
 
     public static SubmissionDTO fromEntity(Submission submission) {
         return new SubmissionDTO(
             submission.getId(),
-            submission.getTeamId(),
+            submission.getTeam().getUuid().toString(),
             submission.getSubmissionValidity(),
             submission.getCreatedAt(),
             submission.getName(),
-            submission.getStoragePath(),
             submission.getIsAutoSet()
         );
     }

@@ -4,8 +4,8 @@ import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.EditTeamDto;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import com.example.botfightwebserver.team.domain.Team;
@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;

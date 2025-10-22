@@ -1,14 +1,8 @@
-package com.example.botfightwebserver.submission;
+package com.example.botfightwebserver.submission.domain;
 
+import com.example.botfightwebserver.team.domain.Team;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +12,7 @@ import lombok.Setter;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 
 @Entity
 @Table
@@ -28,9 +23,11 @@ public class Submission {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String storagePath;
+    private UUID storageFileUuid;
 
-    private Long teamId;
+    @ManyToOne()
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     @Enumerated(EnumType.STRING)
     private SUBMISSION_VALIDITY submissionValidity;

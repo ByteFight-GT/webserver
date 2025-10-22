@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.submission;
+package com.example.botfightwebserver.submission.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
@@ -9,6 +9,12 @@ import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
+import com.example.botfightwebserver.storage.domain.DownloadLinkDto;
+import com.example.botfightwebserver.submission.application.SubmissionService;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.submission.domain.SubmissionDTO;
+import com.example.botfightwebserver.submission.domain.UploadSubmissionDto;
+import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,8 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,19 +42,37 @@ public class SubmissionController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SubmissionDTO> uploadSubmission(
             @AuthenticationPrincipal User user,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(defaultValue = "false") Boolean isAutoSet
+            UploadSubmissionDto uploadSubmissionDto
     ) {
         permissionsService.validateAllowNewSubmission();
 
         Player player = playerService.getPlayer(user);
+        SubmissionDTO submissionDTO = null;
+
+        try {
+            submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(player.getTeam().getUuid().toString(), uploadSubmissionDto.getFile(), uploadSubmissionDto.getIsAutoSet()));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
         Long teamId = player.getTeam().getId();
-        SubmissionDTO submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(teamId, file, isAutoSet));
         GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
                 MATCH_REASON.VALIDATION,
                 "empty");
         rabbitMQService.enqueueGameMatchJob(GameMatchJob.fromEntity(valMatch));
         return ResponseEntity.ok(submissionDTO);
+    }
+
+    @PostMapping("get-download-url")
+    public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam Long submissionId) {
+        Player player = playerService.getPlayer(user);
+        Team team = player.getTeam();
+
+        if(team == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionId, team.getId()));
     }
 
     @GetMapping("/team")

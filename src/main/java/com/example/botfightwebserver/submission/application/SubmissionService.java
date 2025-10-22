@@ -1,52 +1,54 @@
-package com.example.botfightwebserver.submission;
+package com.example.botfightwebserver.submission.application;
 
 import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.storage.application.LocalStorageService;
+import com.example.botfightwebserver.storage.domain.DownloadLinkDto;
+import com.example.botfightwebserver.storage.domain.StoredObject;
+import com.example.botfightwebserver.submission.domain.*;
+import com.example.botfightwebserver.submission.infra.SubmissionRepository;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.infra.TeamRepository;
-import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.URI;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SubmissionService {
 
     private final SubmissionRepository submissionRepository;
-    private final StorageService storageService;
+    private final LocalStorageService storageService;
     private final TeamRepository teamRepository;
     private final PermissionsService permissionsService;
 
-    public SubmissionService(SubmissionRepository submissionRepository, @Qualifier("gcpStorageServiceImpl") StorageService storageService,
-                             TeamRepository teamRepository, PermissionsService permissionsService) {
-        this.submissionRepository = submissionRepository;
-        this.storageService = storageService;
-        this.teamRepository = teamRepository;
-        this.permissionsService = permissionsService;
-    }
-
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-    public Submission createSubmission(Long teamId, MultipartFile file, Boolean isAutoSet) {
+    public Submission createSubmission(String teamUuid, MultipartFile file, Boolean isAutoSet) throws IOException {
         validateFile(file);
 
-        Team team = teamRepository.findById(teamId)
-            .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
+        Team team = teamRepository.findByUuid(UUID.fromString(teamUuid))
+            .orElseThrow(() -> new EntityNotFoundException("Team not found with uuid: " + teamUuid));
 
-        String filePathString = storageService.uploadFile(teamId, file);
+        StoredObject storedObject = storageService.store(file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
 
         Submission submission = new Submission();
-        submission.setStoragePath(filePathString);
+        submission.setStorageFileUuid(storedObject.getUuid());
         submission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
-        submission.setSource(STORAGE_SOURCE.GCP);
-        submission.setTeamId(teamId);
+        submission.setSource(STORAGE_SOURCE.LOCAL);
+        submission.setTeam(team);
         submission.setName(file.getOriginalFilename());
         submission.setIsAutoSet(isAutoSet);
+
         return submissionRepository.save(submission);
     }
 
@@ -58,7 +60,7 @@ public class SubmissionService {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new EntityNotFoundException("Submission not found with id: " + submissionId));
 
-        if (!submission.getTeamId().equals(teamId)) {
+        if (!submission.getTeam().getId().equals(teamId)) {
             throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
         }
 
@@ -67,6 +69,16 @@ public class SubmissionService {
         submissionRepository.save(submission);
 
         return submission;
+    }
+
+    public DownloadLinkDto getSubmissionDownloadUri(Long submissionId, Long teamId) {
+        Submission submission = submissionRepository.findById(submissionId).orElseThrow();
+
+        if (!submission.getTeam().getId().equals(teamId)) {
+            throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
+        }
+
+        return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
     }
 
     public void validateFile(MultipartFile file) {
