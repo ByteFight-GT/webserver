@@ -5,7 +5,7 @@ import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.transaction.Transactional;

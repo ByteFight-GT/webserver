@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.team;
 
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.team.domain.Team;
 import org.junit.jupiter.api.Test;
 

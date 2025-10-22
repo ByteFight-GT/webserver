@@ -4,7 +4,7 @@ import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.team.domain.Team;
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.Submission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

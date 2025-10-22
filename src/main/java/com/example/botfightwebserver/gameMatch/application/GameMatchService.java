@@ -4,7 +4,7 @@ import com.example.botfightwebserver.gameMatch.domain.*;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
-import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.StatsDTO;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.google.common.annotations.VisibleForTesting;

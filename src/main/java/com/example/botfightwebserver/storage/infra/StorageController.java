@@ -32,7 +32,7 @@ public class StorageController {
                     .contentType(MediaType.parseMediaType(storedObject.getContentType()))
                     .eTag("\"" + storedObject.getSha256() + "\"")
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            ContentDisposition.attachment().filename(storedObject.getFilename(), StandardCharsets.UTF_8).toString())
+                            ContentDisposition.attachment().filename(storedObject.getFilename(), StandardCharsets.UTF_8).build().toString())
                     .body(res);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
