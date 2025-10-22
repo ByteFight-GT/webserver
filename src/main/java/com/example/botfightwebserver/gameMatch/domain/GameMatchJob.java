@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatch.domain;
 
-import com.example.botfightwebserver.submission.STORAGE_SOURCE;
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
+import com.example.botfightwebserver.submission.domain.Submission;
 
 import java.io.Serializable;
 
@@ -13,8 +13,8 @@ public record GameMatchJob(Long gameMatchId, String Submission1Path, String Subm
         Submission submission2 = gameMatch.getSubmissionTwo();
         return new GameMatchJob(
             gameMatch.getId(),
-            submission1.getStoragePath(),
-            submission2.getStoragePath(),
+            null,
+            null,
             submission1.getSource(),
             submission2.getSource(),
             gameMatch.getReason(),

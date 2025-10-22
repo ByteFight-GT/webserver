@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.submission;
+package com.example.botfightwebserver.submission.infra;
 
+import com.example.botfightwebserver.submission.domain.Submission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

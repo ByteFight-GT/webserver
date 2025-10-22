@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatch.domain;
 
 import com.example.botfightwebserver.team.domain.Team;
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.Submission;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
