@@ -37,7 +37,7 @@ public class SelfTeamDto {
                 .numberDraws(team.getNumberDraws())
                 .quote(team.getQuote())
                 .currentSubmissionDTO(
-                        team.getCurrentSubmission() != null ? SubmissionDTO.fromEntity(team.getCurrentSubmission()) : null)
+                        team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
                 .teamCode(team.getTeamCode())
                 .numberOfPlayers(team.getNumberPlayers())
                 .build();

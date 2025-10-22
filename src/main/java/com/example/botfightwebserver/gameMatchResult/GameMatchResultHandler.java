@@ -118,7 +118,7 @@ public class GameMatchResultHandler {
         if (status == MATCH_STATUS.TEAM_ONE_WIN) {
             submissionService.validateSubmissionAfterMatch(submission.getId());
             if (teamService.getCurrentSubmission(team.getId()).isEmpty() || submission.getIsAutoSet()) {
-                teamService.setCurrentSubmission(team.getId(), submission.getId());
+                teamService.setCurrentSubmission(team.getId(), submission.getUuid().toString());
             }
         } else {
             submissionService.invalidateSubmissionAfterMatch(submission.getId());

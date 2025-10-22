@@ -32,7 +32,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/submission")
 public class SubmissionController {
-
     private final SubmissionService submissionService;
     private final GameMatchService gameMatchService;
     private final RabbitMQService rabbitMQService;
@@ -47,32 +46,32 @@ public class SubmissionController {
         permissionsService.validateAllowNewSubmission();
 
         Player player = playerService.getPlayer(user);
-        SubmissionDTO submissionDTO = null;
+        Submission submission = null;
 
         try {
-            submissionDTO = SubmissionDTO.fromEntity(submissionService.createSubmission(player.getTeam().getUuid().toString(), uploadSubmissionDto.getFile(), uploadSubmissionDto.getIsAutoSet()));
+            submission = submissionService.createSubmission(player.getTeam().getUuid().toString(), uploadSubmissionDto.getFile(), uploadSubmissionDto.getIsAutoSet());
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
 
         Long teamId = player.getTeam().getId();
-        GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submissionDTO.getId(), submissionDTO.getId(),
+        GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submission.getId(), submission.getId(),
                 MATCH_REASON.VALIDATION,
                 "empty");
-        rabbitMQService.enqueueGameMatchJob(GameMatchJob.fromEntity(valMatch));
-        return ResponseEntity.ok(submissionDTO);
+        rabbitMQService.enqueueGameMatchJob(GameMatchJob.from(valMatch));
+        return ResponseEntity.ok(SubmissionDTO.from(submission));
     }
 
     @PostMapping("get-download-url")
-    public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam Long submissionId) {
+    public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
         Player player = playerService.getPlayer(user);
         Team team = player.getTeam();
 
-        if(team == null) {
+        if (team == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionId, team.getId()));
+        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, team.getId()));
     }
 
     @GetMapping("/team")
@@ -83,16 +82,16 @@ public class SubmissionController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<SubmissionDTO> deleteSubmission(@RequestParam Long submissionId) {
+    public ResponseEntity<SubmissionDTO> deleteSubmission(@RequestParam String submissionUuid) {
 //        permissionsService.validateAllowDeleteSubmission();
 
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeam().getId();
 
-        Submission deleted = submissionService.deleteSubmission(submissionId, teamId);
+        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
 
-        return ResponseEntity.ok(SubmissionDTO.fromEntity(deleted));
+        return ResponseEntity.ok(SubmissionDTO.from(deleted));
     }
 
 

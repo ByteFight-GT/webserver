@@ -23,6 +23,9 @@ public class Submission {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false, unique = true, updatable = false)
+    private UUID uuid;
+
     private UUID storageFileUuid;
 
     @ManyToOne()
@@ -51,8 +54,8 @@ public class Submission {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now(clock);
+        uuid = UUID.randomUUID();
     }
-
 
     public void setSubmissionValidity(SUBMISSION_VALIDITY submissionValidity) {
         this.submissionValidity = submissionValidity;

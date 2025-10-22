@@ -78,12 +78,12 @@ public class PrivateTeamController {
     }
 
     @PostMapping("/set-submission")
-    public ResponseEntity<Void> setCurrentSubmission(@RequestParam Long submissionId) {
+    public ResponseEntity<Void> setCurrentSubmission(@RequestParam String submissionUuid) {
         permissionsService.validateAllowSetSubmission();
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeam().getId();
-        teamService.setCurrentSubmission(teamId, submissionId);
+        teamService.setCurrentSubmission(teamId, submissionUuid);
         return ResponseEntity.ok().build();
     }
 }

@@ -70,7 +70,7 @@ public class GameMatchService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                GameMatchJob job = GameMatchJob.fromEntity(match);
+                GameMatchJob job = GameMatchJob.from(match);
                 rabbitMQService.enqueueGameMatchJob(job);
             }
         });
@@ -187,7 +187,7 @@ public class GameMatchService {
         gameMatch.setQueuedAt(LocalDateTime.now(clock));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
         gameMatch.setTimesQueued(gameMatch.getTimesQueued() + 1);
-        GameMatchJob job = GameMatchJob.fromEntity(gameMatch);
+        GameMatchJob job = GameMatchJob.from(gameMatch);
         rabbitMQService.enqueueGameMatchJob(job);
         gameMatchRepository.save(gameMatch);
         log.info("rescheduled match {}", job);
