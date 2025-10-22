@@ -1,12 +1,11 @@
 package com.example.botfightwebserver.submission;
 
 import com.example.botfightwebserver.permissions.PermissionsService;
-import com.example.botfightwebserver.storage.application.LocalStorageService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamRepository;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.infra.TeamRepository;
+import com.example.botfightwebserver.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,11 +15,20 @@ import java.util.Optional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class SubmissionService {
+
     private final SubmissionRepository submissionRepository;
-    private final LocalStorageService storageService;
+    private final StorageService storageService;
     private final TeamRepository teamRepository;
+    private final PermissionsService permissionsService;
+
+    public SubmissionService(SubmissionRepository submissionRepository, @Qualifier("gcpStorageServiceImpl") StorageService storageService,
+                             TeamRepository teamRepository, PermissionsService permissionsService) {
+        this.submissionRepository = submissionRepository;
+        this.storageService = storageService;
+        this.teamRepository = teamRepository;
+        this.permissionsService = permissionsService;
+    }
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
@@ -30,7 +38,7 @@ public class SubmissionService {
         Team team = teamRepository.findById(teamId)
             .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
 
-        String filePathString = storageService.store(file, "/submissions/",file.getName());
+        String filePathString = storageService.uploadFile(teamId, file);
 
         Submission submission = new Submission();
         submission.setStoragePath(filePathString);
@@ -66,9 +74,11 @@ public class SubmissionService {
             throw new IllegalArgumentException("File is empty");
         }
 
-        if (file.getSize() > MAX_FILE_SIZE) {
+        if (file.getSize()  > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("File is too large");
         }
+
+        String contentType = file.getContentType();
     }
 
     public void validateSubmissions(Long submission1Id, Long submission2Id) {
