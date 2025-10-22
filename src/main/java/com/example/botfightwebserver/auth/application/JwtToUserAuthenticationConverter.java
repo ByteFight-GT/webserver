@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,7 +29,9 @@ public class JwtToUserAuthenticationConverter implements Converter<Jwt, Abstract
 
         Optional<User> userOptional = userRepository.findByUuid(sub);
 
-        if(userOptional.isEmpty()) return null;
+        if(userOptional.isEmpty()) {
+            return new JwtAuthenticationToken(jwt, List.of());
+        }
 
         User user = userOptional.get();
 
