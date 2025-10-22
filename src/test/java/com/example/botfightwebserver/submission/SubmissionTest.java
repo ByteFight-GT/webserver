@@ -1,7 +1,9 @@
 package com.example.botfightwebserver.submission;
 
 import com.example.botfightwebserver.PersistentTestBase;
-import jakarta.validation.ConstraintViolationException;
+import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
+import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
+import com.example.botfightwebserver.submission.domain.Submission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.storage.application;
 
-import com.example.botfightwebserver.storage.domain.StorageProperties;
+import com.example.botfightwebserver.storage.infra.StorageProperties;
 import com.example.botfightwebserver.storage.domain.StoredObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 
@@ -21,7 +20,7 @@ public class HmacService {
     public String sign(StoredObject storedObject, long exp) {
         String data = "GET\n" + storedObject.getUuid() + "\n" + exp;
 
-        return base64Url(hmacSha256(props.getHmacSecret(), data));
+        return base64Url(hmacSha256(props.hmacSecret(), data));
     }
 
     public boolean verify(StoredObject storedObject, String expStr, String sig) {
@@ -40,7 +39,7 @@ public class HmacService {
 
         // make sure the signature is actually legit
         String data = "GET\n" + storedObject.getUuid() + "\n" + exp;
-        String expected = base64Url(hmacSha256(props.getHmacSecret(), data));
+        String expected = base64Url(hmacSha256(props.hmacSecret(), data));
 
         return constantTimeEquals(sig, expected);
     }

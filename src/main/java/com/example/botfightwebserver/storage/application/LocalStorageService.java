@@ -1,19 +1,16 @@
 package com.example.botfightwebserver.storage.application;
 
+import com.example.botfightwebserver.storage.domain.DownloadLinkDto;
 import com.example.botfightwebserver.storage.domain.FileRecord;
-import com.example.botfightwebserver.storage.domain.StorageProperties;
+import com.example.botfightwebserver.storage.infra.StorageProperties;
 import com.example.botfightwebserver.storage.domain.StoredObject;
 import com.example.botfightwebserver.storage.infra.FileRecordRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.Store;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
@@ -22,12 +19,8 @@ import java.nio.file.*;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -42,7 +35,6 @@ public class LocalStorageService {
     private static final Pattern SAFE = Pattern.compile("[^A-Za-z0-9._-]");
 
     private static String sanitize(String name) {
-        if (name == null || name.isBlank()) return "file";
         String cleaned = SAFE.matcher(name).replaceAll("_");
         return cleaned.length() > 180 ? cleaned.substring(0, 180) : cleaned;
     }
@@ -64,7 +56,7 @@ public class LocalStorageService {
         return sb.toString();
     }
 
-    public StoredObject store(MultipartFile file, String logicalPath, String desiredName) throws IOException, NoSuchAlgorithmException {
+    public StoredObject store(MultipartFile file, String logicalPath, String desiredName) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is null or empty");
         }
@@ -77,12 +69,17 @@ public class LocalStorageService {
         String ext = extension(safeName);
         UUID objectId = UUID.randomUUID();
 
-        Path dir = props.getRoot().resolve(sanitizePath(logicalPath)).normalize();
+        Path dir = props.root().resolve(sanitizePath(logicalPath)).normalize();
         Files.createDirectories(dir);
 
         Path target = dir.resolve(objectId + (ext.isEmpty() ? "" : ("." + ext))).normalize();
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
         try (InputStream in = file.getInputStream();
              DigestInputStream dis = new DigestInputStream(in, digest);
              OutputStream out = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW);
@@ -122,7 +119,7 @@ public class LocalStorageService {
         return new UrlResource(p.toUri());
     }
 
-    public URI getDownloadLink(String uuid, Duration ttl) {
+    public DownloadLinkDto getDownloadLink(String uuid, Duration ttl) {
         StoredObject object = stat(uuid).orElseThrow();
 
         URI base = ServletUriComponentsBuilder
@@ -133,12 +130,15 @@ public class LocalStorageService {
         long exp = Instant.now().plus(ttl).getEpochSecond();
         String sig = hmacService.sign(object, exp);
 
-        return UriComponentsBuilder
-                .fromUri(base)
-                .path("/files/" + object.getUuid().toString())
-                .queryParam("exp", exp)
-                .queryParam("sig", sig)
-                .build(true)
-                .toUri();
+        return new DownloadLinkDto(
+                UriComponentsBuilder
+                        .fromUri(base)
+                        .path("/files/" + object.getUuid().toString())
+                        .queryParam("exp", exp)
+                        .queryParam("sig", sig)
+                        .build(true)
+                        .toUri(),
+                exp
+        );
     }
 }

@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.team.domain;
 
-import com.example.botfightwebserver.submission.SubmissionDTO;
+import com.example.botfightwebserver.submission.domain.SubmissionDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 

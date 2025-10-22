@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.team.domain;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.submission.Submission;
+import com.example.botfightwebserver.submission.domain.Submission;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
