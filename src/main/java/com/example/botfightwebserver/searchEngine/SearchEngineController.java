@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.searchEngine;
 
-import com.example.botfightwebserver.gameMatch.GameMatchDTO;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
-import com.example.botfightwebserver.team.TeamDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,30 +23,16 @@ public class SearchEngineController {
     private final SearchEngineService searchEngineService;
 
     @GetMapping("/team")
-    public ResponseEntity<Page<TeamDTO>> searchTeam(@RequestParam String searchParam,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size
+    public ResponseEntity<Page<PublicTeamDto>> searchTeam(@RequestParam String searchParam,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         System.out.println("searchTeam");
-        Page<TeamDTO> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable)
-            .map(TeamDTO::fromEntity);
+        Page<PublicTeamDto> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable)
+            .map(PublicTeamDto::from);
         return ResponseEntity.ok(teamSearchResult);
     }
 
-    @GetMapping("/match")
-    public ResponseEntity<Page<GameMatchDTO>> searchGame(
-        @RequestParam(required = false) String teamSearchParam,
-        @RequestParam(required = false) Long teamId,
-        @RequestParam(required = false) MATCH_REASON reason,
-        @RequestParam(required = false) String map,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
-        System.out.println("searchGame");
-        Pageable pageable = PageRequest.of(page, size);
-        Page<GameMatchDTO> gameSearchResult =
-            searchEngineService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamId),
-                Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
-        return ResponseEntity.ok(gameSearchResult);
-    }
+
 }

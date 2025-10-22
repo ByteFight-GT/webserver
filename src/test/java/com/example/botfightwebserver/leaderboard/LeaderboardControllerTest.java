@@ -2,9 +2,8 @@ package com.example.botfightwebserver.leaderboard;
 
 import com.example.botfightwebserver.SecurityTestConfig;
 import com.example.botfightwebserver.gameMatch.TestJwtFilter;
-import com.example.botfightwebserver.gameMatchLogs.GameMatchLogController;
 import com.example.botfightwebserver.security.JwtAuthFilter;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.application.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

@@ -1,23 +1,22 @@
 package com.example.botfightwebserver.leaderboard;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Value
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class LeaderboardDTO {
-    private Long teamId;
-    private int rank;
-    private double glicko;
-    private String teamName;
-    private LocalDateTime createdAt;
-    private List<String> members;
-    private String quote;
+    @NotNull String teamUuid;
+    @NotNull String teamName;
+    @NotNull String quote;
+    @NotNull LocalDateTime createdAt;
+
+    int rank;
+    double glicko;
+    List<String> members;
+
 }
