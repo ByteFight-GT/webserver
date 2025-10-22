@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubmissionDTO {
-    @NotNull private Long id;
+    @NotNull private String uuid;
     @NotNull private String teamUuid;
     @NotNull private SUBMISSION_VALIDITY validity;
     @NotNull private LocalDateTime createdAt;
     @NotNull private String name;
     @NotNull private Boolean isAutoSet;
 
-    public static SubmissionDTO fromEntity(Submission submission) {
+    public static SubmissionDTO from(Submission submission) {
         return new SubmissionDTO(
-            submission.getId(),
+            submission.getUuid().toString(),
             submission.getTeam().getUuid().toString(),
             submission.getSubmissionValidity(),
             submission.getCreatedAt(),

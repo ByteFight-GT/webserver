@@ -56,9 +56,13 @@ public class SubmissionService {
         return submissionRepository.getReferenceById(id);
     }
 
-    public Submission deleteSubmission(Long submissionId, Long teamId) {
-        Submission submission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new EntityNotFoundException("Submission not found with id: " + submissionId));
+    public Submission getSubmissionByUuid(String uuid) {
+        return submissionRepository.findSubmissionByUuid(UUID.fromString(uuid)).orElseThrow();
+    }
+
+    public Submission deleteSubmission(String submissionUuid, Long teamId) {
+        Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid))
+                .orElseThrow(() -> new EntityNotFoundException("Submission not found with uuid: " + submissionUuid));
 
         if (!submission.getTeam().getId().equals(teamId)) {
             throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
@@ -71,8 +75,8 @@ public class SubmissionService {
         return submission;
     }
 
-    public DownloadLinkDto getSubmissionDownloadUri(Long submissionId, Long teamId) {
-        Submission submission = submissionRepository.findById(submissionId).orElseThrow();
+    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, Long teamId) {
+        Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
         if (!submission.getTeam().getId().equals(teamId)) {
             throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
@@ -111,8 +115,8 @@ public class SubmissionService {
         submissionRepository.save(submission);
     }
 
-    public boolean isSubmissionValid(Long submissionId) {
-        Optional<Submission> maybeSubmission = submissionRepository.findById(submissionId);
+    public boolean isSubmissionValid(String submissionUuid) {
+        Optional<Submission> maybeSubmission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid));
         if (maybeSubmission.isPresent()) {
             return maybeSubmission.get().getSubmissionValidity() == SUBMISSION_VALIDITY.VALID;
         }
@@ -121,7 +125,7 @@ public class SubmissionService {
 
     public List<SubmissionDTO> getTeamSubmissions(Long teamId) {
         List<Submission> submissions =submissionRepository.findSubmissionsByTeamIdOrderByCreatedAtDesc(teamId);
-        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::fromEntity).toList();
+        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::from).toList();
     }
 
 }

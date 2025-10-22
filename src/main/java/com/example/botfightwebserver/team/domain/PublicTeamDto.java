@@ -32,7 +32,7 @@ public class PublicTeamDto {
                 .numberLosses(team.getNumberLosses())
                 .numberDraws(team.getNumberDraws())
                 .quote(team.getQuote())
-                .currentSubmissionDTO(team.getCurrentSubmission() != null ? SubmissionDTO.fromEntity(team.getCurrentSubmission()) : null)
+                .currentSubmissionDTO(team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
                 .numberOfPlayers(team.getNumberPlayers())
                 .build();
     }

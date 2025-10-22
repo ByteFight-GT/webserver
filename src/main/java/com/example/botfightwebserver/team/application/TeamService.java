@@ -103,12 +103,12 @@ public class TeamService {
     }
 
 
-    public void setCurrentSubmission(Long teamId, Long submissionId) {
-        if (!submissionService.isSubmissionValid(submissionId)) {
+    public void setCurrentSubmission(Long teamId, String submissionUuid) {
+        if (!submissionService.isSubmissionValid(submissionUuid)) {
             throw new IllegalArgumentException("Submission is not valid");
         }
         Team team = teamRepository.findById(teamId).get();
-        team.setCurrentSubmission(submissionService.getSubmissionReferenceById(submissionId));
+        team.setCurrentSubmission(submissionService.getSubmissionByUuid(submissionUuid));
     }
 
     public Optional<Submission> getCurrentSubmission(Long teamId) {
