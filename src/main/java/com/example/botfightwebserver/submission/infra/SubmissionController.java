@@ -62,7 +62,7 @@ public class SubmissionController {
         return ResponseEntity.ok(SubmissionDTO.from(submission));
     }
 
-    @PostMapping("get-download-url")
+    @GetMapping("get-download-url")
     public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
         return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, user));
     }
