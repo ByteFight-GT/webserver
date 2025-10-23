@@ -10,7 +10,6 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./storage:/app/storage
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test -d test"]
       interval: 5s
@@ -33,6 +32,8 @@ services:
       - .env
     ports:
       - "8080:8080"
+    volumes:
+      - ./storage:/app/storage
 
 volumes:
   db_data:
