@@ -64,14 +64,7 @@ public class SubmissionController {
 
     @PostMapping("get-download-url")
     public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-        Player player = playerService.getPlayer(user);
-        Team team = player.getTeam();
-
-        if (team == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, team.getId(), user.isAdmin()));
+        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, user));
     }
 
     @GetMapping("/team")
