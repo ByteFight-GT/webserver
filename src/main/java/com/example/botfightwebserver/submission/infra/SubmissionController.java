@@ -71,7 +71,7 @@ public class SubmissionController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, team.getId()));
+        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, team.getId(), user.isAdmin()));
     }
 
     @GetMapping("/team")

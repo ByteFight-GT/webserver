@@ -75,11 +75,11 @@ public class SubmissionService {
         return submission;
     }
 
-    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, Long teamId) {
+    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, Long teamId, boolean isAdmin) {
         Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
-        if (!submission.getTeam().getId().equals(teamId)) {
-            throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
+        if (!isAdmin && !submission.getTeam().getId().equals(teamId)) {
+            throw new IllegalArgumentException();
         }
 
         return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
