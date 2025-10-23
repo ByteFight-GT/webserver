@@ -1,6 +1,9 @@
 package com.example.botfightwebserver.submission.application;
 
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.storage.application.LocalStorageService;
 import com.example.botfightwebserver.storage.domain.DownloadLinkDto;
 import com.example.botfightwebserver.storage.domain.StoredObject;
@@ -11,6 +14,8 @@ import com.example.botfightwebserver.team.infra.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +30,7 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class SubmissionService {
-
+    private final PlayerService playerService;
     private final SubmissionRepository submissionRepository;
     private final LocalStorageService storageService;
     private final TeamRepository teamRepository;
@@ -75,11 +80,21 @@ public class SubmissionService {
         return submission;
     }
 
-    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, Long teamId, boolean isAdmin) {
+    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {
         Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
-        if (!isAdmin && !submission.getTeam().getId().equals(teamId)) {
-            throw new IllegalArgumentException();
+        // if user is NOT an admin, we check that they own the submission
+        if(!user.isAdmin()) {
+            Player player = playerService.getPlayer(user);
+            Team team = player.getTeam();
+
+            if (team == null) {
+                throw new AccessDeniedException("You are not allowed to access this submission");
+            }
+
+            if (!submission.getTeam().getId().equals(team.getId())) {
+                throw new AccessDeniedException("You are not allowed to access this submission");
+            }
         }
 
         return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
