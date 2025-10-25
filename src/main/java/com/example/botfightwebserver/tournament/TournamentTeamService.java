@@ -1,6 +1,5 @@
 package com.example.botfightwebserver.tournament;
 
-import com.example.botfightwebserver.team.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

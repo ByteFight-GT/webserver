@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class GlickoHistoryDTO {
-    private Long teamId;
+    private String teamUuid;
     private Double glicko;
     private LocalDateTime saveDate;
 
     public static GlickoHistoryDTO fromEntity(GlickoHistory glickoHistory) {
         return GlickoHistoryDTO.builder()
-            .teamId(glickoHistory.getTeamId())
+            .teamUuid(glickoHistory.getTeam().getUuid().toString())
             .glicko(glickoHistory.getGlicko())
             .saveDate(glickoHistory.getSaveDate())
             .build();

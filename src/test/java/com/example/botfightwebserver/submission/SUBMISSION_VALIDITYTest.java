@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.submission;
 
+import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

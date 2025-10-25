@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.player;
 
+import com.example.botfightwebserver.player.domain.Badge;
+import com.example.botfightwebserver.player.domain.Player;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

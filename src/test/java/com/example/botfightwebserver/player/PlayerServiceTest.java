@@ -1,20 +1,20 @@
 package com.example.botfightwebserver.player;
 
 import com.example.botfightwebserver.PersistentTestBase;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.infra.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @DataJpaTest
 @AutoConfigureTestDatabase
