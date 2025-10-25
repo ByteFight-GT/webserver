@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
-import com.example.botfightwebserver.gameMatchResult.GameMatchResultHandler;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
+import com.example.botfightwebserver.gameMatch.application.GameMatchResultHandler;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

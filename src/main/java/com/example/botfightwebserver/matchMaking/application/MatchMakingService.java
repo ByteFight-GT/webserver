@@ -40,12 +40,13 @@ public class MatchMakingService {
             .reason(reason)
             .build();
 
+        matchMakingEventRepository.save(event);
+
         for(GameMatch match : gameMatches) {
             match.setMatchmakingEvent(event);
             gameMatchRepository.save(match);
         }
 
-        matchMakingEventRepository.save(event);
         return event;
     }
 
