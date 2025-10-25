@@ -1,9 +1,14 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MatchSubmissionRequest;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchController;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.security.JwtAuthFilter;
-import com.example.botfightwebserver.submission.STORAGE_SOURCE;
+import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

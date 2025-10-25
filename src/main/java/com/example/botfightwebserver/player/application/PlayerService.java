@@ -4,6 +4,10 @@ import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.infra.PlayerRepository;
+import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.infra.TeamRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,7 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
     private final PermissionsService permissionsService;
+    private final TeamRepository teamRepository;
 
     public List<Player> getPlayers() {
         return playerRepository.findAll()
@@ -26,7 +31,7 @@ public class PlayerService {
     public Player createPlayer(User user, String name, Long teamId) {
         Player player = new Player();
         player.setName(name);
-        player.setTeamId(teamId);
+        player.setTeam(null);
         player.setUser(user);
         return playerRepository.save(player);
     }
@@ -41,27 +46,24 @@ public class PlayerService {
         playerRepository.save(player);
     }
 
-    public Player setPlayerTeam(UUID playerId, Long teamId) {
+    public Player setPlayerTeam(UUID playerId, Team team) {
         permissionsService.validateAllowJoinTeam();
         if (!playerRepository.existsByUserUuid(playerId)) {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
         Player player = playerRepository.findByUserUuid(playerId).orElse(null);
-        player.setTeamId(teamId);
+        player.setTeam(team);
         player.setHasTeam(true);
         return playerRepository.save(player);
     }
 
-    public Long leaveTeam(UUID playerId) {
-        if (!playerRepository.existsByUserUuid(playerId)) {
-            throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
-        }
-        Player player = playerRepository.findByUserUuid(playerId).orElse(null);
-        Long oldTeamId = player.getTeamId();
+    @Transactional
+    public Team leaveTeam(Player player) {
+        Team oldTeam = player.getTeam();
         player.setHasTeam(false);
-        player.setTeamId(null);
+        player.setTeam(null);
         playerRepository.save(player);
-        return oldTeamId;
+        return oldTeam;
     }
 
     public List<Player> getPlayersByTeam(Long teamId) {
@@ -95,12 +97,12 @@ public class PlayerService {
         return playerRepository.existsByUserEmail(email);
     }
 
-    public Long getTeamFromUUID(UUID uuid) {
+    public Team getTeamFromUUID(UUID uuid) {
         Player player = getPlayer(uuid);
         if (!player.isHasTeam()) {
             throw new IllegalArgumentException("Player with UUID " + uuid + " has no team");
         }
-        return player.getTeamId();
+        return player.getTeam();
     }
 
     public Long getNumberPlayers() {

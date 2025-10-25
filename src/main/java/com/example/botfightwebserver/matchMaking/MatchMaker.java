@@ -1,11 +1,11 @@
 package com.example.botfightwebserver.matchMaking;
 
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MAPS;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MAPS;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ public class MatchMaker {
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
 
         if (saveHistory) {
-            playableTeams.forEach(team -> glickoHistoryService.save(team.getId(), team.getGlicko()));
+            playableTeams.forEach(team -> glickoHistoryService.save(team, team.getGlicko()));
         }
 
         List<int[]> edges;
