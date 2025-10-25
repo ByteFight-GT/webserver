@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -23,6 +24,10 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
     List<GameMatch> findByStatusAndQueuedAtBefore(MATCH_STATUS status, LocalDateTime threshold);
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
+
+    Optional<GameMatch> findByUuid(UUID uuid);
+
+    boolean existsByUuid(UUID uuid);
 
     @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND gm.status NOT IN :statusList")
     List<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("statusList") List<MATCH_STATUS> statusList);

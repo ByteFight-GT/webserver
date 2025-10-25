@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.gameMatchResult;
 
+import com.example.botfightwebserver.gameMatch.application.GameMatchResultHandler;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;

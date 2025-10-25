@@ -77,10 +77,10 @@ public class GameMatchService {
         return gameMatchRepository.save(match);
     }
 
-    public void setGameMatchStatus(Long gameMatchId, MATCH_STATUS status) {
-        Optional maybeGameMatch = gameMatchRepository.findById(gameMatchId);
+    public void setGameMatchStatus(String gameMatchUuid, MATCH_STATUS status) {
+        Optional maybeGameMatch = gameMatchRepository.findByUuid(UUID.fromString(gameMatchUuid));
         if (maybeGameMatch.isEmpty()) {
-            throw new IllegalStateException("Failed setting match to" + status + " Game Id doesn't exist" + gameMatchId);
+            throw new IllegalStateException("Failed setting match to" + status + " Game Id doesn't exist" + gameMatchUuid);
         }
         GameMatch gameMatch = (GameMatch) maybeGameMatch.get();
         gameMatch.setStatus(status);
@@ -103,18 +103,26 @@ public class GameMatchService {
         return gameMatchRepository.getReferenceById(id);
     }
 
+    public Optional<GameMatch> getReferenceByUuid(String uuid) {
+        return gameMatchRepository.findByUuid(UUID.fromString(uuid));
+    }
+
     public boolean isGameMatchIdExist(Long id) {
         return gameMatchRepository.existsById(id);
     }
 
-    public boolean isGameMatchWaiting(Long id) {
-        return gameMatchRepository.findById(id).get().getStatus() == MATCH_STATUS.WAITING;
+    public boolean isGameMatchUuidExist(String uuid) {
+        return gameMatchRepository.existsByUuid(UUID.fromString(uuid));
+    }
+
+    public boolean isGameMatchWaiting(String uuid) {
+        return gameMatchRepository.findByUuid(UUID.fromString(uuid)).orElseThrow().getStatus() == MATCH_STATUS.WAITING;
     }
 
     public List<GameMatchJob> deleteQueuedMatches() {
         List<GameMatchJob> removedMatches = rabbitMQService.deleteGameMatchQueue();
         for (GameMatchJob job : removedMatches) {
-            setGameMatchStatus(job.gameMatchId(), MATCH_STATUS.MANUALLY_FAILED);
+            setGameMatchStatus(job.gameMatchUuid(), MATCH_STATUS.MANUALLY_FAILED);
         }
         return removedMatches;
     }
