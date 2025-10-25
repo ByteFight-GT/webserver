@@ -1,11 +1,12 @@
 package com.example.botfightwebserver.tournament;
 
 import com.example.botfightwebserver.config.ClockConfig;
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.player.PlayerService;
-import com.example.botfightwebserver.team.Team;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -199,12 +199,10 @@ public class TournamentService {
         Random random = new Random();
 
         if (tournamentSet.getState().equals(TOURNAMENT_SET_STATES.PENDING)) {
-            GameMatch match = gameMatchService.submitGameMatch(gameMatch.getTeamOne().getId(), gameMatch.getTeamTwo().getId(),
-                gameMatch.getSubmissionOne().getId(), gameMatch.getSubmissionTwo().getId(), gameMatch.getReason(),
-                getRandomUnplayedMap(tournamentSet, random).toMapName());
+            gameMatchService.queueMatch(gameMatch);
 
             tournamentGameMatchService.save(TournamentGameMatch.builder()
-                .gameMatch(match)
+                .gameMatch(gameMatch)
                 .tournament(tournament)
                 .tournamentSet(tournamentSet)
                 .build());
