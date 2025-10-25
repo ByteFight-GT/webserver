@@ -37,8 +37,8 @@ public class TournamentController {
     public ResponseEntity<Tournament> createTournament(@RequestParam String name, @RequestParam Integer numberPlayers,
                                                        @RequestParam String description, @RequestParam String type) {
         Tournament tournament = Tournament.builder().name(name).numPlayers(numberPlayers).description(description)
-            .tournamentType(TOURNAMENT_TYPE.fromChallongeType(type)).createdAt(LocalDateTime.now(clockConfig.clock()))
-            .build();
+                .tournamentType(TOURNAMENT_TYPE.fromChallongeType(type)).createdAt(LocalDateTime.now(clockConfig.clock()))
+                .build();
         return ResponseEntity.ok(tournamentService.createTournament(tournament));
     }
 
@@ -69,35 +69,41 @@ public class TournamentController {
             Long player2ChallongeId = challongeMatch.getChallongePlayer2Id();
 
             TournamentTeam tournamentTeam1 = tournamentTeamService.getTeamByChallongeId(player1ChallongeId).orElseThrow(
-                () -> new IllegalArgumentException("No team saved with Challonge ID " + player1ChallongeId));
+                    () -> new IllegalArgumentException("No team saved with Challonge ID " + player1ChallongeId));
             TournamentTeam tournamentTeam2 = tournamentTeamService.getTeamByChallongeId(player2ChallongeId).orElseThrow(
-                () -> new IllegalArgumentException("No team saved with Challonge ID " + player1ChallongeId));
+                    () -> new IllegalArgumentException("No team saved with Challonge ID " + player1ChallongeId));
 
             Team team1 = tournamentTeam1.getTeam();
             Team team2 = tournamentTeam2.getTeam();
 
-            GameMatch
-                match =  gameMatchService.submitGameMatch(team1.getId(), team2.getId(), team1.getCurrentSubmission().getId(),
-                team2.getCurrentSubmission().getId(), MATCH_REASON.TOURNAMENT, TOURNEY_MAP.getRandomMap()
-                    .toMapName());
+            GameMatch match = gameMatchService.createMatch(
+                    team1.getUuid().toString(),
+                    team2.getUuid().toString(),
+                    team1.getCurrentSubmission().getUuid().toString(),
+                    team2.getCurrentSubmission().getUuid().toString(),
+                    MATCH_REASON.TOURNAMENT,
+                    TOURNEY_MAP.getRandomMap().toMapName()
+            );
+
+            gameMatchService.queueMatch(match);
 
 
             TournamentSet tournamentSet = tournamentSetService.save(TournamentSet.builder()
-                .round(challongeMatch.getRound())
-                .challongePlayer1Id(challongeMatch.getChallongePlayer1Id())
-                .challongePlayer2Id(challongeMatch.getChallongePlayer2Id())
-                .challongeMatchId(challongeMatch.getMatchId())
-                .state(TOURNAMENT_SET_STATES.PENDING)
-                .teamOneScore(0)
-                .teamTwoScore(0)
-                .tournament(tournament)
-                .build());
+                    .round(challongeMatch.getRound())
+                    .challongePlayer1Id(challongeMatch.getChallongePlayer1Id())
+                    .challongePlayer2Id(challongeMatch.getChallongePlayer2Id())
+                    .challongeMatchId(challongeMatch.getMatchId())
+                    .state(TOURNAMENT_SET_STATES.PENDING)
+                    .teamOneScore(0)
+                    .teamTwoScore(0)
+                    .tournament(tournament)
+                    .build());
 
             tournamentGameMatchService.save(TournamentGameMatch.builder()
-                .gameMatch(match)
-                .tournament(tournament)
-                .tournamentSet(tournamentSet)
-                .build());
+                    .gameMatch(match)
+                    .tournament(tournament)
+                    .tournamentSet(tournamentSet)
+                    .build());
         }
         tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         tournamentService.saveTournament(tournament);

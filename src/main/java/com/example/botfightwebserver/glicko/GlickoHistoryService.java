@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.glicko;
 
 import com.example.botfightwebserver.config.ClockConfig;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,15 @@ public class GlickoHistoryService {
     private final ClockConfig clockConfig;
     private final PlayerService playerService;
 
-    public GlickoHistory save(Team team, Double glicko) {
-        GlickoHistory glickoHistory = GlickoHistory.builder()
-            .team(team)
-            .glicko(glicko)
-            .saveDate(LocalDateTime.now(clockConfig.clock()))
-            .build();
+    public GlickoHistory save(Team team, GameMatch gameMatch) {
+        GlickoHistory glickoHistory = new GlickoHistory(
+                null,
+                team,
+                gameMatch,
+                team.getGlicko(),
+                LocalDateTime.now(clockConfig.clock())
+        );
+
         glickoHistoryRepository.save(glickoHistory);
         return glickoHistory;
     }

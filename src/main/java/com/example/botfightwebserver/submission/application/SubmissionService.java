@@ -1,6 +1,9 @@
 package com.example.botfightwebserver.submission.application;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.Player;
@@ -112,8 +115,8 @@ public class SubmissionService {
         String contentType = file.getContentType();
     }
 
-    public void validateSubmissions(Long submission1Id, Long submission2Id) {
-        if(!submissionRepository.existsById(submission1Id) || !submissionRepository.existsById(submission2Id)) {
+    public void validateSubmissions(String submission1Uuid, String submission2Uuid) {
+        if(!submissionRepository.existsByUuid(UUID.fromString(submission1Uuid)) || !submissionRepository.existsByUuid(UUID.fromString(submission2Uuid))) {
             throw new IllegalArgumentException("Submission 1 or 2 does not exist");
         }
     }

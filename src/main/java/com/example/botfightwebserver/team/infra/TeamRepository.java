@@ -19,4 +19,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Page<Team> findAllTeamsWithCurrentSubmission(Pageable pageable);
     Optional<Team> findByTeamCode(String teamCode);
     Optional<Team> findByUuid(UUID uuid);
+    boolean existsByUuid(UUID uuid);
 }

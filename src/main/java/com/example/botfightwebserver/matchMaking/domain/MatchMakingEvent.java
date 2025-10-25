@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.matchMaking;
+package com.example.botfightwebserver.matchMaking.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

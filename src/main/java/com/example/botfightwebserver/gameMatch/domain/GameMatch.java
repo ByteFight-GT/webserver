@@ -1,19 +1,10 @@
 package com.example.botfightwebserver.gameMatch.domain;
 
+import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +14,7 @@ import lombok.Setter;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 
 @Entity
 @Table
@@ -35,6 +27,9 @@ public class GameMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_one_id", nullable = false)
@@ -62,13 +57,17 @@ public class GameMatch {
     private LocalDateTime queuedAt;
     private LocalDateTime processedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "matchmaking_event_id", nullable = true)
+    private MatchMakingEvent matchmakingEvent;
+
     @ManyToOne()
     @JoinColumn(name = "winning_team_id", nullable = true)
     private Team winningTeam;
 
     private String map;
 
-    private Integer timesQueued;
+    private Integer timesQueued = 0;
 
     private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
@@ -81,11 +80,16 @@ public class GameMatch {
         if (reason == null) {
             reason = MATCH_REASON.UNKNOWN;
         }
+        uuid = UUID.randomUUID();
     }
 
     @VisibleForTesting
     public static void setClock(Clock testClock) {
         clock = testClock;
+    }
+
+    public void incrementTimesQueued() {
+        timesQueued += 1;
     }
 }
 

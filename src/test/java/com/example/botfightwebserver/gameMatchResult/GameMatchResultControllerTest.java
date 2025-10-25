@@ -1,8 +1,11 @@
 package com.example.botfightwebserver.gameMatchResult;
 
 import com.example.botfightwebserver.SecurityTestConfig;
+import com.example.botfightwebserver.gameMatch.application.GameMatchResultHandler;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatch.TestJwtFilter;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchResultController;
 import com.example.botfightwebserver.security.JwtAuthFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
