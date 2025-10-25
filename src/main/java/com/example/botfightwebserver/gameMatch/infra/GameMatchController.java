@@ -36,14 +36,15 @@ public class GameMatchController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GameMatchDTO> submitMatch(@RequestBody MatchSubmissionRequest request) {
         // add validation logic here for match reason
-        GameMatch match = gameMatchService.submitGameMatch(
-                request.getTeam1Id(),
-                request.getTeam2Id(),
-                request.getSubmission1Id(),
-                request.getSubmission2Id(),
+        GameMatch match = gameMatchService.createMatch(
+                request.getTeam1Uuid(),
+                request.getTeam2Uuid(),
+                request.getSubmission1Uuid(),
+                request.getSubmission2Uuid(),
                 request.getReason(),
                 request.getMap()
         );
+        gameMatchService.queueMatch(match);
         return ResponseEntity.ok(GameMatchDTO.fromEntity(match));
     }
 

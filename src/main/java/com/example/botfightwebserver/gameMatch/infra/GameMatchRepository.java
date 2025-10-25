@@ -3,6 +3,7 @@ package com.example.botfightwebserver.gameMatch.infra;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
+    List<GameMatch> findByMatchmakingEvent(MatchMakingEvent matchmakingEvent);
+
     List<GameMatch> findByStatusAndQueuedAtBefore(MATCH_STATUS status, LocalDateTime threshold);
 
     List<GameMatch> findByStatus(MATCH_STATUS status);

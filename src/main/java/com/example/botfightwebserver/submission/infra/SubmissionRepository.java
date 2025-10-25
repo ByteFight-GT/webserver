@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findSubmissionsByTeamIdOrderByCreatedAtDesc(Long teamId);
     Optional<Submission> findSubmissionByUuid(UUID uuid);
+    boolean existsByUuid(UUID uuid);
 }
