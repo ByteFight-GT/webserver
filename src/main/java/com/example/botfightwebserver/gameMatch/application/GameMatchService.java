@@ -49,24 +49,21 @@ public class GameMatchService {
         return gameMatchRepository.findAll();
     }
 
-    public GameMatch createMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
-        teamService.validateTeams(team1Id, team2Id);
-        submissionService.validateSubmissions(submission1Id, submission2Id);
+    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MATCH_REASON reason, String map) {
+        teamService.validateTeams(team1Uuid, team2Uuid);
+        submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setTeamOne(teamService.getTeamById(team1Id));
-        gameMatch.setTeamTwo(teamService.getTeamById(team2Id));
-        gameMatch.setSubmissionOne(submissionService.getSubmissionReferenceById(submission1Id));
-        gameMatch.setSubmissionTwo(submissionService.getSubmissionReferenceById(submission2Id));
+        gameMatch.setTeamOne(teamService.getTeamByUuid(team1Uuid).orElseThrow());
+        gameMatch.setTeamTwo(teamService.getTeamByUuid(team2Uuid).orElseThrow());
+        gameMatch.setSubmissionOne(submissionService.getSubmissionByUuid(submission1Uuid));
+        gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
         gameMatch.setReason(reason);
         gameMatch.setMap(map);
-        gameMatch.setQueuedAt(LocalDateTime.now(clock));
-        gameMatch.setTimesQueued(1);
-        return gameMatchRepository.save(gameMatch);
+        return gameMatch;
     }
 
-    public GameMatch submitGameMatch(Long team1Id, Long team2Id, Long submission1Id, Long submission2Id, MATCH_REASON reason, String map) {
-        GameMatch match = createMatch(team1Id, team2Id, submission1Id, submission2Id, reason, map);
+    public GameMatch queueMatch(GameMatch match) {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
@@ -74,7 +71,10 @@ public class GameMatchService {
                 rabbitMQService.enqueueGameMatchJob(job);
             }
         });
-        return match;
+
+        match.setQueuedAt(LocalDateTime.now(clock));
+        match.incrementTimesQueued();
+        return gameMatchRepository.save(match);
     }
 
     public void setGameMatchStatus(Long gameMatchId, MATCH_STATUS status) {

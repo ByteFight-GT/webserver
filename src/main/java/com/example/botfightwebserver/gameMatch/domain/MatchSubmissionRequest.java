@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class MatchSubmissionRequest {
-    private Long team1Id;
-    private Long team2Id;
-    private Long submission1Id;
-    private Long submission2Id;
+    private String team1Uuid;
+    private String team2Uuid;
+    private String submission1Uuid;
+    private String submission2Uuid;
     private MATCH_REASON reason;
     private String map;
 }
