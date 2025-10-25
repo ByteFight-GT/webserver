@@ -1,13 +1,14 @@
-package com.example.botfightwebserver.gameMatchResult;
+package com.example.botfightwebserver.gameMatch.application;
 
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
+import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
@@ -35,29 +36,30 @@ public class GameMatchResultHandler {
     private final GameMatchLogService gameMatchLogService;
     private final TournamentService tournamentService;
     private final TournamentGameMatchService tournamentGameMatchService;
+    private final GlickoHistoryService glickoHistoryService;
 
 
     public void handleGameMatchResult(GameMatchResult result) {
-        long gameMatchId = result.matchId();
-        if (!gameMatchService.isGameMatchIdExist(gameMatchId)) {
-            throw new IllegalArgumentException("Game match id " + gameMatchId + " does not exist");
+        String gameMatchUuid = result.matchUuid();
+        if (!gameMatchService.isGameMatchUuidExist(gameMatchUuid)) {
+            throw new IllegalArgumentException("Game match id " + gameMatchUuid + " does not exist");
         }
-        if (!gameMatchService.isGameMatchWaiting(gameMatchId)) {
+        if (!gameMatchService.isGameMatchWaiting(gameMatchUuid)) {
             throw new UnsupportedOperationException("Game match is already played {}" + result);
         }
         MATCH_STATUS status = result.status();
-        GameMatch gameMatch = gameMatchService.getReferenceById(gameMatchId);
+        GameMatch gameMatch = gameMatchService.getReferenceByUuid(gameMatchUuid).orElseThrow();
         Team team1 = gameMatch.getTeamOne();
         Team team2 = gameMatch.getTeamTwo();
 
         log.info("Processing match result for game {}: {} vs {}, status: {}",
-            gameMatchId, team1.getName(), team2.getName(), status);
+                gameMatchUuid, team1.getName(), team2.getName(), status);
 
         GlickoChanges glickoChanges = new GlickoChanges();
         if (gameMatch.getReason() == MATCH_REASON.LADDER) {
             glickoChanges = glickoCalculator.calculateGlicko(team1, team2, status);
             log.info("Handling ladder match: team1 {}, team2 {}", team1.getId(), team2.getId());
-            handleLadderResult(team1, team2, status, glickoChanges);
+            handleLadderResult(team1, team2, status, glickoChanges, gameMatch);
             log.info("Ladder match handled");
         } else if (gameMatch.getReason() == MATCH_REASON.VALIDATION) {
             Submission submission = gameMatch.getSubmissionOne();
@@ -74,12 +76,14 @@ public class GameMatchResultHandler {
         else {
             log.info("Can't process match");
         }
-        gameMatchService.setGameMatchStatus(gameMatchId, status);
+        gameMatchService.setGameMatchStatus(gameMatchUuid, status);
         gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
     }
 
-    private void handleLadderResult(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges) {
+    private void handleLadderResult(Team team1, Team team2, MATCH_STATUS status, GlickoChanges glickoChanges, GameMatch gameMatch) {
         updateTeamStats(team1, team2, status, glickoChanges);
+        glickoHistoryService.save(team1, gameMatch);
+        glickoHistoryService.save(team2, gameMatch);
     }
 
     private void handleScrimmageResult(Team team1, Team team2, MATCH_STATUS status) {
@@ -108,8 +112,8 @@ public class GameMatchResultHandler {
 
 
     public void submitGameMatchResults(GameMatchResult result) {
-        if (!gameMatchService.isGameMatchIdExist(result.matchId())) {
-            throw new RuntimeException("Game match id " + result.matchId() + " does not exist");
+        if (!gameMatchService.isGameMatchUuidExist(result.matchUuid())) {
+            throw new RuntimeException("Game match id " + result.matchUuid() + " does not exist");
         }
         rabbitMQService.enqueueGameMatchResult(result);
     }

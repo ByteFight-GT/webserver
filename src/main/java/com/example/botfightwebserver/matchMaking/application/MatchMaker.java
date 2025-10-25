@@ -1,9 +1,11 @@
-package com.example.botfightwebserver.matchMaking;
+package com.example.botfightwebserver.matchMaking.application;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.domain.MAPS;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
+import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +26,12 @@ public class MatchMaker {
     private final TeamService teamService;
     private final GameMatchService gameMatchService;
     private final GlickoHistoryService glickoHistoryService;
-    private final MatchMakingEventService matchMakingEventService;
 
     private static final Random RANDOM = new Random();
 
-    public void generateMatches(boolean saveHistory, MATCHMAKING_REASON reason) {
-        List<Team> playableTeams = teamService.getTeamsWithSubmission();
+    public List<GameMatch> generateMatches(List<Team> playableTeams) {
         final List<Team> teams =
             playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
-
-        if (saveHistory) {
-            playableTeams.forEach(team -> glickoHistoryService.save(team, team.getGlicko()));
-        }
 
         List<int[]> edges;
         if (teams.size() <= 4) {
@@ -59,13 +55,18 @@ public class MatchMaker {
         }
 
         Collections.shuffle(edges, random);
-        matchMakingEventService.createEvent(playableTeams.size(), edges.size(), reason);
-        edges.stream().forEach((edge) -> {
+        return edges.stream().map((edge) -> {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
-            gameMatchService.submitGameMatch(teamOne.getId(), teamTwo.getId(), teamOne.getCurrentSubmission().getId(),
-                teamTwo.getCurrentSubmission().getId(), MATCH_REASON.LADDER, MAPS.getRandomMap().toMapName());
-        });
+            return gameMatchService.createMatch(
+                    teamOne.getUuid().toString(),
+                    teamTwo.getUuid().toString(),
+                    teamOne.getCurrentSubmission().getUuid().toString(),
+                    teamTwo.getCurrentSubmission().getUuid().toString(),
+                    MATCH_REASON.LADDER,
+                    MAPS.getRandomMap().toMapName()
+            );
+        }).toList();
     }
 
     public List<int[]> generate4RegularGraph(int n) {

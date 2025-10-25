@@ -68,11 +68,11 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    public void validateTeams(Long team1Id, Long team2Id) {
-        if (team1Id == null || team2Id == null) {
+    public void validateTeams(String team1Uuid, String team2Uuid) {
+        if (team1Uuid == null || team2Uuid == null) {
             throw new IllegalArgumentException("TeamIds cannot be null");
         }
-        if (!teamRepository.existsById(team1Id) || !teamRepository.existsById(team2Id)) {
+        if (!teamRepository.existsByUuid(UUID.fromString(team1Uuid)) || !teamRepository.existsByUuid(UUID.fromString(team2Uuid))) {
             throw new IllegalArgumentException("One or both teams do not exist");
         }
     }

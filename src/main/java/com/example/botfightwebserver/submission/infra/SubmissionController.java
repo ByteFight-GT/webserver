@@ -54,11 +54,17 @@ public class SubmissionController {
             return ResponseEntity.internalServerError().build();
         }
 
-        Long teamId = player.getTeam().getId();
-        GameMatch valMatch = gameMatchService.createMatch(teamId, teamId, submission.getId(), submission.getId(),
+        Team team = player.getTeam();
+
+        GameMatch valMatch = gameMatchService.createMatch(
+                team.getUuid().toString(),
+                team.getUuid().toString(),
+                submission.getUuid().toString(),
+                submission.getUuid().toString(),
                 MATCH_REASON.VALIDATION,
-                "empty");
-        rabbitMQService.enqueueGameMatchJob(GameMatchJob.from(valMatch));
+                "empty"
+        );
+        gameMatchService.queueMatch(valMatch);
         return ResponseEntity.ok(SubmissionDTO.from(submission));
     }
 

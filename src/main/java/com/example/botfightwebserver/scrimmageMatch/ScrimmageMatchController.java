@@ -51,7 +51,7 @@ public class ScrimmageMatchController {
         }
 
         Optional<Team> opponentTeamOpt = teamService.getTeamByUuid(team2Uuid);
-        if(opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
         Team opponentTeam = opponentTeamOpt.get();
 
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(selfTeam.getId());
@@ -68,13 +68,16 @@ public class ScrimmageMatchController {
 
         List<ScrimmageMatchDTO> scrimmages = new ArrayList<ScrimmageMatchDTO>();
         for (int i = 0; i < number; i++) {
-            GameMatch match = gameMatchService.submitGameMatch(
-                selfTeam.getId(),
-                opponentTeam.getId(),
-                team1CurrentSubmission.get().getId(),
-                team2CurrentSubmission.get().getId(),
-                MATCH_REASON.SCRIMMAGE,
-                map);
+            GameMatch match = gameMatchService.createMatch(
+                    selfTeam.getUuid().toString(),
+                    opponentTeam.getUuid().toString(),
+                    team1CurrentSubmission.get().getUuid().toString(),
+                    team2CurrentSubmission.get().getUuid().toString(),
+                    MATCH_REASON.SCRIMMAGE,
+                    map
+            );
+
+            gameMatchService.queueMatch(match);
             ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, selfTeam));
             scrimmages.add(scrimmageMatchDTO);
         }
