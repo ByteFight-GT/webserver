@@ -1,13 +1,13 @@
 package com.example.botfightwebserver.scrimmageMatch;
 
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,26 +39,29 @@ public class ScrimmageMatchController {
     private final PlayerService playerService;
     private final TeamService teamService;
 
-
     @PostMapping("/create")
     public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@AuthenticationPrincipal User user,
                                                                         @RequestParam Integer number,
                                                                         @RequestParam String map,
-                                                                        @RequestParam(required = false) Long team2Id) {
+                                                                        @RequestParam(required = false) String team2Uuid) {
 
-        Long team1Id = playerService.getTeamFromUUID(user.getUuid());
-        if (team2Id == null) {
-            team2Id = team1Id;
+        Team selfTeam = playerService.getTeamFromUUID(user.getUuid());
+        if (team2Uuid == null) {
+            team2Uuid = selfTeam.getUuid().toString();
         }
-        Team team = teamService.getReferenceById(team1Id);
-        Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(team1Id);
-        Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(team2Id);
 
-        if (!team1CurrentSubmission.isPresent() || !team2CurrentSubmission.isPresent()) {
+        Optional<Team> opponentTeamOpt = teamService.getTeamByUuid(team2Uuid);
+        if(opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Team opponentTeam = opponentTeamOpt.get();
+
+        Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(selfTeam.getId());
+        Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(opponentTeam.getId());
+
+        if (team1CurrentSubmission.isEmpty() || team2CurrentSubmission.isEmpty()) {
             throw new IllegalArgumentException("Both teams must have submission");
         }
 
-        Long remainingAllowedScrimmages = scrimmageMatchService.remainingAllowedScrimmages(team1Id);
+        Long remainingAllowedScrimmages = scrimmageMatchService.remainingAllowedScrimmages(selfTeam.getId());
         if (number > remainingAllowedScrimmages) {
             throw new IllegalArgumentException("Your team only has " + remainingAllowedScrimmages + " scrimmages allowed at this time");
         }
@@ -66,13 +69,13 @@ public class ScrimmageMatchController {
         List<ScrimmageMatchDTO> scrimmages = new ArrayList<ScrimmageMatchDTO>();
         for (int i = 0; i < number; i++) {
             GameMatch match = gameMatchService.submitGameMatch(
-                team1Id,
-                team2Id,
+                selfTeam.getId(),
+                opponentTeam.getId(),
                 team1CurrentSubmission.get().getId(),
                 team2CurrentSubmission.get().getId(),
                 MATCH_REASON.SCRIMMAGE,
                 map);
-            ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, team));
+            ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, selfTeam));
             scrimmages.add(scrimmageMatchDTO);
         }
         return ResponseEntity.ok(scrimmages);
@@ -81,8 +84,8 @@ public class ScrimmageMatchController {
     @GetMapping("/remaining-scrimmages")
     public ResponseEntity<Long> getRemainingScrimmages() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long teamId = playerService.getTeamFromUUID(UUID.fromString(authId));
-        return ResponseEntity.ok(scrimmageMatchService.remainingAllowedScrimmages(teamId));
+        Team team = playerService.getTeamFromUUID(UUID.fromString(authId));
+        return ResponseEntity.ok(scrimmageMatchService.remainingAllowedScrimmages(team.getId()));
     }
 
     @ExceptionHandler(Exception.class)

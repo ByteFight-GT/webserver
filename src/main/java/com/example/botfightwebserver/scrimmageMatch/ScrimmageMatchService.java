@@ -1,10 +1,10 @@
 package com.example.botfightwebserver.scrimmageMatch;
 
-import com.example.botfightwebserver.gameMatch.GameMatch;
-import com.example.botfightwebserver.gameMatch.GameMatchService;
-import com.example.botfightwebserver.gameMatch.MATCH_STATUS;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ public class ScrimmageMatchService {
     }
 
     public Long getInProgressScrimmages(Long teamId) {
-        Team team = teamService.getReferenceById(teamId);
+        Team team = teamService.getTeamById(teamId);
         return scrimmageMatchDataRepository.countByMatchStatusAndInitiatorTeam(MATCH_STATUS.WAITING, team);
     }
 
