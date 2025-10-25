@@ -1,5 +1,8 @@
 package com.example.botfightwebserver.submission;
 
+import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.submission.domain.SubmissionDTO;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

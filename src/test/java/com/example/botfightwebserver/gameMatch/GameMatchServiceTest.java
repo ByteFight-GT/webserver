@@ -1,12 +1,18 @@
 package com.example.botfightwebserver.gameMatch;
 
+import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.team.Team;
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
-import com.example.botfightwebserver.submission.STORAGE_SOURCE;
-import com.example.botfightwebserver.submission.Submission;
-import com.example.botfightwebserver.submission.SubmissionService;
+import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.submission.application.SubmissionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
