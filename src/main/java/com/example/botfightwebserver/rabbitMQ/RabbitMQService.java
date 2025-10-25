@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatchResult.GameMatchResult;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.leaderboard;
 
-import com.example.botfightwebserver.team.TeamService;
+import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,16 +19,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/leaderboard")
 public class LeaderboardController {
-
     private final TeamService teamService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<LeaderboardDTO>> getLeaderboard() {
+    public ResponseEntity<List<LeaderboardDTO>> getLeaderboardAll() {
         return ResponseEntity.ok(teamService.getLeaderboard());
     }
 
     @GetMapping("/all/paginated")
-    public ResponseEntity<Page<LeaderboardDTO>> getLeaderboard(
+    public ResponseEntity<Page<LeaderboardDTO>> paginateLeaderboard(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {

@@ -42,7 +42,7 @@ public class PermissionsDTO {
             .allowSetSubmission(dto.allowSetSubmission)
 //            .allowDeleteSubmission(dto.allowDeleteSubmission)
             .allowRegister(dto.allowRegister)
-            .allowUpdateProfile(dto.allowUpdateTeam)
+            .allowUpdateTeam(dto.allowUpdateTeam)
             .allowUpdateProfile(dto.allowUpdateProfile)
             .allowCreateTeam(dto.allowCreateTeam)
             .allowJoinTeam(dto.allowJoinTeam)

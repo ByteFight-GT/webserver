@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.storage;
 
+import com.example.botfightwebserver.storage.infra.StorageController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
