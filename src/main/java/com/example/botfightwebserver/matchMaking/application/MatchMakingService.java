@@ -12,6 +12,7 @@ import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -29,6 +30,7 @@ public class MatchMakingService {
     private final MatchMakingEventRepository matchMakingEventRepository;
     private final ClockConfig clockConfig;
 
+    @Transactional
     public MatchMakingEvent createEvent(MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         List<GameMatch> gameMatches = matchMaker.generateMatches(playableTeams);
