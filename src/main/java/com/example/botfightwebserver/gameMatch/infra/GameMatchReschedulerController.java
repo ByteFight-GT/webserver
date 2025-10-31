@@ -17,13 +17,6 @@ public class GameMatchReschedulerController {
 
     private final GameMatchService gameMatchService;
 
-    @PostMapping("/stale-and-failed")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> rescheduleStaleAndFailedMatches() {
-        gameMatchService.rescheduleFailedAndStaleMatches(true);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping("/stale")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> rescheduleStaleMatches() {
@@ -38,9 +31,7 @@ public class GameMatchReschedulerController {
         if (!gameMatchService.isGameMatchIdExist(matchId)) {
             throw new IllegalArgumentException("Match id " + matchId + " does not exist");
         }
-        GameMatch match = gameMatchService.getReferenceById(matchId);
-        gameMatchService.rescheduleMatch(match, true);
+        gameMatchService.rescheduleMatch(matchId, true);
         return ResponseEntity.ok().build();
     }
-
 }
