@@ -17,7 +17,7 @@ import java.time.ZoneId;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(name = "game_match")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

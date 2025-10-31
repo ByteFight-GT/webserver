@@ -2,6 +2,7 @@ package com.example.botfightwebserver.gameMatch.domain;
 
 public enum MATCH_STATUS {
     WAITING,
+    RESCHEDULING,
     IN_PROGRESS,
     FAILED,
     MANUALLY_FAILED,

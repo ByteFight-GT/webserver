@@ -5,6 +5,8 @@ import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,10 +20,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @Repository
-public interface GameMatchRepository extends JpaRepository<GameMatch, Long> {
+public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, JpaSpecificationExecutor<GameMatch> {
     List<GameMatch> findByMatchmakingEvent(MatchMakingEvent matchmakingEvent);
 
-    List<GameMatch> findByStatusAndQueuedAtBefore(MATCH_STATUS status, LocalDateTime threshold);
+    @Modifying
+    @Query(value = """
+        WITH cte AS (
+            SELECT id
+            FROM game_match gm
+            WHERE (gm.status = 'WAITING' AND gm.queuedAt < :threshold)
+            FOR UPDATE SKIP LOCKED
+        )
+        UPDATE game_match gm
+        SET status = 'RESCHEDULING'
+        FROM cte
+        WHERE gm.id = cte.id
+        RETURNING gm.id
+    """, nativeQuery = true)
+    List<Long> claimAndMarkStaleMatches(LocalDateTime threshold);
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
 
