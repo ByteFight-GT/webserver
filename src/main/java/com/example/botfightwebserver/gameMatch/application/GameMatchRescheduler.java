@@ -10,13 +10,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "is-prod-env", havingValue = "true")
 public class  GameMatchRescheduler {
-
     private final GameMatchService gameMatchService;
 
-    @Scheduled(cron = "0 30 */2 * * *")
-    public List<GameMatchJob> reschedule() {
-        return gameMatchService.rescheduleStaleMatches(false);
+    @Scheduled(cron = "0 */30 * * * *")
+    public void reschedule() {
+        gameMatchService.rescheduleStaleMatches(false);
     }
 }

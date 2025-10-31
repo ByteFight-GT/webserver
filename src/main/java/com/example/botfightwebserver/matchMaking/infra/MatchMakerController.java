@@ -18,8 +18,6 @@ import java.util.Optional;
 @RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
 public class MatchMakerController {
-
-    private final MatchMaker matchMaker;
     private final MatchMakingService matchMakingService;
 
     @PostMapping("/generate")

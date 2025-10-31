@@ -8,9 +8,11 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguratio
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
 
@@ -25,6 +28,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @SpringBootApplication
 @RestController
+@RequestMapping("/api/v1")
 @EnableScheduling
 @ConfigurationPropertiesScan
 public class BotFightWebServerApplication {
@@ -36,5 +40,10 @@ public class BotFightWebServerApplication {
     @Bean
     public ApplicationRunner buildIndex(SearchIndexBuild searchIndexBuild) {
         return args -> {searchIndexBuild.indexPersistedData();};
+    }
+
+    @GetMapping("/ping")
+    public Map<String, String> ping() {
+        return Map.of("ts", String.valueOf(System.currentTimeMillis()));
     }
 }

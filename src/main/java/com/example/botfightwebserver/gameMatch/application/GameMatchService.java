@@ -1,13 +1,13 @@
 package com.example.botfightwebserver.gameMatch.application;
 
 import com.example.botfightwebserver.gameMatch.domain.*;
+import com.example.botfightwebserver.gameMatch.infra.GameMatchProperties;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.StatsDTO;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +37,9 @@ public class GameMatchService {
     private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
+    private final GameMatchProperties gameMatchProperties;
     private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
-
-
-    @VisibleForTesting
-    public static final int STALE_THRESHOLD_MINUTES = 60;
-
 
     public List<GameMatch> getGameMatches() {
         return gameMatchRepository.findAll();
@@ -131,15 +127,6 @@ public class GameMatchService {
         return rabbitMQService.peekGameMatchQueue();
     }
 
-    public List<GameMatch> getStaleWaitingMatches() {
-        LocalDateTime thresholdTime = LocalDateTime.now(clock).minusMinutes(STALE_THRESHOLD_MINUTES);
-
-        return gameMatchRepository
-                .findByStatusAndQueuedAtBefore(MATCH_STATUS.WAITING, thresholdTime)
-                .stream()
-                .toList();
-    }
-
     public List<GameMatch> getFailedMatches() {
         return gameMatchRepository
                 .findByStatus(MATCH_STATUS.FAILED)
@@ -147,57 +134,34 @@ public class GameMatchService {
                 .toList();
     }
 
-    public List<GameMatchJob> rescheduleStaleMatches(boolean isIgnoreLimit) {
-        List<GameMatch> matchesToReschedule = getStaleWaitingMatches();
-        log.info("Found {} matches to reschedule", matchesToReschedule.size());
+    @Transactional
+    public void rescheduleStaleMatches(boolean isIgnoreLimit) {
+        LocalDateTime thresholdTime = LocalDateTime.now(clock).minusMinutes(gameMatchProperties.getStaleThresholdMinutes());
 
-        List<GameMatchJob> rescheduledJobs = new ArrayList<>();
+        // This atomically marks all stale matches as RESCHEDULING and returns their ids
+        List<Long> matchesToReschedule = gameMatchRepository.claimAndMarkStaleMatches(thresholdTime);
 
-        for (GameMatch match : matchesToReschedule) {
-            try {
-                log.info("Rescheduling match {}", match.getId());
-                rescheduledJobs.add(rescheduleMatch(match, isIgnoreLimit));
-            } catch (Exception e) {
-                log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() {
+                log.info("Found {} matches to reschedule", matchesToReschedule.size());
+                matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
+                log.info("Rescheduling completed");
             }
-        }
-
-        log.info("Rescheduling completed");
-        return rescheduledJobs;
+        });
     }
 
-
-    public List<GameMatchJob> rescheduleFailedAndStaleMatches(boolean isIgnoreLimit) {
-        List<GameMatch> matchesToReschedule = Stream.concat(getFailedMatches().stream(),
-                getStaleWaitingMatches().stream()).toList();
-        log.info("Found {} matches to reschedule", matchesToReschedule.size());
-
-        List<GameMatchJob> rescheduledJobs = new ArrayList<>();
-
-        for (GameMatch match : matchesToReschedule) {
-            try {
-                log.info("Rescheduling match {}", match.getId());
-                rescheduledJobs.add(rescheduleMatch(match, isIgnoreLimit));
-            } catch (Exception e) {
-                log.error("Failed to reschedule match {}: {}", match.getId(), e.getMessage());
-            }
-        }
-
-        log.info("Rescheduling completed");
-        return rescheduledJobs;
-    }
-
-    public GameMatchJob rescheduleMatch(GameMatch gameMatch, boolean isIgnoreLimit) {
+    public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
+        GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
         Integer timesQueued = gameMatch.getTimesQueued();
         if (!isIgnoreLimit && timesQueued == 3) {
             throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
         }
         gameMatch.setQueuedAt(LocalDateTime.now(clock));
+        gameMatch.incrementTimesQueued();
         gameMatch.setStatus(MATCH_STATUS.WAITING);
-        gameMatch.setTimesQueued(gameMatch.getTimesQueued() + 1);
         GameMatchJob job = GameMatchJob.from(gameMatch);
-        rabbitMQService.enqueueGameMatchJob(job);
         gameMatchRepository.save(gameMatch);
+        rabbitMQService.enqueueGameMatchJob(job);
         log.info("rescheduled match {}", job);
         return job;
     }
