@@ -28,7 +28,7 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, Jpa
         WITH cte AS (
             SELECT id
             FROM game_match gm
-            WHERE (gm.status = 'WAITING' AND gm.queuedAt < :threshold)
+            WHERE (gm.status = 'WAITING' AND gm.queued_at < :threshold)
             FOR UPDATE SKIP LOCKED
         )
         UPDATE game_match gm
