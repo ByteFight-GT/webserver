@@ -6,7 +6,8 @@ import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
-import com.example.botfightwebserver.team.domain.EditTeamDto;
+import com.example.botfightwebserver.team.domain.AdminCreateTeamDto;
+import com.example.botfightwebserver.team.domain.TeamSettingsDto;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import com.example.botfightwebserver.team.domain.Team;
 import jakarta.transaction.Transactional;
@@ -56,7 +57,8 @@ public class TeamService {
         return teamRepository.findByUuid(UUID.fromString(uuid));
     }
 
-    public Team createTeam(String name) {
+    public Team createTeam(TeamSettingsDto teamSettingsDto) {
+        String name = teamSettingsDto.getName();
         if (teamRepository.existsByName(name.trim())) {
             throw new IllegalArgumentException("Team with name " + name + " already exists");
         }
@@ -65,6 +67,36 @@ public class TeamService {
         }
         Team team = new Team();
         team.setName(name);
+        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+
+        if(teamSettingsDto.getQuote() != null) {
+            team.setQuote(teamSettingsDto.getQuote());
+        }
+
+        return teamRepository.save(team);
+    }
+
+    public Team adminCreateTeam(AdminCreateTeamDto teamDto) {
+        String name = teamDto.getName();
+        if (teamRepository.existsByName(name.trim())) {
+            throw new IllegalArgumentException("Team with name " + name + " already exists");
+        }
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
+        Team team = new Team();
+        team.setName(name);
+        team.setDisplayMembers(teamDto.isDisplayMembers());
+
+        if(teamDto.getQuote() != null) {
+            team.setQuote(teamDto.getQuote());
+        }
+
+        if(teamDto.getSubmissionUuid() != null) {
+            Submission submission = submissionService.getSubmissionByUuid(teamDto.getSubmissionUuid());
+            team.setCurrentSubmission(submission);
+        }
+
         return teamRepository.save(team);
     }
 
@@ -148,14 +180,14 @@ public class TeamService {
     }
 
     @Transactional
-    public void editTeam(Long teamId, EditTeamDto editTeamDto) {
+    public void editTeam(Long teamId, TeamSettingsDto teamSettingsDto) {
         if (!teamRepository.existsById(teamId)) {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
-        if (editTeamDto.getName() != null) team.setName(editTeamDto.getName());
-        if (editTeamDto.getQuote() != null) team.setQuote(editTeamDto.getQuote());
-        team.setDisplayMembers(editTeamDto.isDisplayMembers());
+        if (teamSettingsDto.getName() != null) team.setName(teamSettingsDto.getName());
+        if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
+        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
 
         teamRepository.save(team);
     }
@@ -166,18 +198,18 @@ public class TeamService {
 
     public List<LeaderboardDTO> getLeaderboard() {
         AtomicInteger rank = new AtomicInteger(1);
-        List<LeaderboardDTO> leaderboard = teamRepository.findAll().stream()
-                .filter(team -> team.getCurrentSubmission() != null)
-                .sorted(Comparator.comparing(Team::getGlicko).reversed())
+        return teamRepository.findAll().stream()
+                .sorted(Comparator.comparing(
+                        (Team team) -> team.getCurrentSubmission() != null ? team.getGlicko() : -1
+                ).reversed())
                 .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
                 .collect(Collectors.toList());
-        return leaderboard;
     }
 
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
+        Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
-        Page<Team> teamPage = teamRepository.findAllTeamsWithCurrentSubmission(pageable);
+        Page<Team> teamPage = teamRepository.findTeamsPaginated(pageable);
         return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
     }
 
@@ -188,7 +220,7 @@ public class TeamService {
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
         builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
-                .glicko(team.getGlicko())
+                .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
                 .teamName(team.getName())
                 .createdAt(team.getCreationDateTime())
                 .quote(team.getQuote());

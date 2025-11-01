@@ -15,8 +15,8 @@ import java.util.UUID;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByName(String name);
     int countByCurrentSubmissionNotNull();
-    @Query("SELECT t FROM Team t WHERE t.currentSubmission IS NOT NULL")
-    Page<Team> findAllTeamsWithCurrentSubmission(Pageable pageable);
+    @Query("SELECT t FROM Team t ORDER BY CASE WHEN t.currentSubmission IS NULL THEN 1 ELSE 0 END, t.glicko DESC")
+    Page<Team> findTeamsPaginated(Pageable pageable);
     Optional<Team> findByTeamCode(String teamCode);
     Optional<Team> findByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
