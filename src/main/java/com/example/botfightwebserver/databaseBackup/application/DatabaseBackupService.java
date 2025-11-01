@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.databaseBackup;
+package com.example.botfightwebserver.databaseBackup.application;
 
+import com.example.botfightwebserver.databaseBackup.infra.BackupProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
