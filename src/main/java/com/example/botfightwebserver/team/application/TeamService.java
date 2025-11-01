@@ -198,18 +198,18 @@ public class TeamService {
 
     public List<LeaderboardDTO> getLeaderboard() {
         AtomicInteger rank = new AtomicInteger(1);
-        List<LeaderboardDTO> leaderboard = teamRepository.findAll().stream()
-                .filter(team -> team.getCurrentSubmission() != null)
-                .sorted(Comparator.comparing(Team::getGlicko).reversed())
+        return teamRepository.findAll().stream()
+                .sorted(Comparator.comparing(
+                        (Team team) -> team.getCurrentSubmission() != null ? team.getGlicko() : -1
+                ).reversed())
                 .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
                 .collect(Collectors.toList());
-        return leaderboard;
     }
 
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
+        Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
-        Page<Team> teamPage = teamRepository.findAllTeamsWithCurrentSubmission(pageable);
+        Page<Team> teamPage = teamRepository.findTeamsPaginated(pageable);
         return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
     }
 
@@ -220,7 +220,7 @@ public class TeamService {
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
         builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
-                .glicko(team.getGlicko())
+                .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
                 .teamName(team.getName())
                 .createdAt(team.getCreationDateTime())
                 .quote(team.getQuote());
