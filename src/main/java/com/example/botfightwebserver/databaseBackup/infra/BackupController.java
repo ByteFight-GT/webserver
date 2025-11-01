@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/database-backup")
+@RequestMapping("/api/v1/database-backup")
 @Slf4j
 public class DatabaseBackupController {
     private final DatabaseBackupService databaseBackupService;
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/backup")

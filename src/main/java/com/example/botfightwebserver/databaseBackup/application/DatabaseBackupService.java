@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.databaseBackup;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DatabaseBackupService {
 
     @Value("${spring.datasource.url}")
@@ -25,6 +27,7 @@ public class DatabaseBackupService {
     @Value("${spring.datasource.password}")
     private String dbPassword;
 
+    private final BackupProperties backupProperties;
 
     public String createDatabaseDump() {
         try {
@@ -36,7 +39,8 @@ public class DatabaseBackupService {
             int exitValue = process.waitFor();
 
             if (exitValue != 0) {
-                log.error("pg_dump process exited with error code {}: {}", exitValue, errorOutput);
+                log.error("pg_dump process exited with error code {}. Full output" +
+                        "(stdout): '{}'. Error output (stderr): '{}'", exitValue, output.trim(), errorOutput.trim());
                 throw new RuntimeException("Database dump process failed.");
             }
             log.info("Database dump created successfully");
@@ -49,21 +53,17 @@ public class DatabaseBackupService {
 
     private Process getProcess() throws URISyntaxException, IOException {
         URI dbUri = new URI(dbUrl.replace("jdbc:", ""));
-
         String dbHost = dbUri.getHost();
         String dbPort = String.valueOf(dbUri.getPort());
         String dbName = dbUri.getPath().substring(1);
-
-        ProcessBuilder pb = new ProcessBuilder(
-                "pg_dump",
-                "--host", dbHost,
-                "--username", dbUser,
-                "--port", dbPort,
-                "--no-password", // avoid the password prompt and instead make with env variables
-                dbName
-        );
+        ProcessBuilder pb = new ProcessBuilder("./create_backup.sh");
         Map<String, String> env = pb.environment();
-        env.put("PGPASSWORD", dbPassword);
+        env.put("DB_HOST", dbHost);
+        env.put("DB_PORT", dbPort);
+        env.put("DB_NAME", dbName);
+        env.put("DB_USER", dbUser);
+        env.put("DB_PASSWORD", dbPassword);
+        env.put("BACKUP_DIR", backupProperties.dbDumpDir());
 
         Process process = pb.start();
         return process;
@@ -80,5 +80,4 @@ public class DatabaseBackupService {
         // java will automatically call reader.close() because we wrapped BufferedReader in the try block
         return content.toString();
     }
-
 }
