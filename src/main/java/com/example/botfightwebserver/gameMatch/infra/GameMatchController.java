@@ -59,13 +59,6 @@ public class GameMatchController {
         return ResponseEntity.ok(gameMatchService.peekQueuedMatches());
     }
 
-    @PostMapping("/reschedule/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<GameMatchJob>> rescheduleAllQueuedMatches() {
-        List<GameMatchJob> jobs = gameMatchService.rescheduleFailedAndStaleMatches(true);
-        return ResponseEntity.ok(jobs);
-    }
-
     @GetMapping("/public/stats")
     public ResponseEntity<StatsDTO> stats(@RequestParam Long teamId, @RequestParam MATCH_REASON reason) {
         if (teamId == null) {
