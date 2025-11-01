@@ -6,7 +6,6 @@ fi
 
 echo "Starting backup process"
 
-BACKUP_DIR="./db_backups"
 mkdir -p "$BACKUP_DIR"
 if [ $? -ne 0 ]; then
   echo "Error: could not create backup directory '$BACKUP_DIR'."

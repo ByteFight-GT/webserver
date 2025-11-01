@@ -1,5 +1,6 @@
-package com.example.botfightwebserver.databaseBackup;
+package com.example.botfightwebserver.databaseBackup.infra;
 
+import com.example.botfightwebserver.databaseBackup.application.DatabaseBackupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/database-backup")
+@RequestMapping("/api/v1/admin/backup")
 @Slf4j
-public class DatabaseBackupController {
+public class BackupController {
     private final DatabaseBackupService databaseBackupService;
 
+    @PostMapping("/database")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/backup")
     public ResponseEntity<String> createBackup() {
         try {
             log.info("Received request to create database backup. Attempting to create backup");
