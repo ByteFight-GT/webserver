@@ -62,7 +62,8 @@ public class PrivateTeamController {
     public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto edit) {
         permissionsService.validateAllowUpdateTeam();
         boolean isAvailable = !teamService.isNameExist(edit.getName());
-        if (!isAvailable) {
+        String currentTeamName = playerService.getPlayer(user.getUuid()).getTeam().getName();
+        if (!isAvailable && !currentTeamName.equals(edit.getName())) {
             throw new IllegalArgumentException("Name is Already Taken.");
         }
 
