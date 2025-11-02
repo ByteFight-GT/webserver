@@ -45,16 +45,16 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, Jpa
 
     boolean existsByUuid(UUID uuid);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND gm.status NOT IN :statusList")
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND gm.status NOT IN :statusList ORDER BY gm.processedAt DESC")
     List<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("statusList") List<MATCH_STATUS> statusList);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.reason IN :reasonList")
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.id = :teamId OR gm.teamTwo.id = :teamId) AND gm.reason IN :reasonList ORDER BY gm.processedAt DESC")
     List<GameMatch> findTeamMatchesByReason(@Param("teamId") Long teamId, @Param("reasonList") List<MATCH_REASON> reasonList);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND gm.status NOT IN :statusList AND gm.reason NOT IN :reasonList")
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND gm.status NOT IN :statusList AND gm.reason NOT IN :reasonList ORDER BY gm.processedAt DESC")
     Page<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("statusList") List<MATCH_STATUS> statusList, @Param("reasonList") List<MATCH_REASON> reasonList, Pageable pageable);
 
-    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND (gm.teamOne.uuid = :otherTeamUuid OR gm.teamTwo.uuid = :otherTeamUuid) AND gm.status NOT IN :statusList AND gm.reason NOT IN :reasonList")
+    @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamOne.uuid = :teamUuid OR gm.teamTwo.uuid = :teamUuid) AND (gm.teamOne.uuid = :otherTeamUuid OR gm.teamTwo.uuid = :otherTeamUuid) AND gm.status NOT IN :statusList AND gm.reason NOT IN :reasonList ORDER BY gm.processedAt DESC")
     Page<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("otherTeamId") UUID otherTeamUuid, @Param("statusList") List<MATCH_STATUS> statusList, @Param("reasonList") List<MATCH_REASON> reasonList, Pageable pageable);
 }
 
