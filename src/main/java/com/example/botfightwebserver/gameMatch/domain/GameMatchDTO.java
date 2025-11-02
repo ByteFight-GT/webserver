@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameMatchDTO {
-    private Long id;
+    private String uuid;
     @NotNull private String teamOneName;
     @NotNull private String teamTwoName;
     @NotNull private String teamOneUuid;
@@ -30,7 +30,7 @@ public class GameMatchDTO {
     // Convert from Entity to DTO
     public static GameMatchDTO fromEntity(GameMatch gameMatch) {
         return GameMatchDTO.builder()
-            .id(gameMatch.getId())
+            .uuid(gameMatch.getUuid().toString())
             .teamOneName(gameMatch.getTeamOne().getName())
             .teamTwoName(gameMatch.getTeamTwo().getName())
             .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())

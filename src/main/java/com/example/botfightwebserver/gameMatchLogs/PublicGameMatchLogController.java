@@ -1,15 +1,12 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
+import com.google.api.Http;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,19 +14,19 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/game-match-log")
-public class GameMatchLogController {
+public class PublicGameMatchLogController {
 
     private final GameMatchLogService gameMatchLogService;
 
     @GetMapping("/all")
     public ResponseEntity<List<GameMatchLogDTO>> getGameMatchLogs() {
-        return ResponseEntity.ok(gameMatchLogService.getAllGameMatchLogs().stream().map(GameMatchLogDTO::fromEntity).toList());
+        return ResponseEntity.ok(gameMatchLogService.getAllGameMatchLogs().stream().map(GameMatchLogDTO::from).toList());
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<GameMatchLogDTO> getGameMatchLogsByGameId(@RequestParam Long id) {
-        Optional<GameMatchLog> maybeLog = gameMatchLogService.getGameMatchLogById(id);
-        return maybeLog.isPresent() ? ResponseEntity.ok(GameMatchLogDTO.fromEntity(maybeLog.get())) : ResponseEntity.notFound().build();
+    @GetMapping("/{uuid}")
+    public ResponseEntity<GameMatchLogDTO> getGameMatchLogsByGameMatchUuid(@PathVariable String uuid) {
+        GameMatchLog gmLog = gameMatchLogService.getGameMatchLog(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Game match log not found"));
+        return ResponseEntity.ok(GameMatchLogDTO.from(gmLog));
     }
 
     @GetMapping("/ids")
@@ -43,7 +40,7 @@ public class GameMatchLogController {
         if (maybeLog == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(GameMatchLogDTO.fromEntity(maybeLog.get()));
+        return ResponseEntity.ok(GameMatchLogDTO.from(maybeLog.get()));
     }
 
     @GetMapping("/count")
