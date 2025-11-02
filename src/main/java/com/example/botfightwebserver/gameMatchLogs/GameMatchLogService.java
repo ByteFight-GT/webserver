@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -30,6 +31,10 @@ public class GameMatchLogService {
 
     public Optional<GameMatchLog> getGameMatchLogById(Long gameMatchLogId) {
         return gameMatchLogRepository.findById(gameMatchLogId);
+    }
+
+    public Optional<GameMatchLog> getGameMatchLog(String uuid) {
+        return gameMatchLogRepository.findByGameMatchUuid(UUID.fromString(uuid));
     }
 
     public List<Long> getGameMatchLogIds() {
