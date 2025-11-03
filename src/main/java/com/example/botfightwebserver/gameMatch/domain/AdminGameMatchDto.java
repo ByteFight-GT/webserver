@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameMatchDTO {
-    private String uuid;
+public class AdminGameMatchDto {
+    @NotNull private Long id;
+    @NotNull private String uuid;
     @NotNull private String teamOneName;
     @NotNull private String teamTwoName;
     @NotNull private String teamOneUuid;
@@ -28,8 +29,9 @@ public class GameMatchDTO {
     private String map;
 
     // Convert from Entity to DTO
-    public static GameMatchDTO fromEntity(GameMatch gameMatch) {
-        return GameMatchDTO.builder()
+    public static AdminGameMatchDto fromEntity(GameMatch gameMatch) {
+        return AdminGameMatchDto.builder()
+            .id(gameMatch.getId())
             .uuid(gameMatch.getUuid().toString())
             .teamOneName(gameMatch.getTeamOne().getName())
             .teamTwoName(gameMatch.getTeamTwo().getName())

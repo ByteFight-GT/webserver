@@ -1,7 +1,8 @@
 package com.example.botfightwebserver.gameMatch.application;
 
+import com.example.botfightwebserver.gameMatch.domain.AdminGameMatchDto;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class AdminGameMatchService {
     private final GameMatchRepository gameMatchRepository;
 
-    public Page<GameMatchDTO> list(Specification<GameMatch> specs, Pageable pageable) {
-        return gameMatchRepository.findAll(specs, pageable).map(GameMatchDTO::fromEntity);
+    public Page<AdminGameMatchDto> list(Specification<GameMatch> specs, Pageable pageable) {
+        return gameMatchRepository.findAll(specs, pageable).map(AdminGameMatchDto::fromEntity);
     }
 }

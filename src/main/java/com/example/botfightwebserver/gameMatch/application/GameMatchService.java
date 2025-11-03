@@ -21,11 +21,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -91,8 +89,8 @@ public class GameMatchService {
         gameMatchRepository.save(gameMatch);
     }
 
-    public GameMatchDTO getDTOById(Long id) {
-        return GameMatchDTO.fromEntity(gameMatchRepository.getReferenceById(id));
+    public GameMatchDto getDTOById(Long id) {
+        return GameMatchDto.fromEntity(gameMatchRepository.getReferenceById(id));
     }
 
     public GameMatch getReferenceById(Long id) {
@@ -166,22 +164,22 @@ public class GameMatchService {
         return job;
     }
 
-    public List<GameMatchDTO> getAllTeamMatches(String teamUuid) {
+    public List<GameMatchDto> getAllTeamMatches(String teamUuid) {
         return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid), List.of(MATCH_STATUS.FAILED)).stream()
                 .filter((match) -> match.getReason() != MATCH_REASON.TOURNAMENT)
-                .map(GameMatchDTO::fromEntity)
+                .map(GameMatchDto::fromEntity)
                 .toList();
     }
 
-    public Page<GameMatchDTO> getTeamMatches(String teamUuid, int page, int size) {
+    public Page<GameMatchDto> getTeamMatches(String teamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
                 List.of(MATCH_STATUS.FAILED), List.of(MATCH_REASON.TOURNAMENT), pageable);
 
-        return matches.map(GameMatchDTO::fromEntity);
+        return matches.map(GameMatchDto::fromEntity);
     }
 
-    public Page<GameMatchDTO> getTeamMatches(String teamUuid, String otherTeamUuid, int page, int size) {
+    public Page<GameMatchDto> getTeamMatches(String teamUuid, String otherTeamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
         Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
@@ -191,14 +189,14 @@ public class GameMatchService {
                 List.of(MATCH_REASON.TOURNAMENT),
                 pageable);
 
-        return matches.map(GameMatchDTO::fromEntity);
+        return matches.map(GameMatchDto::fromEntity);
     }
 
-    private Page<GameMatchDTO> processMatches(Page<GameMatch> matches, PageRequest pageable) {
-        List<GameMatchDTO> filteredMatches = matches.getContent()
+    private Page<GameMatchDto> processMatches(Page<GameMatch> matches, PageRequest pageable) {
+        List<GameMatchDto> filteredMatches = matches.getContent()
                 .stream()
                 .filter(match -> match.getReason() != MATCH_REASON.TOURNAMENT)
-                .map(GameMatchDTO::fromEntity)
+                .map(GameMatchDto::fromEntity)
                 .toList();
 
         return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());

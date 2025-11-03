@@ -2,7 +2,7 @@ package com.example.botfightwebserver.gameMatch.infra;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchSearchService;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ public class PublicGameMatchController {
     private final GameMatchService gameMatchService;
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GameMatchDTO>> searchGameMatches(
+    public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
             @RequestParam(required = false) String teamSearchParam,
             @RequestParam(required = false) String teamUuid,
             @RequestParam(required = false) MATCH_REASON reason,
@@ -33,13 +33,13 @@ public class PublicGameMatchController {
             @RequestParam(defaultValue = "10") int size) {
         System.out.println("searchGame");
         Pageable pageable = PageRequest.of(page, size);
-        Page<GameMatchDTO> gameSearchResult = searchService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamUuid),
+        Page<GameMatchDto> gameSearchResult = searchService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamUuid),
                 Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 
     @GetMapping("/logs/paginated")
-    public ResponseEntity<Page<GameMatchDTO>> paginateGameMatches(
+    public ResponseEntity<Page<GameMatchDto>> paginateGameMatches(
             @RequestParam String teamUuid,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

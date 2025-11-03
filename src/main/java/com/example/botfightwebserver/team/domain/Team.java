@@ -16,10 +16,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table
@@ -117,6 +114,17 @@ public class Team {
     @VisibleForTesting
     public static void setClock(Clock testClock) {
         clock = testClock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Team team)) return false;
+        return Objects.equals(uuid, team.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 }
 
