@@ -19,9 +19,10 @@ public class PublicTeamDto {
     @NotNull Integer numberDraws;
     @NotNull String quote;
     @NotNull Integer numberOfPlayers;
+    @NotNull Integer rank;
     SubmissionDTO currentSubmissionDTO;
 
-    public static PublicTeamDto from(Team team) {
+    public static PublicTeamDto from(Team team, int rank) {
         return PublicTeamDto.builder()
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
@@ -34,6 +35,7 @@ public class PublicTeamDto {
                 .quote(team.getQuote())
                 .currentSubmissionDTO(team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
                 .numberOfPlayers(team.getNumberPlayers())
+                .rank(rank)
                 .build();
     }
 }

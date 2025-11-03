@@ -18,13 +18,14 @@ public class SelfTeamDto {
     @NotNull Integer numberDraws;
     @NotNull String quote;
     @NotNull Integer numberOfPlayers;
+    @NotNull Integer rank;
     SubmissionDTO currentSubmissionDTO;
     String teamCode;
     @NotNull LocalDateTime creationDateTime;
     @NotNull LocalDateTime lastModifiedDate;
 
 
-    public static SelfTeamDto from(Team team) {
+    public static SelfTeamDto from(Team team, int rank) {
         return SelfTeamDto.builder()
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
@@ -40,6 +41,7 @@ public class SelfTeamDto {
                         team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
                 .teamCode(team.getTeamCode())
                 .numberOfPlayers(team.getNumberPlayers())
+                .rank(rank)
                 .build();
     }
 }

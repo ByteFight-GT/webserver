@@ -6,10 +6,8 @@ import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
-import com.example.botfightwebserver.team.domain.AdminCreateTeamDto;
-import com.example.botfightwebserver.team.domain.TeamSettingsDto;
+import com.example.botfightwebserver.team.domain.*;
 import com.example.botfightwebserver.team.infra.TeamRepository;
-import com.example.botfightwebserver.team.domain.Team;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,6 +53,28 @@ public class TeamService {
 
     public Optional<Team> getTeamByUuid(String uuid) {
         return teamRepository.findByUuid(UUID.fromString(uuid));
+    }
+
+    public Optional<PublicTeamDto> getPublicTeamDtoByUuid(String uuid) {
+        Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
+        if(team.isEmpty()) return Optional.empty();
+
+        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+
+        return Optional.of(PublicTeamDto.from(team.get(), rank));
+    }
+
+    public Optional<SelfTeamDto> getSelfTeamDtoByUuid(String uuid) {
+        Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
+        if(team.isEmpty()) return Optional.empty();
+
+        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+
+        return Optional.of(SelfTeamDto.from(team.get(), rank));
+    }
+
+    public int getRankForTeam(Team team) {
+        return teamRepository.findRankByUuid(team.getUuid());
     }
 
     public Team createTeam(TeamSettingsDto teamSettingsDto) {

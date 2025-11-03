@@ -42,13 +42,6 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.createTournament(tournament));
     }
 
-    @PostMapping("/add-eligible-players/{tournamentId}")
-    public ResponseEntity<List<PublicTeamDto>> addPlayers(@PathVariable Long tournamentId) {
-        List<Team> eligibleTeams = teamService.getTeamsWithSubmission();
-        tournamentService.addPlayers(tournamentId, eligibleTeams);
-        return ResponseEntity.ok(eligibleTeams.stream().map(PublicTeamDto::from).toList());
-    }
-
     @PostMapping("/start/{tournamentId}")
     public ResponseEntity<Tournament> startTournament(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.startTournament(tournamentId));

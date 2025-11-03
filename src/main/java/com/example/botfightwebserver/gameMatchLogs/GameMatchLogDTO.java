@@ -1,15 +1,16 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
 public class GameMatchLogDTO {
-    private GameMatchDTO gameMatchDTO;
+    @NotNull private GameMatchDTO gameMatchDTO;
 
-    private String matchLog;
+    @NotNull private String matchLog;
 
     private Double team1GlickoChange;
 

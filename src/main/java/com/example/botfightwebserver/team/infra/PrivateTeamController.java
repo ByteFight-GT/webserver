@@ -47,7 +47,8 @@ public class PrivateTeamController {
         if (!player.isHasTeam() || player.getTeam() == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.ok(SelfTeamDto.from(player.getTeam()));
+        Optional<SelfTeamDto> selfTeamDtoOptional = teamService.getSelfTeamDtoByUuid(player.getTeam().getUuid().toString());
+        return selfTeamDtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/new")
@@ -55,7 +56,7 @@ public class PrivateTeamController {
         permissionsService.validateAllowCreateTeam();
         Team team = teamService.createTeam(new TeamSettingsDto(name, null));
         playerService.setPlayerTeam(user.getUuid(), team);
-        return ResponseEntity.ok(SelfTeamDto.from(team));
+        return ResponseEntity.ok(SelfTeamDto.from(team, -1));
     }
 
     @PostMapping("/edit")
