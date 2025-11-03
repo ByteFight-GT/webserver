@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.team.domain.Team;
@@ -56,7 +56,7 @@ class GameMatchDTOTest {
         try (MockedStatic<TeamDTO> teamDTOMock = mockStatic(TeamDTO.class);
              MockedStatic<SubmissionDTO> submissionDTOMock = mockStatic(SubmissionDTO.class)) {
 
-            GameMatchDTO dto = GameMatchDTO.fromEntity(gameMatch);
+            GameMatchDto dto = GameMatchDto.fromEntity(gameMatch);
 
             assertNotNull(dto);
             assertEquals(1L, dto.getId());

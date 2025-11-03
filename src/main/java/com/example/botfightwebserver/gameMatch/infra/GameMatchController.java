@@ -1,18 +1,14 @@
 package com.example.botfightwebserver.gameMatch.infra;
 
-import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.*;
-import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.domain.StatsDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +30,7 @@ public class GameMatchController {
 
     @PostMapping("/submit/match")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GameMatchDTO> submitMatch(@RequestBody MatchSubmissionRequest request) {
+    public ResponseEntity<GameMatchDto> submitMatch(@RequestBody MatchSubmissionRequest request) {
         // add validation logic here for match reason
         GameMatch match = gameMatchService.createMatch(
                 request.getTeam1Uuid(),
@@ -45,7 +41,7 @@ public class GameMatchController {
                 request.getMap()
         );
         gameMatchService.queueMatch(match);
-        return ResponseEntity.ok(GameMatchDTO.fromEntity(match));
+        return ResponseEntity.ok(GameMatchDto.fromEntity(match));
     }
 
     @PostMapping("/queue/remove_all")

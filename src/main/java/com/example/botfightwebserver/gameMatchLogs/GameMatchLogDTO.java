@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatchLogs;
 
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class GameMatchLogDTO {
-    @NotNull private GameMatchDTO gameMatchDTO;
+    @NotNull private GameMatchDto gameMatchDTO;
 
     @NotNull private String matchLog;
 
@@ -18,7 +18,7 @@ public class GameMatchLogDTO {
 
     public static GameMatchLogDTO from(GameMatchLog gameMatchLog) {
         return GameMatchLogDTO.builder()
-            .gameMatchDTO(GameMatchDTO.fromEntity(gameMatchLog.getGameMatch()))
+            .gameMatchDTO(GameMatchDto.fromEntity(gameMatchLog.getGameMatch()))
             .matchLog(gameMatchLog.getMatchLog())
             .team1GlickoChange(gameMatchLog.getTeam1GlickoChange())
             .team2GlickoChange(gameMatchLog.getTeam2GlickoChange())

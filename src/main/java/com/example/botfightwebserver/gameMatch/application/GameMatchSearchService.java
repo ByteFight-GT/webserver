@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.gameMatch.application;
 
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
+import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
@@ -34,12 +34,12 @@ public class GameMatchSearchService {
         searchSession = Search.session(entityManager);
     }
 
-    public Page<GameMatchDTO> searchGame(Optional<String> teamSearchparam,
+    public Page<GameMatchDto> searchGame(Optional<String> teamSearchparam,
                                          Optional<String> requiredTeamUuid,
                                          Optional<MATCH_REASON> reason,
                                          Optional<String> map,
                                          Pageable pageable) {
-        List<GameMatchDTO> allMatches = gameMatchService.getAllTeamMatches(requiredTeamUuid.get());
+        List<GameMatchDto> allMatches = gameMatchService.getAllTeamMatches(requiredTeamUuid.get());
         if (teamSearchparam.isPresent()) {
             SearchResult<Team> result = searchSession.search(Team.class)
                     .where(f -> f.match()
@@ -73,7 +73,7 @@ public class GameMatchSearchService {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), allMatches.size());
 
-        List<GameMatchDTO> pagedContent = start < end ?
+        List<GameMatchDto> pagedContent = start < end ?
                 allMatches.subList(start, end) :
                 List.of();
 

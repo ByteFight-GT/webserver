@@ -24,7 +24,7 @@ public class AdminGameMatchController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<GameMatchDTO> adminListGameMatches(
+    public Page<AdminGameMatchDto> adminListGameMatches(
             Pageable pageable,
             @RequestParam(required = false) List<MATCH_STATUS> status,
             @RequestParam(required = false) List<MATCH_REASON> reason
