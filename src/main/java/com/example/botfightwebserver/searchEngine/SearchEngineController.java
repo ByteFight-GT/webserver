@@ -29,10 +29,7 @@ public class SearchEngineController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         System.out.println("searchTeam");
-        Page<PublicTeamDto> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable)
-            .map(PublicTeamDto::from);
+        Page<PublicTeamDto> teamSearchResult = searchEngineService.searchTeamByNameFuzzy(searchParam, pageable);
         return ResponseEntity.ok(teamSearchResult);
     }
-
-
 }

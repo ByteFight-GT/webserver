@@ -20,4 +20,14 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByTeamCode(String teamCode);
     Optional<Team> findByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
+
+    @Query(value = """
+        SELECT 1+COUNT(t2.id)
+        FROM Team t
+        LEFT JOIN Team t2
+            ON (t2.glicko, t2.matchesPlayed, t2.id) > (t.glicko, t.matchesPlayed, t.id)
+        WHERE t.uuid = :uuid
+        GROUP BY t.id
+    """)
+    int findRankByUuid(UUID uuid);
 }

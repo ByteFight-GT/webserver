@@ -7,7 +7,6 @@ import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +25,11 @@ public class PublicTeamController {
     private final GlickoHistoryService glickoHistoryService;
     private final ClockConfig clockConfig;
 
-    @GetMapping("/all")
-    public List<PublicTeamDto> getTeams() {
-        return teamService.getTeams().stream().map(PublicTeamDto::from).toList();
-    }
-
     @GetMapping("/{uuid}")
     public ResponseEntity<PublicTeamDto> getTeam(@PathVariable String uuid) {
-        Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
+        Optional<PublicTeamDto> dtoOptional = teamService.getPublicTeamDtoByUuid(uuid);
 
-        return teamOptional.map(team -> ResponseEntity.ok(PublicTeamDto.from(team))).orElseGet(() -> ResponseEntity.notFound().build());
+        return dtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/glicko-history/{uuid}")

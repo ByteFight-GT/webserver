@@ -22,6 +22,6 @@ public class AdminTeamController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SelfTeamDto> adminCreateTeam(@RequestBody AdminCreateTeamDto adminCreateTeamDto) {
         Team team = teamService.adminCreateTeam(adminCreateTeamDto);
-        return ResponseEntity.ok(SelfTeamDto.from(team));
+        return ResponseEntity.ok(SelfTeamDto.from(team, -1));
     }
 }

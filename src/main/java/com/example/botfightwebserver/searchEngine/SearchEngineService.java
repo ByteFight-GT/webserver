@@ -3,6 +3,7 @@ package com.example.botfightwebserver.searchEngine;
 import com.example.botfightwebserver.gameMatch.domain.GameMatchDTO;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.annotation.PostConstruct;
@@ -38,7 +39,7 @@ public class SearchEngineService {
         searchSession = Search.session(entityManager);
     }
 
-    public Page<Team> searchTeamByNameFuzzy(String searchTerm, Pageable pageable) {
+    public Page<PublicTeamDto> searchTeamByNameFuzzy(String searchTerm, Pageable pageable) {
         log.info("Searching teams with fuzzy match for name: {}", searchTerm);
 
         SearchResult<Team> result = searchSession.search(Team.class)
@@ -48,8 +49,15 @@ public class SearchEngineService {
                 .fuzzy(2))
             .fetch((int) pageable.getOffset(), pageable.getPageSize());
 
+        List<PublicTeamDto> dtos = result.hits().stream()
+                .map(team -> {
+                    int rank = teamService.getRankForTeam(team);
+                    return PublicTeamDto.from(team, rank);
+                })
+                .collect(Collectors.toList());
+
         return new PageImpl<>(
-            result.hits(),
+            dtos,
             pageable,
             result.total().hitCount()
         );
