@@ -4,11 +4,13 @@ import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -38,6 +40,8 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, Jpa
         RETURNING gm.id
     """, nativeQuery = true)
     List<Long> claimAndMarkStaleMatches(LocalDateTime threshold);
+
+    Page<GameMatch> findAllByOrderByProcessedAt(@Nullable Specification<GameMatch> spec, Pageable pageable);
 
     List<GameMatch> findByStatus(MATCH_STATUS status);
 

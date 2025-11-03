@@ -31,10 +31,9 @@ public class PublicGameMatchController {
             @RequestParam(required = false) String map,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        System.out.println("searchGame");
         Pageable pageable = PageRequest.of(page, size);
         Page<GameMatchDto> gameSearchResult = searchService.searchGame(Optional.ofNullable(teamSearchParam), Optional.ofNullable(teamUuid),
-                Optional.ofNullable(reason), Optional.ofNullable(map), pageable);
+                Optional.ofNullable(reason), pageable);
         return ResponseEntity.ok(gameSearchResult);
     }
 
