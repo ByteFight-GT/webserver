@@ -243,6 +243,7 @@ public class TeamService {
                 .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
                 .teamName(team.getName())
                 .createdAt(team.getCreationDateTime())
+                .type(team.getType())
                 .quote(team.getQuote());
 
         if (team.isDisplayMembers()) {
