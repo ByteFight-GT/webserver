@@ -20,6 +20,7 @@ public class PublicTeamDto {
     @NotNull String quote;
     @NotNull Integer numberOfPlayers;
     @NotNull Integer rank;
+    @NotNull TeamType type;
     SubmissionDTO currentSubmissionDTO;
 
     public static PublicTeamDto from(Team team, int rank) {

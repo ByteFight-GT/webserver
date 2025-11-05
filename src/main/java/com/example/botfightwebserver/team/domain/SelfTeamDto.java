@@ -19,6 +19,7 @@ public class SelfTeamDto {
     @NotNull String quote;
     @NotNull Integer numberOfPlayers;
     @NotNull Integer rank;
+    @NotNull TeamType type;
     SubmissionDTO currentSubmissionDTO;
     String teamCode;
     @NotNull LocalDateTime creationDateTime;

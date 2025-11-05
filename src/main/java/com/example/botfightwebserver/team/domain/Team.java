@@ -85,6 +85,9 @@ public class Team {
 
     private String teamCode;
 
+    @Enumerated(EnumType.STRING)
+    private TeamType type = TeamType.NORMAL;
+
     private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
     @PrePersist

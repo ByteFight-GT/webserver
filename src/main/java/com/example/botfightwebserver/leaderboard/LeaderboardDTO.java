@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.leaderboard;
 
+import com.example.botfightwebserver.team.domain.TeamType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
@@ -14,9 +15,10 @@ public class LeaderboardDTO {
     @NotNull String teamName;
     @NotNull String quote;
     @NotNull LocalDateTime createdAt;
+    @NotNull TeamType type;
 
-    int rank;
-    double glicko;
+    @NotNull int rank;
+    @NotNull double glicko;
     List<String> members;
 
 }
