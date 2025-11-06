@@ -93,6 +93,13 @@ public class GameMatchService {
         return GameMatchDto.fromEntity(gameMatchRepository.getReferenceById(id));
     }
 
+    public Optional<GameMatchDto> getDTOByUuid(String uuid) {
+        Optional<GameMatch> dto = gameMatchRepository.findByUuid(UUID.fromString(uuid));
+        if(dto.isEmpty()) return Optional.empty();
+
+        return Optional.of(GameMatchDto.fromEntity(dto.get()));
+    }
+
     public GameMatch getReferenceById(Long id) {
         return gameMatchRepository.getReferenceById(id);
     }
