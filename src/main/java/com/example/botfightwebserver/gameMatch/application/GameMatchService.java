@@ -145,16 +145,12 @@ public class GameMatchService {
 
         // This atomically marks all stale matches as RESCHEDULING and returns their ids
         List<Long> matchesToReschedule = gameMatchRepository.claimAndMarkStaleMatches(thresholdTime);
-
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override public void afterCommit() {
-                log.info("Found {} matches to reschedule", matchesToReschedule.size());
-                matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
-                log.info("Rescheduling completed");
-            }
-        });
+        log.info("Found {} matches to reschedule", matchesToReschedule.size());
+        matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
+        log.info("Rescheduling completed");
     }
 
+    @Transactional
     public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
         GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
         Integer timesQueued = gameMatch.getTimesQueued();
