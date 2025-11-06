@@ -30,7 +30,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     """)
     int findRankByUuid(UUID uuid);
 
-    @Query("SELECT t FROM Team t ORDER BY t.glicko DESC")
+    @Query("SELECT t FROM Team t ORDER BY CASE WHEN t.currentSubmission IS NULL THEN 1 ELSE 0 END, t.glicko DESC")
     Page<Team> findTeamsPaginated(Pageable pageable);
 
     List<Team> findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
