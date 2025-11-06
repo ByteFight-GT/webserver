@@ -42,7 +42,6 @@ public class ScrimmageMatchController {
     @PostMapping("/create")
     public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@AuthenticationPrincipal User user,
                                                                         @RequestParam Integer number,
-                                                                        @RequestParam String map,
                                                                         @RequestParam(required = false) String team2Uuid) {
 
         Team selfTeam = playerService.getTeamFromUUID(user.getUuid());
@@ -73,8 +72,7 @@ public class ScrimmageMatchController {
                     opponentTeam.getUuid().toString(),
                     team1CurrentSubmission.get().getUuid().toString(),
                     team2CurrentSubmission.get().getUuid().toString(),
-                    MATCH_REASON.SCRIMMAGE,
-                    map
+                    MATCH_REASON.SCRIMMAGE
             );
 
             gameMatchService.queueMatch(match);

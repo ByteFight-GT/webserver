@@ -37,8 +37,7 @@ public class GameMatchController {
                 request.getTeam2Uuid(),
                 request.getSubmission1Uuid(),
                 request.getSubmission2Uuid(),
-                request.getReason(),
-                request.getMap()
+                request.getReason()
         );
         gameMatchService.queueMatch(match);
         return ResponseEntity.ok(GameMatchDto.fromEntity(match));

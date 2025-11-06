@@ -9,5 +9,4 @@ public class MatchSubmissionRequest {
     private String submission1Uuid;
     private String submission2Uuid;
     private MATCH_REASON reason;
-    private String map;
 }
