@@ -64,8 +64,7 @@ public class MatchMaker {
                     teamTwo.getUuid().toString(),
                     teamOne.getCurrentSubmission().getUuid().toString(),
                     teamTwo.getCurrentSubmission().getUuid().toString(),
-                    MATCH_REASON.LADDER,
-                    MAPS.getRandomMap().toMapName()
+                    MATCH_REASON.LADDER
             );
         }).toList();
     }

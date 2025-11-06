@@ -43,7 +43,7 @@ public class GameMatchService {
         return gameMatchRepository.findAll();
     }
 
-    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MATCH_REASON reason, String map) {
+    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MATCH_REASON reason) {
         teamService.validateTeams(team1Uuid, team2Uuid);
         submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
         GameMatch gameMatch = new GameMatch();
@@ -53,7 +53,6 @@ public class GameMatchService {
         gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
         gameMatch.setReason(reason);
-        gameMatch.setMap(map);
         return gameMatch;
     }
 
