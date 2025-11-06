@@ -4,6 +4,7 @@ import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.infra.PlayerRepository;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.*;
@@ -16,8 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class TeamService {
-
+    private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
@@ -57,7 +58,7 @@ public class TeamService {
 
     public Optional<PublicTeamDto> getPublicTeamDtoByUuid(String uuid) {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
-        if(team.isEmpty()) return Optional.empty();
+        if (team.isEmpty()) return Optional.empty();
 
         int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
 
@@ -66,7 +67,7 @@ public class TeamService {
 
     public Optional<SelfTeamDto> getSelfTeamDtoByUuid(String uuid) {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
-        if(team.isEmpty()) return Optional.empty();
+        if (team.isEmpty()) return Optional.empty();
 
         int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
 
@@ -89,7 +90,7 @@ public class TeamService {
         team.setName(name);
         team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
 
-        if(teamSettingsDto.getQuote() != null) {
+        if (teamSettingsDto.getQuote() != null) {
             team.setQuote(teamSettingsDto.getQuote());
         }
 
@@ -108,11 +109,11 @@ public class TeamService {
         team.setName(name);
         team.setDisplayMembers(teamDto.isDisplayMembers());
 
-        if(teamDto.getQuote() != null) {
+        if (teamDto.getQuote() != null) {
             team.setQuote(teamDto.getQuote());
         }
 
-        if(teamDto.getSubmissionUuid() != null) {
+        if (teamDto.getSubmissionUuid() != null) {
             Submission submission = submissionService.getSubmissionByUuid(teamDto.getSubmissionUuid());
             team.setCurrentSubmission(submission);
         }
@@ -217,26 +218,27 @@ public class TeamService {
     }
 
     public List<LeaderboardDTO> getLeaderboard() {
-        AtomicInteger rank = new AtomicInteger(1);
-        return teamRepository.findAll().stream()
-                .sorted(Comparator.comparing(
-                        (Team team) -> team.getCurrentSubmission() != null ? team.getGlicko() : -1
-                ).reversed())
-                .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
-                .collect(Collectors.toList());
+        return getLeaderboard(0, Integer.MAX_VALUE).toList();
     }
 
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
         Page<Team> teamPage = teamRepository.findTeamsPaginated(pageable);
-        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
+
+        List<UUID> teamUuids = teamPage.map(Team::getUuid).stream().toList();
+        List<Player> teamPlayers = playerRepository.findMembersByTeamUuids(teamUuids);
+
+        Map<UUID, List<String>> membersByTeamUuid = teamPlayers.stream()
+                .collect(Collectors.groupingBy(
+                        p -> p.getTeam().getUuid(),
+                        Collectors.mapping(Player::getName, Collectors.toList())
+                ));
+
+        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement(), membersByTeamUuid.get(team.getUuid())));
     }
 
-    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank) {
-        List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
-        List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
-
+    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank, List<String> memberNames) {
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
         builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
@@ -247,7 +249,7 @@ public class TeamService {
                 .quote(team.getQuote());
 
         if (team.isDisplayMembers()) {
-            builder.members(playerNames);
+            builder.members(memberNames);
         }
 
         return builder.build();
