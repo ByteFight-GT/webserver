@@ -16,8 +16,6 @@ import java.util.UUID;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByName(String name);
     int countByCurrentSubmissionNotNull();
-    @Query("SELECT t FROM Team t ORDER BY CASE WHEN t.currentSubmission IS NULL THEN 1 ELSE 0 END, t.glicko DESC")
-    Page<Team> findTeamsPaginated(Pageable pageable);
     Optional<Team> findByTeamCode(String teamCode);
     Optional<Team> findByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
@@ -31,6 +29,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
         GROUP BY t.id
     """)
     int findRankByUuid(UUID uuid);
+
+    @Query("SELECT t FROM Team t ORDER BY t.glicko DESC")
+    Page<Team> findTeamsPaginated(Pageable pageable);
 
     List<Team> findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
 }

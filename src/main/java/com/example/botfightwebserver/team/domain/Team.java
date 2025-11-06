@@ -19,7 +19,13 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Entity
-@Table
+@Table(
+        name="team",
+        indexes = {
+                @Index(name = "idx_team_glicko", columnList = "glicko DESC"),
+                @Index(name = "idx_team_current_submission", columnList = "current_submission_id")
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -81,6 +87,7 @@ public class Team {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)
+    @JsonIgnore
     private Submission currentSubmission;
 
     private String teamCode;
