@@ -3,7 +3,7 @@ package com.example.botfightwebserver.team.infra;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.application.TeamService;

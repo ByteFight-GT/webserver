@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.shared.web;
 
 import com.example.botfightwebserver.auth.domain.RegistrationException;
+import com.example.botfightwebserver.permissions.domain.PermissionDeniedException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -60,5 +61,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
         return problem(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ProblemDetail handlePermissionDenied(PermissionDeniedException ex) {
+        return problem(HttpStatus.CONFLICT, "Permission Denied", ex.getMessage());
     }
 }
