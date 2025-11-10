@@ -1,11 +1,11 @@
 name: bytefight-server
 services:
   db:
-    image: postgres:16
+    image: postgres:16.4
     environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -37,4 +37,5 @@ services:
 
 volumes:
   db_data:
+    driver: local
   pgadmin_data:
