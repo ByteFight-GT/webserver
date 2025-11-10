@@ -19,6 +19,7 @@ public class PermissionsDto {
     private Boolean allowUpdateProfile;
     private Boolean allowCreateTeam;
     private Boolean allowJoinTeam;
+    private Boolean runScheduledMatchmaking;
 
     public static PermissionsDto fromEntity(Permissions permissions) {
         return PermissionsDto.builder()
@@ -29,6 +30,7 @@ public class PermissionsDto {
             .allowUpdateProfile(permissions.getAllowUpdateProfile())
             .allowCreateTeam(permissions.getAllowCreateTeam())
             .allowJoinTeam(permissions.getAllowJoinTeam())
+            .runScheduledMatchmaking(permissions.getRunScheduledMatchmaking())
             .build();
     }
 
@@ -40,5 +42,6 @@ public class PermissionsDto {
         entity.setAllowUpdateProfile(this.getAllowUpdateProfile());
         entity.setAllowCreateTeam(this.getAllowCreateTeam());
         entity.setAllowJoinTeam(this.getAllowJoinTeam());
+        entity.setRunScheduledMatchmaking(this.getRunScheduledMatchmaking());
     }
 }

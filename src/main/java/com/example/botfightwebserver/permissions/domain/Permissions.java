@@ -49,6 +49,9 @@ public class Permissions {
     @Builder.Default
     private Boolean allowJoinTeam = false;
 
+    @Builder.Default
+    private Boolean runScheduledMatchmaking = false;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
