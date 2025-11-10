@@ -79,11 +79,8 @@ public class SubmissionController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<SubmissionDTO> deleteSubmission(@RequestParam String submissionUuid) {
-//        permissionsService.validateAllowDeleteSubmission();
-
-        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Player player = playerService.getPlayer(UUID.fromString(authId));
+    public ResponseEntity<SubmissionDTO> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
+        Player player = playerService.getPlayer(user);
         Long teamId = player.getTeam().getId();
 
         Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
