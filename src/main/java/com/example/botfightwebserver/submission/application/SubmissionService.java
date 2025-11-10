@@ -1,10 +1,7 @@
 package com.example.botfightwebserver.submission.application;
 
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.storage.application.LocalStorageService;
@@ -17,13 +14,11 @@ import com.example.botfightwebserver.team.infra.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;

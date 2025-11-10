@@ -1,10 +1,9 @@
 package com.example.botfightwebserver.player.application;
 ;
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.permissions.PermissionsService;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.infra.PlayerRepository;
-import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import jakarta.transaction.Transactional;
