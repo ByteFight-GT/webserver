@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.auth.infra;
 
+import com.example.botfightwebserver.auth.application.SupabaseService;
 import com.example.botfightwebserver.auth.application.UserService;
 import com.example.botfightwebserver.auth.domain.RegisterUserDto;
 import com.example.botfightwebserver.auth.domain.SelfUserDto;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Tag(name = "Auth")
 @RequestMapping("/api/v1/auth")
