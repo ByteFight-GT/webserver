@@ -56,7 +56,7 @@ public class PrivateTeamController {
         permissionsService.validateAllowCreateTeam();
         Player player = playerService.getPlayer(user);
         if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
-        Team team = teamService.createTeam(new TeamSettingsDto(name, null));
+        Team team = teamService.createTeam(user, new TeamSettingsDto(name, null));
         playerService.setPlayerTeam(user.getUuid(), team);
         return ResponseEntity.ok(SelfTeamDto.from(team, -1));
     }
