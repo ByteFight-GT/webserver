@@ -44,7 +44,10 @@ public class PrivatePlayerController {
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
-        Player player = playerService.setPlayerTeam(user.getUuid(), team);
+        Player player = playerService.getPlayer(user);
+        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
+
+        player = playerService.setPlayerTeam(user.getUuid(), team);
         teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
