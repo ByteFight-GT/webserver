@@ -16,6 +16,19 @@ services:
       timeout: 3s
       retries: 10
 
+  pgbackweb:
+    image: eduardolat/pgbackweb:latest
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./backups:/backups
+    environment:
+      PBW_ENCRYPTION_KEY: "${PBW_ENCRYPTION_KEY}"
+      PBW_POSTGRES_CONN_STRING: "postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   spring:
     build:
       context: ./
