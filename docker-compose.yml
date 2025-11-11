@@ -33,3 +33,7 @@ volumes:
   db_data:
     driver: local
   pgadmin_data:
+
+networks:
+  bytefight-net:
+    external: true
