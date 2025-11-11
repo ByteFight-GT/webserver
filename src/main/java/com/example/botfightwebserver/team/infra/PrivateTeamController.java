@@ -54,6 +54,8 @@ public class PrivateTeamController {
     @PostMapping("/new")
     public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
         permissionsService.validateAllowCreateTeam();
+        Player player = playerService.getPlayer(user);
+        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
         Team team = teamService.createTeam(new TeamSettingsDto(name, null));
         playerService.setPlayerTeam(user.getUuid(), team);
         return ResponseEntity.ok(SelfTeamDto.from(team, -1));
