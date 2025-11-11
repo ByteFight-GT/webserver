@@ -1,10 +1,13 @@
 package com.example.botfightwebserver.team.application;
 
+import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.infra.PlayerRepository;
+import com.example.botfightwebserver.student.application.StudentEmailRepository;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.*;
@@ -34,6 +37,8 @@ public class TeamService {
     private final PlayerService playerService;
     private final ClockConfig clockConfig;
     private static final int MAX_PLAYERS = 2;
+    private final PermissionsService permissionsService;
+    private final StudentEmailRepository studentEmailRepository;
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -78,8 +83,15 @@ public class TeamService {
         return teamRepository.findRankByUuid(team.getUuid());
     }
 
-    public Team createTeam(TeamSettingsDto teamSettingsDto) {
+    public Team createTeam(User user, TeamSettingsDto teamSettingsDto) {
         String name = teamSettingsDto.getName();
+
+        if(permissionsService.get().getRestrictTeamCreationToStudentEmails()) {
+            if(!studentEmailRepository.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("You are not whitelisted for this competition.");
+            }
+        }
+
         if (teamRepository.existsByName(name.trim())) {
             throw new IllegalArgumentException("Team with name " + name + " already exists");
         }

@@ -52,6 +52,9 @@ public class Permissions {
     @Builder.Default
     private Boolean runScheduledMatchmaking = false;
 
+    @Builder.Default
+    private Boolean restrictTeamCreationToStudentEmails = false;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
