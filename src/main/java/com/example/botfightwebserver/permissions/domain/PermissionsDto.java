@@ -19,6 +19,7 @@ public class PermissionsDto {
     private Boolean allowUpdateProfile;
     private Boolean allowCreateTeam;
     private Boolean allowJoinTeam;
+    private Boolean allowLeaveTeam;
     private Boolean runScheduledMatchmaking;
     private Boolean restrictTeamCreationToStudentEmails;
 
@@ -31,6 +32,7 @@ public class PermissionsDto {
             .allowUpdateProfile(permissions.getAllowUpdateProfile())
             .allowCreateTeam(permissions.getAllowCreateTeam())
             .allowJoinTeam(permissions.getAllowJoinTeam())
+            .allowLeaveTeam(permissions.getAllowLeaveTeam())
             .runScheduledMatchmaking(permissions.getRunScheduledMatchmaking())
             .restrictTeamCreationToStudentEmails(permissions.getRestrictTeamCreationToStudentEmails())
             .build();
@@ -44,6 +46,7 @@ public class PermissionsDto {
         entity.setAllowUpdateProfile(this.getAllowUpdateProfile());
         entity.setAllowCreateTeam(this.getAllowCreateTeam());
         entity.setAllowJoinTeam(this.getAllowJoinTeam());
+        entity.setAllowLeaveTeam(this.getAllowLeaveTeam());
         entity.setRunScheduledMatchmaking(this.getRunScheduledMatchmaking());
         entity.setRestrictTeamCreationToStudentEmails(this.getRestrictTeamCreationToStudentEmails());
     }

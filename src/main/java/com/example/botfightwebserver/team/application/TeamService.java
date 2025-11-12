@@ -254,7 +254,7 @@ public class TeamService {
     }
 
     public boolean isTeamJoinable(Team team) {
-        return team.getNumberPlayers() < 2;
+        return team.getNumberPlayers() < 2 && !team.isDeleted();
     }
 
     public List<LeaderboardDTO> getLeaderboard() {
