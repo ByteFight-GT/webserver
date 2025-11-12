@@ -150,12 +150,24 @@ public class GameMatchService {
     }
 
     @Transactional
+    public void adminRescheduleMatches(List<Long> matchIds) {
+        log.info("Admin {} matches to reschedule", matchIds.size());
+        matchIds.forEach(id -> rescheduleMatch(id, true));
+        log.info("Rescheduling completed");
+    }
+
+    @Transactional
     public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
         GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
         Integer timesQueued = gameMatch.getTimesQueued();
         if (!isIgnoreLimit && timesQueued == 3) {
             throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
         }
+
+        if(gameMatch.getStatus() != MATCH_STATUS.WAITING) {
+            throw new IllegalArgumentException("Match " + gameMatch.getId() + " cannot be rescheduled.");
+        }
+
         gameMatch.setQueuedAt(LocalDateTime.now(clock));
         gameMatch.incrementTimesQueued();
         gameMatch.setStatus(MATCH_STATUS.WAITING);

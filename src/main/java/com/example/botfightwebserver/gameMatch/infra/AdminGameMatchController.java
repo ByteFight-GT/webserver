@@ -30,6 +30,14 @@ public class AdminGameMatchController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/reschedule")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> adminRescheduleMatches(@RequestBody List<Long> matchIds) {
+        gameMatchService.adminRescheduleMatches(matchIds);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Page<AdminGameMatchDto> adminListGameMatches(
