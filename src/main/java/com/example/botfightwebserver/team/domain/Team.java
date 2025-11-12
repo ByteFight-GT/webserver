@@ -98,6 +98,15 @@ public class Team {
 
     private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean isDeleted = false;
+
+    private LocalDateTime deletedAt;
+
+    @Enumerated(EnumType.STRING)
+    private TeamDeletionReason deletionReason;
+
     @PrePersist
     public void onCreate() {
         creationDateTime = LocalDateTime.now(clock);

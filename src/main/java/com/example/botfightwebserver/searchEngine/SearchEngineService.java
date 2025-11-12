@@ -48,7 +48,7 @@ public class SearchEngineService {
 
         List<PublicTeamDto> dtos = result.hits().stream()
                 .map(team -> {
-                    int rank = teamService.getRankForTeam(team);
+                    Integer rank = teamService.getRankForTeam(team);
                     return PublicTeamDto.from(team, rank);
                 })
                 .collect(Collectors.toList());

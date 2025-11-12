@@ -25,6 +25,7 @@ public class SelfTeamDto {
     String teamCode;
     @NotNull LocalDateTime creationDateTime;
     @NotNull LocalDateTime lastModifiedDate;
+    @NotNull Boolean isDeleted;
 
 
     public static SelfTeamDto from(Team team, int rank) {
@@ -46,6 +47,7 @@ public class SelfTeamDto {
                 .rank(rank)
                 .type(team.getType())
                 .displayMembers(team.isDisplayMembers())
+                .isDeleted(team.isDeleted())
                 .build();
     }
 }

@@ -53,6 +53,8 @@ public class PlayerService {
         Player player = playerRepository.findByUserUuid(playerId).orElse(null);
         player.setTeam(team);
         player.setHasTeam(true);
+        team.setNumberPlayers(team.getNumberPlayers() + 1);
+        teamRepository.save(team);
         return playerRepository.save(player);
     }
 
@@ -61,6 +63,8 @@ public class PlayerService {
         Team oldTeam = player.getTeam();
         player.setHasTeam(false);
         player.setTeam(null);
+        oldTeam.setNumberPlayers(oldTeam.getNumberPlayers() - 1);
+        teamRepository.save(oldTeam);
         playerRepository.save(player);
         return oldTeam;
     }

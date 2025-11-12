@@ -53,6 +53,10 @@ public class ScrimmageMatchController {
         if (opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
         Team opponentTeam = opponentTeamOpt.get();
 
+        if(opponentTeam.isDeleted()) {
+            throw new IllegalArgumentException("You can't scrimmage a deleted team.");
+        }
+
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(selfTeam.getId());
         Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(opponentTeam.getId());
 

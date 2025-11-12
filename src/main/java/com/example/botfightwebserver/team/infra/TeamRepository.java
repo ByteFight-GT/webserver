@@ -20,17 +20,24 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
 
-    @Query(value = """
-        SELECT 1+COUNT(t2.id)
-        FROM Team t
-        LEFT JOIN Team t2
-            ON (t2.glicko, t2.matchesPlayed, t2.id) > (t.glicko, t.matchesPlayed, t.id)
-        WHERE t.uuid = :uuid
-        GROUP BY t.id
-    """)
-    int findRankByUuid(UUID uuid);
+    List<Team> findAllByIsDeletedFalse();
 
-    @Query("SELECT t FROM Team t ORDER BY CASE WHEN t.currentSubmission IS NULL THEN 1 ELSE 0 END, t.glicko DESC")
+    @Query("""
+      select 1 + count(t2.id)
+      from Team t
+      left join Team t2 on (
+           t2.isDeleted = false
+       and (  t2.glicko > t.glicko
+           or (t2.glicko = t.glicko and t2.matchesPlayed > t.matchesPlayed)
+           or (t2.glicko = t.glicko and t2.matchesPlayed = t.matchesPlayed and t2.id > t.id)
+       )
+      )
+      where t.uuid = :uuid and t.isDeleted = false
+      group by t.id
+    """)
+    Optional<Integer> findRankByUuid(UUID uuid);
+
+    @Query("SELECT t FROM Team t WHERE NOT t.isDeleted ORDER BY CASE WHEN t.currentSubmission IS NULL THEN 1 ELSE 0 END, t.glicko DESC")
     Page<Team> findTeamsPaginated(Pageable pageable);
 
     List<Team> findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
