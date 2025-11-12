@@ -73,6 +73,7 @@ public class Team {
     private Integer numberPlayers=1;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean displayMembers = false;
 
     @OneToMany(mappedBy = "teamOne")

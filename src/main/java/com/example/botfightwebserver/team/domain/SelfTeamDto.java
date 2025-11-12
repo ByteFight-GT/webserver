@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 public class SelfTeamDto {
     @NotNull String uuid;
     @NotNull String name;
+    @NotNull String quote;
+    @NotNull Boolean displayMembers;
     @NotNull Double glicko;
     @NotNull Integer matchesPlayed;
     @NotNull Integer numberWins;
     @NotNull Integer numberLosses;
     @NotNull Integer numberDraws;
-    @NotNull String quote;
     @NotNull Integer numberOfPlayers;
     @NotNull Integer rank;
     @NotNull TeamType type;
@@ -44,6 +45,7 @@ public class SelfTeamDto {
                 .numberOfPlayers(team.getNumberPlayers())
                 .rank(rank)
                 .type(team.getType())
+                .displayMembers(team.isDisplayMembers())
                 .build();
     }
 }
