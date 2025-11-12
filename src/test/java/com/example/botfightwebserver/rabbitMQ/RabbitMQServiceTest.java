@@ -4,6 +4,8 @@ import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
+import com.example.botfightwebserver.rabbitMQ.infra.RabbitMQConfiguration;
+import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

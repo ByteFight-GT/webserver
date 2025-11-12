@@ -9,7 +9,7 @@ import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
+import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;

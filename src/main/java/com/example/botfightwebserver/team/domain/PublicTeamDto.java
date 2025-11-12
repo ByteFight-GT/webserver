@@ -37,6 +37,7 @@ public class PublicTeamDto {
                 .currentSubmissionDTO(team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
                 .numberOfPlayers(team.getNumberPlayers())
                 .rank(rank)
+                .type(team.getType())
                 .build();
     }
 }

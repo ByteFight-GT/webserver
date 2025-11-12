@@ -43,6 +43,7 @@ public class SelfTeamDto {
                 .teamCode(team.getTeamCode())
                 .numberOfPlayers(team.getNumberPlayers())
                 .rank(rank)
+                .type(team.getType())
                 .build();
     }
 }
