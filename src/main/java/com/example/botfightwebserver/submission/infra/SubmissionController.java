@@ -7,7 +7,7 @@ import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
+import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
 import com.example.botfightwebserver.storage.domain.DownloadLinkDto;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.submission.domain.Submission;
@@ -20,12 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
