@@ -8,6 +8,7 @@ import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.player.domain.SelfPlayerDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.team.domain.TeamDeletionReason;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -83,8 +84,18 @@ public class PrivatePlayerController {
     @PostMapping("/leave-team")
     public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
+
+        if(player.getTeam() == null) {
+            throw new IllegalArgumentException("You are not on a team!");
+        }
+
         Team oldTeam = playerService.leaveTeam(player);
-        teamService.decrementTeamMembers(oldTeam.getId());
+
+        if(oldTeam.getNumberPlayers() == 0) {
+            // no more members left, team will be deleted
+            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
+        }
+
         return ResponseEntity.ok().build();
     }
 
