@@ -28,7 +28,7 @@ public class SelfTeamDto {
     @NotNull Boolean isDeleted;
 
 
-    public static SelfTeamDto from(Team team, int rank) {
+    public static SelfTeamDto from(Team team, Integer rank) {
         return SelfTeamDto.builder()
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
