@@ -75,6 +75,12 @@ public class PermissionsService {
         }
     }
 
+    public void validateAllowLeaveTeam() {
+        if(!get().getAllowLeaveTeam()) {
+            throw new IllegalArgumentException("You may not leave your current team at this time.");
+        }
+    }
+
     @PostConstruct
     @Transactional
     public void ensureGlobalPermissionsExists() {

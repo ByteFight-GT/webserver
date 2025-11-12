@@ -20,7 +20,8 @@ import java.util.Set;
 public class PublicPermissionsController {
     private static final Set<String> ALLOWED_FIELDS = Set.of(
             "allowNewSubmission",
-            "allowSetSubmission"
+            "allowSetSubmission",
+            "allowLeaveTeam"
     );
 
     private final PermissionsService permissionsService;

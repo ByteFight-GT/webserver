@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.PlayerUsername;
@@ -38,6 +39,7 @@ import java.util.UUID;
 public class PrivatePlayerController {
     private final PlayerService playerService;
     private final TeamService teamService;
+    private final PermissionsService permissionsService;
 
     @PostMapping("/join-team")
     public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
@@ -88,6 +90,8 @@ public class PrivatePlayerController {
         if(player.getTeam() == null) {
             throw new IllegalArgumentException("You are not on a team!");
         }
+
+        permissionsService.validateAllowLeaveTeam();
 
         Team oldTeam = playerService.leaveTeam(player);
 

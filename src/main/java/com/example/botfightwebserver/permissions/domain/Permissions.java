@@ -50,6 +50,9 @@ public class Permissions {
     private Boolean allowJoinTeam = false;
 
     @Builder.Default
+    private Boolean allowLeaveTeam = false;
+
+    @Builder.Default
     private Boolean runScheduledMatchmaking = false;
 
     @Builder.Default
