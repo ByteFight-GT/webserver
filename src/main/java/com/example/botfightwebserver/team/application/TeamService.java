@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +48,7 @@ public class TeamService {
     }
 
     public List<Team> getTeamsWithSubmission() {
-        return teamRepository.findAll()
+        return teamRepository.findAllByIsDeletedFalse()
                 .stream()
                 .filter(team -> team.getCurrentSubmission() != null)
                 .toList();
@@ -65,22 +66,22 @@ public class TeamService {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
         if (team.isEmpty()) return Optional.empty();
 
-        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
 
-        return Optional.of(PublicTeamDto.from(team.get(), rank));
+        return Optional.of(PublicTeamDto.from(team.get(), rank.orElse(null)));
     }
 
     public Optional<SelfTeamDto> getSelfTeamDtoByUuid(String uuid) {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
         if (team.isEmpty()) return Optional.empty();
 
-        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
 
-        return Optional.of(SelfTeamDto.from(team.get(), rank));
+        return Optional.of(SelfTeamDto.from(team.get(), rank.orElse(null)));
     }
 
-    public int getRankForTeam(Team team) {
-        return teamRepository.findRankByUuid(team.getUuid());
+    public Integer getRankForTeam(Team team) {
+        return teamRepository.findRankByUuid(team.getUuid()).orElse(null);
     }
 
     public Team createTeam(User user, TeamSettingsDto teamSettingsDto) {
@@ -218,9 +219,36 @@ public class TeamService {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
+
+        if(team.isDeleted()) {
+            throw new IllegalArgumentException("This team is deleted and cannot be edited.");
+        }
+
         if (teamSettingsDto.getName() != null) team.setName(teamSettingsDto.getName());
         if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
         team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+
+        teamRepository.save(team);
+    }
+
+    @Transactional
+    public void deleteTeam(Long teamId, TeamDeletionReason reason) {
+        Team team = teamRepository.findById(teamId).orElseThrow();
+
+        if(team.isDeleted()) {
+            throw new IllegalArgumentException("This team is already deleted.");
+        }
+
+        // remove all players from the team
+        List<Player> players = playerService.getPlayersByTeam(teamId);
+        for(Player p : players) {
+            playerService.leaveTeam(p);
+        }
+
+        // mark the team as deleted
+        team.setDeleted(true);
+        team.setDeletedAt(LocalDateTime.now());
+        team.setDeletionReason(reason);
 
         teamRepository.save(team);
     }
@@ -274,13 +302,6 @@ public class TeamService {
 
     public int countTeamsWithSubmission() {
         return teamRepository.countByCurrentSubmissionNotNull();
-    }
-
-    public Integer incrementTeamMembers(Long teamId) {
-        Team team = teamRepository.findById(teamId).get();
-        Integer currentNumber = team.getNumberPlayers();
-        team.setNumberPlayers(currentNumber + 1);
-        return currentNumber + 1;
     }
 
     public Integer decrementTeamMembers(Long teamId) {

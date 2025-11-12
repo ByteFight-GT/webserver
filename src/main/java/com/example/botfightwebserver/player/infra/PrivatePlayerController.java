@@ -48,7 +48,6 @@ public class PrivatePlayerController {
         if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
 
         player = playerService.setPlayerTeam(user.getUuid(), team);
-        teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
 

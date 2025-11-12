@@ -19,11 +19,12 @@ public class PublicTeamDto {
     @NotNull Integer numberDraws;
     @NotNull String quote;
     @NotNull Integer numberOfPlayers;
-    @NotNull Integer rank;
+    Integer rank;
     @NotNull TeamType type;
     SubmissionDTO currentSubmissionDTO;
+    @NotNull Boolean isDeleted;
 
-    public static PublicTeamDto from(Team team, int rank) {
+    public static PublicTeamDto from(Team team, Integer rank) {
         return PublicTeamDto.builder()
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
@@ -38,6 +39,7 @@ public class PublicTeamDto {
                 .numberOfPlayers(team.getNumberPlayers())
                 .rank(rank)
                 .type(team.getType())
+                .isDeleted(team.isDeleted())
                 .build();
     }
 }
