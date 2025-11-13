@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.student.application;
 
 import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.student.domain.StudentDto;
 import com.example.botfightwebserver.student.domain.StudentEmail;
 import com.example.botfightwebserver.team.domain.Team;
@@ -19,30 +20,33 @@ import java.util.stream.Collectors;
 public class StudentService {
     private final StudentEmailRepository studentEmailRepository;
     private final PlayerService playerService;
-    private final TeamRepository teamRepository;
 
     public List<StudentDto> list() {
-        List<Team> teams = teamRepository.findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
-        Map<UUID, Integer> teamToRank = new HashMap<>();
-        AtomicInteger rank = new AtomicInteger(1);
+        List<String> emails = studentEmailRepository.findAll().stream().map(StudentEmail::getEmail).collect(Collectors.toList());
 
-        teams.forEach((t) -> {
-            teamToRank.put(t.getUuid(), rank.getAndIncrement());
-        });
+        Map<String, Player> emailToPlayer = playerService.getPlayers().stream().collect(Collectors.toMap(
+                player -> player.getUser().getEmail(),
+                player -> player
+        ));
 
-        Set<String> emails = studentEmailRepository.findAll().stream().map(StudentEmail::getEmail).collect(Collectors.toSet());
+        return emails.stream().map(email -> {
+            Player p = emailToPlayer.get(email);
 
-        return playerService.getPlayers().stream().filter(p -> emails.contains(p.getUser().getEmail())).map(p -> {
             var builder = StudentDto.builder()
-                    .id(p.getUser().getUuid().toString())
-                    .email(p.getUser().getEmail())
-                    .playerName(p.getName());
+                    .email(email);
 
-            if (p.getTeam() != null) {
-                builder = builder.teamUuid(p.getTeam().getUuid().toString())
-                        .teamName(p.getTeam().getName())
-                        .teamGlicko(p.getTeam().getGlicko())
-                        .teamRanking(teamToRank.getOrDefault(p.getTeam().getUuid(), -1));
+            if(p != null) {
+                builder = builder
+                        .playerName(p.getName())
+                        .id(p.getUser().getUuid().toString());
+
+                if (p.getTeam() != null) {
+                    builder = builder
+                            .teamUuid(p.getTeam().getUuid().toString())
+                            .teamName(p.getTeam().getName())
+                            .teamGlicko(p.getTeam().getGlicko())
+                            .teamRanking(-1);
+                }
             }
 
             return builder.build();
