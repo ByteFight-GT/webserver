@@ -70,7 +70,7 @@ public class Team {
     private Integer numberDraws=0;
 
     @Builder.Default
-    private Integer numberPlayers=1;
+    private Integer numberPlayers = 0;
 
     @Column(nullable = false)
     @Builder.Default
