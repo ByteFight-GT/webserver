@@ -29,7 +29,7 @@ public class PublicTeamDto {
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
                 .creationDateTime(team.getCreationDateTime())
-                .glicko(team.getGlicko())
+                .glicko(team.getCurrentSubmission() != null? team.getGlicko() : -1)
                 .matchesPlayed(team.getMatchesPlayed())
                 .numberWins(team.getNumberWins())
                 .numberLosses(team.getNumberLosses())
