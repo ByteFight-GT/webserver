@@ -1,9 +1,9 @@
 package com.example.botfightwebserver.searchEngine;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
+import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
-import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +48,9 @@ public class SearchEngineService {
 
         List<PublicTeamDto> dtos = result.hits().stream()
                 .map(team -> {
-                    Integer rank = teamService.getRankForTeam(team);
-                    return PublicTeamDto.from(team, rank);
+                    List<String> memberNames = teamService.getMemberNamesForTeam(team);
+                    int rank = teamService.getRankForTeam(team);
+                    return PublicTeamDto.from(team, rank, memberNames);
                 })
                 .collect(Collectors.toList());
 

@@ -9,5 +9,5 @@ import lombok.Value;
 public class TeamSettingsDto {
     @NotNull String name;
     String quote;
-    boolean displayMembers;
+    boolean displayMembers = false;
 }

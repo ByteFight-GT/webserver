@@ -1,7 +1,6 @@
 package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.auth.domain.User;
-import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.PlayerUsername;
@@ -9,7 +8,6 @@ import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.player.domain.SelfPlayerDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.team.domain.TeamDeletionReason;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +37,6 @@ import java.util.UUID;
 public class PrivatePlayerController {
     private final PlayerService playerService;
     private final TeamService teamService;
-    private final PermissionsService permissionsService;
 
     @PostMapping("/join-team")
     public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
@@ -47,10 +44,8 @@ public class PrivatePlayerController {
         if (!teamService.isTeamJoinable(team)) {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
-        Player player = playerService.getPlayer(user);
-        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
-
-        player = playerService.setPlayerTeam(user.getUuid(), team);
+        Player player = playerService.setPlayerTeam(user.getUuid(), team);
+        teamService.incrementTeamMembers(team.getId());
         return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
 
@@ -86,20 +81,8 @@ public class PrivatePlayerController {
     @PostMapping("/leave-team")
     public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
-
-        if(player.getTeam() == null) {
-            throw new IllegalArgumentException("You are not on a team!");
-        }
-
-        permissionsService.validateAllowLeaveTeam();
-
         Team oldTeam = playerService.leaveTeam(player);
-
-        if(oldTeam.getNumberPlayers() == 0) {
-            // no more members left, team will be deleted
-            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
-        }
-
+        teamService.decrementTeamMembers(oldTeam.getId());
         return ResponseEntity.ok().build();
     }
 

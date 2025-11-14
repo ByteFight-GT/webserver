@@ -3,7 +3,6 @@ package com.example.botfightwebserver.matchMaking.application;
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
 import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingProperties;
-import com.example.botfightwebserver.permissions.application.PermissionsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,7 +25,7 @@ public class ScheduledMatchMaker {
 
     @Scheduled(cron = "${matchmaking.cron}", zone = "${matchmaking.tz:UTC}")
     public void scheduleMatchGeneration() {
-        if(matchMakingService.isEnabled()) {
+        if(props.isEnabled()) {
             log.info("Scheduling Matches");
             MatchMakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.SCHEDULED);
             matchMakingService.queueEvent(event);

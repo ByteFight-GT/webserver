@@ -3,7 +3,7 @@ package com.example.botfightwebserver.team.infra;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.permissions.application.PermissionsService;
+import com.example.botfightwebserver.permissions.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -52,13 +52,11 @@ public class PrivateTeamController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto teamSettingsDto) {
+    public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestParam String name) {
         permissionsService.validateAllowCreateTeam();
-        Player player = playerService.getPlayer(user);
-        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
-        Team team = teamService.createTeam(user, teamSettingsDto);
+        Team team = teamService.createTeam(new TeamSettingsDto(name, null));
         playerService.setPlayerTeam(user.getUuid(), team);
-        return ResponseEntity.ok(SelfTeamDto.from(team, -1));
+        return ResponseEntity.ok(SelfTeamDto.from(team, -1, null));
     }
 
     @PostMapping("/edit")
@@ -79,9 +77,10 @@ public class PrivateTeamController {
     }
 
     @PostMapping("/set-submission")
-    public ResponseEntity<Void> setCurrentSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
+    public ResponseEntity<Void> setCurrentSubmission(@RequestParam String submissionUuid) {
         permissionsService.validateAllowSetSubmission();
-        Player player = playerService.getPlayer(user);
+        String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Player player = playerService.getPlayer(UUID.fromString(authId));
         Long teamId = player.getTeam().getId();
         teamService.setCurrentSubmission(teamId, submissionUuid);
         return ResponseEntity.ok().build();

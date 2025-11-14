@@ -18,13 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(
-        name = "player",
-        indexes = {
-                @Index(name = "idx_player_team_id", columnList = "team_id"),
-                @Index(name = "idx_player_user_id", columnList = "user_id"),
-        }
-)
+@Table
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -35,11 +29,11 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, unique = true)
+    @Unique
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,6 +1,8 @@
-package com.example.botfightwebserver.permissions.domain;
+package com.example.botfightwebserver.permissions;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
@@ -8,7 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +21,8 @@ import java.time.LocalDateTime;
 public class Permissions {
 
     @Id
-    private Long id = 1L;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Version
     private Long version;
@@ -49,18 +51,5 @@ public class Permissions {
     @Builder.Default
     private Boolean allowJoinTeam = false;
 
-    @Builder.Default
-    private Boolean allowLeaveTeam = false;
-
-    @Builder.Default
-    private Boolean runScheduledMatchmaking = false;
-
-    @Builder.Default
-    private Boolean restrictTeamCreationToStudentEmails = false;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    @CreationTimestamp
     private LocalDateTime createdAt;
 }

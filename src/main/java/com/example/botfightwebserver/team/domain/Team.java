@@ -19,13 +19,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Entity
-@Table(
-        name="team",
-        indexes = {
-                @Index(name = "idx_team_glicko", columnList = "glicko DESC"),
-                @Index(name = "idx_team_current_submission", columnList = "current_submission_id")
-        }
-)
+@Table
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -70,10 +64,9 @@ public class Team {
     private Integer numberDraws=0;
 
     @Builder.Default
-    private Integer numberPlayers = 0;
+    private Integer numberPlayers=1;
 
     @Column(nullable = false)
-    @Builder.Default
     private boolean displayMembers = false;
 
     @OneToMany(mappedBy = "teamOne")
@@ -88,7 +81,6 @@ public class Team {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="current_submission_id", nullable = true)
-    @JsonIgnore
     private Submission currentSubmission;
 
     private String teamCode;
@@ -97,15 +89,6 @@ public class Team {
     private TeamType type = TeamType.NORMAL;
 
     private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    @Builder.Default
-    private boolean isDeleted = false;
-
-    private LocalDateTime deletedAt;
-
-    @Enumerated(EnumType.STRING)
-    private TeamDeletionReason deletionReason;
 
     @PrePersist
     public void onCreate() {

@@ -1,16 +1,16 @@
 package com.example.botfightwebserver.team.application;
 
-import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
-import com.example.botfightwebserver.permissions.application.PermissionsService;
-import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.player.infra.PlayerRepository;
-import com.example.botfightwebserver.student.application.StudentEmailRepository;
-import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.*;
+import com.example.botfightwebserver.submission.domain.Submission;
+import com.example.botfightwebserver.team.domain.AdminCreateTeamDto;
+import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.team.domain.TeamSettingsDto;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,14 +31,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class TeamService {
-    private final PlayerRepository playerRepository;
+
     private final TeamRepository teamRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
     private final ClockConfig clockConfig;
     private static final int MAX_PLAYERS = 2;
-    private final PermissionsService permissionsService;
-    private final StudentEmailRepository studentEmailRepository;
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -48,7 +45,7 @@ public class TeamService {
     }
 
     public List<Team> getTeamsWithSubmission() {
-        return teamRepository.findAllByIsDeletedFalse()
+        return teamRepository.findAll()
                 .stream()
                 .filter(team -> team.getCurrentSubmission() != null)
                 .toList();
@@ -64,35 +61,38 @@ public class TeamService {
 
     public Optional<PublicTeamDto> getPublicTeamDtoByUuid(String uuid) {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
-        if (team.isEmpty()) return Optional.empty();
+        if(team.isEmpty()) return Optional.empty();
 
-        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
 
-        return Optional.of(PublicTeamDto.from(team.get(), rank.orElse(null)));
+        List<String> memberNames = null;
+        if (team.get().isDisplayMembers()) {
+            List<Player> teamPlayers = playerService.getPlayersByTeam(team.get().getId());
+            memberNames = teamPlayers.stream().map(Player::getName).toList();
+        }
+
+        return Optional.of(PublicTeamDto.from(team.get(), rank, memberNames));
     }
 
     public Optional<SelfTeamDto> getSelfTeamDtoByUuid(String uuid) {
         Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
-        if (team.isEmpty()) return Optional.empty();
-
-        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
-
-        return Optional.of(SelfTeamDto.from(team.get(), rank.orElse(null)));
+        if(team.isEmpty()) return Optional.empty();
+        int rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        List<String> memberNames = getMemberNamesForTeam(team.get());
+        return Optional.of(SelfTeamDto.from(team.get(), rank, memberNames));
     }
 
-    public Integer getRankForTeam(Team team) {
-        return teamRepository.findRankByUuid(team.getUuid()).orElse(null);
+    public List<String> getMemberNamesForTeam (Team team) {
+        List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
+        return teamPlayers.stream().map(player -> player.getName()).toList();
     }
 
-    public Team createTeam(User user, TeamSettingsDto teamSettingsDto) {
+    public int getRankForTeam(Team team) {
+        return teamRepository.findRankByUuid(team.getUuid());
+    }
+
+    public Team createTeam(TeamSettingsDto teamSettingsDto) {
         String name = teamSettingsDto.getName();
-
-        if(permissionsService.get().getRestrictTeamCreationToStudentEmails()) {
-            if(!studentEmailRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("You are not whitelisted for this competition.");
-            }
-        }
-
         if (teamRepository.existsByName(name.trim())) {
             throw new IllegalArgumentException("Team with name " + name + " already exists");
         }
@@ -103,7 +103,7 @@ public class TeamService {
         team.setName(name);
         team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
 
-        if (teamSettingsDto.getQuote() != null) {
+        if(teamSettingsDto.getQuote() != null) {
             team.setQuote(teamSettingsDto.getQuote());
         }
 
@@ -122,11 +122,11 @@ public class TeamService {
         team.setName(name);
         team.setDisplayMembers(teamDto.isDisplayMembers());
 
-        if (teamDto.getQuote() != null) {
+        if(teamDto.getQuote() != null) {
             team.setQuote(teamDto.getQuote());
         }
 
-        if (teamDto.getSubmissionUuid() != null) {
+        if(teamDto.getSubmissionUuid() != null) {
             Submission submission = submissionService.getSubmissionByUuid(teamDto.getSubmissionUuid());
             team.setCurrentSubmission(submission);
         }
@@ -219,11 +219,6 @@ public class TeamService {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
-
-        if(team.isDeleted()) {
-            throw new IllegalArgumentException("This team is deleted and cannot be edited.");
-        }
-
         if (teamSettingsDto.getName() != null) team.setName(teamSettingsDto.getName());
         if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
         team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
@@ -231,65 +226,41 @@ public class TeamService {
         teamRepository.save(team);
     }
 
-    @Transactional
-    public void deleteTeam(Long teamId, TeamDeletionReason reason) {
-        Team team = teamRepository.findById(teamId).orElseThrow();
-
-        if(team.isDeleted()) {
-            throw new IllegalArgumentException("This team is already deleted.");
-        }
-
-        // remove all players from the team
-        List<Player> players = playerService.getPlayersByTeam(teamId);
-        for(Player p : players) {
-            playerService.leaveTeam(p);
-        }
-
-        // mark the team as deleted
-        team.setDeleted(true);
-        team.setDeletedAt(LocalDateTime.now());
-        team.setDeletionReason(reason);
-
-        teamRepository.save(team);
-    }
-
     public boolean isTeamJoinable(Team team) {
-        return team.getNumberPlayers() < 2 && !team.isDeleted();
+        return team.getNumberPlayers() < 2;
     }
 
     public List<LeaderboardDTO> getLeaderboard() {
-        return getLeaderboard(0, Integer.MAX_VALUE).toList();
+        AtomicInteger rank = new AtomicInteger(1);
+        return teamRepository.findAll().stream()
+                .sorted(Comparator.comparing(
+                        (Team team) -> team.getCurrentSubmission() != null ? team.getGlicko() : -1
+                ).reversed())
+                .map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()))
+                .collect(Collectors.toList());
     }
 
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
         Page<Team> teamPage = teamRepository.findTeamsPaginated(pageable);
-
-        List<UUID> teamUuids = teamPage.map(Team::getUuid).stream().toList();
-        List<Player> teamPlayers = playerRepository.findMembersByTeamUuids(teamUuids);
-
-        Map<UUID, List<String>> membersByTeamUuid = teamPlayers.stream()
-                .collect(Collectors.groupingBy(
-                        p -> p.getTeam().getUuid(),
-                        Collectors.mapping(Player::getName, Collectors.toList())
-                ));
-
-        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement(), membersByTeamUuid.get(team.getUuid())));
+        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement()));
     }
 
-    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank, List<String> memberNames) {
+    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank) {
+        List<Player> teamPlayers = playerService.getPlayersByTeam(team.getId());
+        List<String> playerNames = teamPlayers.stream().map(Player::getName).toList();
+
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
         builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
                 .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
                 .teamName(team.getName())
                 .createdAt(team.getCreationDateTime())
-                .type(team.getType())
                 .quote(team.getQuote());
 
         if (team.isDisplayMembers()) {
-            builder.members(memberNames);
+            builder.members(playerNames);
         }
 
         return builder.build();
@@ -302,6 +273,13 @@ public class TeamService {
 
     public int countTeamsWithSubmission() {
         return teamRepository.countByCurrentSubmissionNotNull();
+    }
+
+    public Integer incrementTeamMembers(Long teamId) {
+        Team team = teamRepository.findById(teamId).get();
+        Integer currentNumber = team.getNumberPlayers();
+        team.setNumberPlayers(currentNumber + 1);
+        return currentNumber + 1;
     }
 
     public Integer decrementTeamMembers(Long teamId) {

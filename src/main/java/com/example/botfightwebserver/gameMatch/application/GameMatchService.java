@@ -4,7 +4,7 @@ import com.example.botfightwebserver.gameMatch.domain.*;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchProperties;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
-import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
+import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.StatsDTO;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -43,7 +43,7 @@ public class GameMatchService {
         return gameMatchRepository.findAll();
     }
 
-    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MATCH_REASON reason) {
+    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MATCH_REASON reason, String map) {
         teamService.validateTeams(team1Uuid, team2Uuid);
         submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
         GameMatch gameMatch = new GameMatch();
@@ -53,6 +53,7 @@ public class GameMatchService {
         gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
         gameMatch.setStatus(MATCH_STATUS.WAITING);
         gameMatch.setReason(reason);
+        gameMatch.setMap(map);
         return gameMatch;
     }
 
@@ -144,30 +145,22 @@ public class GameMatchService {
 
         // This atomically marks all stale matches as RESCHEDULING and returns their ids
         List<Long> matchesToReschedule = gameMatchRepository.claimAndMarkStaleMatches(thresholdTime);
-        log.info("Found {} matches to reschedule", matchesToReschedule.size());
-        matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
-        log.info("Rescheduling completed");
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() {
+                log.info("Found {} matches to reschedule", matchesToReschedule.size());
+                matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
+                log.info("Rescheduling completed");
+            }
+        });
     }
 
-    @Transactional
-    public void adminRescheduleMatches(List<Long> matchIds) {
-        log.info("Admin {} matches to reschedule", matchIds.size());
-        matchIds.forEach(id -> rescheduleMatch(id, true));
-        log.info("Rescheduling completed");
-    }
-
-    @Transactional
     public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
         GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
         Integer timesQueued = gameMatch.getTimesQueued();
         if (!isIgnoreLimit && timesQueued == 3) {
             throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
         }
-
-        if(gameMatch.getStatus() != MATCH_STATUS.WAITING) {
-            throw new IllegalArgumentException("Match " + gameMatch.getId() + " cannot be rescheduled.");
-        }
-
         gameMatch.setQueuedAt(LocalDateTime.now(clock));
         gameMatch.incrementTimesQueued();
         gameMatch.setStatus(MATCH_STATUS.WAITING);

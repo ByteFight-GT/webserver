@@ -42,6 +42,7 @@ public class ScrimmageMatchController {
     @PostMapping("/create")
     public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@AuthenticationPrincipal User user,
                                                                         @RequestParam Integer number,
+                                                                        @RequestParam String map,
                                                                         @RequestParam(required = false) String team2Uuid) {
 
         Team selfTeam = playerService.getTeamFromUUID(user.getUuid());
@@ -52,10 +53,6 @@ public class ScrimmageMatchController {
         Optional<Team> opponentTeamOpt = teamService.getTeamByUuid(team2Uuid);
         if (opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
         Team opponentTeam = opponentTeamOpt.get();
-
-        if(opponentTeam.isDeleted()) {
-            throw new IllegalArgumentException("You can't scrimmage a deleted team.");
-        }
 
         Optional<Submission> team1CurrentSubmission = teamService.getCurrentSubmission(selfTeam.getId());
         Optional<Submission> team2CurrentSubmission = teamService.getCurrentSubmission(opponentTeam.getId());
@@ -76,7 +73,8 @@ public class ScrimmageMatchController {
                     opponentTeam.getUuid().toString(),
                     team1CurrentSubmission.get().getUuid().toString(),
                     team2CurrentSubmission.get().getUuid().toString(),
-                    MATCH_REASON.SCRIMMAGE
+                    MATCH_REASON.SCRIMMAGE,
+                    map
             );
 
             gameMatchService.queueMatch(match);

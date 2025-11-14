@@ -4,7 +4,7 @@
 //import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
 //import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 //import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-//import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
+//import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 //import com.example.botfightwebserver.team.domain.Team;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

@@ -74,7 +74,8 @@ public class TournamentController {
                     team2.getUuid().toString(),
                     team1.getCurrentSubmission().getUuid().toString(),
                     team2.getCurrentSubmission().getUuid().toString(),
-                    MATCH_REASON.TOURNAMENT
+                    MATCH_REASON.TOURNAMENT,
+                    TOURNEY_MAP.getRandomMap().toMapName()
             );
 
             gameMatchService.queueMatch(match);

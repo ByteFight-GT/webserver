@@ -1,9 +1,8 @@
-package com.example.botfightwebserver.rabbitMQ.application;
+package com.example.botfightwebserver.rabbitMQ;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
-import com.example.botfightwebserver.rabbitMQ.infra.RabbitMQConfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

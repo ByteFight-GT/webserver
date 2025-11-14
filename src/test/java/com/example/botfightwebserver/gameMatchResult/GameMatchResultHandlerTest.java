@@ -11,7 +11,7 @@ import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
+import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import org.junit.jupiter.api.BeforeEach;

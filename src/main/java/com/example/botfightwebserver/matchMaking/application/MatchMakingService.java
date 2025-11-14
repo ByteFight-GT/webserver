@@ -8,8 +8,6 @@ import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingEventRepository;
 import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
-import com.example.botfightwebserver.matchMaking.infra.MatchMakingProperties;
-import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +29,6 @@ public class MatchMakingService {
     private final GameMatchRepository gameMatchRepository;
     private final MatchMakingEventRepository matchMakingEventRepository;
     private final ClockConfig clockConfig;
-    private final MatchMakingProperties props;
-    private final PermissionsService permissionsService;
 
     @Transactional
     public MatchMakingEvent createEvent(MATCHMAKING_REASON reason) {
@@ -68,9 +64,5 @@ public class MatchMakingService {
 
     public Optional<MatchMakingEvent> getLastScheduledEvent() {
         return matchMakingEventRepository.findFirstByReasonOrderByCreationDateTimeDesc(MATCHMAKING_REASON.SCHEDULED);
-    }
-
-    public boolean isEnabled() {
-        return props.isEnabled() && permissionsService.get().getRunScheduledMatchmaking();
     }
 }

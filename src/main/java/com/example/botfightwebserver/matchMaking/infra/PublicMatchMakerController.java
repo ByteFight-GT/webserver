@@ -24,7 +24,6 @@ import java.util.Optional;
 public class PublicMatchMakerController {
     private final ScheduledMatchMaker scheduler;
     private final MatchMakingProperties props;
-    private final MatchMakingService matchMakingService;
 
     @GetMapping("/status")
     public ResponseEntity<MatchMakingStatusDto> getMatchMakingStatus() {
@@ -35,9 +34,9 @@ public class PublicMatchMakerController {
 
         return ResponseEntity.ok(
                 MatchMakingStatusDto.builder()
-                        .running(matchMakingService.isEnabled())
+                        .running(props.isEnabled())
                         .lastRunAt(scheduler.getLastRun())
-                        .nextRunAt(matchMakingService.isEnabled() ? next.toInstant() : null)
+                        .nextRunAt(props.isEnabled() ? next.toInstant() : null)
                         .build()
         );
     }

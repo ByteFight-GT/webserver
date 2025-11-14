@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.rabbitMQ.application;
+package com.example.botfightwebserver.rabbitMQ;
 
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;

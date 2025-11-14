@@ -49,7 +49,7 @@ public class UserService {
         }
 
         try {
-            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
+            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), true, Map.of(), Map.of());
 
             User user = new User();
             user.setUuid(UUID.fromString(supabaseUser.id()));

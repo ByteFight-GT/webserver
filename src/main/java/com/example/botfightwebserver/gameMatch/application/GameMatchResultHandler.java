@@ -9,7 +9,7 @@ import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
+import com.example.botfightwebserver.rabbitMQ.RabbitMQService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.Team;
