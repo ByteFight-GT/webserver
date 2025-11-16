@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,6 +34,10 @@ public class UserService {
         u.setUuid(uuid);
         u.setEmail(email.toLowerCase());
         return userRepository.save(u);
+    }
+
+    public Optional<User> findByUuid(String uuid) {
+        return userRepository.findByUuid(UUID.fromString(uuid));
     }
 
     @Transactional

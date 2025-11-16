@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.auth.domain;
 
+import lombok.Getter;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -12,6 +14,17 @@ public class SupabaseDtos {
             Map<String,Object> app_metadata
     ) {}
 
+    @Getter
+    public static class GenerateLinkRequest {
+        private String email;
+        private String type = "magiclink";
+        private String redirect_to = "redirect_to";
+
+        public GenerateLinkRequest(String email) {
+            this.email = email;
+        }
+    }
+
     // Responses (subset of fields commonly used)
     public record SupabaseUser(
             String id,                      // UUID
@@ -19,6 +32,12 @@ public class SupabaseDtos {
             Instant created_at,
             Map<String,Object> user_metadata,
             Map<String,Object> app_metadata
+    ) {}
+
+    public record SupabaseMagicLink(
+            String id,                      // UUID
+            String email,
+            String action_link
     ) {}
 
     public record SupabaseError(String msg, String error_code) {

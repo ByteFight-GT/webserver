@@ -39,6 +39,11 @@ public class SupabaseService {
         return post("/auth/v1/admin/users", body, SupabaseUser.class);
     }
 
+    public SupabaseMagicLink createMagicSignInLink(String email) {
+        var body = new GenerateLinkRequest(email);
+        return post("/auth/v1/admin/generate_link", body, SupabaseMagicLink.class);
+    }
+
     private <T> T post(String path, Object body, Class<T> type) {
         try {
             var req = base(path).POST(HttpRequest.BodyPublishers.ofString(om.writeValueAsString(body), StandardCharsets.UTF_8))
