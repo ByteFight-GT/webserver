@@ -18,7 +18,7 @@ public class SupabaseDtos {
     public static class GenerateLinkRequest {
         private String email;
         private String type = "magiclink";
-        private String redirect_to = "redirect_to";
+        private String redirect_to = "https://bytefight.org/auth/callback";
 
         public GenerateLinkRequest(String email) {
             this.email = email;
