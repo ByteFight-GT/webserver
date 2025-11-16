@@ -27,12 +27,13 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
       from Team t
       left join Team t2 on (
            t2.isDeleted = false
-       and (  t2.glicko > t.glicko
-           or (t2.glicko = t.glicko and t2.matchesPlayed > t.matchesPlayed)
-           or (t2.glicko = t.glicko and t2.matchesPlayed = t.matchesPlayed and t2.id > t.id)
+           and t2.matchesPlayed > 0
+       and ( t2.glicko > t.glicko
+         or(t2.glicko = t.glicko and t2.matchesPlayed > t.matchesPlayed)
+         or(t2.glicko = t.glicko and t2.matchesPlayed = t.matchesPlayed and t2.id > t.id)
        )
       )
-      where t.uuid = :uuid and t.isDeleted = false
+      where t.uuid = :uuid and t.isDeleted = false and t.matchesPlayed > 0
       group by t.id
     """)
     Optional<Integer> findRankByUuid(UUID uuid);
@@ -42,3 +43,34 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     List<Team> findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
 }
+
+/*
+ *  This is the query for putting unranked people in the last rank
+ *  @Query("""
+ *       select 1 + count(t2.id)
+ *       from Team t
+ *       left join Team t2 on (
+ *            t2.isDeleted = false
+ *        and ( case when t2.matchesPlayed < 1 then 1 else 0 end
+ *        < case when t.matchesPlayed < 1 then 1 else 0 end
+ *        or( case when t2.matchesPlayed < 1 then 1 else 0 end
+ *             = case when t.matchesPlayed < 1 then 1 else 0 end
+ *             and t2.glicko > t.glicko
+ *        )
+ *        or ( case when t2.matchesPlayed < 1 then 1 else 0 end
+ *             = case when t.matchesPlayed < 1 then 1 else 0 end
+ *             and t2.glicko = t.glicko
+ *             and t2.matchesPlayed > t.matchesPlayed
+ *        )
+ *        or ( case when t2.matchesPlayed < 1 then 1 else 0 end
+ *             = case when t.matchesPlayed < 1 then 1 else 0 end
+ *             and t2.glicko = t.glicko
+ *             and t2.matchesPlayed = t.matchesPlayed
+ *             and t2.id > t.id
+ *        )
+ *        )
+ *       )
+ *       where t.uuid = :uuid and t.isDeleted = false
+ *       group by t.id
+ *     """)
+ */
