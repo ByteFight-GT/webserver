@@ -34,7 +34,7 @@ public class SelfTeamDto {
                 .name(team.getName())
                 .creationDateTime(team.getCreationDateTime())
                 .lastModifiedDate(team.getLastModifiedDate())
-                .glicko(team.getGlicko())
+                .glicko(team.getCurrentSubmission() != null? team.getGlicko() : -1)
                 .matchesPlayed(team.getMatchesPlayed())
                 .numberWins(team.getNumberWins())
                 .numberLosses(team.getNumberLosses())
