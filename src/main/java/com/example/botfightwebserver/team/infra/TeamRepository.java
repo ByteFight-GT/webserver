@@ -33,7 +33,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
          or(t2.glicko = t.glicko and t2.matchesPlayed = t.matchesPlayed and t2.id > t.id)
        )
       )
-      where t.uuid = :uuid and t.isDeleted = false and t.matchesPlayed > 0
+      where t.uuid = :uuid and t.isDeleted IS false and t.matchesPlayed > 0
       group by t.id
     """)
     Optional<Integer> findRankByUuid(UUID uuid);

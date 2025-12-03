@@ -81,6 +81,12 @@ public class PermissionsService {
         }
     }
 
+    public void validateAllowScrimmage() {
+        if(!Boolean.TRUE.equals(get().getAllowScrimmage())) {
+            throw new IllegalArgumentException("Scrimmages are not allowed at this time.");
+        }
+    }
+
     @PostConstruct
     @Transactional
     public void ensureGlobalPermissionsExists() {
