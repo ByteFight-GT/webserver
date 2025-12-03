@@ -132,7 +132,7 @@ public class GlickoCalculator {
 
 
     public Rating rate(Rating rating, List<Double> game) {
-        double K = 24;
+        double K = 40;
 
         double rating1 = rating.getMu();
         double rating2 = game.get(1);
