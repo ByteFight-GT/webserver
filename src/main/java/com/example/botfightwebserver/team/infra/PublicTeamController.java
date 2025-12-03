@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.team.infra;
 
 import com.example.botfightwebserver.config.ClockConfig;
+import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -42,8 +43,13 @@ public class PublicTeamController {
 
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
                 glickoHistoryService.getTeamHistory(uuid).stream().map(GlickoHistoryDTO::fromEntity).toList());
-        glickoHistories.add(GlickoHistoryDTO.builder().teamUuid(team.getUuid().toString()).glicko(team.getGlicko())
-                .saveDate(LocalDateTime.now(clockConfig.clock())).build());
+        glickoHistories.add(0,
+                GlickoHistoryDTO.builder()
+                        .teamUuid(team.getUuid().toString())
+                        .glicko(GlickoCalculator.MU) // initial rating
+                        .saveDate(team.getCreationDateTime()
+                ).build()
+        );
         return ResponseEntity.ok(glickoHistories);
     }
 
