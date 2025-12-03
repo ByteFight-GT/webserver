@@ -58,6 +58,9 @@ public class Permissions {
     @Builder.Default
     private Boolean restrictTeamCreationToStudentEmails = false;
 
+    @Builder.Default
+    private Boolean allowScrimmage = false;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

@@ -4,6 +4,7 @@ import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.team.domain.Team;
@@ -33,7 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class ScrimmageMatchController {
-
+    private final PermissionsService permissionsService;
     private final ScrimmageMatchService scrimmageMatchService;
     private final GameMatchService gameMatchService;
     private final PlayerService playerService;
@@ -43,6 +44,7 @@ public class ScrimmageMatchController {
     public ResponseEntity<List<ScrimmageMatchDTO>> createScrimmageMatch(@AuthenticationPrincipal User user,
                                                                         @RequestParam Integer number,
                                                                         @RequestParam(required = false) String team2Uuid) {
+        permissionsService.validateAllowScrimmage();
 
         Team selfTeam = playerService.getTeamFromUUID(user.getUuid());
         if (team2Uuid == null) {
