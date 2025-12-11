@@ -32,7 +32,7 @@ public class MatchMaker {
 
     public List<GameMatch> generateMatches(List<Team> playableTeams) {
         final List<Team> teams =
-            playableTeams.stream().sorted(Comparator.comparing(Team::getGlicko).reversed()).toList();
+            playableTeams.stream().toList();
 
         List<int[]> edges;
         if (teams.size() <= 4) {

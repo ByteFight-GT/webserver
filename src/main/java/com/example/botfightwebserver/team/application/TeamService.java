@@ -148,23 +148,23 @@ public class TeamService {
         if (isWin && isDraw) {
             throw new IllegalArgumentException("Result can't be a win and a draw");
         }
-        double currentGlicko = team.getGlicko();
-        double currentPhi = team.getPhi();
-        double currentSigma = team.getSigma();
-        double newGlicko = currentGlicko + glickoChange;
-        double newPhi = currentPhi + phiChange;
-        double newSigma = currentSigma + sigmaChange;
-        team.setGlicko(newGlicko);
-        team.setPhi(newPhi);
-        team.setSigma(newSigma);
-        team.setMatchesPlayed(team.getMatchesPlayed() + 1);
-        if (!isWin && !isDraw) {
-            team.setNumberLosses(team.getNumberLosses() + 1);
-        } else if (isWin) {
-            team.setNumberWins(team.getNumberWins() + 1);
-        } else if (isDraw) {
-            team.setNumberDraws(team.getNumberDraws() + 1);
-        }
+//        double currentGlicko = team.getGlicko();
+//        double currentPhi = team.getPhi();
+//        double currentSigma = team.getSigma();
+//        double newGlicko = currentGlicko + glickoChange;
+//        double newPhi = currentPhi + phiChange;
+//        double newSigma = currentSigma + sigmaChange;
+//        team.setGlicko(newGlicko);
+//        team.setPhi(newPhi);
+//        team.setSigma(newSigma);
+//        team.setMatchesPlayed(team.getMatchesPlayed() + 1);
+//        if (!isWin && !isDraw) {
+//            team.setNumberLosses(team.getNumberLosses() + 1);
+//        } else if (isWin) {
+//            team.setNumberWins(team.getNumberWins() + 1);
+//        } else if (isDraw) {
+//            team.setNumberDraws(team.getNumberDraws() + 1);
+//        }
         return teamRepository.save(team);
     }
 
@@ -248,13 +248,12 @@ public class TeamService {
         // mark the team as deleted
         team.setDeleted(true);
         team.setDeletedAt(LocalDateTime.now());
-        team.setDeletionReason(reason);
 
         teamRepository.save(team);
     }
 
     public boolean isTeamJoinable(Team team) {
-        return team.getNumberPlayers() < 2 && !team.isDeleted();
+        return !team.isDeleted();
     }
 
     public List<LeaderboardDTO> getLeaderboard() {
@@ -272,7 +271,7 @@ public class TeamService {
         Map<UUID, List<String>> membersByTeamUuid = teamPlayers.stream()
                 .collect(Collectors.groupingBy(
                         p -> p.getTeam().getUuid(),
-                        Collectors.mapping(Player::getName, Collectors.toList())
+                        Collectors.mapping(Player::getUsername, Collectors.toList())
                 ));
 
         return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement(), membersByTeamUuid.get(team.getUuid())));
@@ -282,9 +281,9 @@ public class TeamService {
         LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
         builder.teamUuid(team.getUuid().toString())
                 .rank(rank)
-                .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
+//                .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
                 .teamName(team.getName())
-                .createdAt(team.getCreationDateTime())
+//                .createdAt(team.getCreationDateTime())
                 .type(team.getType())
                 .quote(team.getQuote());
 
@@ -303,17 +302,6 @@ public class TeamService {
     public int countTeamsWithSubmission() {
         return teamRepository.countByCurrentSubmissionNotNull();
     }
-
-    public Integer decrementTeamMembers(Long teamId) {
-        Team team = teamRepository.findById(teamId).get();
-        if (team.getNumberPlayers() == 0) {
-            throw new IllegalArgumentException("Team with id " + teamId + " has 0 players");
-        }
-        Integer currentNumber = team.getNumberPlayers();
-        team.setNumberPlayers(currentNumber - 1);
-        return currentNumber - 1;
-    }
-
 
     public boolean isNameExist(String name) {
         return teamRepository.existsByName(name);

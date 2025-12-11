@@ -47,8 +47,8 @@ public class PublicTeamController {
                 GlickoHistoryDTO.builder()
                         .teamUuid(team.getUuid().toString())
                         .glicko(GlickoCalculator.MU) // initial rating
-                        .saveDate(team.getCreationDateTime()
-                ).build()
+//                        .saveDate(team.getCreationDateTime())
+                        .build()
         );
         return ResponseEntity.ok(glickoHistories);
     }

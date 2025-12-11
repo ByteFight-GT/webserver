@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team.domain;
 
+import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,18 +15,13 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
 @Entity
-@Table(
-        name="team",
-        indexes = {
-                @Index(name = "idx_team_glicko", columnList = "glicko DESC"),
-                @Index(name = "idx_team_current_submission", columnList = "current_submission_id")
-        }
-)
+@Table(name = "teams")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -34,86 +30,47 @@ import java.util.*;
 @Indexed
 public class Team {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // matches BIGINT IDENTITY
     private Long id;
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "competition_id", nullable = false)
+    private Competition competition;
+
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
-    @FullTextField
+    @Column(name = "name")
     private String name;
 
-    private LocalDateTime creationDateTime;
-
-    private LocalDateTime lastModifiedDate;
-
-    @Builder.Default
+    @Column(name = "quote")
     private String quote = "Welcome to ByteFight!";
 
-    @Builder.Default
-    private Double glicko=1500.0;
+    @Column(name = "join_code")
+    private String joinCode;
 
-    @Builder.Default
-    private Double phi=350.0;
-
-    @Builder.Default
-    private Double sigma=0.06;
-
-    @Builder.Default
-    private Integer matchesPlayed=0;
-
-    @Builder.Default
-    private Integer numberWins=0;
-    @Builder.Default
-    private Integer numberLosses=0;
-    @Builder.Default
-    private Integer numberDraws=0;
-
-    @Builder.Default
-    private Integer numberPlayers = 0;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean displayMembers = false;
-
-    @OneToMany(mappedBy = "teamOne")
-    @Builder.Default
-    @JsonIgnore
-    private List<GameMatch> teamOneMatches = new ArrayList<>();
-
-    @OneToMany(mappedBy = "teamTwo")
-    @Builder.Default
-    @JsonIgnore
-    private List<GameMatch> teamTwoMatches = new ArrayList<>();
+    @Column(name = "display_members", nullable = false)
+    private boolean displayMembers;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name="current_submission_id", nullable = true)
-    @JsonIgnore
+    @JoinColumn(name = "active_submission_id", nullable = true)
     private Submission currentSubmission;
 
-    private String teamCode;
+    @Column(name = "team_type")
+    private TeamType type = TeamType.REGULAR;
 
-    @Enumerated(EnumType.STRING)
-    private TeamType type = TeamType.NORMAL;
-
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
-    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Column(name = "is_deleted", nullable = false)
     @Builder.Default
     private boolean isDeleted = false;
 
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Enumerated(EnumType.STRING)
-    private TeamDeletionReason deletionReason;
-
-    @PrePersist
-    public void onCreate() {
-        creationDateTime = LocalDateTime.now(clock);
-        lastModifiedDate = LocalDateTime.now(clock);
-        teamCode = generateCode();
-        uuid = UUID.randomUUID();
-    }
 
     private String generateCode() {
         Random random = new Random();
@@ -124,16 +81,6 @@ public class Team {
             sb.append(CHARACTERS.charAt(randomIndex));
         }
         return sb.toString();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        lastModifiedDate = LocalDateTime.now(clock);
-    }
-
-    @VisibleForTesting
-    public static void setClock(Clock testClock) {
-        clock = testClock;
     }
 
     @Override
