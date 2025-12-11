@@ -37,14 +37,14 @@ public class StudentService {
 
             if(p != null) {
                 builder = builder
-                        .playerName(p.getName())
+                        .playerName(p.getUsername())
                         .id(p.getUser().getUuid().toString());
 
                 if (p.getTeam() != null) {
                     builder = builder
                             .teamUuid(p.getTeam().getUuid().toString())
                             .teamName(p.getTeam().getName())
-                            .teamGlicko(p.getTeam().getGlicko())
+//                            .teamGlicko(p.getTeam().getGlicko())
                             .teamRanking(-1);
                 }
             }

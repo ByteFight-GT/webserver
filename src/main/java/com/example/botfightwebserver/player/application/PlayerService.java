@@ -31,7 +31,7 @@ public class PlayerService {
 
     public Player createPlayer(User user, String name, Long teamId) {
         Player player = new Player();
-        player.setName(name);
+        player.setUsername(name);
         player.setTeam(null);
         player.setUser(user);
         return playerRepository.save(player);
@@ -43,7 +43,7 @@ public class PlayerService {
             throw new IllegalArgumentException("Player with id " + playerId + " does not exist");
         }
         Player player = playerRepository.findById(playerId).get();
-        player.setName(name);
+        player.setUsername(name);
         playerRepository.save(player);
     }
 
@@ -62,8 +62,6 @@ public class PlayerService {
         }
 
         player.setTeam(team);
-        player.setHasTeam(true);
-        team.setNumberPlayers(team.getNumberPlayers() + 1);
         teamRepository.save(team);
         return playerRepository.save(player);
     }
@@ -71,9 +69,7 @@ public class PlayerService {
     @Transactional
     public Team leaveTeam(Player player) {
         Team oldTeam = player.getTeam();
-        player.setHasTeam(false);
         player.setTeam(null);
-        oldTeam.setNumberPlayers(oldTeam.getNumberPlayers() - 1);
         teamRepository.save(oldTeam);
         playerRepository.save(player);
         return oldTeam;
@@ -112,9 +108,6 @@ public class PlayerService {
 
     public Team getTeamFromUUID(UUID uuid) {
         Player player = getPlayer(uuid);
-        if (!player.isHasTeam()) {
-            throw new IllegalArgumentException("Player with UUID " + uuid + " has no team");
-        }
         return player.getTeam();
     }
 

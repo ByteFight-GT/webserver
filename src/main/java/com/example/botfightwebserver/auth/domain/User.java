@@ -9,9 +9,11 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Table(name = "users")
 @Entity
@@ -19,22 +21,23 @@ import java.util.List;
 @Setter
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
-    @JdbcTypeCode(SqlTypes.UUID)
-    private java.util.UUID uuid;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Column(name = "uuid", nullable = false, unique = true)
+    private UUID uuid;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private Date createdAt;
-
-    @Column
+    @Column(name = "is_admin", nullable = false)
     private boolean isAdmin = false;
 
     @Override

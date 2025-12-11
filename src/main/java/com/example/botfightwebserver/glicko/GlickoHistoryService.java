@@ -20,16 +20,16 @@ public class GlickoHistoryService {
     private final PlayerService playerService;
 
     public GlickoHistory save(Team team, GameMatch gameMatch) {
-        GlickoHistory glickoHistory = new GlickoHistory(
-                null,
-                team,
-                gameMatch,
-                team.getGlicko(),
-                LocalDateTime.now(clockConfig.clock())
-        );
-
-        glickoHistoryRepository.save(glickoHistory);
-        return glickoHistory;
+//        GlickoHistory glickoHistory = new GlickoHistory(
+//                null,
+//                team,
+//                gameMatch,
+//                team.getGlicko(),
+//                LocalDateTime.now(clockConfig.clock())
+//        );
+//
+//        glickoHistoryRepository.save(glickoHistory);
+        return null;
     }
 
     public List<GlickoHistory> getTeamHistory(String teamUuid) {
