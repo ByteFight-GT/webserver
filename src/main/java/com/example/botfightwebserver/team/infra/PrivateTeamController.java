@@ -44,9 +44,6 @@ public class PrivateTeamController {
     @GetMapping("/my-team")
     public ResponseEntity<SelfTeamDto> getCurrentTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
-        if (!player.isHasTeam() || player.getTeam() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Optional<SelfTeamDto> selfTeamDtoOptional = teamService.getSelfTeamDtoByUuid(player.getTeam().getUuid().toString());
         return selfTeamDtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -55,7 +52,6 @@ public class PrivateTeamController {
     public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto teamSettingsDto) {
         permissionsService.validateAllowCreateTeam();
         Player player = playerService.getPlayer(user);
-        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
         Team team = teamService.createTeam(user, teamSettingsDto);
         playerService.setPlayerTeam(user.getUuid(), team);
         return ResponseEntity.ok(SelfTeamDto.from(team, -1));

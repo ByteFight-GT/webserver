@@ -86,7 +86,7 @@ public class TournamentService {
     }
 
     public void addPlayers(Long tournamentId, List<Team> teams) {
-        List<Team> sortedTeams = teams.stream().sorted((a, b) -> Double.compare(b.getGlicko(), a.getGlicko())).toList();
+        List<Team> sortedTeams = teams.stream().toList();
 
         Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(
             () -> new IllegalArgumentException("Invalid tournament id: " + tournamentId)

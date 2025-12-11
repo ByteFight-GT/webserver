@@ -3,6 +3,7 @@ package com.example.botfightwebserver.auth.domain;
 import lombok.Builder;
 import lombok.Value;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class SelfUserDto {
     UUID uuid;
     String email;
-    Date createdAt;
+    Instant createdAt;
     boolean isAdmin;
 
     public static SelfUserDto from(User user) {
