@@ -10,20 +10,16 @@ import java.util.List;
 @Builder
 public class PublicPlayerDto {
     String uuid;
-    String name;
+    String username;
     String teamUuid;
-    boolean hasTeam;
     List<String> badges;
     LocalDateTime creationDateTime;
 
     public static PublicPlayerDto from(Player player) {
         return PublicPlayerDto.builder()
                 .uuid(player.getUser().getUuid().toString())
-                .name(player.getName())
+                .username(player.getUsername())
                 .teamUuid(player.getTeam().getUuid().toString())
-                .hasTeam(player.isHasTeam())
-                .creationDateTime(player.getCreationDateTime())
-                .badges(player.getBadgeList())
                 .build();
     }
 }

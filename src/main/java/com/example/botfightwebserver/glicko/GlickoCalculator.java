@@ -178,44 +178,45 @@ public class GlickoCalculator {
 
     // Optional: Method to calculate Elo changes directly
     public GlickoChanges calculateGlicko(Team team1, Team team2, MATCH_STATUS matchStatus) {
-        // Validate the match status
-        if (matchStatus == MATCH_STATUS.IN_PROGRESS ||
-                matchStatus == MATCH_STATUS.FAILED ||
-                matchStatus == MATCH_STATUS.WAITING) {
-            log.error("Match must have a determined result. Match was in state: " + matchStatus);
-        }
-
-        // Validate team Elo ratings
-        if (team1.getGlicko() == null || team2.getGlicko() == null) {
-            log.error("Team Elo cannot be null.");
-        }
-
-        // Create team ratings
-        Rating team1Rating = new Rating(team1.getGlicko(), team1.getPhi(), team1.getSigma());
-        Rating team2Rating = new Rating(team2.getGlicko(), team2.getPhi(), team2.getSigma());
-
-        // Determine match status for Glicko calculation
-        String glickoMatchStatus;
-        if (matchStatus == MATCH_STATUS.DRAW) {
-            glickoMatchStatus = "draw";
-        } else if (matchStatus == MATCH_STATUS.TEAM_ONE_WIN) {
-            glickoMatchStatus = "team1";
-        } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
-            glickoMatchStatus = "team2";
-        } else {
-            log.error("Team Elo cannot be null.");
-            return new GlickoChanges();
-        }
-
-        MatchResult result = rate1vs1(team1Rating, team2Rating, glickoMatchStatus);
-
-        return new GlickoChanges(
-                result.getUpdatedTeam1().getMu() - team1.getGlicko(),
-                result.getUpdatedTeam2().getMu() - team2.getGlicko(),
-                result.getUpdatedTeam1().getPhi() - team1.getPhi(),
-                result.getUpdatedTeam2().getPhi() - team2.getPhi(),
-                result.getUpdatedTeam1().getSigma() - team1.getSigma(),
-                result.getUpdatedTeam2().getSigma() - team2.getSigma()
-        );
+//        // Validate the match status
+//        if (matchStatus == MATCH_STATUS.IN_PROGRESS ||
+//                matchStatus == MATCH_STATUS.FAILED ||
+//                matchStatus == MATCH_STATUS.WAITING) {
+//            log.error("Match must have a determined result. Match was in state: " + matchStatus);
+//        }
+//
+//        // Validate team Elo ratings
+//        if (team1.getGlicko() == null || team2.getGlicko() == null) {
+//            log.error("Team Elo cannot be null.");
+//        }
+//
+//        // Create team ratings
+//        Rating team1Rating = new Rating(team1.getGlicko(), team1.getPhi(), team1.getSigma());
+//        Rating team2Rating = new Rating(team2.getGlicko(), team2.getPhi(), team2.getSigma());
+//
+//        // Determine match status for Glicko calculation
+//        String glickoMatchStatus;
+//        if (matchStatus == MATCH_STATUS.DRAW) {
+//            glickoMatchStatus = "draw";
+//        } else if (matchStatus == MATCH_STATUS.TEAM_ONE_WIN) {
+//            glickoMatchStatus = "team1";
+//        } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
+//            glickoMatchStatus = "team2";
+//        } else {
+//            log.error("Team Elo cannot be null.");
+//            return new GlickoChanges();
+//        }
+//
+//        MatchResult result = rate1vs1(team1Rating, team2Rating, glickoMatchStatus);
+//
+//        return new GlickoChanges(
+//                result.getUpdatedTeam1().getMu() - team1.getGlicko(),
+//                result.getUpdatedTeam2().getMu() - team2.getGlicko(),
+//                result.getUpdatedTeam1().getPhi() - team1.getPhi(),
+//                result.getUpdatedTeam2().getPhi() - team2.getPhi(),
+//                result.getUpdatedTeam1().getSigma() - team1.getSigma(),
+//                result.getUpdatedTeam2().getSigma() - team2.getSigma()
+//        );
+        return null;
     }
 }

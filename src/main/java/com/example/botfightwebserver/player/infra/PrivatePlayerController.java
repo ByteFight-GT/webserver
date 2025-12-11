@@ -48,7 +48,6 @@ public class PrivatePlayerController {
             throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
         }
         Player player = playerService.getPlayer(user);
-        if(player.isHasTeam()) throw new IllegalArgumentException("You're already on a team!");
 
         player = playerService.setPlayerTeam(user.getUuid(), team);
         return ResponseEntity.ok(PublicPlayerDto.from(player));
@@ -76,7 +75,7 @@ public class PrivatePlayerController {
             throw new IllegalArgumentException("Name " + name + " is not available");
         }
         Player player = playerService.getPlayer(user);
-        if (player.getName().equals(name)) {
+        if (player.getUsername().equals(name)) {
             return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
         }
         playerService.setName(player.getId(), name);
@@ -94,11 +93,11 @@ public class PrivatePlayerController {
         permissionsService.validateAllowLeaveTeam();
 
         Team oldTeam = playerService.leaveTeam(player);
-
-        if(oldTeam.getNumberPlayers() == 0) {
-            // no more members left, team will be deleted
-            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
-        }
+//
+//        if(oldTeam.getNumberPlayers() == 0) {
+//            // no more members left, team will be deleted
+//            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
+//        }
 
         return ResponseEntity.ok().build();
     }
