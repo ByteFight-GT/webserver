@@ -1,95 +1,69 @@
 package com.example.botfightwebserver.gameMatch.domain;
 
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
-import com.example.botfightwebserver.team.domain.Team;
+import com.example.botfightwebserver.common.domain.AuditableEntity;
+import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.matchMaking.domain.MatchmakingEvent;
 import com.example.botfightwebserver.submission.domain.Submission;
-import com.google.common.annotations.VisibleForTesting;
+import com.example.botfightwebserver.team.domain.Team;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "game_match")
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-@Builder
-public class GameMatch {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+@NoArgsConstructor
+@Entity
+@Table(name = "game_matches")
+public class GameMatch extends AuditableEntity {
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(name = "uuid", nullable = false)
     private UUID uuid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_one_id", nullable = false)
-    private Team teamOne;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "competition_id", nullable = false)
+    private Competition competition;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_two_id", nullable = false)
-    private Team teamTwo;
+    @Column(name = "ladder", nullable = false, length = 50)
+    private String ladder;
 
-    @ManyToOne()
-    @JoinColumn(name = "submission_one_id", nullable = false)
-    private Submission submissionOne;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "team_a_id", nullable = false)
+    private Team teamA;
 
-    @ManyToOne()
-    @JoinColumn(name = "submission_two_id", nullable = false)
-    private Submission submissionTwo;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "team_b_id", nullable = false)
+    private Team teamB;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "submission_a_id", nullable = false)
+    private Submission submissionA;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "submission_b_id", nullable = false)
+    private Submission submissionB;
 
     @Enumerated(EnumType.STRING)
-    private MATCH_STATUS status;
+    @Column(name = "status", nullable = false, columnDefinition = "match_status")
+    private MatchStatus status = MatchStatus.scheduling;
 
     @Enumerated(EnumType.STRING)
-    private MATCH_REASON reason;
+    @Column(name = "reason", nullable = false, columnDefinition = "match_reason")
+    private MatchReason reason = MatchReason.other;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime queuedAt;
-    private LocalDateTime processedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matchmaking_event_id")
+    private MatchmakingEvent matchmakingEvent;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "matchmaking_event_id", nullable = true)
-    private MatchMakingEvent matchmakingEvent;
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
 
-    @ManyToOne()
-    @JoinColumn(name = "winning_team_id", nullable = true)
-    private Team winningTeam;
+    @Column(name = "started_at")
+    private Instant startedAt;
 
-    private String map;
-
-    private Integer timesQueued = 0;
-
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now(clock);
-        if (status == null) {
-            status = MATCH_STATUS.WAITING;
-        }
-        if (reason == null) {
-            reason = MATCH_REASON.UNKNOWN;
-        }
-        uuid = UUID.randomUUID();
-    }
-
-    @VisibleForTesting
-    public static void setClock(Clock testClock) {
-        clock = testClock;
-    }
-
-    public void incrementTimesQueued() {
-        timesQueued += 1;
-    }
+    @Column(name = "finished_at")
+    private Instant finishedAt;
 }
-

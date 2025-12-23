@@ -3,7 +3,6 @@ package com.example.botfightwebserver.matchMaking.application;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingEventRepository;
@@ -15,8 +14,6 @@ import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;

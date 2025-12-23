@@ -1,6 +1,6 @@
-package com.example.botfightwebserver.team.domain;
+package com.example.botfightwebserver.team.domain.dto;
 
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +11,6 @@ public class StatsDTO {
     Integer numWins;
     Integer numLosses;
     Integer numDraws;
-    MATCH_REASON matchReason;
+    MatchReason matchReason;
 
 }

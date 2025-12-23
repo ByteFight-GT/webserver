@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch.application;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchDto;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
@@ -17,10 +17,8 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +71,7 @@ public class GameMatchSearchService {
                 );
     }
 
-    private Specification<GameMatch> hasReason(MATCH_REASON reason) {
+    private Specification<GameMatch> hasReason(MatchReason reason) {
         return (root, query, cb) -> cb.equal(root.get("reason"), reason);
     }
 
@@ -83,7 +81,7 @@ public class GameMatchSearchService {
 
     public Page<GameMatchDto> searchGame(Optional<String> teamSearchparam,
                                          Optional<String> requiredTeamUuid,
-                                         Optional<MATCH_REASON> reason,
+                                         Optional<MatchReason> reason,
                                          Pageable pageable) {
         String teamUuid = requiredTeamUuid
                 .orElseThrow(() -> new IllegalArgumentException("requiredTeamUuid is required"));

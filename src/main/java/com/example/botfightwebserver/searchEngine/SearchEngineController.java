@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.searchEngine;
 
-import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

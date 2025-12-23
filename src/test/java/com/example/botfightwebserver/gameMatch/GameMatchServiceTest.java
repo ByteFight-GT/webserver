@@ -2,9 +2,9 @@ package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.team.domain.Team;
@@ -83,13 +83,13 @@ class GameMatchServiceTest {
         when(gameMatchRepository.save(any(GameMatch.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Act
-        GameMatch result = gameMatchService.createMatch(team1Id, team2Id, submission1Id, submission2Id, MATCH_REASON.SCRIMMAGE, map);
+        GameMatch result = gameMatchService.createMatch(team1Id, team2Id, submission1Id, submission2Id, MatchReason.SCRIMMAGE, map);
 
         // Assert
         assertNotNull(result);
-        assertEquals(MATCH_STATUS.WAITING, result.getStatus());
+        assertEquals(MatchStatus.WAITING, result.getStatus());
         assertEquals(map, result.getMap());
-        assertEquals(MATCH_REASON.SCRIMMAGE, result.getReason());
+        assertEquals(MatchReason.SCRIMMAGE, result.getReason());
         assertEquals(1, result.getTimesQueued());
         assertEquals(LocalDateTime.now(fixedClock), result.getQueuedAt());
         verify(teamService).validateTeams(team1Id, team2Id);
@@ -147,16 +147,16 @@ class GameMatchServiceTest {
         // Arrange
         Long gameMatchId = 1L;
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setStatus(MATCH_STATUS.WAITING);
+        gameMatch.setStatus(MatchStatus.WAITING);
 
         when(gameMatchRepository.findById(gameMatchId)).thenReturn(Optional.of(gameMatch));
         when(gameMatchRepository.save(any(GameMatch.class))).thenReturn(gameMatch);
 
         // Act
-        gameMatchService.setGameMatchStatus(gameMatchId, MATCH_STATUS.WAITING);
+        gameMatchService.setGameMatchStatus(gameMatchId, MatchStatus.WAITING);
 
         // Assert
-        assertEquals(MATCH_STATUS.WAITING, gameMatch.getStatus());
+        assertEquals(MatchStatus.WAITING, gameMatch.getStatus());
         verify(gameMatchRepository).save(gameMatch);
     }
 
@@ -168,7 +168,7 @@ class GameMatchServiceTest {
         List<GameMatch> staleMatches = Arrays.asList(new GameMatch(), new GameMatch());
 
         when(gameMatchRepository.findByStatusAndQueuedAtBefore(
-                MATCH_STATUS.WAITING, thresholdTime))
+                MatchStatus.WAITING, thresholdTime))
                 .thenReturn(staleMatches);
 
         // Act
@@ -177,7 +177,7 @@ class GameMatchServiceTest {
         // Assert
         assertEquals(staleMatches.size(), result.size());
         verify(gameMatchRepository).findByStatusAndQueuedAtBefore(
-                MATCH_STATUS.WAITING, thresholdTime);
+                MatchStatus.WAITING, thresholdTime);
     }
 
     @Test
@@ -227,7 +227,7 @@ class GameMatchServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(2, gameMatch.getTimesQueued());  // Check that timesQueued has been incremented
-        assertEquals(MATCH_STATUS.WAITING, gameMatch.getStatus());  // Check the status
+        assertEquals(MatchStatus.WAITING, gameMatch.getStatus());  // Check the status
         assertNotNull(gameMatch.getQueuedAt());  // Ensure the queuedAt time is set
         verify(rabbitMQService).enqueueGameMatchJob(any(GameMatchJob.class));  // Verify the job was enqueued
         verify(gameMatchRepository).save(gameMatch);  // Verify save was called
