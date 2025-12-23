@@ -46,7 +46,7 @@ public class SubmissionService {
 
         Submission submission = new Submission();
         submission.setStorageFileUuid(storedObject.getUuid());
-        submission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
+        submission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
         submission.setSource(STORAGE_SOURCE.LOCAL);
         submission.setTeam(team);
         submission.setName(file.getOriginalFilename());
@@ -118,20 +118,20 @@ public class SubmissionService {
 
     public void validateSubmissionAfterMatch(long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).get();
-        submission.setSubmissionValidity(SUBMISSION_VALIDITY.VALID);
+        submission.setSubmissionValidity(SubmissionValidity.VALID);
         submissionRepository.save(submission);
     }
 
     public void invalidateSubmissionAfterMatch(long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).get();
-        submission.setSubmissionValidity(SUBMISSION_VALIDITY.INVALID);
+        submission.setSubmissionValidity(SubmissionValidity.INVALID);
         submissionRepository.save(submission);
     }
 
     public boolean isSubmissionValid(String submissionUuid) {
         Optional<Submission> maybeSubmission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid));
         if (maybeSubmission.isPresent()) {
-            return maybeSubmission.get().getSubmissionValidity() == SUBMISSION_VALIDITY.VALID;
+            return maybeSubmission.get().getSubmissionValidity() == SubmissionValidity.VALID;
         }
         return false;
     }

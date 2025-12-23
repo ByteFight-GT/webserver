@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.team.domain;
 
 public enum TeamType {
-    REGULAR,
-    TA_BOT
+    regular,
+    ta_bot
 }

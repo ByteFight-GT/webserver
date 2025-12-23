@@ -3,6 +3,7 @@ package com.example.botfightwebserver.gameMatch.infra;
 import com.example.botfightwebserver.gameMatch.application.AdminGameMatchService;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.*;
+import com.example.botfightwebserver.gameMatch.domain.dto.AdminGameMatchDto;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,8 +43,8 @@ public class AdminGameMatchController {
     @PreAuthorize("hasRole('ADMIN')")
     public Page<AdminGameMatchDto> adminListGameMatches(
             Pageable pageable,
-            @RequestParam(required = false) List<MATCH_STATUS> status,
-            @RequestParam(required = false) List<MATCH_REASON> reason
+            @RequestParam(required = false) List<MatchStatus> status,
+            @RequestParam(required = false) List<MatchReason> reason
     ) {
         Specification<GameMatch> specs = (root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.auth.domain;
 
+import com.example.botfightwebserver.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,22 +16,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Table(name = "users")
-@Entity
 @Getter
 @Setter
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
+@Entity
+@Table(name = "users")
+public class User extends BaseEntity implements UserDetails {
     @Column(name = "uuid", nullable = false, unique = true)
     private UUID uuid;
 
@@ -53,12 +43,5 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return "";
-    }
-
-    @PrePersist
-    private void initPublicId() {
-        if (uuid == null) {
-            uuid = java.util.UUID.randomUUID();
-        }
     }
 }

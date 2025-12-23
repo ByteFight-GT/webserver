@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class SubmissionDTO {
     @NotNull private String uuid;
     @NotNull private String teamUuid;
-    @NotNull private SUBMISSION_VALIDITY validity;
+    @NotNull private SubmissionValidity validity;
     @NotNull private LocalDateTime createdAt;
     @NotNull private String name;
     @NotNull private Boolean isAutoSet;

@@ -8,5 +8,5 @@ public class MatchSubmissionRequest {
     private String team2Uuid;
     private String submission1Uuid;
     private String submission2Uuid;
-    private MATCH_REASON reason;
+    private MatchReason reason;
 }

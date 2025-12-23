@@ -6,8 +6,8 @@ import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoChanges;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.gameMatchLogs.GameMatchLogService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -80,28 +80,28 @@ class GameMatchResultHandlerTest {
 
     @Test
     void handleGameMatchResult_LadderMatch_TeamOneWin() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
-        gameMatch.setReason(MATCH_REASON.LADDER);
+        GameMatchResult result = new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "match log");
+        gameMatch.setReason(MatchReason.LADDER);
         GlickoChanges glickoChanges = new GlickoChanges(15.0, -15.0, 0.0, 0.0, 0.0, 0.0);
 
         when(gameMatchService.isGameMatchIdExist(1L)).thenReturn(true);
         when(gameMatchService.isGameMatchWaiting(1L)).thenReturn(true);
         when(gameMatchService.getReferenceById(1L)).thenReturn(gameMatch);
-        when(glickoCalculator.calculateGlicko(team1, team2, MATCH_STATUS.TEAM_ONE_WIN))
+        when(glickoCalculator.calculateGlicko(team1, team2, MatchStatus.TEAM_ONE_WIN))
             .thenReturn(glickoChanges);
 
         gameMatchResultHandler.handleGameMatchResult(result);
 
         verify(teamService).updateAfterMatch(team1, 15,0.0,0.0, true, false);
         verify(teamService).updateAfterMatch(team2, -15, 0.0,0.0, false, false);
-        verify(gameMatchService).setGameMatchStatus(1L, MATCH_STATUS.TEAM_ONE_WIN);
+        verify(gameMatchService).setGameMatchStatus(1L, MatchStatus.TEAM_ONE_WIN);
         verify(gameMatchLogService).createGameMatchLog(1L, "match log", 15, -15);
     }
 
     @Test
     void handleGameMatchResult_ValidationMatch() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
-        gameMatch.setReason(MATCH_REASON.VALIDATION);
+        GameMatchResult result = new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "match log");
+        gameMatch.setReason(MatchReason.VALIDATION);
 
         when(gameMatchService.isGameMatchIdExist(1L)).thenReturn(true);
         when(gameMatchService.isGameMatchWaiting(1L)).thenReturn(true);
@@ -112,13 +112,13 @@ class GameMatchResultHandlerTest {
 
         verify(submissionService).validateSubmissionAfterMatch(1L);
         verify(teamService).setCurrentSubmission(1L, 1L);
-        verify(gameMatchService).setGameMatchStatus(1L, MATCH_STATUS.TEAM_ONE_WIN);
+        verify(gameMatchService).setGameMatchStatus(1L, MatchStatus.TEAM_ONE_WIN);
         verify(gameMatchLogService).createGameMatchLog(1L, "match log", 0, 0);
     }
 
     @Test
     void handleGameMatchResult_NonExistentMatch() {
-        GameMatchResult result = new GameMatchResult(999L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
+        GameMatchResult result = new GameMatchResult(999L, MatchStatus.TEAM_ONE_WIN, "match log");
         when(gameMatchService.isGameMatchIdExist(999L)).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
@@ -127,7 +127,7 @@ class GameMatchResultHandlerTest {
 
     @Test
     void handleGameMatchResult_AlreadyPlayedMatch() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
+        GameMatchResult result = new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "match log");
         when(gameMatchService.isGameMatchIdExist(1L)).thenReturn(true);
         when(gameMatchService.isGameMatchWaiting(1L)).thenReturn(false);
 
@@ -137,7 +137,7 @@ class GameMatchResultHandlerTest {
 
     @Test
     void submitGameMatchResults_Success() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
+        GameMatchResult result = new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "match log");
         when(gameMatchService.isGameMatchIdExist(1L)).thenReturn(true);
 
         gameMatchResultHandler.submitGameMatchResults(result);
@@ -147,7 +147,7 @@ class GameMatchResultHandlerTest {
 
     @Test
     void submitGameMatchResults_NonExistentMatch() {
-        GameMatchResult result = new GameMatchResult(999L, MATCH_STATUS.TEAM_ONE_WIN, "match log");
+        GameMatchResult result = new GameMatchResult(999L, MatchStatus.TEAM_ONE_WIN, "match log");
         when(gameMatchService.isGameMatchIdExist(999L)).thenReturn(false);
 
         assertThrows(RuntimeException.class,
@@ -157,8 +157,8 @@ class GameMatchResultHandlerTest {
     @Test
     void deleteQueuedMatches_Success() {
         List<GameMatchResult> expectedResults = Arrays.asList(
-            new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "log1"),
-            new GameMatchResult(2L, MATCH_STATUS.TEAM_TWO_WIN, "log2")
+            new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "log1"),
+            new GameMatchResult(2L, MatchStatus.TEAM_TWO_WIN, "log2")
         );
         when(rabbitMQService.deleteGameResultQueue()).thenReturn(expectedResults);
 

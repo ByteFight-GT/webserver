@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.team.domain;
+package com.example.botfightwebserver.team.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

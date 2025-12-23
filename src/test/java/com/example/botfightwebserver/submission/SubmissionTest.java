@@ -2,7 +2,7 @@ package com.example.botfightwebserver.submission;
 
 import com.example.botfightwebserver.PersistentTestBase;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
-import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
+import com.example.botfightwebserver.submission.domain.SubmissionValidity;
 import com.example.botfightwebserver.submission.domain.Submission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class SubmissionTest extends PersistentTestBase {
         testSubmission = Submission.builder()
                 .storagePath("/fake/storage/path")
                 .teamId(1L)
-                .submissionValidity(SUBMISSION_VALIDITY.VALID)
+                .submissionValidity(SubmissionValidity.VALID)
                 .source(STORAGE_SOURCE.LOCAL)
                 .build();
     }
@@ -44,7 +44,7 @@ class SubmissionTest extends PersistentTestBase {
                 .id(1L)
                 .storagePath("/fake/storage/path")
                 .teamId(2L)
-                .submissionValidity(SUBMISSION_VALIDITY.VALID)
+                .submissionValidity(SubmissionValidity.VALID)
                 .source(STORAGE_SOURCE.GCP)
                 .createdAt(NOW)
                 .validateAt(NOW.plusHours(1))
@@ -53,7 +53,7 @@ class SubmissionTest extends PersistentTestBase {
         assertEquals(1L, submission.getId());
         assertEquals("/fake/storage/path", submission.getStoragePath());
         assertEquals(2L, submission.getTeamId());
-        assertEquals(SUBMISSION_VALIDITY.VALID, submission.getSubmissionValidity());
+        assertEquals(SubmissionValidity.VALID, submission.getSubmissionValidity());
         assertEquals(STORAGE_SOURCE.GCP, submission.getSource());
         assertEquals(NOW, submission.getCreatedAt());
         assertEquals(NOW.plusHours(1), submission.getValidateAt());
@@ -74,7 +74,7 @@ class SubmissionTest extends PersistentTestBase {
 
     @Test
     void testSetSubmissionValidityUpdatesValidateAt() {
-        testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.VALID);
+        testSubmission.setSubmissionValidity(SubmissionValidity.VALID);
         assertEquals(NOW, testSubmission.getValidateAt());
     }
 
@@ -85,7 +85,7 @@ class SubmissionTest extends PersistentTestBase {
         Clock newClock = Clock.fixed(dayAfter.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
         Submission.setClock(newClock);
 
-        testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.VALID);
+        testSubmission.setSubmissionValidity(SubmissionValidity.VALID);
         assertEquals(dayAfter, testSubmission.getValidateAt());
     }
 }

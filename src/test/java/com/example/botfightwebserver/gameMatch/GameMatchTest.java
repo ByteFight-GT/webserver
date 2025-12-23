@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.domain.Submission;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,20 +53,20 @@ class GameMatchTest {
     void testPrePersist() {
         gameMatch.onCreate();
 
-        assertEquals(MATCH_STATUS.WAITING, gameMatch.getStatus());
-        assertEquals(MATCH_REASON.UNKNOWN, gameMatch.getReason());
+        assertEquals(MatchStatus.WAITING, gameMatch.getStatus());
+        assertEquals(MatchReason.UNKNOWN, gameMatch.getReason());
         assertEquals(NOW, gameMatch.getCreatedAt());
     }
 
     @Test
     void testCustomStatusAndReasonAreNotOverwritten() {
-        gameMatch.setStatus(MATCH_STATUS.IN_PROGRESS);
-        gameMatch.setReason(MATCH_REASON.LADDER);
+        gameMatch.setStatus(MatchStatus.IN_PROGRESS);
+        gameMatch.setReason(MatchReason.LADDER);
 
         gameMatch.onCreate();
 
-        assertEquals(MATCH_STATUS.IN_PROGRESS, gameMatch.getStatus());
-        assertEquals(MATCH_REASON.LADDER, gameMatch.getReason());
+        assertEquals(MatchStatus.IN_PROGRESS, gameMatch.getStatus());
+        assertEquals(MatchReason.LADDER, gameMatch.getReason());
     }
 
 
@@ -92,8 +92,8 @@ class GameMatchTest {
         LocalDateTime processed = LocalDateTime.now(fixedClock).plusMinutes(5);
 
         gameMatch.setId(1L);
-        gameMatch.setStatus(MATCH_STATUS.IN_PROGRESS);
-        gameMatch.setReason(MATCH_REASON.LADDER);
+        gameMatch.setStatus(MatchStatus.IN_PROGRESS);
+        gameMatch.setReason(MatchReason.LADDER);
         gameMatch.setCreatedAt(now);
         gameMatch.setProcessedAt(processed);
         gameMatch.setMap("new_map");
@@ -103,8 +103,8 @@ class GameMatchTest {
         assertEquals(teamTwo, gameMatch.getTeamTwo());
         assertEquals(submissionOne, gameMatch.getSubmissionOne());
         assertEquals(submissionTwo, gameMatch.getSubmissionTwo());
-        assertEquals(MATCH_STATUS.IN_PROGRESS, gameMatch.getStatus());
-        assertEquals(MATCH_REASON.LADDER, gameMatch.getReason());
+        assertEquals(MatchStatus.IN_PROGRESS, gameMatch.getStatus());
+        assertEquals(MatchReason.LADDER, gameMatch.getReason());
         assertEquals(now, gameMatch.getCreatedAt());
         assertEquals(processed, gameMatch.getProcessedAt());
         assertEquals("new_map", gameMatch.getMap());

@@ -2,8 +2,8 @@ package com.example.botfightwebserver.gameMatch.infra;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchSearchService;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchDto;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +31,7 @@ public class PublicGameMatchController {
     public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
             @RequestParam(required = false) String teamSearchParam,
             @RequestParam(required = false) String teamUuid,
-            @RequestParam(required = false) MATCH_REASON reason,
+            @RequestParam(required = false) MatchReason reason,
             @RequestParam(required = false) String map,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

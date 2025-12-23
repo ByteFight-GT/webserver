@@ -2,8 +2,8 @@ package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.SecurityTestConfig;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.gameMatch.domain.MatchSubmissionRequest;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchController;
 import com.example.botfightwebserver.player.application.PlayerService;
@@ -63,7 +63,7 @@ class GameMatchControllerTest {
         request.setTeam2Id(2L);
         request.setSubmission1Id(10L);
         request.setSubmission2Id(20L);
-        request.setReason(MATCH_REASON.VALIDATION);
+        request.setReason(MatchReason.VALIDATION);
         request.setMap("Map1");
 
         GameMatchJob job = new GameMatchJob(
@@ -72,7 +72,7 @@ class GameMatchControllerTest {
                 "path/to/submission2",
                 STORAGE_SOURCE.LOCAL,
                 STORAGE_SOURCE.LOCAL,
-                MATCH_REASON.LADDER,
+                MatchReason.LADDER,
                 "Map1"
         );
 
@@ -91,7 +91,7 @@ class GameMatchControllerTest {
                 .andExpect(jsonPath("$.map").value("Map1"));
 
         // Assert: Verify interaction with service
-        verify(gameMatchService).submitGameMatch(1L, 2L, 10L, 20L, MATCH_REASON.VALIDATION, "Map1");
+        verify(gameMatchService).submitGameMatch(1L, 2L, 10L, 20L, MatchReason.VALIDATION, "Map1");
     }
 
     @Test
@@ -108,9 +108,9 @@ class GameMatchControllerTest {
     @Test
     void testQueuedMatches() throws Exception {
         List<GameMatchJob> jobs = List.of(
-            new GameMatchJob(123L, "path1", "path2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER,
+            new GameMatchJob(123L, "path1", "path2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MatchReason.LADDER,
                 "Map1"),
-            new GameMatchJob(124L, "path3", "path4", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MATCH_REASON.LADDER,
+            new GameMatchJob(124L, "path3", "path4", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL, MatchReason.LADDER,
                 "Map2")
         );
 
@@ -132,7 +132,7 @@ class GameMatchControllerTest {
         // Arrange: Mock the service to return a list of rescheduled GameMatchJobs
         List<GameMatchJob> rescheduledJobs = List.of(
             new GameMatchJob(125L, "reschedulePath1", "reschedulePath2", STORAGE_SOURCE.LOCAL, STORAGE_SOURCE.LOCAL,
-                MATCH_REASON.LADDER, "RescheduleMap1")
+                MatchReason.LADDER, "RescheduleMap1")
         );
 
         when(gameMatchService.rescheduleFailedAndStaleMatches(false)).thenReturn(rescheduledJobs);
