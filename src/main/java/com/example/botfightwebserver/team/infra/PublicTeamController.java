@@ -5,14 +5,13 @@ import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

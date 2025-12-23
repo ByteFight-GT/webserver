@@ -1,15 +1,12 @@
 package com.example.botfightwebserver.team.infra;
 
-import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.team.domain.AdminCreateTeamDto;
-import com.example.botfightwebserver.team.domain.SelfTeamDto;
+import com.example.botfightwebserver.team.domain.dto.AdminCreateTeamDto;
+import com.example.botfightwebserver.team.domain.dto.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
-import com.example.botfightwebserver.team.domain.TeamSettingsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.storage.domain;
 
+import com.example.botfightwebserver.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,39 +10,29 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
-@Table(name = "file_records")
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileRecord {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+@Entity
+@Table(name = "file_records")
+public class FileRecord extends BaseEntity {
 
     @Column(name = "uuid", nullable = false, unique = true)
     private UUID uuid;
 
-    @Column(nullable = false)
+    @Column(name = "filename", nullable = false)
     private String filename;
 
-    @Column(nullable = false)
+    @Column(name = "content_type", nullable = false, length = 255)
     private String contentType;
 
-    @Column(nullable = false)
+    @Column(name = "size", nullable = false)
     private Long size;
 
-    @Column(nullable = false)
+    @Column(name = "sha256", nullable = false)
     private String sha256;
 
-    @Column(nullable = false)
+    @Column(name = "storage_path", nullable = false)
     private String storagePath;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
 }

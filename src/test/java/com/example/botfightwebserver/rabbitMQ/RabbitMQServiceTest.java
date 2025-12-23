@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.rabbitMQ;
 
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.rabbitMQ.infra.RabbitMQConfiguration;
 import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
@@ -46,7 +46,7 @@ class RabbitMQServiceTest {
     void enqueueGameMatchJob_shouldSendMessageToQueue() {
         GameMatchJob gameMatchJob =
             new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
-                MATCH_REASON.LADDER, "default map");
+                MatchReason.LADDER, "default map");
 
         rabbitMQService.enqueueGameMatchJob(gameMatchJob);
 
@@ -60,11 +60,11 @@ class RabbitMQServiceTest {
     void peekGameMatchQueue_shouldReturnAllMessagesAndRequeueThem() {
         GameMatchJob gameMatchJob1 =
             new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
-                MATCH_REASON.LADDER, "default map");
+                MatchReason.LADDER, "default map");
 
         GameMatchJob gameMatchJob2 =
             new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
-                MATCH_REASON.LADDER, "default map");
+                MatchReason.LADDER, "default map");
 
         when(rabbitTemplate.receiveAndConvert(
             eq(RabbitMQConfiguration.GAME_MATCH_QUEUE),
@@ -92,11 +92,11 @@ class RabbitMQServiceTest {
     void deleteGameMatchQueue_shouldReturnAllMessagesWithoutRequeueing() {
         GameMatchJob gameMatchJob1 =
             new GameMatchJob(1L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
-                MATCH_REASON.LADDER, "default map");
+                MatchReason.LADDER, "default map");
 
         GameMatchJob gameMatchJob2 =
             new GameMatchJob(2L, "fake path", "fake path 2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP,
-                MATCH_REASON.LADDER, "default map");
+                MatchReason.LADDER, "default map");
 
 
         when(rabbitTemplate.receiveAndConvert(
@@ -118,7 +118,7 @@ class RabbitMQServiceTest {
 
     @Test
     void enqueueGameMatchResult_shouldSendResultToQueue() {
-        GameMatchResult result = new GameMatchResult(1L, MATCH_STATUS.TEAM_ONE_WIN, "some logs");
+        GameMatchResult result = new GameMatchResult(1L, MatchStatus.TEAM_ONE_WIN, "some logs");
 
         rabbitMQService.enqueueGameMatchResult(result);
 

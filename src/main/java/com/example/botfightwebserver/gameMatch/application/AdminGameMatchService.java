@@ -1,8 +1,7 @@
 package com.example.botfightwebserver.gameMatch.application;
 
-import com.example.botfightwebserver.gameMatch.domain.AdminGameMatchDto;
+import com.example.botfightwebserver.gameMatch.domain.dto.AdminGameMatchDto;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

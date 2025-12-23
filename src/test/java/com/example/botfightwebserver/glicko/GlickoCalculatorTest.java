@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.glicko;
 
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.team.domain.Team;
 import org.junit.jupiter.api.Test;
 
@@ -157,7 +157,7 @@ class GlickoCalculatorTest {
                 .sigma(0.06)
                 .build();
 
-        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MATCH_STATUS.TEAM_ONE_WIN);
+        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MatchStatus.TEAM_ONE_WIN);
 
         assertNotNull(changes, "GlickoChanges should not be null");
         assertTrue(changes.getTeam1Change() > 0, "Team 1 Elo change should be positive");
@@ -182,7 +182,7 @@ class GlickoCalculatorTest {
                 .sigma(0.06)
                 .build();
 
-        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MATCH_STATUS.DRAW);
+        GlickoChanges changes = calculator.calculateGlicko(team1, team2, MatchStatus.DRAW);
 
         assertNotNull(changes, "GlickoChanges should not be null");
         assertEquals(0.0, changes.getTeam1Change(), 0.0001, "Team 1 Elo change should be zero");

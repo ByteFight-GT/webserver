@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.glicko;
 
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -177,7 +177,7 @@ public class GlickoCalculator {
     }
 
     // Optional: Method to calculate Elo changes directly
-    public GlickoChanges calculateGlicko(Team team1, Team team2, MATCH_STATUS matchStatus) {
+    public GlickoChanges calculateGlicko(Team team1, Team team2, MatchStatus matchStatus) {
 //        // Validate the match status
 //        if (matchStatus == MATCH_STATUS.IN_PROGRESS ||
 //                matchStatus == MATCH_STATUS.FAILED ||

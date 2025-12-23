@@ -1,12 +1,14 @@
-package com.example.botfightwebserver.gameMatch.domain;
+package com.example.botfightwebserver.gameMatch.domain.dto;
 
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.domain.Submission;
 
 import java.io.Serializable;
 
 public record GameMatchJob(String gameMatchUuid, String submission1Uuid, String submission2Uuid, STORAGE_SOURCE source1,
-                           STORAGE_SOURCE source2, MATCH_REASON reason, String map) implements Serializable {
+                           STORAGE_SOURCE source2, MatchReason reason, String map) implements Serializable {
 
     public static GameMatchJob from(GameMatch gameMatch) {
         Submission submission1 = gameMatch.getSubmissionOne();

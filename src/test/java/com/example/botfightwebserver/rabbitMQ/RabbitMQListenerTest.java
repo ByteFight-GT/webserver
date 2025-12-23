@@ -2,7 +2,7 @@ package com.example.botfightwebserver.rabbitMQ;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.gameMatch.application.GameMatchResultHandler;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.rabbitMQ.application.RabbitMQListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class RabbitMQListenerTest {
 
     @Test
     void receiveGameMatchResults_ShouldProcessMessageSuccessfully() {
-        GameMatchResult gameMatchResult = new GameMatchResult(1L, MATCH_STATUS.TEAM_TWO_WIN, "SOME LOGS");
+        GameMatchResult gameMatchResult = new GameMatchResult(1L, MatchStatus.TEAM_TWO_WIN, "SOME LOGS");
 
         rabbitMQListener.receiveGameMatchResults(gameMatchResult);
 

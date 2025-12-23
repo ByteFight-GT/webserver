@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.submission.domain;
 
+import com.example.botfightwebserver.common.domain.AuditableSoftDeletableEntity;
+import com.example.botfightwebserver.storage.domain.FileRecord;
 import com.example.botfightwebserver.team.domain.Team;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
@@ -14,58 +16,28 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
-@Table
-@Builder
-@NoArgsConstructor @AllArgsConstructor @Getter @Setter
-public class Submission {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+@Table(name = "submissions")
+public class Submission extends AuditableSoftDeletableEntity {
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(name = "uuid", nullable = false)
     private UUID uuid;
 
-    private UUID storageFileUuid;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "file_record_id", nullable = false)
+    private FileRecord fileRecord;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 
-    @Enumerated(EnumType.STRING)
-    private SUBMISSION_VALIDITY submissionValidity;
+    @Column(name = "description", length = 512)
+    private String description;
 
     @Enumerated(EnumType.STRING)
-    private STORAGE_SOURCE source;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime validateAt;
-
-    private String name;
-
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
-    private Boolean isAutoSet;
-
-    @Builder.Default
-    private Boolean isDeleted=false;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now(clock);
-        uuid = UUID.randomUUID();
-    }
-
-    public void setSubmissionValidity(SUBMISSION_VALIDITY submissionValidity) {
-        this.submissionValidity = submissionValidity;
-        if (submissionValidity == SUBMISSION_VALIDITY.VALID) {
-            validateAt = LocalDateTime.now(clock);
-        }
-    }
-
-    @VisibleForTesting
-    public static void setClock(Clock testClock) {
-        clock = testClock;
-    }
+    @Column(name = "validity", nullable = false, columnDefinition = "submission_validity")
+    private SubmissionValidity validity = SubmissionValidity.not_evaluated;
 }

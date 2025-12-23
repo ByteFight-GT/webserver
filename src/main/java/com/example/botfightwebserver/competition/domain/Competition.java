@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.competition.domain;
 
+import com.example.botfightwebserver.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,43 +9,22 @@ import lombok.Setter;
 
 import java.time.Instant;
 
-@Entity
-@Table(name = "competitions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Competition {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // matches BIGINT IDENTITY
-    private Long id;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
-    @Column(nullable = false, length = 255)
+@Entity
+@Table(name = "competitions")
+public class Competition extends BaseEntity {
+    @Column(name = "slug", nullable = false, unique = true, length = 255)
     private String slug;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description")
     private String description;
 
     @Column(name = "is_active", nullable = false)
-    private boolean active = false;
-
-    @PrePersist
-    public void onCreate() {
-        Instant now = Instant.now();
-        if (createdAt == null) createdAt = now;
-        if (updatedAt == null) updatedAt = now;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = Instant.now();
-    }
+    private boolean isActive = false;
 }

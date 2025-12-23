@@ -3,7 +3,7 @@ package com.example.botfightwebserver.scrimmageMatch;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.submission.domain.Submission;
@@ -78,7 +78,7 @@ public class ScrimmageMatchController {
                     opponentTeam.getUuid().toString(),
                     team1CurrentSubmission.get().getUuid().toString(),
                     team2CurrentSubmission.get().getUuid().toString(),
-                    MATCH_REASON.SCRIMMAGE
+                    MatchReason.SCRIMMAGE
             );
 
             gameMatchService.queueMatch(match);

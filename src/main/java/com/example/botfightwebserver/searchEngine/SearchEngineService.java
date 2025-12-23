@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.searchEngine;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.annotation.PostConstruct;

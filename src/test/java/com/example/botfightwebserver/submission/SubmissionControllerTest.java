@@ -1,7 +1,7 @@
 //package com.example.botfightwebserver.submission;
 //
 //import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-//import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
+//import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
 //import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 //import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
 //import com.example.botfightwebserver.rabbitMQ.application.RabbitMQService;
