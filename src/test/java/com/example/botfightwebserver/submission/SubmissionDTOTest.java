@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.submission;
 
-import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
+import com.example.botfightwebserver.submission.domain.SubmissionValidity;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.domain.SubmissionDTO;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class SubmissionDTOTest {
         // Arrange
         Long id = 1L;
         Long teamId = 2L;
-        SUBMISSION_VALIDITY validity = SUBMISSION_VALIDITY.VALID;
+        SubmissionValidity validity = SubmissionValidity.VALID;
         LocalDateTime createdAt = LocalDateTime.now();
 
         Submission submission = new Submission();
@@ -50,7 +50,7 @@ class SubmissionDTOTest {
         // Arrange
         Long id = 1L;
         Long teamId = 2L;
-        SUBMISSION_VALIDITY validity = SUBMISSION_VALIDITY.VALID;
+        SubmissionValidity validity = SubmissionValidity.VALID;
         LocalDateTime createdAt = LocalDateTime.now();
 
         // Act

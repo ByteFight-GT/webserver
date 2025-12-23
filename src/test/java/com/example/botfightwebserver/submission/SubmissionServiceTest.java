@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.submission;
 
 import com.example.botfightwebserver.submission.application.SubmissionService;
-import com.example.botfightwebserver.submission.domain.SUBMISSION_VALIDITY;
+import com.example.botfightwebserver.submission.domain.SubmissionValidity;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.infra.SubmissionRepository;
 import com.example.botfightwebserver.team.domain.Team;
@@ -54,7 +54,7 @@ class SubmissionServiceTest {
         testSubmission.setId(1L);
         testSubmission.setTeamId(1L);
         testSubmission.setStoragePath("test/path");
-        testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
+        testSubmission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
 
         // Set up valid test file
         validFile = new MockMultipartFile(
@@ -88,7 +88,7 @@ class SubmissionServiceTest {
         assertEquals(testSubmission.getId(), result.getId());
         assertEquals(testSubmission.getTeamId(), result.getTeamId());
         assertEquals(testSubmission.getStoragePath(), result.getStoragePath());
-        assertEquals(SUBMISSION_VALIDITY.NOT_EVALUATED, result.getSubmissionValidity());
+        assertEquals(SubmissionValidity.NOT_EVALUATED, result.getSubmissionValidity());
 
         verify(teamRepository).findById(1L);
         verify(storageService).uploadFile(eq(1L), any(MultipartFile.class));
@@ -191,13 +191,13 @@ class SubmissionServiceTest {
         // Assert
         verify(submissionRepository).findById(1L);
         verify(submissionRepository).save(any(Submission.class));
-        assertEquals(SUBMISSION_VALIDITY.VALID, testSubmission.getSubmissionValidity());
+        assertEquals(SubmissionValidity.VALID, testSubmission.getSubmissionValidity());
     }
 
     @Test
     void isSubmissionValid_ValidSubmission() {
         // Arrange
-        testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.VALID);
+        testSubmission.setSubmissionValidity(SubmissionValidity.VALID);
         when(submissionRepository.findById(1L)).thenReturn(Optional.of(testSubmission));
 
         // Act
@@ -211,7 +211,7 @@ class SubmissionServiceTest {
     @Test
     void isSubmissionValid_InvalidSubmission() {
         // Arrange
-        testSubmission.setSubmissionValidity(SUBMISSION_VALIDITY.NOT_EVALUATED);
+        testSubmission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
         when(submissionRepository.findById(1L)).thenReturn(Optional.of(testSubmission));
 
         // Act

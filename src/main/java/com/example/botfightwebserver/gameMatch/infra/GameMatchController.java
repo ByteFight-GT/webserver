@@ -2,8 +2,10 @@ package com.example.botfightwebserver.gameMatch.infra;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.*;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchDto;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.team.domain.StatsDTO;
+import com.example.botfightwebserver.team.domain.dto.StatsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -55,7 +57,7 @@ public class GameMatchController {
     }
 
     @GetMapping("/public/stats")
-    public ResponseEntity<StatsDTO> stats(@RequestParam Long teamId, @RequestParam MATCH_REASON reason) {
+    public ResponseEntity<StatsDTO> stats(@RequestParam Long teamId, @RequestParam MatchReason reason) {
         if (teamId == null) {
             throw new IllegalArgumentException("team id can't be null");
         }

@@ -2,20 +2,16 @@ package com.example.botfightwebserver.matchMaking.application;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.MAPS;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
-import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +60,7 @@ public class MatchMaker {
                     teamTwo.getUuid().toString(),
                     teamOne.getCurrentSubmission().getUuid().toString(),
                     teamTwo.getCurrentSubmission().getUuid().toString(),
-                    MATCH_REASON.LADDER
+                    MatchReason.LADDER
             );
         }).toList();
     }

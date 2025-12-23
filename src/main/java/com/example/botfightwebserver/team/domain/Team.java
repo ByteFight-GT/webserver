@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team.domain;
 
+import com.example.botfightwebserver.common.domain.AuditableSoftDeletableEntity;
 import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.submission.domain.Submission;
@@ -20,25 +21,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-@Entity
-@Table(name = "teams")
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@Builder
-@Indexed
-public class Team {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // matches BIGINT IDENTITY
-    private Long id;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "teams")
+public class Team extends AuditableSoftDeletableEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "competition_id", nullable = false)
     private Competition competition;
@@ -52,46 +41,18 @@ public class Team {
     @Column(name = "quote")
     private String quote = "Welcome to ByteFight!";
 
-    @Column(name = "join_code")
+    @Column(name = "join_code", unique = true)
     private String joinCode;
 
     @Column(name = "display_members", nullable = false)
     private boolean displayMembers;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "active_submission_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "active_submission_id")
     private Submission currentSubmission;
 
-    @Column(name = "team_type")
-    private TeamType type = TeamType.REGULAR;
-
-    @Column(name = "is_deleted", nullable = false)
-    @Builder.Default
-    private boolean isDeleted = false;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    private String generateCode() {
-        Random random = new Random();
-        String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            sb.append(CHARACTERS.charAt(randomIndex));
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Team team)) return false;
-        return Objects.equals(uuid, team.uuid);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(uuid);
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, columnDefinition = "team_type")
+    private TeamType type = TeamType.regular;
 }
 

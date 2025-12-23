@@ -1,8 +1,8 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import com.example.botfightwebserver.submission.domain.Submission;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class GameMatchJobTest {
         when(gameMatch.getId()).thenReturn(1L);
         when(gameMatch.getSubmissionOne()).thenReturn(submission1);
         when(gameMatch.getSubmissionTwo()).thenReturn(submission2);
-        when(gameMatch.getReason()).thenReturn(MATCH_REASON.LADDER);
+        when(gameMatch.getReason()).thenReturn(MatchReason.LADDER);
         when(gameMatch.getMap()).thenReturn("test_map");
 
         when(submission1.getStoragePath()).thenReturn("path/to/submission1");
@@ -47,7 +47,7 @@ class GameMatchJobTest {
         assertEquals("path/to/submission2", job.Submission2Path());
         assertEquals(STORAGE_SOURCE.GCP, job.source1());
         assertEquals(STORAGE_SOURCE.LOCAL, job.source2());
-        assertEquals(MATCH_REASON.LADDER, job.reason());
+        assertEquals(MatchReason.LADDER, job.reason());
         assertEquals("test_map", job.map());
     }
 

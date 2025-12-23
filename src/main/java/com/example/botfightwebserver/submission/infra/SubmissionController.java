@@ -3,7 +3,7 @@ package com.example.botfightwebserver.submission.infra;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
@@ -58,7 +58,7 @@ public class SubmissionController {
                 team.getUuid().toString(),
                 submission.getUuid().toString(),
                 submission.getUuid().toString(),
-                MATCH_REASON.VALIDATION
+                MatchReason.VALIDATION
         );
         gameMatchService.queueMatch(valMatch);
         return ResponseEntity.ok(SubmissionDTO.from(submission));

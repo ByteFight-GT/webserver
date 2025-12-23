@@ -2,7 +2,7 @@ package com.example.botfightwebserver.scrimmageMatch;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class ScrimmageMatchService {
 
     public Long getInProgressScrimmages(Long teamId) {
         Team team = teamService.getTeamById(teamId);
-        return scrimmageMatchDataRepository.countByMatchStatusAndInitiatorTeam(MATCH_STATUS.WAITING, team);
+        return scrimmageMatchDataRepository.countByMatchStatusAndInitiatorTeam(MatchStatus.WAITING, team);
     }
 
 }

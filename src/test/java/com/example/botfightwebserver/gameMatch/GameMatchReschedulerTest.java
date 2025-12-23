@@ -2,8 +2,8 @@ package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.application.GameMatchRescheduler;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.submission.domain.STORAGE_SOURCE;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +28,8 @@ class GameMatchReschedulerTest {
 
     @BeforeEach
     void setUp() {
-        jobs = List.of(new GameMatchJob(1L, "path1", "path2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MATCH_REASON.LADDER,"map"),
-            new GameMatchJob(2L, "path_3", "path_4", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MATCH_REASON.LADDER,"map"));
+        jobs = List.of(new GameMatchJob(1L, "path1", "path2", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MatchReason.LADDER,"map"),
+            new GameMatchJob(2L, "path_3", "path_4", STORAGE_SOURCE.GCP, STORAGE_SOURCE.GCP, MatchReason.LADDER,"map"));
 
         when(gameMatchService.rescheduleFailedAndStaleMatches(false)).thenReturn(jobs);
         gameMatchRescheduler = new GameMatchRescheduler(gameMatchService);

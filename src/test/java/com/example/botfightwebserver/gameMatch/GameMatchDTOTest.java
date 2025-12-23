@@ -1,9 +1,9 @@
 package com.example.botfightwebserver.gameMatch;
 
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
-import com.example.botfightwebserver.gameMatch.domain.GameMatchDto;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchDto;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.domain.SubmissionDTO;
@@ -43,8 +43,8 @@ class GameMatchDTOTest {
             .teamTwo(teamTwo)
             .submissionOne(submissionOne)
             .submissionTwo(submissionTwo)
-            .status(MATCH_STATUS.IN_PROGRESS)
-            .reason(MATCH_REASON.LADDER)
+            .status(MatchStatus.IN_PROGRESS)
+            .reason(MatchReason.LADDER)
             .createdAt(createdAt)
             .processedAt(processedAt)
             .timesQueued(2)
@@ -64,8 +64,8 @@ class GameMatchDTOTest {
             assertEquals(teamTwo.getName(), dto.getTeamTwoName());
             assertEquals(submissionOne.getName(), dto.getSubmissionOneName());
             assertEquals(submissionTwo.getName(), dto.getSubmissionTwoName());
-            assertEquals(MATCH_STATUS.IN_PROGRESS, dto.getStatus());
-            assertEquals(MATCH_REASON.LADDER, dto.getReason());
+            assertEquals(MatchStatus.IN_PROGRESS, dto.getStatus());
+            assertEquals(MatchReason.LADDER, dto.getReason());
             assertEquals(createdAt, dto.getCreatedAt());
             assertEquals(processedAt, dto.getProcessedAt());
             assertEquals(2, dto.getTimesQueued());

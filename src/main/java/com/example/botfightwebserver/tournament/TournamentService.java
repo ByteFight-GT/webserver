@@ -3,8 +3,7 @@ package com.example.botfightwebserver.tournament;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_STATUS;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
@@ -176,15 +175,15 @@ public class TournamentService {
         return tournamentRepository.save(tournament);
     }
 
-    public void updateMatchResult(Long tournamentMatchId, MATCH_STATUS matchStatus) {
+    public void updateMatchResult(Long tournamentMatchId, MatchStatus matchStatus) {
         TournamentGameMatch tournamentGameMatch = tournamentGameMatchService.findById(tournamentMatchId);
         TournamentSet tournamentSet = tournamentGameMatch.getTournamentSet();
         Tournament tournament = tournamentGameMatch.getTournament();
-        if (matchStatus == MATCH_STATUS.TEAM_ONE_WIN) {
+        if (matchStatus == MatchStatus.TEAM_ONE_WIN) {
             tournamentSet.setTeamOneScore(tournamentSet.getTeamOneScore() + 1);
-        } else if (matchStatus == MATCH_STATUS.TEAM_TWO_WIN) {
+        } else if (matchStatus == MatchStatus.TEAM_TWO_WIN) {
             tournamentSet.setTeamTwoScore(tournamentSet.getTeamTwoScore() + 1);
-        } else if (matchStatus == MATCH_STATUS.DRAW) {
+        } else if (matchStatus == MatchStatus.DRAW) {
             tournamentSet.setTeamOneScore(tournamentSet.getTeamOneScore() + 1);
             tournamentSet.setTeamTwoScore(tournamentSet.getTeamTwoScore() + 1);
         }

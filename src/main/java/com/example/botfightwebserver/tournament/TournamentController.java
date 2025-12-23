@@ -3,8 +3,7 @@ package com.example.botfightwebserver.tournament;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
-import com.example.botfightwebserver.team.domain.PublicTeamDto;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import jakarta.transaction.Transactional;
@@ -74,7 +73,7 @@ public class TournamentController {
                     team2.getUuid().toString(),
                     team1.getCurrentSubmission().getUuid().toString(),
                     team2.getCurrentSubmission().getUuid().toString(),
-                    MATCH_REASON.TOURNAMENT
+                    MatchReason.TOURNAMENT
             );
 
             gameMatchService.queueMatch(match);

@@ -1,5 +1,8 @@
-package com.example.botfightwebserver.gameMatch.domain;
+package com.example.botfightwebserver.gameMatch.domain.dto;
 
+import com.example.botfightwebserver.gameMatch.domain.GameMatch;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
+import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +15,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameMatchDto {
+public class AdminGameMatchDto {
+    @NotNull private Long id;
     @NotNull private String uuid;
     @NotNull private String teamOneName;
     @NotNull private String teamTwoName;
@@ -20,16 +24,17 @@ public class GameMatchDto {
     @NotNull private String teamTwoUuid;
     private String submissionOneName;
     private String submissionTwoName;
-    private MATCH_STATUS status;
-    private MATCH_REASON reason;
+    private MatchStatus status;
+    private MatchReason reason;
     @NotNull private LocalDateTime createdAt;
     @NotNull private LocalDateTime processedAt;
     private Integer timesQueued;
     private String map;
 
     // Convert from Entity to DTO
-    public static GameMatchDto fromEntity(GameMatch gameMatch) {
-        return GameMatchDto.builder()
+    public static AdminGameMatchDto fromEntity(GameMatch gameMatch) {
+        return AdminGameMatchDto.builder()
+            .id(gameMatch.getId())
             .uuid(gameMatch.getUuid().toString())
             .teamOneName(gameMatch.getTeamOne().getName())
             .teamTwoName(gameMatch.getTeamTwo().getName())

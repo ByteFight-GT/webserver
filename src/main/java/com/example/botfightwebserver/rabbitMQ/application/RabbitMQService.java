@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.rabbitMQ.application;
 
-import com.example.botfightwebserver.gameMatch.domain.GameMatchJob;
-import com.example.botfightwebserver.gameMatch.domain.MATCH_REASON;
+import com.example.botfightwebserver.gameMatch.domain.dto.GameMatchJob;
+import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.gameMatch.domain.GameMatchResult;
 import com.example.botfightwebserver.rabbitMQ.infra.RabbitMQConfiguration;
 import com.google.common.annotations.VisibleForTesting;
@@ -20,11 +20,11 @@ public class RabbitMQService {
 
     public void enqueueGameMatchJob(GameMatchJob job) {
         int priority;
-        if (job.reason() == MATCH_REASON.VALIDATION) {
+        if (job.reason() == MatchReason.VALIDATION) {
             priority = 6;
-        } else if (job.reason() == MATCH_REASON.TOURNAMENT){
+        } else if (job.reason() == MatchReason.TOURNAMENT){
             priority = 5;
-        } else if (job.reason() == MATCH_REASON.LADDER) {
+        } else if (job.reason() == MatchReason.LADDER) {
             priority = 4;
         } else {
             priority = 3;
