@@ -7,6 +7,7 @@ import com.example.botfightwebserver.glicko.GlickoHistoryService;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Tag(name = "Teams (Public)", description = "Public read-only team endpoints")
 @RestController
@@ -26,14 +28,16 @@ public class PublicTeamController {
     private final ClockConfig clockConfig;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<PublicTeamDto> getTeam(@PathVariable String uuid) {
+    @Operation(
+            summary = "Get a public team by UUID"
+    )
+    public ResponseEntity<PublicTeamDto> getPublicTeam(@PathVariable UUID uuid) {
         Optional<PublicTeamDto> dtoOptional = teamService.getPublicTeamDtoByUuid(uuid);
-
         return dtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/glicko-history/{uuid}")
-    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@PathVariable String uuid) {
+    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@PathVariable UUID uuid) {
         Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
 
         if (teamOptional.isEmpty()) return ResponseEntity.notFound().build();
@@ -41,7 +45,7 @@ public class PublicTeamController {
         Team team = teamOptional.get();
 
         List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
-                glickoHistoryService.getTeamHistory(uuid).stream().map(GlickoHistoryDTO::fromEntity).toList());
+                glickoHistoryService.getTeamHistory(uuid.toString()).stream().map(GlickoHistoryDTO::fromEntity).toList());
         glickoHistories.add(0,
                 GlickoHistoryDTO.builder()
                         .teamUuid(team.getUuid().toString())

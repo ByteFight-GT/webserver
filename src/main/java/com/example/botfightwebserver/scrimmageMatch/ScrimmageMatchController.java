@@ -51,7 +51,7 @@ public class ScrimmageMatchController {
             team2Uuid = selfTeam.getUuid().toString();
         }
 
-        Optional<Team> opponentTeamOpt = teamService.getTeamByUuid(team2Uuid);
+        Optional<Team> opponentTeamOpt = teamService.getTeamByUuid(UUID.fromString(team2Uuid));
         if (opponentTeamOpt.isEmpty()) return ResponseEntity.notFound().build();
         Team opponentTeam = opponentTeamOpt.get();
 

@@ -1,6 +1,8 @@
 package com.example.botfightwebserver.auth.application;
 
 import com.example.botfightwebserver.auth.domain.*;
+import com.example.botfightwebserver.auth.domain.dto.RegisterUserDto;
+import com.example.botfightwebserver.auth.domain.dto.SupabaseDtos;
 import com.example.botfightwebserver.auth.infra.UserRepository;
 import com.example.botfightwebserver.player.infra.PlayerRepository;
 import com.example.botfightwebserver.player.application.PlayerService;

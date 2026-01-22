@@ -2,9 +2,8 @@ package com.example.botfightwebserver.auth.infra;
 
 import com.example.botfightwebserver.auth.application.SupabaseService;
 import com.example.botfightwebserver.auth.application.UserService;
-import com.example.botfightwebserver.auth.domain.ImpersonateUserDto;
-import com.example.botfightwebserver.auth.domain.RegisterUserDto;
-import com.example.botfightwebserver.auth.domain.SupabaseDtos;
+import com.example.botfightwebserver.auth.domain.dto.ImpersonateUserDto;
+import com.example.botfightwebserver.auth.domain.dto.SupabaseDtos;
 import com.example.botfightwebserver.auth.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
