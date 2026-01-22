@@ -1,10 +1,10 @@
-package com.example.botfightwebserver.auth.domain;
+package com.example.botfightwebserver.auth.domain.dto;
 
+import com.example.botfightwebserver.auth.domain.User;
 import lombok.Builder;
 import lombok.Value;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 
 @Value
