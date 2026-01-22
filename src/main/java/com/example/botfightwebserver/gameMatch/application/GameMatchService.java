@@ -24,6 +24,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,8 +50,8 @@ public class GameMatchService {
         teamService.validateTeams(team1Uuid, team2Uuid);
         submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setTeamOne(teamService.getTeamByUuid(team1Uuid).orElseThrow());
-        gameMatch.setTeamTwo(teamService.getTeamByUuid(team2Uuid).orElseThrow());
+        gameMatch.setTeamOne(teamService.getTeamByUuid(UUID.fromString(team1Uuid)).orElseThrow());
+        gameMatch.setTeamTwo(teamService.getTeamByUuid(UUID.fromString(team2Uuid)).orElseThrow());
         gameMatch.setSubmissionOne(submissionService.getSubmissionByUuid(submission1Uuid));
         gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
         gameMatch.setStatus(MatchStatus.WAITING);
@@ -248,5 +249,3 @@ public class GameMatchService {
                 .build();
     }
 }
-
-

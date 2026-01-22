@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.auth.application;
 
 import com.example.botfightwebserver.auth.infra.SupabaseProperties;
-import com.example.botfightwebserver.auth.domain.SupabaseDtos.*;
+import com.example.botfightwebserver.auth.domain.dto.SupabaseDtos.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 
 @Service

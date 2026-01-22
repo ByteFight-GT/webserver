@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.team.infra;
 
+import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.team.domain.Team;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     int countByCurrentSubmissionNotNull();
     Optional<Team> findByTeamCode(String teamCode);
     Optional<Team> findByUuid(UUID uuid);
+    Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
     boolean existsByUuid(UUID uuid);
 
     List<Team> findAllByIsDeletedFalse();
@@ -42,6 +44,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Page<Team> findTeamsPaginated(Pageable pageable);
 
     List<Team> findAllByOrderByGlickoDescMatchesPlayedAscIdAsc();
+
+    Optional<Team> findByCompetitionAndUuid(Competition competition, UUID uuid);
 }
 
 /*

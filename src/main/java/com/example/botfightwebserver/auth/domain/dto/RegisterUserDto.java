@@ -1,12 +1,9 @@
-package com.example.botfightwebserver.auth.domain;
+package com.example.botfightwebserver.auth.domain.dto;
 
 import com.example.botfightwebserver.player.domain.PlayerUsername;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class RegisterUserDto {

@@ -42,7 +42,7 @@ public class PrivateTeamController {
     @GetMapping("/my-team")
     public ResponseEntity<SelfTeamDto> getCurrentTeam(@AuthenticationPrincipal User user) {
         Player player = playerService.getPlayer(user);
-        Optional<SelfTeamDto> selfTeamDtoOptional = teamService.getSelfTeamDtoByUuid(player.getTeam().getUuid().toString());
+        Optional<SelfTeamDto> selfTeamDtoOptional = teamService.getSelfTeamDtoByUuid(player.getTeam().getUuid());
         return selfTeamDtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
