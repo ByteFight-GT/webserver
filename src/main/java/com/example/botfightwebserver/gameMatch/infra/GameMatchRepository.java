@@ -3,7 +3,6 @@ package com.example.botfightwebserver.gameMatch.infra;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.domain.MatchReason;
 import com.example.botfightwebserver.gameMatch.domain.MatchStatus;
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -23,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, JpaSpecificationExecutor<GameMatch> {
-    List<GameMatch> findByMatchmakingEvent(MatchMakingEvent matchmakingEvent);
-
     @Modifying
     @Query(value = """
         WITH cte AS (
