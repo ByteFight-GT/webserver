@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.team.application;
 
 import com.example.botfightwebserver.auth.domain.User;
+import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.leaderboard.LeaderboardDTO;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
@@ -36,14 +37,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class TeamService {
-    private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
+    private final PlayerRepository playerRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
     private final ClockConfig clockConfig;
     private static final int MAX_PLAYERS = 2;
     private final PermissionsService permissionsService;
     private final StudentEmailRepository studentEmailRepository;
+
+    public Optional<Team> getTeamByCompetitionAndUuid(Competition competition, UUID uuid) {
+        return teamRepository.findByCompetitionAndUuid(competition, uuid);
+    }
+
+    public Optional<Team> getTeamByUuid(UUID uuid) {
+        return teamRepository.findByUuidAndIsDeletedFalse(uuid);
+    }
 
     public List<Team> getTeams() {
         return teamRepository.findAll()
@@ -62,24 +71,20 @@ public class TeamService {
         return teamRepository.getReferenceById(id);
     }
 
-    public Optional<Team> getTeamByUuid(String uuid) {
-        return teamRepository.findByUuid(UUID.fromString(uuid));
-    }
-
-    public Optional<PublicTeamDto> getPublicTeamDtoByUuid(String uuid) {
-        Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
+    public Optional<PublicTeamDto> getPublicTeamDtoByUuid(UUID uuid) {
+        Optional<Team> team = teamRepository.findByUuidAndIsDeletedFalse(uuid);
         if (team.isEmpty()) return Optional.empty();
 
-        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
 
         return Optional.of(PublicTeamDto.from(team.get(), rank.orElse(null)));
     }
 
-    public Optional<SelfTeamDto> getSelfTeamDtoByUuid(String uuid) {
-        Optional<Team> team = teamRepository.findByUuid(UUID.fromString(uuid));
+    public Optional<SelfTeamDto> getSelfTeamDtoByUuid(UUID uuid) {
+        Optional<Team> team = teamRepository.findByUuid(uuid);
         if (team.isEmpty()) return Optional.empty();
 
-        Optional<Integer> rank = teamRepository.findRankByUuid(UUID.fromString(uuid));
+        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
 
         return Optional.of(SelfTeamDto.from(team.get(), rank.orElse(null)));
     }
@@ -311,5 +316,3 @@ public class TeamService {
         return teamRepository.existsByName(name);
     }
 }
-
-

@@ -1,4 +1,4 @@
-package com.example.botfightwebserver.auth.domain;
+package com.example.botfightwebserver.auth.domain.dto;
 
 import lombok.Getter;
 
