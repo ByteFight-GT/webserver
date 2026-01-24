@@ -33,19 +33,19 @@ public class GameMatchDto {
     // Convert from Entity to DTO
     public static GameMatchDto fromEntity(GameMatch gameMatch) {
         return GameMatchDto.builder()
-            .uuid(gameMatch.getUuid().toString())
-            .teamOneName(gameMatch.getTeamOne().getName())
-            .teamTwoName(gameMatch.getTeamTwo().getName())
-            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())
-            .teamTwoUuid(gameMatch.getTeamTwo().getUuid().toString())
-            .submissionOneName(gameMatch.getSubmissionOne().getName())
-            .submissionTwoName(gameMatch.getSubmissionTwo().getName())
-            .status(gameMatch.getStatus())
-            .reason(gameMatch.getReason())
-            .createdAt(gameMatch.getCreatedAt())
-            .processedAt(gameMatch.getProcessedAt())
-            .timesQueued(gameMatch.getTimesQueued())
-            .map(gameMatch.getMap())
+//            .uuid(gameMatch.getUuid().toString())
+//            .teamOneName(gameMatch.getTeamOne().getName())
+//            .teamTwoName(gameMatch.getTeamTwo().getName())
+//            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())
+//            .teamTwoUuid(gameMatch.getTeamTwo().getUuid().toString())
+//            .submissionOneName(gameMatch.getSubmissionOne().getName())
+//            .submissionTwoName(gameMatch.getSubmissionTwo().getName())
+//            .status(gameMatch.getStatus())
+//            .reason(gameMatch.getReason())
+//            .createdAt(gameMatch.getCreatedAt())
+//            .processedAt(gameMatch.getProcessedAt())
+//            .timesQueued(gameMatch.getTimesQueued())
+//            .map(gameMatch.getMap())
             .build();
     }
 }

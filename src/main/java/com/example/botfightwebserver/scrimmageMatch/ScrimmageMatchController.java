@@ -78,7 +78,7 @@ public class ScrimmageMatchController {
                     opponentTeam.getUuid().toString(),
                     team1CurrentSubmission.get().getUuid().toString(),
                     team2CurrentSubmission.get().getUuid().toString(),
-                    MatchReason.SCRIMMAGE
+                    MatchReason.scrimmage
             );
 
             gameMatchService.queueMatch(match);

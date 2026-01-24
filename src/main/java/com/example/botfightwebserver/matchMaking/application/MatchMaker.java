@@ -60,7 +60,7 @@ public class MatchMaker {
                     teamTwo.getUuid().toString(),
                     teamOne.getCurrentSubmission().getUuid().toString(),
                     teamTwo.getCurrentSubmission().getUuid().toString(),
-                    MatchReason.LADDER
+                    MatchReason.ladder
             );
         }).toList();
     }
