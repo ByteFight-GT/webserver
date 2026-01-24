@@ -1,8 +1,7 @@
 package com.example.botfightwebserver;
 
 import org.junit.jupiter.api.Test;
-@FullStackIntegrationTest
-class BotFightWebServerApplicationTests {
+class BotFightWebServerApplicationTests extends FullStackIntegrationTestBase {
 
     @Test
     void contextLoads() {

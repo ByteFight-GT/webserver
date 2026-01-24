@@ -51,7 +51,7 @@ public class UserService {
             throw new EmailAlreadyRegisteredException(input.getEmail());
         }
 
-        if(playerRepository.existsByNameIgnoreCase(normalizedUsername)) {
+        if(playerRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
             throw new UsernameAlreadyExistsException(input.getName());
         }
 

@@ -2,8 +2,6 @@ package com.example.botfightwebserver.matchMaking.infra;
 
 import com.example.botfightwebserver.matchMaking.application.MatchMakingService;
 import com.example.botfightwebserver.matchMaking.application.ScheduledMatchMaker;
-import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import com.example.botfightwebserver.matchMaking.domain.MatchMakingStatusDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

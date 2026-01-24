@@ -21,13 +21,14 @@ public class SubmissionDTO {
     @NotNull private Boolean isAutoSet;
 
     public static SubmissionDTO from(Submission submission) {
-        return new SubmissionDTO(
-            submission.getUuid().toString(),
-            submission.getTeam().getUuid().toString(),
-            submission.getSubmissionValidity(),
-            submission.getCreatedAt(),
-            submission.getName(),
-            submission.getIsAutoSet()
-        );
+//        return new SubmissionDTO(
+//            submission.getUuid().toString(),
+//            submission.getTeam().getUuid().toString(),
+//            submission.getSubmissionValidity(),
+//            submission.getCreatedAt(),
+//            submission.getName(),
+//            submission.getIsAutoSet()
+//        );
+        return null;
     }
 }

@@ -20,17 +20,17 @@ public class RabbitMQService {
 
     public void enqueueGameMatchJob(GameMatchJob job) {
         int priority;
-        if (job.reason() == MatchReason.VALIDATION) {
-            priority = 6;
-        } else if (job.reason() == MatchReason.TOURNAMENT){
-            priority = 5;
-        } else if (job.reason() == MatchReason.LADDER) {
-            priority = 4;
-        } else {
-            priority = 3;
-        }
+//        if (job.reason() == MatchReason.VALIDATION) {
+//            priority = 6;
+//        } else if (job.reason() == MatchReason.TOURNAMENT){
+//            priority = 5;
+//        } else if (job.reason() == MatchReason.LADDER) {
+//            priority = 4;
+//        } else {
+//            priority = 3;
+//        }
         rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_QUEUE, job, message -> {
-            message.getMessageProperties().setPriority(priority);
+//            message.getMessageProperties().setPriority(priority);
             return message;
         });
     }

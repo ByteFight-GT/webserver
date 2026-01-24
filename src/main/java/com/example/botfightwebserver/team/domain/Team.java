@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -47,12 +49,18 @@ public class Team extends AuditableSoftDeletableEntity {
     @Column(name = "display_members", nullable = false)
     private boolean displayMembers;
 
+    @Column(name = "matches_played", nullable = false)
+    private int matchesPlayed = 0;
+
+    @Column(name = "glicko", nullable = false)
+    private double glicko = 0.0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "active_submission_id")
     private Submission currentSubmission;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "type", nullable = false, columnDefinition = "team_type")
     private TeamType type = TeamType.regular;
 }
-

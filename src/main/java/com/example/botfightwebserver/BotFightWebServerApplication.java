@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class BotFightWebServerApplication {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "search.index.enabled", havingValue = "true", matchIfMissing = true)
     public ApplicationRunner buildIndex(SearchIndexBuild searchIndexBuild) {
         return args -> {searchIndexBuild.indexPersistedData();};
     }

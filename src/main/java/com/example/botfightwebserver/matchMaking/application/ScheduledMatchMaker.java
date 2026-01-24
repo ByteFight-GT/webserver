@@ -1,7 +1,7 @@
 package com.example.botfightwebserver.matchMaking.application;
 
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
+import com.example.botfightwebserver.matchMaking.domain.MatchmakingEvent;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingProperties;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ScheduledMatchMaker {
     public void scheduleMatchGeneration() {
         if(matchMakingService.isEnabled()) {
             log.info("Scheduling Matches");
-            MatchMakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.SCHEDULED);
+            MatchmakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.SCHEDULED);
             matchMakingService.queueEvent(event);
             lastRun.set(Instant.now());
         }
