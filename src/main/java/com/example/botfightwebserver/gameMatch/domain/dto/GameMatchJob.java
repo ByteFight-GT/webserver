@@ -11,16 +11,17 @@ public record GameMatchJob(String gameMatchUuid, String submission1Uuid, String 
                            STORAGE_SOURCE source2, MatchReason reason, String map) implements Serializable {
 
     public static GameMatchJob from(GameMatch gameMatch) {
-        Submission submission1 = gameMatch.getSubmissionOne();
-        Submission submission2 = gameMatch.getSubmissionTwo();
-        return new GameMatchJob(
-            gameMatch.getUuid().toString(),
-            submission1.getUuid().toString(),
-            submission2.getUuid().toString(),
-            submission1.getSource(),
-            submission2.getSource(),
-            gameMatch.getReason(),
-            gameMatch.getMap()
-        );
+//        Submission submission1 = gameMatch.getSubmissionOne();
+//        Submission submission2 = gameMatch.getSubmissionTwo();
+//        return new GameMatchJob(
+//            gameMatch.getUuid().toString(),
+//            submission1.getUuid().toString(),
+//            submission2.getUuid().toString(),
+//            submission1.getSource(),
+//            submission2.getSource(),
+//            gameMatch.getReason(),
+//            gameMatch.getMap()
+//        );
+        return null;
     }
 }

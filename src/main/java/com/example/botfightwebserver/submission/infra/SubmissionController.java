@@ -58,7 +58,7 @@ public class SubmissionController {
                 team.getUuid().toString(),
                 submission.getUuid().toString(),
                 submission.getUuid().toString(),
-                MatchReason.VALIDATION
+                MatchReason.validation
         );
         gameMatchService.queueMatch(valMatch);
         return ResponseEntity.ok(SubmissionDTO.from(submission));

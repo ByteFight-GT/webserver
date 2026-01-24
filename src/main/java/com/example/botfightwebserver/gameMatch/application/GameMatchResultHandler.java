@@ -14,9 +14,6 @@ import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
-import com.example.botfightwebserver.tournament.TournamentGameMatch;
-import com.example.botfightwebserver.tournament.TournamentGameMatchService;
-import com.example.botfightwebserver.tournament.TournamentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,8 +31,6 @@ public class GameMatchResultHandler {
     private final RabbitMQService rabbitMQService;
     private final GlickoCalculator glickoCalculator;
     private final GameMatchLogService gameMatchLogService;
-    private final TournamentService tournamentService;
-    private final TournamentGameMatchService tournamentGameMatchService;
     private final GlickoHistoryService glickoHistoryService;
 
 
@@ -49,35 +44,35 @@ public class GameMatchResultHandler {
         }
         MatchStatus status = result.status();
         GameMatch gameMatch = gameMatchService.getReferenceByUuid(gameMatchUuid).orElseThrow();
-        Team team1 = gameMatch.getTeamOne();
-        Team team2 = gameMatch.getTeamTwo();
-
-        log.info("Processing match result for game {}: {} vs {}, status: {}",
-                gameMatchUuid, team1.getName(), team2.getName(), status);
-
-        GlickoChanges glickoChanges = new GlickoChanges();
-        if (gameMatch.getReason() == MatchReason.LADDER) {
-            glickoChanges = glickoCalculator.calculateGlicko(team1, team2, status);
-            log.info("Handling ladder match: team1 {}, team2 {}", team1.getId(), team2.getId());
-            handleLadderResult(team1, team2, status, glickoChanges, gameMatch);
-            log.info("Ladder match handled");
-        } else if (gameMatch.getReason() == MatchReason.VALIDATION) {
-            Submission submission = gameMatch.getSubmissionOne();
-            log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
-            handleValidationResult(team1, submission, status);
-            log.info("Validation match handled");
-        } else if (gameMatch.getReason() == MatchReason.TOURNAMENT) {
-            log.info("Processing tournament match for team1 {} team2 {}", team1.getId(), team2.getId());
-            handleTournamentResult(gameMatch.getId(), status, team1, team2);
-        } else if (gameMatch.getReason() == MatchReason.SCRIMMAGE) {
-            log.info("Processing Scrimmage match for team1 {} team2 {}", team1.getId(), team2.getId());
-            handleScrimmageResult(team1, team2, status);
-        }
-        else {
-            log.info("Can't process match");
-        }
+//        Team team1 = gameMatch.getTeamOne();
+//        Team team2 = gameMatch.getTeamTwo();
+//
+//        log.info("Processing match result for game {}: {} vs {}, status: {}",
+//                gameMatchUuid, team1.getName(), team2.getName(), status);
+//
+//        GlickoChanges glickoChanges = new GlickoChanges();
+//        if (gameMatch.getReason() == MatchReason.LADDER) {
+//            glickoChanges = glickoCalculator.calculateGlicko(team1, team2, status);
+//            log.info("Handling ladder match: team1 {}, team2 {}", team1.getId(), team2.getId());
+//            handleLadderResult(team1, team2, status, glickoChanges, gameMatch);
+//            log.info("Ladder match handled");
+//        } else if (gameMatch.getReason() == MatchReason.VALIDATION) {
+//            Submission submission = gameMatch.getSubmissionOne();
+//            log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
+//            handleValidationResult(team1, submission, status);
+//            log.info("Validation match handled");
+//        } else if (gameMatch.getReason() == MatchReason.TOURNAMENT) {
+//            log.info("Processing tournament match for team1 {} team2 {}", team1.getId(), team2.getId());
+//            handleTournamentResult(gameMatch.getId(), status, team1, team2);
+//        } else if (gameMatch.getReason() == MatchReason.SCRIMMAGE) {
+//            log.info("Processing Scrimmage match for team1 {} team2 {}", team1.getId(), team2.getId());
+//            handleScrimmageResult(team1, team2, status);
+//        }
+//        else {
+//            log.info("Can't process match");
+//        }
         gameMatchService.setGameMatchStatus(gameMatchUuid, status);
-        gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
+//        gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
     }
 
     private void handleLadderResult(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges, GameMatch gameMatch) {
@@ -91,23 +86,16 @@ public class GameMatchResultHandler {
     }
 
     private void updateTeamStats(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges) {
-        if (status == MatchStatus.TEAM_ONE_WIN) {
-            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
-            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
-        } else if (status == MatchStatus.TEAM_TWO_WIN) {
-            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
-            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
-        } else if (status == MatchStatus.DRAW) {
-            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
-            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
-        }
-    }
-
-    private void handleTournamentResult(Long gameMatchId, MatchStatus status, Team team1, Team team2) {
-        TournamentGameMatch tournamentGameMatch = tournamentGameMatchService.findById(gameMatchId);
-        tournamentService.updateMatchResult(gameMatchId, status);
-//        updateTeamStats(team1, team2, status, new GlickoChanges());
-        tournamentGameMatchService.save(tournamentGameMatch);
+//        if (status == MatchStatus.TEAM_ONE_WIN) {
+//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
+//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
+//        } else if (status == MatchStatus.TEAM_TWO_WIN) {
+//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
+//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
+//        } else if (status == MatchStatus.DRAW) {
+//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
+//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
+//        }
     }
 
 
@@ -119,14 +107,14 @@ public class GameMatchResultHandler {
     }
 
     private  void handleValidationResult(Team team, Submission submission, MatchStatus status) {
-        if (status == MatchStatus.TEAM_ONE_WIN) {
-            submissionService.validateSubmissionAfterMatch(submission.getId());
-            if (teamService.getCurrentSubmission(team.getId()).isEmpty() || submission.getIsAutoSet()) {
-                teamService.setCurrentSubmission(team.getId(), submission.getUuid().toString());
-            }
-        } else {
-            submissionService.invalidateSubmissionAfterMatch(submission.getId());
-        }
+//        if (status == MatchStatus.TEAM_ONE_WIN) {
+//            submissionService.validateSubmissionAfterMatch(submission.getId());
+//            if (teamService.getCurrentSubmission(team.getId()).isEmpty() || submission.getIsAutoSet()) {
+//                teamService.setCurrentSubmission(team.getId(), submission.getUuid().toString());
+//            }
+//        } else {
+//            submissionService.invalidateSubmissionAfterMatch(submission.getId());
+//        }
     }
 
     public List<GameMatchResult> deleteQueuedMatches() {

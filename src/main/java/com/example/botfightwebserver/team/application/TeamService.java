@@ -255,8 +255,8 @@ public class TeamService {
         }
 
         // mark the team as deleted
-        team.setDeleted(true);
-        team.setDeletedAt(LocalDateTime.now());
+//        team.setDeleted(true);
+//        team.setDeletedAt(LocalDateTime.now());
 
         teamRepository.save(team);
     }
@@ -304,7 +304,7 @@ public class TeamService {
     }
 
     public Team findTeamByCode(String code) {
-        Optional<Team> team = teamRepository.findByTeamCode(code);
+        Optional<Team> team = teamRepository.findByJoinCode(code);
         return team.orElseThrow(() -> new IllegalArgumentException("Team with code " + code + " does not exist"));
     }
 

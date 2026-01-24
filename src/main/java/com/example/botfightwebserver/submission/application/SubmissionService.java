@@ -45,12 +45,12 @@ public class SubmissionService {
         StoredObject storedObject = storageService.store(file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
 
         Submission submission = new Submission();
-        submission.setStorageFileUuid(storedObject.getUuid());
-        submission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
-        submission.setSource(STORAGE_SOURCE.LOCAL);
-        submission.setTeam(team);
-        submission.setName(file.getOriginalFilename());
-        submission.setIsAutoSet(isAutoSet);
+//        submission.setStorageFileUuid(storedObject.getUuid());
+//        submission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
+//        submission.setSource(STORAGE_SOURCE.LOCAL);
+//        submission.setTeam(team);
+//        submission.setName(file.getOriginalFilename());
+//        submission.setIsAutoSet(isAutoSet);
 
         return submissionRepository.save(submission);
     }
@@ -71,7 +71,7 @@ public class SubmissionService {
             throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
         }
 
-        submission.setIsDeleted(true);
+//        submission.setIsDeleted(true);
 
         submissionRepository.save(submission);
 
@@ -95,7 +95,8 @@ public class SubmissionService {
             }
         }
 
-        return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
+//        return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
+        return null;
     }
 
     public void validateFile(MultipartFile file) {
@@ -118,27 +119,28 @@ public class SubmissionService {
 
     public void validateSubmissionAfterMatch(long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).get();
-        submission.setSubmissionValidity(SubmissionValidity.VALID);
+//        submission.setSubmissionValidity(SubmissionValidity.VALID);
         submissionRepository.save(submission);
     }
 
     public void invalidateSubmissionAfterMatch(long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).get();
-        submission.setSubmissionValidity(SubmissionValidity.INVALID);
+//        submission.setSubmissionValidity(SubmissionValidity.INVALID);
         submissionRepository.save(submission);
     }
 
     public boolean isSubmissionValid(String submissionUuid) {
         Optional<Submission> maybeSubmission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid));
         if (maybeSubmission.isPresent()) {
-            return maybeSubmission.get().getSubmissionValidity() == SubmissionValidity.VALID;
+//            return maybeSubmission.get().getSubmissionValidity() == SubmissionValidity.VALID;
         }
         return false;
     }
 
     public List<SubmissionDTO> getTeamSubmissions(Long teamId) {
         List<Submission> submissions =submissionRepository.findSubmissionsByTeamIdOrderByCreatedAtDesc(teamId);
-        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::from).toList();
+//        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::from).toList();
+        return null;
     }
 
 }

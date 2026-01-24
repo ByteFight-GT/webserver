@@ -1,6 +1,6 @@
 package com.example.botfightwebserver.team;
 
-import com.example.botfightwebserver.FullStackIntegrationTest;
+import com.example.botfightwebserver.FullStackIntegrationTestBase;
 import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
@@ -14,14 +14,16 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@FullStackIntegrationTest
 @Transactional
-class TeamServiceTest {
-    @Autowired
-    private TeamService teamService;
+class TeamServiceTest extends FullStackIntegrationTestBase {
+    private final TeamService teamService;
+    private final TestDataFactory testDataFactory;
 
     @Autowired
-    private TestDataFactory testDataFactory;
+    TeamServiceTest(TeamService teamService, TestDataFactory testDataFactory) {
+        this.teamService = teamService;
+        this.testDataFactory = testDataFactory;
+    }
 
     @Test
     void getTeamByUuidReturnsTeamWhenActive() {

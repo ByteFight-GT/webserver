@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByName(String name);
     int countByCurrentSubmissionNotNull();
-    Optional<Team> findByTeamCode(String teamCode);
+    Optional<Team> findByJoinCode(String joinCode);
     Optional<Team> findByUuid(UUID uuid);
     Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
     boolean existsByUuid(UUID uuid);
