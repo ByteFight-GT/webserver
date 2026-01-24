@@ -16,6 +16,7 @@ import com.example.botfightwebserver.team.domain.dto.AdminCreateTeamDto;
 import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.dto.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.dto.TeamSettingsDto;
+import com.example.botfightwebserver.team.infra.TeamMemberRepository;
 import com.example.botfightwebserver.team.infra.TeamRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +39,58 @@ import java.util.stream.Collectors;
 @Transactional
 public class TeamService {
     private final TeamRepository teamRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final PlayerRepository playerRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
-    private final ClockConfig clockConfig;
-    private static final int MAX_PLAYERS = 2;
-    private final PermissionsService permissionsService;
-    private final StudentEmailRepository studentEmailRepository;
+
+    public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto) {
+        String name = teamSettingsDto.getName();
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
+
+        String normalizedName = name.trim().toLowerCase();
+
+        if (teamRepository.existsByCompetitionAndNameNormalized(competition, normalizedName)) {
+            throw new IllegalArgumentException("Team with name " + name + " already exists");
+        }
+
+        Team team = new Team();
+        team.setUuid(UUID.randomUUID());
+        team.setType(TeamType.regular);
+        team.setCompetition(competition);
+        team.setName(name);
+        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+
+        if (teamSettingsDto.getQuote() != null) {
+            team.setQuote(teamSettingsDto.getQuote());
+        }
+
+        return teamRepository.save(team);
+    }
+
+    public TeamMember joinTeam(Player player, Team team) {
+        if (player == null || team == null) {
+            throw new IllegalArgumentException("Player and team are required");
+        }
+
+        Competition competition = team.getCompetition();
+        if (competition == null) {
+            throw new IllegalArgumentException("Team must belong to a competition");
+        }
+
+        if (teamMemberRepository.existsByCompetitionAndPlayer(competition, player)) {
+            throw new IllegalArgumentException("Player is already in a team for this competition");
+        }
+
+        TeamMember member = new TeamMember();
+        member.setPlayer(player);
+        member.setTeam(team);
+        member.setCompetition(competition);
+        return teamMemberRepository.save(member);
+    }
 
     public Optional<Team> getTeamByCompetitionAndUuid(Competition competition, UUID uuid) {
         return teamRepository.findByCompetitionAndUuid(competition, uuid);
@@ -75,57 +121,31 @@ public class TeamService {
         Optional<Team> team = teamRepository.findByUuidAndIsDeletedFalse(uuid);
         if (team.isEmpty()) return Optional.empty();
 
-        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
+//        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
 
-        return Optional.of(PublicTeamDto.from(team.get(), rank.orElse(null)));
+        return Optional.of(PublicTeamDto.from(team.get(), -1));
     }
 
     public Optional<SelfTeamDto> getSelfTeamDtoByUuid(UUID uuid) {
         Optional<Team> team = teamRepository.findByUuid(uuid);
         if (team.isEmpty()) return Optional.empty();
 
-        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
-
-        return Optional.of(SelfTeamDto.from(team.get(), rank.orElse(null)));
+        return Optional.of(SelfTeamDto.from(team.get()));
     }
 
     public Integer getRankForTeam(Team team) {
-        return teamRepository.findRankByUuid(team.getUuid()).orElse(null);
-    }
-
-    public Team createTeam(User user, TeamSettingsDto teamSettingsDto) {
-        String name = teamSettingsDto.getName();
-
-        if(permissionsService.get().getRestrictTeamCreationToStudentEmails()) {
-            if(!studentEmailRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("You are not whitelisted for this competition.");
-            }
-        }
-
-        if (teamRepository.existsByName(name.trim())) {
-            throw new IllegalArgumentException("Team with name " + name + " already exists");
-        }
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Team name cannot be null or empty");
-        }
-        Team team = new Team();
-        team.setName(name);
-        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
-
-        if (teamSettingsDto.getQuote() != null) {
-            team.setQuote(teamSettingsDto.getQuote());
-        }
-
-        return teamRepository.save(team);
+        return -1;
     }
 
     public Team adminCreateTeam(AdminCreateTeamDto teamDto) {
         String name = teamDto.getName();
-        if (teamRepository.existsByName(name.trim())) {
-            throw new IllegalArgumentException("Team with name " + name + " already exists");
-        }
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
+
+        String normalizedName = name.trim().toLowerCase();
+        if (teamRepository.existsByNameNormalized(normalizedName)) {
+            throw new IllegalArgumentException("Team with name " + name + " already exists");
         }
         Team team = new Team();
         team.setName(name);
@@ -229,7 +249,7 @@ public class TeamService {
         }
         Team team = teamRepository.findById(teamId).get();
 
-        if(team.isDeleted()) {
+        if (team.isDeleted()) {
             throw new IllegalArgumentException("This team is deleted and cannot be edited.");
         }
 
@@ -244,13 +264,13 @@ public class TeamService {
     public void deleteTeam(Long teamId, TeamDeletionReason reason) {
         Team team = teamRepository.findById(teamId).orElseThrow();
 
-        if(team.isDeleted()) {
+        if (team.isDeleted()) {
             throw new IllegalArgumentException("This team is already deleted.");
         }
 
         // remove all players from the team
         List<Player> players = playerService.getPlayersByTeam(teamId);
-        for(Player p : players) {
+        for (Player p : players) {
             playerService.leaveTeam(p);
         }
 
@@ -272,7 +292,7 @@ public class TeamService {
     public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
-        Page<Team> teamPage = teamRepository.findTeamsPaginated(pageable);
+        Page<Team> teamPage = null;
 
         List<UUID> teamUuids = teamPage.map(Team::getUuid).stream().toList();
         List<Player> teamPlayers = playerRepository.findMembersByTeamUuids(teamUuids);
@@ -313,6 +333,9 @@ public class TeamService {
     }
 
     public boolean isNameExist(String name) {
-        return teamRepository.existsByName(name);
+        if (name == null) {
+            return false;
+        }
+        return teamRepository.existsByNameNormalized(name.trim().toLowerCase());
     }
 }

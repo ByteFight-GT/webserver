@@ -1,5 +1,7 @@
 package com.example.botfightwebserver.team.domain.dto;
 
+import com.example.botfightwebserver.common.domain.dto.TimestampsDto;
+import com.example.botfightwebserver.competition.domain.dto.CompetitionDto;
 import com.example.botfightwebserver.submission.domain.SubmissionDTO;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.TeamType;
@@ -11,46 +13,28 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class SelfTeamDto {
+    @NotNull CompetitionDto competition;
     @NotNull String uuid;
     @NotNull String name;
     @NotNull String quote;
+    String joinCode;
     @NotNull Boolean displayMembers;
-    @NotNull Double glicko;
-    @NotNull Integer matchesPlayed;
-    @NotNull Integer numberWins;
-    @NotNull Integer numberLosses;
-    @NotNull Integer numberDraws;
-    @NotNull Integer numberOfPlayers;
-    @NotNull Integer rank;
-    @NotNull
-    TeamType type;
     SubmissionDTO currentSubmissionDTO;
-    String teamCode;
-    @NotNull LocalDateTime creationDateTime;
-    @NotNull LocalDateTime lastModifiedDate;
-    @NotNull Boolean isDeleted;
+    @NotNull TeamType type;
+    @NotNull TimestampsDto timestampsDto;
 
-
-    public static SelfTeamDto from(Team team, Integer rank) {
+    public static SelfTeamDto from(Team team) {
         return SelfTeamDto.builder()
+                .competition(CompetitionDto.from(team.getCompetition()))
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
-//                .creationDateTime(team.getCreationDateTime())
-//                .lastModifiedDate(team.getLastModifiedDate())
-//                .glicko(team.getCurrentSubmission() != null? team.getGlicko() : -1)
-//                .matchesPlayed(team.getMatchesPlayed())
-//                .numberWins(team.getNumberWins())
-//                .numberLosses(team.getNumberLosses())
-//                .numberDraws(team.getNumberDraws())
                 .quote(team.getQuote())
+                .joinCode(team.getJoinCode())
+                .displayMembers(team.isDisplayMembers())
                 .currentSubmissionDTO(
                         team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
-//                .teamCode(team.getTeamCode())
-//                .numberOfPlayers(team.getNumberPlayers())
-                .rank(rank)
                 .type(team.getType())
-                .displayMembers(team.isDisplayMembers())
-                .isDeleted(team.isDeleted())
+                .timestampsDto(TimestampsDto.from(team))
                 .build();
     }
 }

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -41,17 +42,17 @@ public class PrivatePlayerController {
     private final TeamService teamService;
     private final PermissionsService permissionsService;
 
-    @PostMapping("/join-team")
-    public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
-        Team team = teamService.findTeamByCode(teamCode);
-        if (!teamService.isTeamJoinable(team)) {
-            throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
-        }
-        Player player = playerService.getPlayer(user);
-
-        player = playerService.setPlayerTeam(user.getUuid(), team);
-        return ResponseEntity.ok(PublicPlayerDto.from(player));
-    }
+//    @PostMapping("/join-team")
+//    public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
+//        Team team = teamService.findTeamByCode(teamCode);
+//        if (!teamService.isTeamJoinable(team)) {
+//            throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
+//        }
+//        Player player = playerService.getPlayer(user);
+//
+//        player = playerService.setPlayerTeam(user.getUuid(), team);
+//        return ResponseEntity.ok(PublicPlayerDto.from(player));
+//    }
 
     @GetMapping("/player")
     public ResponseEntity<PublicPlayerDto> getPlayerById(@RequestParam Long id) {
@@ -64,43 +65,46 @@ public class PrivatePlayerController {
     )
     @GetMapping("/me")
     public ResponseEntity<SelfPlayerDto> getCurrentPlayer(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(SelfPlayerDto.from(playerService.getPlayer(user)));
+        return ResponseEntity.ok(
+                SelfPlayerDto.from(playerService.getPlayer(user)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)))
+        );
     }
 
-    @PostMapping("/name")
-    public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
-        name = name.trim();
-        boolean isAvailable = !playerService.isUsernameExist(name);
-        if (!isAvailable) {
-            throw new IllegalArgumentException("Name " + name + " is not available");
-        }
-        Player player = playerService.getPlayer(user);
-        if (player.getUsername().equals(name)) {
-            return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
-        }
-        playerService.setName(player.getId(), name);
-        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
-    }
-
-    @PostMapping("/leave-team")
-    public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
-        Player player = playerService.getPlayer(user);
-
-        if(player.getTeam() == null) {
-            throw new IllegalArgumentException("You are not on a team!");
-        }
-
-        permissionsService.validateAllowLeaveTeam();
-
-        Team oldTeam = playerService.leaveTeam(player);
-//
-//        if(oldTeam.getNumberPlayers() == 0) {
-//            // no more members left, team will be deleted
-//            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
+//    @PostMapping("/name")
+//    public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
+//        name = name.trim();
+//        boolean isAvailable = !playerService.isUsernameExist(name);
+//        if (!isAvailable) {
+//            throw new IllegalArgumentException("Name " + name + " is not available");
 //        }
+//        Player player = playerService.getPlayer(user);
+//        if (player.getUsername().equals(name)) {
+//            return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
+//        }
+//        playerService.setName(player.getId(), name);
+//        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
+//    }
 
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/leave-team")
+//    public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
+//        Player player = playerService.getPlayer(user);
+//
+//        if (player.getTeam() == null) {
+//            throw new IllegalArgumentException("You are not on a team!");
+//        }
+//
+//        permissionsService.validateAllowLeaveTeam();
+//
+//        Team oldTeam = playerService.leaveTeam(player);
+////
+////        if(oldTeam.getNumberPlayers() == 0) {
+////            // no more members left, team will be deleted
+////            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
+////        }
+//
+//        return ResponseEntity.ok().build();
+//    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

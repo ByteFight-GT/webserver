@@ -82,18 +82,18 @@ public class SubmissionService {
         Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
         // if user is NOT an admin, we check that they own the submission
-        if(!user.isAdmin()) {
-            Player player = playerService.getPlayer(user);
-            Team team = player.getTeam();
-
-            if (team == null) {
-                throw new AccessDeniedException("You are not allowed to access this submission");
-            }
-
-            if (!submission.getTeam().getId().equals(team.getId())) {
-                throw new AccessDeniedException("You are not allowed to access this submission");
-            }
-        }
+//        if(!user.isAdmin()) {
+//            Player player = playerService.getPlayer(user);
+//            Team team = player.getTeam();
+//
+//            if (team == null) {
+//                throw new AccessDeniedException("You are not allowed to access this submission");
+//            }
+//
+//            if (!submission.getTeam().getId().equals(team.getId())) {
+//                throw new AccessDeniedException("You are not allowed to access this submission");
+//            }
+//        }
 
 //        return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
         return null;

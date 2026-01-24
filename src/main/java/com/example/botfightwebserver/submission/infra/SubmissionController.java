@@ -35,56 +35,56 @@ public class SubmissionController {
     private final PlayerService playerService;
     private final PermissionsService permissionsService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SubmissionDTO> uploadSubmission(
-            @AuthenticationPrincipal User user,
-            UploadSubmissionDto uploadSubmissionDto
-    ) {
-        permissionsService.validateAllowNewSubmission();
-
-        Player player = playerService.getPlayer(user);
-        Submission submission = null;
-
-        try {
-            submission = submissionService.createSubmission(player.getTeam().getUuid().toString(), uploadSubmissionDto.getFile(), uploadSubmissionDto.getIsAutoSet());
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
-
-        Team team = player.getTeam();
-
-        GameMatch valMatch = gameMatchService.createMatch(
-                team.getUuid().toString(),
-                team.getUuid().toString(),
-                submission.getUuid().toString(),
-                submission.getUuid().toString(),
-                MatchReason.validation
-        );
-        gameMatchService.queueMatch(valMatch);
-        return ResponseEntity.ok(SubmissionDTO.from(submission));
-    }
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<SubmissionDTO> uploadSubmission(
+//            @AuthenticationPrincipal User user,
+//            UploadSubmissionDto uploadSubmissionDto
+//    ) {
+//        permissionsService.validateAllowNewSubmission();
+//
+//        Player player = playerService.getPlayer(user);
+//        Submission submission = null;
+//
+//        try {
+//            submission = submissionService.createSubmission(player.getTeam().getUuid().toString(), uploadSubmissionDto.getFile(), uploadSubmissionDto.getIsAutoSet());
+//        } catch (IOException e) {
+//            return ResponseEntity.internalServerError().build();
+//        }
+//
+//        Team team = player.getTeam();
+//
+//        GameMatch valMatch = gameMatchService.createMatch(
+//                team.getUuid().toString(),
+//                team.getUuid().toString(),
+//                submission.getUuid().toString(),
+//                submission.getUuid().toString(),
+//                MatchReason.validation
+//        );
+//        gameMatchService.queueMatch(valMatch);
+//        return ResponseEntity.ok(SubmissionDTO.from(submission));
+//    }
 
     @GetMapping("get-download-url")
     public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
         return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, user));
     }
 
-    @GetMapping("/team")
-    public ResponseEntity<List<SubmissionDTO>> getTeamSubmissions(@AuthenticationPrincipal User user) {
-        Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeam().getId();
-        return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
-    }
-
-    @DeleteMapping("")
-    public ResponseEntity<SubmissionDTO> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-        Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeam().getId();
-
-        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
-
-        return ResponseEntity.ok(SubmissionDTO.from(deleted));
-    }
+//    @GetMapping("/team")
+//    public ResponseEntity<List<SubmissionDTO>> getTeamSubmissions(@AuthenticationPrincipal User user) {
+//        Player player = playerService.getPlayer(user);
+//        Long teamId = player.getTeam().getId();
+//        return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
+//    }
+//
+//    @DeleteMapping("")
+//    public ResponseEntity<SubmissionDTO> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
+//        Player player = playerService.getPlayer(user);
+//        Long teamId = player.getTeam().getId();
+//
+//        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
+//
+//        return ResponseEntity.ok(SubmissionDTO.from(deleted));
+//    }
 
 
     @ExceptionHandler(Exception.class)
