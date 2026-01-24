@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,6 +23,24 @@ public class PlayerService {
     private final PermissionsService permissionsService;
     private final TeamRepository teamRepository;
     private final StudentEmailRepository studentEmailRepository;
+
+    public Player getPlayer(Long playerId) {
+        if (playerId == null) {
+            throw new IllegalArgumentException("Player id cannot be null");
+        }
+        return playerRepository.findById(playerId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
+    }
+
+    public Player getPlayer(UUID authId) {
+        if (authId == null) {
+            throw new IllegalArgumentException("Auth id cannot be null");
+        }
+        return playerRepository.findByUserUuid(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
+    }
+
+    public Optional<Player> getPlayer(User user) {
+        return playerRepository.findByUser(user);
+    }
 
     public List<Player> getPlayers() {
         return playerRepository.findAll()
@@ -77,24 +96,6 @@ public class PlayerService {
 
     public List<Player> getPlayersByTeam(Long teamId) {
         return playerRepository.findByTeamId(teamId);
-    }
-
-    public Player getPlayer(Long playerId) {
-        if (playerId == null) {
-            throw new IllegalArgumentException("Player id cannot be null");
-        }
-        return playerRepository.findById(playerId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
-    }
-
-    public Player getPlayer(UUID authId) {
-        if (authId == null) {
-            throw new IllegalArgumentException("Auth id cannot be null");
-        }
-        return playerRepository.findByUserUuid(authId).orElseThrow(() -> new IllegalArgumentException("Player not found"));
-    }
-
-    public Player getPlayer(User user) {
-        return playerRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Player not found"));
     }
 
     public boolean isUsernameExist(String username) {

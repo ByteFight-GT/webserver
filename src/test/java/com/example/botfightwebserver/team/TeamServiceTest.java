@@ -16,14 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 class TeamServiceTest extends FullStackIntegrationTestBase {
-    private final TeamService teamService;
-    private final TestDataFactory testDataFactory;
+    @Autowired
+    private TeamService teamService;
 
     @Autowired
-    TeamServiceTest(TeamService teamService, TestDataFactory testDataFactory) {
-        this.teamService = teamService;
-        this.testDataFactory = testDataFactory;
-    }
+    private TestDataFactory testDataFactory;
 
     @Test
     void getTeamByUuidReturnsTeamWhenActive() {

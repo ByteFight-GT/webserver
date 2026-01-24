@@ -75,6 +75,7 @@ CREATE TABLE "teams" (
                          "competition_id" bigint NOT NULL,
                          "uuid" uuid UNIQUE NOT NULL DEFAULT (gen_random_uuid()),
                          "name" varchar(50) NOT NULL,
+                         "name_normalized" varchar(50) NOT NULL,
                          "quote" varchar,
                          "join_code" varchar(50) UNIQUE,
                          "display_members" boolean NOT NULL,
@@ -174,7 +175,7 @@ CREATE TABLE "matchmaking_events" (
                                       "updated_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE UNIQUE INDEX ON "teams" ("competition_id", "name");
+CREATE UNIQUE INDEX ON "teams" ("competition_id", "name_normalized");
 
 CREATE UNIQUE INDEX ON "team_stats" ("team_id", "ladder");
 

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +27,12 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "teams")
+@Table(
+        name = "teams",
+        indexes = {
+                @Index(name = "uk_teams_competition_name_normalized", columnList = "competition_id,name_normalized", unique = true)
+        }
+)
 public class Team extends AuditableSoftDeletableEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "competition_id", nullable = false)
@@ -37,8 +41,11 @@ public class Team extends AuditableSoftDeletableEntity {
     @Column(name = "uuid", nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
+
+    @Column(name = "name_normalized", nullable = false, length = 50)
+    private String nameNormalized;
 
     @Column(name = "quote")
     private String quote = "Welcome to ByteFight!";
@@ -49,12 +56,6 @@ public class Team extends AuditableSoftDeletableEntity {
     @Column(name = "display_members", nullable = false)
     private boolean displayMembers;
 
-    @Column(name = "matches_played", nullable = false)
-    private int matchesPlayed = 0;
-
-    @Column(name = "glicko", nullable = false)
-    private double glicko = 0.0;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "active_submission_id")
     private Submission currentSubmission;
@@ -63,4 +64,11 @@ public class Team extends AuditableSoftDeletableEntity {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "type", nullable = false, columnDefinition = "team_type")
     private TeamType type = TeamType.regular;
+
+    public void setName(String name) {
+        this.name = name;
+        if (name != null) {
+            this.nameNormalized = name.trim().toLowerCase();
+        }
+    }
 }
