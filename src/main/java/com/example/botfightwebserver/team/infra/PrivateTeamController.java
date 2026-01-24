@@ -35,26 +35,6 @@ public class PrivateTeamController {
     private final ClockConfig clockConfig;
     private final PermissionsService permissionsService;
 
-    @Operation(
-            operationId = "getCurrentTeam",
-            summary = "Get current user's team"
-    )
-    @GetMapping("/my-team")
-    public ResponseEntity<SelfTeamDto> getCurrentTeam(@AuthenticationPrincipal User user) {
-        Player player = playerService.getPlayer(user);
-        Optional<SelfTeamDto> selfTeamDtoOptional = teamService.getSelfTeamDtoByUuid(player.getTeam().getUuid());
-        return selfTeamDtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/new")
-    public ResponseEntity<SelfTeamDto> createTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto teamSettingsDto) {
-        permissionsService.validateAllowCreateTeam();
-        Player player = playerService.getPlayer(user);
-        Team team = teamService.createTeam(user, teamSettingsDto);
-        playerService.setPlayerTeam(user.getUuid(), team);
-        return ResponseEntity.ok(SelfTeamDto.from(team, -1));
-    }
-
     @PostMapping("/edit")
     public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto edit) {
         permissionsService.validateAllowUpdateTeam();
@@ -72,12 +52,12 @@ public class PrivateTeamController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/set-submission")
-    public ResponseEntity<Void> setCurrentSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-        permissionsService.validateAllowSetSubmission();
-        Player player = playerService.getPlayer(user);
-        Long teamId = player.getTeam().getId();
-        teamService.setCurrentSubmission(teamId, submissionUuid);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/set-submission")
+//    public ResponseEntity<Void> setCurrentSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
+//        permissionsService.validateAllowSetSubmission();
+//        Player player = playerService.getPlayer(user);
+//        Long teamId = player.getTeam().getId();
+//        teamService.setCurrentSubmission(teamId, submissionUuid);
+//        return ResponseEntity.ok().build();
+//    }
 }
