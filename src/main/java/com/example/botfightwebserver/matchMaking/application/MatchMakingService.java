@@ -5,8 +5,8 @@ import com.example.botfightwebserver.gameMatch.application.GameMatchService;
 import com.example.botfightwebserver.gameMatch.domain.GameMatch;
 import com.example.botfightwebserver.gameMatch.infra.GameMatchRepository;
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
+import com.example.botfightwebserver.matchMaking.domain.MatchmakingEvent;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingEventRepository;
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import com.example.botfightwebserver.matchMaking.infra.MatchMakingProperties;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -32,15 +32,11 @@ public class MatchMakingService {
     private final PermissionsService permissionsService;
 
     @Transactional
-    public MatchMakingEvent createEvent(MATCHMAKING_REASON reason) {
+    public MatchmakingEvent createEvent(MATCHMAKING_REASON reason) {
         List<Team> playableTeams = teamService.getTeamsWithSubmission();
         List<GameMatch> gameMatches = matchMaker.generateMatches(playableTeams);
 
-        MatchMakingEvent event = MatchMakingEvent.builder()
-            .numberTeams(playableTeams.size())
-            .numberMatches(gameMatches.size())
-            .creationDateTime(LocalDateTime.now(clockConfig.clock()))
-            .reason(reason)
+        MatchmakingEvent event = MatchmakingEvent.builder()
             .build();
 
         matchMakingEventRepository.save(event);
@@ -53,18 +49,18 @@ public class MatchMakingService {
         return event;
     }
 
-    public MatchMakingEvent queueEvent(MatchMakingEvent event) {
-        List<GameMatch> gameMatches = gameMatchRepository.findByMatchmakingEvent(event);
-
-        for(GameMatch gameMatch : gameMatches) {
-            gameMatchService.queueMatch(gameMatch);
-        }
+    public MatchmakingEvent queueEvent(MatchmakingEvent event) {
+//        List<GameMatch> gameMatches = gameMatchRepository.findByMatchmakingEvent(event);
+//
+//        for(GameMatch gameMatch : gameMatches) {
+//            gameMatchService.queueMatch(gameMatch);
+//        }
 
         return event;
     }
 
-    public Optional<MatchMakingEvent> getLastScheduledEvent() {
-        return matchMakingEventRepository.findFirstByReasonOrderByCreationDateTimeDesc(MATCHMAKING_REASON.SCHEDULED);
+    public Optional<MatchmakingEvent> getLastScheduledEvent() {
+        return matchMakingEventRepository.findFirstByOrderByCreatedAtDesc();
     }
 
     public boolean isEnabled() {

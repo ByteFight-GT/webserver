@@ -99,7 +99,7 @@ public class PlayerService {
 
     public boolean isUsernameExist(String username) {
         System.out.println(username);
-        return playerRepository.existsByName(username);
+        return playerRepository.existsByUsername(username);
     }
 
     public boolean isEmailExist(String email) {

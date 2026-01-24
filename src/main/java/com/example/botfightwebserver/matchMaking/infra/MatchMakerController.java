@@ -1,7 +1,6 @@
 package com.example.botfightwebserver.matchMaking.infra;
 
 import com.example.botfightwebserver.matchMaking.domain.MATCHMAKING_REASON;
-import com.example.botfightwebserver.matchMaking.domain.MatchMakingEvent;
 import com.example.botfightwebserver.matchMaking.application.MatchMakingService;
 import com.example.botfightwebserver.matchMaking.application.MatchMaker;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +22,16 @@ public class MatchMakerController {
     @PostMapping("/generate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> generateMatches() {
-        MatchMakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.MANUAL);
-        matchMakingService.queueEvent(event);
+//        MatchMakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.MANUAL);
+//        matchMakingService.queueEvent(event);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/public/last-scheduled")
-    public ResponseEntity<MatchMakingEvent>  getLastScheduledMatchMaking() {
-        Optional<MatchMakingEvent> maybeLastEvent = matchMakingService.getLastScheduledEvent();
-        return maybeLastEvent
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/public/last-scheduled")
+//    public ResponseEntity<MatchMakingEvent>  getLastScheduledMatchMaking() {
+//        Optional<MatchMakingEvent> maybeLastEvent = matchMakingService.getLastScheduledEvent();
+//        return maybeLastEvent
+//            .map(ResponseEntity::ok)
+//            .orElse(ResponseEntity.notFound().build());
+//    }
 }

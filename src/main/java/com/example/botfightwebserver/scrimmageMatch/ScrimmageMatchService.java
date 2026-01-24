@@ -29,7 +29,7 @@ public class ScrimmageMatchService {
 
     public Long getInProgressScrimmages(Long teamId) {
         Team team = teamService.getTeamById(teamId);
-        return scrimmageMatchDataRepository.countByMatchStatusAndInitiatorTeam(MatchStatus.WAITING, team);
+        return scrimmageMatchDataRepository.countByMatchStatusAndInitiatorTeam(MatchStatus.waiting, team);
     }
 
 }

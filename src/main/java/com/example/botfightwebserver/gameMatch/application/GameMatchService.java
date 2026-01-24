@@ -50,11 +50,11 @@ public class GameMatchService {
         teamService.validateTeams(team1Uuid, team2Uuid);
         submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
         GameMatch gameMatch = new GameMatch();
-        gameMatch.setTeamOne(teamService.getTeamByUuid(UUID.fromString(team1Uuid)).orElseThrow());
-        gameMatch.setTeamTwo(teamService.getTeamByUuid(UUID.fromString(team2Uuid)).orElseThrow());
-        gameMatch.setSubmissionOne(submissionService.getSubmissionByUuid(submission1Uuid));
-        gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
-        gameMatch.setStatus(MatchStatus.WAITING);
+//        gameMatch.setTeamOne(teamService.getTeamByUuid(UUID.fromString(team1Uuid)).orElseThrow());
+//        gameMatch.setTeamTwo(teamService.getTeamByUuid(UUID.fromString(team2Uuid)).orElseThrow());
+//        gameMatch.setSubmissionOne(submissionService.getSubmissionByUuid(submission1Uuid));
+//        gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
+//        gameMatch.setStatus(MatchStatus.WAITING);
         gameMatch.setReason(reason);
         return gameMatch;
     }
@@ -68,8 +68,8 @@ public class GameMatchService {
             }
         });
 
-        match.setQueuedAt(LocalDateTime.now(clock));
-        match.incrementTimesQueued();
+//        match.setQueuedAt(LocalDateTime.now(clock));
+//        match.incrementTimesQueued();
         return gameMatchRepository.save(match);
     }
 
@@ -80,14 +80,14 @@ public class GameMatchService {
         }
         GameMatch gameMatch = (GameMatch) maybeGameMatch.get();
         gameMatch.setStatus(status);
-        if (!MatchStatus.WAITING.equals(gameMatch.getStatus())) {
-            gameMatch.setProcessedAt(LocalDateTime.now(clock));
-        }
-        if (status == MatchStatus.TEAM_ONE_WIN) {
-            gameMatch.setWinningTeam(gameMatch.getTeamOne());
-        } else if (status == MatchStatus.TEAM_TWO_WIN) {
-            gameMatch.setWinningTeam(gameMatch.getTeamTwo());
-        }
+//        if (!MatchStatus.WAITING.equals(gameMatch.getStatus())) {
+//            gameMatch.setProcessedAt(LocalDateTime.now(clock));
+//        }
+//        if (status == MatchStatus.TEAM_ONE_WIN) {
+//            gameMatch.setWinningTeam(gameMatch.getTeamOne());
+//        } else if (status == MatchStatus.TEAM_TWO_WIN) {
+//            gameMatch.setWinningTeam(gameMatch.getTeamTwo());
+//        }
         gameMatchRepository.save(gameMatch);
     }
 
@@ -119,14 +119,15 @@ public class GameMatchService {
     }
 
     public boolean isGameMatchWaiting(String uuid) {
-        return gameMatchRepository.findByUuid(UUID.fromString(uuid)).orElseThrow().getStatus() == MatchStatus.WAITING;
+        return false;
+//        return gameMatchRepository.findByUuid(UUID.fromString(uuid)).orElseThrow().getStatus() == MatchStatus.WAITING;
     }
 
     public List<GameMatchJob> deleteQueuedMatches() {
         List<GameMatchJob> removedMatches = rabbitMQService.deleteGameMatchQueue();
-        for (GameMatchJob job : removedMatches) {
-            setGameMatchStatus(job.gameMatchUuid(), MatchStatus.MANUALLY_FAILED);
-        }
+//        for (GameMatchJob job : removedMatches) {
+//            setGameMatchStatus(job.gameMatchUuid(), MatchStatus.MANUALLY_FAILED);
+//        }
         return removedMatches;
     }
 
@@ -135,10 +136,11 @@ public class GameMatchService {
     }
 
     public List<GameMatch> getFailedMatches() {
-        return gameMatchRepository
-                .findByStatus(MatchStatus.FAILED)
-                .stream()
-                .toList();
+        return null;
+//        return gameMatchRepository
+//                .findByStatus(MatchStatus.FAILED)
+//                .stream()
+//                .toList();
     }
 
     @Transactional
@@ -162,18 +164,18 @@ public class GameMatchService {
     @Transactional
     public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
         GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
-        Integer timesQueued = gameMatch.getTimesQueued();
-        if (!isIgnoreLimit && timesQueued == 3) {
-            throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
-        }
-
-        if(gameMatch.getStatus() != MatchStatus.WAITING) {
-            throw new IllegalArgumentException("Match " + gameMatch.getId() + " cannot be rescheduled.");
-        }
-
-        gameMatch.setQueuedAt(LocalDateTime.now(clock));
-        gameMatch.incrementTimesQueued();
-        gameMatch.setStatus(MatchStatus.WAITING);
+//        Integer timesQueued = gameMatch.getTimesQueued();
+//        if (!isIgnoreLimit && timesQueued == 3) {
+//            throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded maximum retry attempts (3)");
+//        }
+//
+//        if(gameMatch.getStatus() != MatchStatus.WAITING) {
+//            throw new IllegalArgumentException("Match " + gameMatch.getId() + " cannot be rescheduled.");
+//        }
+//
+//        gameMatch.setQueuedAt(LocalDateTime.now(clock));
+//        gameMatch.incrementTimesQueued();
+//        gameMatch.setStatus(MatchStatus.WAITING);
         GameMatchJob job = GameMatchJob.from(gameMatch);
         gameMatchRepository.save(gameMatch);
         rabbitMQService.enqueueGameMatchJob(job);
@@ -182,41 +184,48 @@ public class GameMatchService {
     }
 
     public List<GameMatchDto> getAllTeamMatches(String teamUuid) {
-        return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid), List.of(MatchStatus.FAILED)).stream()
-                .filter((match) -> match.getReason() != MatchReason.TOURNAMENT)
-                .map(GameMatchDto::fromEntity)
-                .toList();
+        return null;
+//        return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid), List.of(MatchStatus.FAILED)).stream()
+//                .filter((match) -> match.getReason() != MatchReason.TOURNAMENT)
+//                .map(GameMatchDto::fromEntity)
+//                .toList();
     }
 
     public Page<GameMatchDto> getTeamMatches(String teamUuid, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
-                List.of(MatchStatus.FAILED), List.of(MatchReason.TOURNAMENT), pageable);
+//        PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
+//        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
+//                List.of(MatchStatus.FAILED), List.of(MatchReason.TOURNAMENT), pageable);
 
-        return matches.map(GameMatchDto::fromEntity);
+//        return matches.map(GameMatchDto::fromEntity);
+
+        return null;
     }
 
     public Page<GameMatchDto> getTeamMatches(String teamUuid, String otherTeamUuid, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
 
-        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
-                UUID.fromString(teamUuid),
-                UUID.fromString(otherTeamUuid),
-                List.of(MatchStatus.FAILED),
-                List.of(MatchReason.TOURNAMENT),
-                pageable);
+//        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
+//                UUID.fromString(teamUuid),
+//                UUID.fromString(otherTeamUuid),
+//                List.of(MatchStatus.FAILED),
+//                List.of(MatchReason.TOURNAMENT),
+//                pageable);
+//
+//        return matches.map(GameMatchDto::fromEntity);
 
-        return matches.map(GameMatchDto::fromEntity);
+        return null;
     }
 
     private Page<GameMatchDto> processMatches(Page<GameMatch> matches, PageRequest pageable) {
-        List<GameMatchDto> filteredMatches = matches.getContent()
-                .stream()
-                .filter(match -> match.getReason() != MatchReason.TOURNAMENT)
-                .map(GameMatchDto::fromEntity)
-                .toList();
+//        List<GameMatchDto> filteredMatches = matches.getContent()
+//                .stream()
+//                .filter(match -> match.getReason() != MatchReason.TOURNAMENT)
+//                .map(GameMatchDto::fromEntity)
+//                .toList();
+//
+//        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
 
-        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
+        return null;
     }
 
     public StatsDTO getTeamStatsByMatchReason(Long teamId, MatchReason reason) {
@@ -224,22 +233,22 @@ public class GameMatchService {
         int wins = 0;
         int losses = 0;
         int draws = 0;
-        for (GameMatch match : matches) {
-            if (reason == MatchReason.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
-                continue;
-            }
-            MatchStatus status = match.getStatus();
-            boolean isTeamOne = match.getTeamOne().getId().equals(teamId);
-            if (status == MatchStatus.DRAW) {
-                draws++;
-            } else if ((isTeamOne && status == MatchStatus.TEAM_ONE_WIN) ||
-                    (!isTeamOne && status == MatchStatus.TEAM_TWO_WIN)) {
-                wins++;
-            } else if ((isTeamOne && status == MatchStatus.TEAM_TWO_WIN) ||
-                    (!isTeamOne && status == MatchStatus.TEAM_ONE_WIN)) {
-                losses++;
-            }
-        }
+//        for (GameMatch match : matches) {
+//            if (reason == MatchReason.SCRIMMAGE && match.getTeamOne().equals(match.getTeamTwo())) {
+//                continue;
+//            }
+//            MatchStatus status = match.getStatus();
+//            boolean isTeamOne = match.getTeamOne().getId().equals(teamId);
+//            if (status == MatchStatus.DRAW) {
+//                draws++;
+//            } else if ((isTeamOne && status == MatchStatus.TEAM_ONE_WIN) ||
+//                    (!isTeamOne && status == MatchStatus.TEAM_TWO_WIN)) {
+//                wins++;
+//            } else if ((isTeamOne && status == MatchStatus.TEAM_TWO_WIN) ||
+//                    (!isTeamOne && status == MatchStatus.TEAM_ONE_WIN)) {
+//                losses++;
+//            }
+//        }
 
         return StatsDTO.builder()
                 .numWins(wins)
