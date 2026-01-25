@@ -4,12 +4,15 @@ import com.example.botfightwebserver.FullStackIntegrationTestBase;
 import com.example.botfightwebserver.TestDataFactory;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.competition.infra.CompetitionRepository;
 import com.example.botfightwebserver.competition.domain.dto.JoinTeamDto;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.dto.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.dto.TeamSettingsDto;
 import com.example.botfightwebserver.team.application.TeamService;
+import com.example.botfightwebserver.whitelist.domain.WhitelistEntry;
+import com.example.botfightwebserver.whitelist.infra.WhitelistEntryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,12 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private CompetitionRepository competitionRepository;
+
+    @Autowired
+    private WhitelistEntryRepository whitelistEntryRepository;
+
 
     @Test
     void createCompetitionTeamHappyPath() throws Exception {
@@ -49,6 +58,7 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
         TeamSettingsDto dto = TeamSettingsDto.builder()
                 .name("Awesome Team")
                 .quote("We are so cool")
+                .displayMembers(false)
                 .build();
 
         MvcResult result = mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
@@ -71,6 +81,7 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
 
         TeamSettingsDto dto1 = TeamSettingsDto.builder()
                 .name("Team Name")
+                .displayMembers(false)
                 .build();
 
         mockMvc.perform(post("/api/v1/competition/{slug}/teams", "nonexistent-competition")
@@ -89,6 +100,7 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
 
         TeamSettingsDto dto1 = TeamSettingsDto.builder()
                 .name("Team Name")
+                .displayMembers(false)
                 .build();
 
         mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
@@ -101,6 +113,7 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
         // Team names cannot be identical up to differences in capitalization
         TeamSettingsDto dto2 = TeamSettingsDto.builder()
                 .name("TeAm nAmE")
+                .displayMembers(false)
                 .build();
 
         mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
@@ -118,10 +131,12 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
 
         TeamSettingsDto dto1 = TeamSettingsDto.builder()
                 .name("Team 1")
+                .displayMembers(false)
                 .build();
 
         TeamSettingsDto dto2 = TeamSettingsDto.builder()
                 .name("Team 2")
+                .displayMembers(false)
                 .build();
 
         // Player joins Team 1 by creating Team 1
@@ -147,6 +162,7 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
 
         TeamSettingsDto dto1 = TeamSettingsDto.builder()
                 .name("Team 1")
+                .displayMembers(false)
                 .build();
 
         mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
@@ -342,5 +358,95 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
 
         Team updatedTeam = teamService.getTeamByCompetitionAndUuid(competition, team.getUuid()).orElseThrow();
         assertThat(updatedTeam.isDeleted()).isTrue();
+    }
+
+    @Test
+    void createCompetitionTeamWhitelistedCompetitionAllowsWhitelistedUser() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        competition.setWhitelisted(true);
+        competitionRepository.save(competition);
+
+        WhitelistEntry entry = new WhitelistEntry();
+        entry.setCompetition(competition);
+        entry.setEmail(user.getEmail());
+        whitelistEntryRepository.save(entry);
+
+        TeamSettingsDto dto = TeamSettingsDto.builder()
+                .name("Whitelisted Team")
+                .displayMembers(false)
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void createCompetitionTeamWhitelistedCompetitionRejectsNonWhitelistedUser() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        competition.setWhitelisted(true);
+        competitionRepository.save(competition);
+
+        TeamSettingsDto dto = TeamSettingsDto.builder()
+                .name("Blocked Team")
+                .displayMembers(false)
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void joinCompetitionTeamWhitelistedCompetitionAllowsWhitelistedUser() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        competition.setWhitelisted(true);
+        competitionRepository.save(competition);
+        Team team = testDataFactory.createTeam(competition);
+
+        WhitelistEntry entry = new WhitelistEntry();
+        entry.setCompetition(competition);
+        entry.setEmail(user.getEmail());
+        whitelistEntryRepository.save(entry);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode(team.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void joinCompetitionTeamWhitelistedCompetitionRejectsNonWhitelistedUser() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        competition.setWhitelisted(true);
+        competitionRepository.save(competition);
+        Team team = testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode(team.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
     }
 }
