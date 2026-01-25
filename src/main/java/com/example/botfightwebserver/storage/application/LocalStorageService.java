@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.*;
 import java.net.URI;
@@ -73,6 +75,9 @@ public class LocalStorageService {
         Files.createDirectories(dir);
 
         Path target = dir.resolve(objectId + (ext.isEmpty() ? "" : ("." + ext))).normalize();
+        Path tmpDir = props.root().resolve(".tmp").normalize();
+        Files.createDirectories(tmpDir);
+        Path tempTarget = tmpDir.resolve(objectId + (ext.isEmpty() ? "" : ("." + ext)) + ".tmp").normalize();
 
         MessageDigest digest = null;
         try {
@@ -82,29 +87,79 @@ public class LocalStorageService {
         }
         try (InputStream in = file.getInputStream();
              DigestInputStream dis = new DigestInputStream(in, digest);
-             OutputStream out = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW);
+             OutputStream out = Files.newOutputStream(tempTarget, StandardOpenOption.CREATE_NEW);
         ) {
             dis.transferTo(out);
+        } catch (IOException | RuntimeException ex) {
+            deleteQuietly(tempTarget);
+            throw ex;
         }
 
         byte[] hash = digest.digest();
-        long size = Files.size(target);
+        long size = Files.size(tempTarget);
 
         String sha256 = bytesToHex(hash);
         String ctype = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");
 
-        FileRecord rec = FileRecord.builder()
-                .uuid(objectId)
-                .filename(safeName)
-                .contentType(ctype)
-                .size(size)
-                .sha256(sha256)
-                .storagePath(target.toString())
-                .build();
+        FileRecord rec = new FileRecord();
+        rec.setUuid(objectId);
+        rec.setFilename(safeName);
+        rec.setContentType(ctype);
+        rec.setSize(size);
+        rec.setSha256(sha256);
+        rec.setStoragePath(target.toString());
 
-        rec = fileRecordRepository.save(rec);
+        try {
+            rec = fileRecordRepository.save(rec);
+        } catch (RuntimeException ex) {
+            deleteQuietly(tempTarget);
+            throw ex;
+        }
 
-        return StoredObject.from(rec);
+        FileRecord savedRecord = rec;
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    finalizeFile(tempTarget, target, savedRecord);
+                }
+
+                @Override
+                public void afterCompletion(int status) {
+                    if (status != TransactionSynchronization.STATUS_COMMITTED) {
+                        deleteQuietly(tempTarget);
+                    }
+                }
+            });
+        } else {
+            finalizeFile(tempTarget, target, savedRecord);
+        }
+
+        return StoredObject.from(savedRecord);
+    }
+
+    private void finalizeFile(Path tempTarget, Path target, FileRecord record) {
+        try {
+            Files.move(tempTarget, target, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException | RuntimeException ex) {
+            deleteQuietly(tempTarget);
+            deleteRecord(record);
+            throw new IllegalStateException("Failed to finalize stored file", ex);
+        }
+    }
+
+    private void deleteRecord(FileRecord record) {
+        try {
+            fileRecordRepository.delete(record);
+        } catch (RuntimeException ignored) {
+        }
+    }
+
+    private void deleteQuietly(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ignored) {
+        }
     }
 
     public Optional<StoredObject> stat(String uuid) {
