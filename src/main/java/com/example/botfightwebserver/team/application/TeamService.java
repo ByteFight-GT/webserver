@@ -137,12 +137,16 @@ public class TeamService {
         return joinTeam(player, team);
     }
 
+    public Optional<Team> getTeamByUuid(UUID uuid) {
+        return teamRepository.findByUuidAndIsDeletedFalse(uuid);
+    }
+
     public List<Player> getPlayersForTeam(Team team) {
         if (team == null || team.getId() == null) {
             throw new IllegalArgumentException("Team is required");
         }
 
-        return teamMemberRepository.findByTeam(team)
+        return teamMemberRepository.findByTeamAndIsDeletedIsFalse(team)
                 .stream()
                 .map(TeamMember::getPlayer)
                 .toList();
@@ -153,15 +157,11 @@ public class TeamService {
             throw new IllegalArgumentException("Team is required");
         }
 
-        return teamMemberRepository.countByTeam(team);
+        return teamMemberRepository.countByTeamAndIsDeletedIsFalse(team);
     }
 
     public Optional<Team> getTeamByCompetitionAndUuid(Competition competition, UUID uuid) {
         return teamRepository.findByCompetitionAndUuid(competition, uuid);
-    }
-
-    public Optional<Team> getTeamByUuid(UUID uuid) {
-        return teamRepository.findByUuidAndIsDeletedFalse(uuid);
     }
 
     public List<Team> getTeams() {
@@ -179,22 +179,6 @@ public class TeamService {
 
     public Team getTeamById(Long id) {
         return teamRepository.getReferenceById(id);
-    }
-
-    public Optional<PublicTeamDto> getPublicTeamDtoByUuid(UUID uuid) {
-        Optional<Team> team = teamRepository.findByUuidAndIsDeletedFalse(uuid);
-        if (team.isEmpty()) return Optional.empty();
-
-//        Optional<Integer> rank = teamRepository.findRankByUuid(uuid);
-
-        return Optional.of(PublicTeamDto.from(team.get(), -1));
-    }
-
-    public Optional<SelfTeamDto> getSelfTeamDtoByUuid(UUID uuid) {
-        Optional<Team> team = teamRepository.findByUuid(uuid);
-        if (team.isEmpty()) return Optional.empty();
-
-        return Optional.of(SelfTeamDto.from(team.get()));
     }
 
     public Integer getRankForTeam(Team team) {

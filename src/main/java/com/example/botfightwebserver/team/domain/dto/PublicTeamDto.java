@@ -1,47 +1,39 @@
 package com.example.botfightwebserver.team.domain.dto;
 
-import com.example.botfightwebserver.submission.domain.SubmissionDTO;
+import com.example.botfightwebserver.common.domain.dto.TimestampsDto;
+import com.example.botfightwebserver.competition.domain.dto.CompetitionDto;
+import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.TeamType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Value
 @Builder
 public class PublicTeamDto {
+    @NotNull CompetitionDto competition;
     @NotNull String uuid;
     @NotNull String name;
-    @NotNull LocalDateTime creationDateTime;
-    @NotNull Double glicko;
-    @NotNull Integer matchesPlayed;
-    @NotNull Integer numberWins;
-    @NotNull Integer numberLosses;
-    @NotNull Integer numberDraws;
     @NotNull String quote;
-    @NotNull Integer numberOfPlayers;
-    Integer rank;
-    @NotNull
-    TeamType type;
-    SubmissionDTO currentSubmissionDTO;
-    @NotNull Boolean isDeleted;
+    @NotNull Boolean displayMembers;
+    @NotNull TeamType type;
+    @NotNull TimestampsDto timestampsDto;
+    List<PublicPlayerDto> members;
 
-    public static PublicTeamDto from(Team team, Integer rank) {
+    public static PublicTeamDto from(Team team, List<Player> members) {
         return PublicTeamDto.builder()
+                .competition(CompetitionDto.from(team.getCompetition()))
                 .uuid(team.getUuid().toString())
                 .name(team.getName())
-//                .glicko(team.getCurrentSubmission() != null? team.getGlicko() : -1)
-//                .matchesPlayed(team.getMatchesPlayed())
-//                .numberWins(team.getNumberWins())
-//                .numberLosses(team.getNumberLosses())
-//                .numberDraws(team.getNumberDraws())
-//                .quote(team.getQuote())
-//                .currentSubmissionDTO(team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
-//                .numberOfPlayers(team.getNumberPlayers())
-//                .rank(rank)
-//                .type(team.getType())
-//                .isDeleted(team.isDeleted())
+                .quote(team.getQuote())
+                .displayMembers(team.isDisplayMembers())
+                .type(team.getType())
+                .members(members != null ? members.stream().map(PublicPlayerDto::from).toList() : null)
+                .timestampsDto(TimestampsDto.from(team))
                 .build();
     }
 }
