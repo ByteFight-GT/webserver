@@ -27,4 +27,7 @@ public class Competition extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = false;
+
+    @Column(name = "max_players_per_team", nullable = false)
+    private int maxPlayersPerTeam;
 }

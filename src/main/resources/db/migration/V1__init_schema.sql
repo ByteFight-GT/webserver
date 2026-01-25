@@ -65,7 +65,8 @@ CREATE TABLE "competitions" (
                                 "slug" varchar(255) UNIQUE NOT NULL,
                                 "name" varchar NOT NULL,
                                 "description" varchar,
-                                "is_active" boolean NOT NULL DEFAULT false
+                                "is_active" boolean NOT NULL DEFAULT false,
+                                "max_players_per_team" integer NOT NULL
 );
 
 CREATE TABLE "teams" (

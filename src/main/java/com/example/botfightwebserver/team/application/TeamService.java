@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -38,13 +39,41 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class TeamService {
+    private static final String JOIN_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    private static final int JOIN_CODE_LENGTH = 8;
+    private static final int JOIN_CODE_MAX_ATTEMPTS = 10;
+
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final PlayerRepository playerRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
 
+    public String generateJoinCode() {
+        for (int attempt = 0; attempt < JOIN_CODE_MAX_ATTEMPTS; attempt++) {
+            String code = generateJoinCodeCandidate();
+            if (!teamRepository.existsByJoinCode(code)) {
+                return code;
+            }
+        }
+
+        throw new IllegalStateException("Failed to generate unique join code after " + JOIN_CODE_MAX_ATTEMPTS + " attempts");
+    }
+
+    private String generateJoinCodeCandidate() {
+        StringBuilder builder = new StringBuilder(JOIN_CODE_LENGTH);
+        for (int i = 0; i < JOIN_CODE_LENGTH; i++) {
+            int index = ThreadLocalRandom.current().nextInt(JOIN_CODE_ALPHABET.length());
+            builder.append(JOIN_CODE_ALPHABET.charAt(index));
+        }
+        return builder.toString();
+    }
+
     public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto) {
+        if(!competition.isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
+        }
+
         String name = teamSettingsDto.getName();
 
         if (name == null || name.isBlank()) {
@@ -57,12 +86,15 @@ public class TeamService {
             throw new IllegalArgumentException("Team with name " + name + " already exists");
         }
 
+        String joinCode = generateJoinCode();
+
         Team team = new Team();
         team.setUuid(UUID.randomUUID());
         team.setType(TeamType.regular);
         team.setCompetition(competition);
         team.setName(name);
         team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+        team.setJoinCode(joinCode);
 
         if (teamSettingsDto.getQuote() != null) {
             team.setQuote(teamSettingsDto.getQuote());
@@ -81,8 +113,16 @@ public class TeamService {
             throw new IllegalArgumentException("Team must belong to a competition");
         }
 
+        if(!competition.isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
+        }
+
         if (teamMemberRepository.existsByCompetitionAndPlayer(competition, player)) {
             throw new IllegalArgumentException("Player is already in a team for this competition");
+        }
+
+        if(countPlayersForTeam(team) >= competition.getMaxPlayersPerTeam()) {
+            throw new IllegalArgumentException("Team is full");
         }
 
         TeamMember member = new TeamMember();
@@ -90,6 +130,30 @@ public class TeamService {
         member.setTeam(team);
         member.setCompetition(competition);
         return teamMemberRepository.save(member);
+    }
+
+    public TeamMember joinTeamByJoinCode(Competition competition, Player player, String joinCode) {
+        Team team = teamRepository.findByCompetitionAndJoinCodeAndIsDeletedIsFalse(competition, joinCode).orElseThrow(() -> new IllegalArgumentException("A team with that join code was no found"));
+        return joinTeam(player, team);
+    }
+
+    public List<Player> getPlayersForTeam(Team team) {
+        if (team == null || team.getId() == null) {
+            throw new IllegalArgumentException("Team is required");
+        }
+
+        return teamMemberRepository.findByTeam(team)
+                .stream()
+                .map(TeamMember::getPlayer)
+                .toList();
+    }
+
+    public long countPlayersForTeam(Team team) {
+        if (team == null || team.getId() == null) {
+            throw new IllegalArgumentException("Team is required");
+        }
+
+        return teamMemberRepository.countByTeam(team);
     }
 
     public Optional<Team> getTeamByCompetitionAndUuid(Competition competition, UUID uuid) {
@@ -135,32 +199,6 @@ public class TeamService {
 
     public Integer getRankForTeam(Team team) {
         return -1;
-    }
-
-    public Team adminCreateTeam(AdminCreateTeamDto teamDto) {
-        String name = teamDto.getName();
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Team name cannot be null or empty");
-        }
-
-        String normalizedName = name.trim().toLowerCase();
-        if (teamRepository.existsByNameNormalized(normalizedName)) {
-            throw new IllegalArgumentException("Team with name " + name + " already exists");
-        }
-        Team team = new Team();
-        team.setName(name);
-        team.setDisplayMembers(teamDto.isDisplayMembers());
-
-        if (teamDto.getQuote() != null) {
-            team.setQuote(teamDto.getQuote());
-        }
-
-        if (teamDto.getSubmissionUuid() != null) {
-            Submission submission = submissionService.getSubmissionByUuid(teamDto.getSubmissionUuid());
-            team.setCurrentSubmission(submission);
-        }
-
-        return teamRepository.save(team);
     }
 
     public void validateTeams(String team1Uuid, String team2Uuid) {
@@ -330,12 +368,5 @@ public class TeamService {
 
     public int countTeamsWithSubmission() {
         return teamRepository.countByCurrentSubmissionNotNull();
-    }
-
-    public boolean isNameExist(String name) {
-        if (name == null) {
-            return false;
-        }
-        return teamRepository.existsByNameNormalized(name.trim().toLowerCase());
     }
 }
