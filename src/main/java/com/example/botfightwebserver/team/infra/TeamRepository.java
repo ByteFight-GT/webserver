@@ -18,12 +18,12 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByCompetitionAndNameNormalized(Competition competition, String nameNormalized);
     boolean existsByJoinCode(String joinCode);
 
+    Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
     Optional<Team> findByCompetitionAndJoinCodeAndIsDeletedIsFalse(Competition competition, String joinCode);
 
     int countByCurrentSubmissionNotNull();
     Optional<Team> findByJoinCode(String joinCode);
     Optional<Team> findByUuid(UUID uuid);
-    Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
     boolean existsByUuid(UUID uuid);
 
     List<Team> findAllByIsDeletedFalse();

@@ -1,6 +1,7 @@
 package com.example.botfightwebserver.team.domain;
 
 import com.example.botfightwebserver.common.domain.BaseEntity;
+import com.example.botfightwebserver.common.domain.SoftDeletableEntity;
 import com.example.botfightwebserver.competition.domain.Competition;
 import com.example.botfightwebserver.player.domain.Player;
 import jakarta.persistence.*;
@@ -25,7 +26,7 @@ import lombok.Setter;
                 )
         }
 )
-public class TeamMember extends BaseEntity {
+public class TeamMember extends SoftDeletableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", nullable = false)
