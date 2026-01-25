@@ -2,6 +2,7 @@ package com.example.botfightwebserver.competition.infra;
 
 import com.example.botfightwebserver.competition.application.CompetitionService;
 import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Competitions (Public)", description = """
@@ -27,13 +29,4 @@ import java.util.UUID;
 public class PublicCompetitionController {
     private final CompetitionService competitionService;
     private final TeamService teamService;
-
-    @GetMapping("/{competitionSlug}/{uuid}")
-    public ResponseEntity<PublicTeamDto> getTeamByCompetition(@PathVariable String competitionSlug, @PathVariable String uuidString) {
-        UUID uuid = UUID.fromString(uuidString);
-        Competition competition = competitionService.getCompetitionBySlug(competitionSlug).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Team team = teamService.getTeamByCompetitionAndUuid(competition, uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        return ResponseEntity.ok(PublicTeamDto.from(team, -1));
-    }
 }

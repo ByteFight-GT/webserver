@@ -43,15 +43,15 @@ public class PrivateTeamController {
     public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto edit) {
         permissionsService.validateAllowUpdateTeam();
 //        boolean isAvailable = !teamService.isNameExist(edit.getName());
-        String currentTeamName = playerService.getPlayer(user.getUuid()).getTeam().getName();
+//        String currentTeamName = playerService.getPlayer(user.getUuid()).getTeam().getName();
 //        if (!isAvailable && !currentTeamName.equals(edit.getName())) {
 //            throw new IllegalArgumentException("Name is Already Taken.");
 //        }
 
-        Player player = playerService.getPlayer(user.getUuid());
-        Team team = player.getTeam();
-
-        teamService.editTeam(team.getId(), edit);
+//        Player player = playerService.getPlayer(user.getUuid());
+//        Team team = player.getTeam();
+//
+//        teamService.editTeam(team.getId(), edit);
 
         return ResponseEntity.ok().build();
     }

@@ -51,19 +51,22 @@ public class UserService {
             throw new EmailAlreadyRegisteredException(input.getEmail());
         }
 
-        if(playerRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
+        if(playerRepository.existsByUsernameNormalized(normalizedUsername)) {
             throw new UsernameAlreadyExistsException(input.getName());
         }
 
         try {
-            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
-
             User user = new User();
-            user.setUuid(UUID.fromString(supabaseUser.id()));
+            user.setUuid(UUID.randomUUID()); // Set this to a random UUID first, then overwrite with UUID from Supabase
             user.setEmail(normalizedEmail);
             user = userRepository.save(user);
 
-            playerService.createPlayer(user, input.getName(), null);
+            playerService.createPlayer(user, input.getName());
+
+            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
+
+            user.setUuid(UUID.fromString(supabaseUser.id()));
+            user = userRepository.save(user);
 
             return user;
         } catch(SupabaseService.SupabaseServiceException e) {

@@ -85,7 +85,7 @@ public class TestDataFactory {
         player.setUser(user);
         String resolvedUsername = username != null ? username : "player-" + UUID.randomUUID();
         player.setUsername(resolvedUsername);
-        player.setUsername_normalized(resolvedUsername.toLowerCase());
+        player.setUsernameNormalized(resolvedUsername.trim().toLowerCase());
         return playerRepository.save(player);
     }
 
