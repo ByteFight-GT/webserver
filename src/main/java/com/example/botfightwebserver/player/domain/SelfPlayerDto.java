@@ -1,5 +1,6 @@
 package com.example.botfightwebserver.player.domain;
 
+import com.example.botfightwebserver.common.domain.dto.TimestampsDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
@@ -12,17 +13,14 @@ import java.util.UUID;
 @Builder
 public class SelfPlayerDto {
     @NotNull String uuid;
-    @NotNull String name;
-    @NotNull String email;
-    String teamUuid;
-    @NotNull List<String> badges;
+    @NotNull String username;
+    @NotNull TimestampsDto timestampsDto;
 
     public static SelfPlayerDto from(Player player) {
         return SelfPlayerDto.builder()
                 .uuid(player.getUser().getUuid().toString())
-                .name(player.getUsername())
-                .email(player.getUser().getEmail())
-                .teamUuid(player.getTeam() != null ? player.getTeam().getUuid().toString() : null)
+                .username(player.getUsername())
+                .timestampsDto(TimestampsDto.from(player))
                 .build();
     }
 }

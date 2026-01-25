@@ -46,7 +46,7 @@ public class ScrimmageMatchController {
                                                                         @RequestParam(required = false) String team2Uuid) {
         permissionsService.validateAllowScrimmage();
 
-        Team selfTeam = playerService.getTeamFromUUID(user.getUuid());
+        Team selfTeam = null;
         if (team2Uuid == null) {
             team2Uuid = selfTeam.getUuid().toString();
         }
@@ -91,7 +91,7 @@ public class ScrimmageMatchController {
     @GetMapping("/remaining-scrimmages")
     public ResponseEntity<Long> getRemainingScrimmages() {
         String authId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Team team = playerService.getTeamFromUUID(UUID.fromString(authId));
+        Team team = null;
         return ResponseEntity.ok(scrimmageMatchService.remainingAllowedScrimmages(team.getId()));
     }
 

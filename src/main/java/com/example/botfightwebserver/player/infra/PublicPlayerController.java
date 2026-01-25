@@ -1,16 +1,20 @@
 package com.example.botfightwebserver.player.infra;
 
 import com.example.botfightwebserver.player.application.PlayerService;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Tag(name = "Player (Public)")
 @RestController
@@ -20,19 +24,15 @@ import java.util.Map;
 public class PublicPlayerController {
     private final PlayerService playerService;
 
+    @GetMapping("/{uuid}")
+    public ResponseEntity<PublicPlayerDto> getPlayerById(@RequestParam UUID uuid) {
+        Player player = playerService.getPlayer(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(PublicPlayerDto.from(player));
+    }
+
     @GetMapping("/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean isAvailable = !playerService.isUsernameExist(username);
         return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
-    }
-
-    @GetMapping("/count")
-    public ResponseEntity<Long> getPlayerCount() {
-        return ResponseEntity.ok(playerService.getNumberPlayers());
-    }
-
-    @GetMapping("/team-id")
-    public ResponseEntity<List<PublicPlayerDto>> getPlayersByTeamId(@RequestParam Long teamId) {
-        return ResponseEntity.ok(playerService.getPlayersByTeam(teamId).stream().map(PublicPlayerDto::from).toList());
     }
 }
