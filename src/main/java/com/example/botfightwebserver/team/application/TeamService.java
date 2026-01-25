@@ -8,7 +8,6 @@ import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.infra.PlayerRepository;
-import com.example.botfightwebserver.student.application.StudentEmailRepository;
 import com.example.botfightwebserver.submission.domain.Submission;
 import com.example.botfightwebserver.submission.application.SubmissionService;
 import com.example.botfightwebserver.team.domain.*;
@@ -18,6 +17,7 @@ import com.example.botfightwebserver.team.domain.dto.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.dto.TeamSettingsDto;
 import com.example.botfightwebserver.team.infra.TeamMemberRepository;
 import com.example.botfightwebserver.team.infra.TeamRepository;
+import com.example.botfightwebserver.whitelist.application.WhitelistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -48,6 +48,7 @@ public class TeamService {
     private final PlayerRepository playerRepository;
     private final SubmissionService submissionService;
     private final PlayerService playerService;
+    private final WhitelistService whitelistService;
 
     public String generateJoinCode() {
         for (int attempt = 0; attempt < JOIN_CODE_MAX_ATTEMPTS; attempt++) {
@@ -115,6 +116,10 @@ public class TeamService {
 
         if(!competition.isActive()) {
             throw new IllegalArgumentException("Competition is not active");
+        }
+
+        if(!whitelistService.isCompetitionParticipationAllowed(competition, player.getUser())) {
+            throw new IllegalArgumentException("You must be whitelisted to participate in this competition");
         }
 
         if (teamMemberRepository.existsByCompetitionAndPlayer(competition, player)) {

@@ -37,10 +37,6 @@ public class Player extends BaseEntity {
     @Column(name = "username_normalized", nullable = false, unique = true, length = 50)
     private String usernameNormalized;
 
-    public void setTeam(Team team) {
-        throw new RuntimeException("This method is deprecated");
-    }
-
     public Team getTeam() {
         throw new RuntimeException("This method is deprecated");
     }
