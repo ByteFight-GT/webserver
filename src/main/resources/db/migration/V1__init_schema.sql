@@ -109,9 +109,7 @@ CREATE TABLE "team_members" (
                                 "updated_at" timestamp NOT NULL DEFAULT (now()),
                                 "player_id" bigint NOT NULL,
                                 "team_id" bigint NOT NULL,
-                                "competition_id" bigint NOT NULL,
-                                "is_deleted" boolean NOT NULL DEFAULT false,
-                                "deleted_at" timestamp
+                                "competition_id" bigint NOT NULL
 );
 
 CREATE TABLE "team_glicko_history" (
