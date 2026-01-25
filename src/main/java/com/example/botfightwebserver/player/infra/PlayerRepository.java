@@ -37,4 +37,5 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
         WHERE tm.team.uuid IN :uuids
     """)
     List<Player> findMembersByTeamUuids(@Param("uuids") List<UUID> uuids);
+
 }

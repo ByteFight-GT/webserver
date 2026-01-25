@@ -132,6 +132,28 @@ public class TeamService {
         return teamMemberRepository.save(member);
     }
 
+    public void leaveTeam(Competition competition, Player player) {
+        if (player == null || competition == null) {
+            throw new IllegalArgumentException("Competition and player are required");
+        }
+
+        if(!competition.isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
+        }
+
+        TeamMember member = teamMemberRepository.findByCompetitionAndPlayer(competition, player)
+                .orElseThrow(() -> new IllegalArgumentException("Player is not in a team for this competition"));
+
+        Team team = member.getTeam();
+
+        teamMemberRepository.delete(member);
+
+        if(countPlayersForTeam(team) == 0) {
+            team.softDelete();
+            teamRepository.save(team);
+        }
+    }
+
     public TeamMember joinTeamByJoinCode(Competition competition, Player player, String joinCode) {
         Team team = teamRepository.findByCompetitionAndJoinCodeAndIsDeletedIsFalse(competition, joinCode).orElseThrow(() -> new IllegalArgumentException("A team with that join code was no found"));
         return joinTeam(player, team);
@@ -146,7 +168,7 @@ public class TeamService {
             throw new IllegalArgumentException("Team is required");
         }
 
-        return teamMemberRepository.findByTeamAndIsDeletedIsFalse(team)
+        return teamMemberRepository.findByTeam(team)
                 .stream()
                 .map(TeamMember::getPlayer)
                 .toList();
@@ -157,7 +179,7 @@ public class TeamService {
             throw new IllegalArgumentException("Team is required");
         }
 
-        return teamMemberRepository.countByTeamAndIsDeletedIsFalse(team);
+        return teamMemberRepository.countByTeam(team);
     }
 
     public Optional<Team> getTeamByCompetitionAndUuid(Competition competition, UUID uuid) {
