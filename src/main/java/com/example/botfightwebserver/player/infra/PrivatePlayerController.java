@@ -4,9 +4,9 @@ import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.permissions.application.PermissionsService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.application.PlayerService;
-import com.example.botfightwebserver.player.domain.PlayerUsername;
 import com.example.botfightwebserver.player.domain.PublicPlayerDto;
 import com.example.botfightwebserver.player.domain.SelfPlayerDto;
+import com.example.botfightwebserver.player.domain.UpdatePlayerProfileDto;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.TeamDeletionReason;
@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.validation.Valid;
 
 import java.util.Collections;
 import java.util.Map;
@@ -42,23 +46,6 @@ public class PrivatePlayerController {
     private final TeamService teamService;
     private final PermissionsService permissionsService;
 
-//    @PostMapping("/join-team")
-//    public ResponseEntity<PublicPlayerDto> joinTeam(@AuthenticationPrincipal User user, @RequestParam String teamCode) {
-//        Team team = teamService.findTeamByCode(teamCode);
-//        if (!teamService.isTeamJoinable(team)) {
-//            throw new IllegalArgumentException("Team " + team.getName() + " is not joinable");
-//        }
-//        Player player = playerService.getPlayer(user);
-//
-//        player = playerService.setPlayerTeam(user.getUuid(), team);
-//        return ResponseEntity.ok(PublicPlayerDto.from(player));
-//    }
-
-    @GetMapping("/player")
-    public ResponseEntity<PublicPlayerDto> getPlayerById(@RequestParam Long id) {
-        return ResponseEntity.ok(PublicPlayerDto.from(playerService.getPlayer(id)));
-    }
-
     @Operation(
             operationId = "getCurrentPlayer",
             summary = "Get current player profile"
@@ -71,44 +58,23 @@ public class PrivatePlayerController {
         );
     }
 
-//    @PostMapping("/name")
-//    public ResponseEntity<Map<String, String>> updateName(@AuthenticationPrincipal User user, @RequestParam @PlayerUsername String name) {
-//        name = name.trim();
-//        boolean isAvailable = !playerService.isUsernameExist(name);
-//        if (!isAvailable) {
-//            throw new IllegalArgumentException("Name " + name + " is not available");
-//        }
-//        Player player = playerService.getPlayer(user);
-//        if (player.getUsername().equals(name)) {
-//            return ResponseEntity.ok(Collections.singletonMap("setName", "Name Cannot Be Same"));
-//        }
-//        playerService.setName(player.getId(), name);
-//        return ResponseEntity.ok(Collections.singletonMap("setName", "Succesfully updated!"));
-//    }
+    @Operation(
+            operationId = "updateCurrentPlayer",
+            summary = "Update current player profile"
+    )
+    @PatchMapping("/me")
+    public ResponseEntity<SelfPlayerDto> updateCurrentPlayer(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody UpdatePlayerProfileDto input
+    ) {
+//        permissionsService.validateAllowUpdateProfile();
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-//    @PostMapping("/leave-team")
-//    public ResponseEntity<Void> leaveTeam(@AuthenticationPrincipal User user) {
-//        Player player = playerService.getPlayer(user);
-//
-//        if (player.getTeam() == null) {
-//            throw new IllegalArgumentException("You are not on a team!");
-//        }
-//
-//        permissionsService.validateAllowLeaveTeam();
-//
-//        Team oldTeam = playerService.leaveTeam(player);
-////
-////        if(oldTeam.getNumberPlayers() == 0) {
-////            // no more members left, team will be deleted
-////            teamService.deleteTeam(oldTeam.getId(), TeamDeletionReason.ALL_MEMBERS_LEFT);
-////        }
-//
-//        return ResponseEntity.ok().build();
-//    }
+        if(input.getUsername() != null) {
+            playerService.setUsername(player, input.getUsername());
+        }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProblemDetail handleException(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.ok(SelfPlayerDto.from(player));
     }
 }
