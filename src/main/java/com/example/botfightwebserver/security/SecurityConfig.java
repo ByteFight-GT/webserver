@@ -39,17 +39,17 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/error",
                                 "/files/**",
                                 "/api/v1/ping",
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/login",
                                 "/api/v1/public/**",
-                                "/api/v1/player/public/**",
-                                "/api/v1/team/public/**",
-                                "/api/v1/matches/public/**",
-                                "/api/v1/game-match/public/**",
                                 "/swagger-ui.html",
+                                "/swagger-ui",
                                 "/swagger-ui/**",
+                                "/swagger-ui/index.html",
+                                "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml"
                         ).permitAll()

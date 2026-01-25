@@ -12,6 +12,7 @@ public class CompetitionDto {
     String name;
     String description;
     boolean isActive;
+    boolean isWhitelisted;
     TimestampsDto timestamps;
 
     public static CompetitionDto from(Competition competition) {
@@ -20,6 +21,7 @@ public class CompetitionDto {
                 .name(competition.getName())
                 .description(competition.getDescription())
                 .isActive(competition.isActive())
+                .isWhitelisted(competition.isWhitelisted())
                 .timestamps(TimestampsDto.from(competition))
                 .build();
     }
