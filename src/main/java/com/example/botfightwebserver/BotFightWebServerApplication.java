@@ -38,11 +38,11 @@ public class BotFightWebServerApplication {
         SpringApplication.run(BotFightWebServerApplication.class, args);
     }
 
-    @Bean
-    @ConditionalOnProperty(name = "search.index.enabled", havingValue = "true", matchIfMissing = true)
-    public ApplicationRunner buildIndex(SearchIndexBuild searchIndexBuild) {
-        return args -> {searchIndexBuild.indexPersistedData();};
-    }
+//    @Bean
+//    @ConditionalOnProperty(name = "search.index.enabled", havingValue = "true", matchIfMissing = true)
+//    public ApplicationRunner buildIndex(SearchIndexBuild searchIndexBuild) {
+//        return args -> {searchIndexBuild.indexPersistedData();};
+//    }
 
     @GetMapping("/ping")
     public Map<String, String> ping() {

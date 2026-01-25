@@ -2,10 +2,12 @@ package com.example.botfightwebserver.competition.infra;
 
 import com.example.botfightwebserver.competition.application.CompetitionService;
 import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.competition.domain.dto.CompetitionDto;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Competitions (Public)", description = """
-        Public, read-only endpoins for browsing competitions and their related data,
+        Public, read-only endpoints for browsing competitions and their related data,
         including teams, standings, and basic metadata.
         """)
 @RestController
@@ -29,4 +31,15 @@ import java.util.UUID;
 public class PublicCompetitionController {
     private final CompetitionService competitionService;
     private final TeamService teamService;
+
+    @GetMapping("/{slug}")
+    @Operation(
+            operationId = "getCompetitionBySlug",
+            summary = "Get a public competition by slug"
+    )
+    public ResponseEntity<CompetitionDto> getCompetition(@PathVariable String slug) {
+        Competition competition = competitionService.getCompetitionBySlug(slug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+        return ResponseEntity.ok(CompetitionDto.from(competition));
+    }
 }

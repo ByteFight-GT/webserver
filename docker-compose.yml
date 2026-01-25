@@ -1,6 +1,6 @@
 name: bytefight-server
 services:
-  db:
+  postgres:
     image: postgres:16.4
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -20,7 +20,7 @@ services:
     build:
       context: ./
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
     env_file:
       - .env
