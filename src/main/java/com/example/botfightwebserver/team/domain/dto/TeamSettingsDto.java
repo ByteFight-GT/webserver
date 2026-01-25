@@ -11,5 +11,7 @@ import lombok.Value;
 public class TeamSettingsDto {
     @NotNull String name;
     String quote;
-    boolean displayMembers;
+
+    @Builder.Default
+    Boolean displayMembers = false;
 }
