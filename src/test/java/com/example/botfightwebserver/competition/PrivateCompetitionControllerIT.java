@@ -4,7 +4,9 @@ import com.example.botfightwebserver.FullStackIntegrationTestBase;
 import com.example.botfightwebserver.TestDataFactory;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.competition.domain.dto.JoinTeamDto;
 import com.example.botfightwebserver.player.domain.Player;
+import com.example.botfightwebserver.team.domain.Team;
 import com.example.botfightwebserver.team.domain.dto.SelfTeamDto;
 import com.example.botfightwebserver.team.domain.dto.TeamSettingsDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -126,6 +128,134 @@ class PrivateCompetitionControllerIT extends FullStackIntegrationTestBase {
                         .with(user(user))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto2)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void createCompetitionTeamCompetitionIsInactive() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition("test", "test", false, 2);
+
+        TeamSettingsDto dto1 = TeamSettingsDto.builder()
+                .name("Team 1")
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto1)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void joinCompetitionTeamHappyPath() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        Team team = testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode(team.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                .with(user(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void joinCompetitionTeamTeamNotFound() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode("blah")
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void joinCompetitionTeamPlayerAlreadyInTeam() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition();
+        Team team1 = testDataFactory.createTeam(competition);
+        Team team2 = testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto1 = JoinTeamDto.builder()
+                .joinCode(team1.getJoinCode())
+                .build();
+
+        JoinTeamDto dto2 = JoinTeamDto.builder()
+                .joinCode(team2.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto1)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto2)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void joinCompetitionTeamTeamIsFull() throws Exception {
+        Player player1 = testDataFactory.createUserWithPlayer();
+        Player player2 = testDataFactory.createUserWithPlayer();
+
+        User user1 = player1.getUser();
+        User user2 = player2.getUser();
+
+        Competition competition = testDataFactory.createCompetition("test", "test", true, 1);
+        Team team = testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode(team.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user2))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void joinCompetitionTeamCompetitionIsInactive() throws Exception {
+        Player player = testDataFactory.createUserWithPlayer();
+        User user = player.getUser();
+        Competition competition = testDataFactory.createCompetition("test", "test", false, 2);
+        Team team = testDataFactory.createTeam(competition);
+
+        JoinTeamDto dto = JoinTeamDto.builder()
+                .joinCode(team.getJoinCode())
+                .build();
+
+        mockMvc.perform(post("/api/v1/competition/{slug}/teams/join", competition.getSlug())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().is4xxClientError());
     }
 }

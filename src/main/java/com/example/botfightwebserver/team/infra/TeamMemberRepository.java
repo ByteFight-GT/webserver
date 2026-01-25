@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     boolean existsByCompetitionAndPlayer(Competition competition, Player player);
     Optional<TeamMember> findByTeamAndPlayer(Team team, Player player);
+    List<TeamMember> findByTeam(Team team);
+    long countByTeam(Team team);
 }

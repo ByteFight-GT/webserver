@@ -16,7 +16,10 @@ import java.util.UUID;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByCompetitionAndNameNormalized(Competition competition, String nameNormalized);
-    boolean existsByNameNormalized(String nameNormalized);
+    boolean existsByJoinCode(String joinCode);
+
+    Optional<Team> findByCompetitionAndJoinCodeAndIsDeletedIsFalse(Competition competition, String joinCode);
+
     int countByCurrentSubmissionNotNull();
     Optional<Team> findByJoinCode(String joinCode);
     Optional<Team> findByUuid(UUID uuid);
