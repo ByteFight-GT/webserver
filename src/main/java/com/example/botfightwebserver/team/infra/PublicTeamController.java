@@ -4,14 +4,17 @@ import com.example.botfightwebserver.config.ClockConfig;
 import com.example.botfightwebserver.glicko.GlickoCalculator;
 import com.example.botfightwebserver.glicko.GlickoHistoryDTO;
 import com.example.botfightwebserver.glicko.GlickoHistoryService;
+import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.application.TeamService;
 import com.example.botfightwebserver.team.domain.dto.PublicTeamDto;
 import com.example.botfightwebserver.team.domain.Team;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,29 +34,15 @@ public class PublicTeamController {
     @Operation(
             summary = "Get a public team by UUID"
     )
-    public ResponseEntity<PublicTeamDto> getPublicTeam(@PathVariable UUID uuid) {
-        Optional<PublicTeamDto> dtoOptional = teamService.getPublicTeamDtoByUuid(uuid);
-        return dtoOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    public ResponseEntity<PublicTeamDto> getPublicTeamByUuid(@PathVariable UUID uuid) {
+        Team team = teamService.getTeamByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    @GetMapping("/glicko-history/{uuid}")
-    public ResponseEntity<List<GlickoHistoryDTO>> getGlickoHistory(@PathVariable UUID uuid) {
-        Optional<Team> teamOptional = teamService.getTeamByUuid(uuid);
-
-        if (teamOptional.isEmpty()) return ResponseEntity.notFound().build();
-
-        Team team = teamOptional.get();
-
-        List<GlickoHistoryDTO> glickoHistories = new ArrayList<>(
-                glickoHistoryService.getTeamHistory(uuid.toString()).stream().map(GlickoHistoryDTO::fromEntity).toList());
-        glickoHistories.add(0,
-                GlickoHistoryDTO.builder()
-                        .teamUuid(team.getUuid().toString())
-                        .glicko(GlickoCalculator.MU) // initial rating
-//                        .saveDate(team.getCreationDateTime())
-                        .build()
-        );
-        return ResponseEntity.ok(glickoHistories);
+        if(!team.isDisplayMembers()) {
+            return ResponseEntity.ok(PublicTeamDto.from(team, null));
+        } else {
+            List<Player> members = teamService.getPlayersForTeam(team);
+            return ResponseEntity.ok(PublicTeamDto.from(team, members));
+        }
     }
 
     @GetMapping("/teams-with-submission")
