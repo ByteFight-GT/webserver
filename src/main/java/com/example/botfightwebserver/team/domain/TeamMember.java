@@ -26,7 +26,7 @@ import lombok.Setter;
                 )
         }
 )
-public class TeamMember extends SoftDeletableEntity {
+public class TeamMember extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", nullable = false)
