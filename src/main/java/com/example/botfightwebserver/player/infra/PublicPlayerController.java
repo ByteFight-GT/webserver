@@ -3,6 +3,7 @@ package com.example.botfightwebserver.player.infra;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.player.domain.PublicPlayerDto;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,12 +25,20 @@ import java.util.UUID;
 public class PublicPlayerController {
     private final PlayerService playerService;
 
+    @Operation(
+            operationId = "getPublicPlayerByUuid",
+            summary = "Get a public player profile"
+    )
     @GetMapping("/{uuid}")
-    public ResponseEntity<PublicPlayerDto> getPlayerById(@RequestParam UUID uuid) {
+    public ResponseEntity<PublicPlayerDto> getPlayerById(@PathVariable UUID uuid) {
         Player player = playerService.getPlayer(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return ResponseEntity.ok(PublicPlayerDto.from(player));
     }
 
+    @Operation(
+            operationId = "checkPublicUsernameAvailability",
+            summary = "Check if a username is available"
+    )
     @GetMapping("/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean isAvailable = !playerService.isUsernameExist(username);
