@@ -36,6 +36,10 @@ public class PrivateTeamController {
     private final PermissionsService permissionsService;
 
     @PostMapping("/edit")
+    @Operation(
+            operationId = "editTeam",
+            summary = "Update the current user's team settings"
+    )
     public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto edit) {
         permissionsService.validateAllowUpdateTeam();
 //        boolean isAvailable = !teamService.isNameExist(edit.getName());
