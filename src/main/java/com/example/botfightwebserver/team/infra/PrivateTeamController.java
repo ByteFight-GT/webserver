@@ -14,9 +14,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Clock;
 import java.util.*;
@@ -35,25 +37,31 @@ public class PrivateTeamController {
     private final ClockConfig clockConfig;
     private final PermissionsService permissionsService;
 
-    @PostMapping("/edit")
+    @PostMapping("/{uuid}")
     @Operation(
             operationId = "editTeam",
-            summary = "Update the current user's team settings"
+            summary = "Update a team's settings"
     )
-    public ResponseEntity<Void> editTeam(@AuthenticationPrincipal User user, @RequestBody TeamSettingsDto edit) {
-        permissionsService.validateAllowUpdateTeam();
-//        boolean isAvailable = !teamService.isNameExist(edit.getName());
-//        String currentTeamName = playerService.getPlayer(user.getUuid()).getTeam().getName();
-//        if (!isAvailable && !currentTeamName.equals(edit.getName())) {
-//            throw new IllegalArgumentException("Name is Already Taken.");
-//        }
+    public ResponseEntity<SelfTeamDto> editTeam(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID uuid,
+            @RequestBody TeamSettingsDto teamSettingsDto
+    ) {
+//        permissionsService.validateAllowUpdateTeam();
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
-//        Player player = playerService.getPlayer(user.getUuid());
-//        Team team = player.getTeam();
-//
-//        teamService.editTeam(team.getId(), edit);
+        Team team = teamService.getTeamByUuid(uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found"));
 
-        return ResponseEntity.ok().build();
+        if (!teamService.isMember(team, player)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
+        }
+
+        teamService.editTeam(team, teamSettingsDto);
+
+        List<Player> members = teamService.getPlayersForTeam(team);
+        return ResponseEntity.ok(SelfTeamDto.from(team, members));
     }
 
 //    @PostMapping("/set-submission")

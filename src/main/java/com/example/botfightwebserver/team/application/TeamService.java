@@ -93,7 +93,7 @@ public class TeamService {
         team.setType(TeamType.regular);
         team.setCompetition(competition);
         team.setName(name);
-        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+        team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
         team.setJoinCode(joinCode);
 
         if (teamSettingsDto.getQuote() != null) {
@@ -172,6 +172,14 @@ public class TeamService {
                 .stream()
                 .map(TeamMember::getPlayer)
                 .toList();
+    }
+
+    public boolean isMember(Team team, Player player) {
+        if (team == null || player == null) {
+            throw new IllegalArgumentException("Team and player are required");
+        }
+
+        return teamMemberRepository.existsByTeamAndPlayer(team, player);
     }
 
     public long countPlayersForTeam(Team team) {
@@ -292,14 +300,29 @@ public class TeamService {
             throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
         }
         Team team = teamRepository.findById(teamId).get();
+        editTeam(team, teamSettingsDto);
+    }
+
+    @Transactional
+    public void editTeam(Team team, TeamSettingsDto teamSettingsDto) {
+        if (team == null) {
+            throw new IllegalArgumentException("Team is required");
+        }
 
         if (team.isDeleted()) {
             throw new IllegalArgumentException("This team is deleted and cannot be edited.");
         }
 
-        if (teamSettingsDto.getName() != null) team.setName(teamSettingsDto.getName());
+        if (teamSettingsDto.getName() != null) {
+            String normalizedName = teamSettingsDto.getName().trim().toLowerCase();
+            if (!normalizedName.equals(team.getNameNormalized())
+                    && teamRepository.existsByCompetitionAndNameNormalized(team.getCompetition(), normalizedName)) {
+                throw new IllegalArgumentException("Team with name " + teamSettingsDto.getName() + " already exists");
+            }
+            team.setName(teamSettingsDto.getName());
+        }
         if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
-        team.setDisplayMembers(teamSettingsDto.isDisplayMembers());
+        if(teamSettingsDto.getDisplayMembers() != null) team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
 
         teamRepository.save(team);
     }
