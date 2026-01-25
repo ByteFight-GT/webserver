@@ -28,6 +28,10 @@ public class AuthenticationController {
         return ResponseEntity.ok(SelfUserDto.from(user));
     }
 
+    @Operation(
+            operationId = "register",
+            summary = "Register for the application. This also registers the user through Supabase."
+    )
     @PostMapping("/signup")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
         userService.signup(registerUserDto);
