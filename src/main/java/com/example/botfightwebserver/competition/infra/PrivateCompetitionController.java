@@ -3,6 +3,7 @@ package com.example.botfightwebserver.competition.infra;
 import com.example.botfightwebserver.auth.domain.User;
 import com.example.botfightwebserver.competition.application.CompetitionService;
 import com.example.botfightwebserver.competition.domain.Competition;
+import com.example.botfightwebserver.competition.domain.dto.JoinTeamDto;
 import com.example.botfightwebserver.player.application.PlayerService;
 import com.example.botfightwebserver.player.domain.Player;
 import com.example.botfightwebserver.team.application.TeamService;
@@ -49,5 +50,23 @@ public class PrivateCompetitionController {
         teamService.joinTeam(player, team);
 
         return ResponseEntity.ok(SelfTeamDto.from(team));
+    }
+
+    @PostMapping("/{competitionSlug}/teams/join")
+    @Transactional
+    public ResponseEntity<SelfTeamDto> joinCompetitionTeam(
+            @AuthenticationPrincipal User user,
+            @PathVariable String competitionSlug,
+            @RequestBody JoinTeamDto joinTeamDto
+    ) {
+        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        teamService.joinTeamByJoinCode(competition, player, joinTeamDto.getJoinCode());
+
+        return ResponseEntity.ok().build();
     }
 }

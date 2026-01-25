@@ -34,7 +34,7 @@ import java.util.*;
         }
 )
 public class Team extends AuditableSoftDeletableEntity {
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competition_id", nullable = false)
     private Competition competition;
 

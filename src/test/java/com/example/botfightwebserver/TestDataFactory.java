@@ -30,15 +30,16 @@ public class TestDataFactory {
     }
 
     public Competition createCompetition() {
-        return createCompetition(null, null, true);
+        return createCompetition(null, null, true, 2);
     }
 
-    public Competition createCompetition(String slug, String name, boolean active) {
+    public Competition createCompetition(String slug, String name, boolean active, int maxPlayersPerTeam) {
         Competition competition = new Competition();
         UUID randomUuid = UUID.randomUUID();
         competition.setSlug(slug != null ? slug : "test-competition-" + randomUuid);
         competition.setName(name != null ? name : "Test Competition (" + randomUuid + ")");
         competition.setActive(active);
+        competition.setMaxPlayersPerTeam(maxPlayersPerTeam);
         return competitionRepository.save(competition);
     }
 
@@ -52,6 +53,8 @@ public class TestDataFactory {
         team.setUuid(uuid != null ? uuid : UUID.randomUUID());
         team.setName("Team " + team.getUuid().toString().substring(0, 8));
         team.setDisplayMembers(false);
+        team.setJoinCode(UUID.randomUUID().toString());
+
         if (deleted) {
             team.softDelete();
         }
