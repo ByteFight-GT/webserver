@@ -80,4 +80,25 @@ public class PrivateCompetitionController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{competitionSlug}/teams/leave")
+    @Transactional
+    @Operation(
+            operationId = "leaveCompetitionTeam",
+            summary = "Leave competition team"
+    )
+    public ResponseEntity<SelfTeamDto> leaveCompetitionTeam(
+            @AuthenticationPrincipal User user,
+            @PathVariable String competitionSlug
+    ) {
+        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        teamService.leaveTeam(competition, player);
+
+        return ResponseEntity.ok().build();
+    }
 }
