@@ -93,20 +93,18 @@ public class LocalStorageService {
         String sha256 = bytesToHex(hash);
         String ctype = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");
 
-//        FileRecord rec = fileRecordRepository.save(new FileRecord(
-//                null,
-//                objectId,
-//                safeName,
-//                ctype,
-//                size,
-//                sha256,
-//                target.toString(),
-//                Instant.now(),
-//                Instant.now()
-//        ));
-//
-//        return StoredObject.from(rec);
-        return null;
+        FileRecord rec = FileRecord.builder()
+                .uuid(objectId)
+                .filename(safeName)
+                .contentType(ctype)
+                .size(size)
+                .sha256(sha256)
+                .storagePath(target.toString())
+                .build();
+
+        rec = fileRecordRepository.save(rec);
+
+        return StoredObject.from(rec);
     }
 
     public Optional<StoredObject> stat(String uuid) {
