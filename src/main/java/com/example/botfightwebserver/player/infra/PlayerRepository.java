@@ -13,12 +13,9 @@ import java.util.UUID;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-    @Query("""
-        SELECT (COUNT(p) > 0)
-        FROM Player p
-        WHERE lower(p.username) = lower(:name)
-    """)
-    boolean existsByUsernameIgnoreCase(@Param("name") String name);
+    boolean existsByUsernameNormalized(String usernameNormalized);
+    boolean existsByUsernameNormalizedAndIdIsNot(String usernameNormalized, Long id);
+
     boolean existsByUserEmail(String email);
     @Query("""
         SELECT tm.player

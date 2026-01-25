@@ -304,27 +304,6 @@ public class TeamService {
         teamRepository.save(team);
     }
 
-    @Transactional
-    public void deleteTeam(Long teamId, TeamDeletionReason reason) {
-        Team team = teamRepository.findById(teamId).orElseThrow();
-
-        if (team.isDeleted()) {
-            throw new IllegalArgumentException("This team is already deleted.");
-        }
-
-        // remove all players from the team
-        List<Player> players = playerService.getPlayersByTeam(teamId);
-        for (Player p : players) {
-            playerService.leaveTeam(p);
-        }
-
-        // mark the team as deleted
-//        team.setDeleted(true);
-//        team.setDeletedAt(LocalDateTime.now());
-
-        teamRepository.save(team);
-    }
-
     public boolean isTeamJoinable(Team team) {
         return !team.isDeleted();
     }
