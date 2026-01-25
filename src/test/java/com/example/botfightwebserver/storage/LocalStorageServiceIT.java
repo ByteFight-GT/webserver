@@ -5,24 +5,25 @@ import com.example.botfightwebserver.storage.application.LocalStorageService;
 import com.example.botfightwebserver.storage.domain.StoredObject;
 import com.example.botfightwebserver.storage.infra.FileRecordRepository;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Transactional
 class LocalStorageServiceIT extends FullStackIntegrationTestBase {
     private static Path storageRoot;
 
@@ -35,6 +36,23 @@ class LocalStorageServiceIT extends FullStackIntegrationTestBase {
     @BeforeAll
     static void setupStorageRoot() throws IOException {
         storageRoot = Files.createTempDirectory("storage-test-");
+    }
+
+    @BeforeEach
+    void clearStorage() throws IOException {
+        fileRecordRepository.deleteAll();
+        if (Files.exists(storageRoot)) {
+            try (Stream<Path> paths = Files.walk(storageRoot)) {
+                paths.sorted(Comparator.reverseOrder())
+                        .filter(path -> !path.equals(storageRoot))
+                        .forEach(path -> {
+                            try {
+                                Files.deleteIfExists(path);
+                            } catch (IOException ignored) {
+                            }
+                        });
+            }
+        }
     }
 
     @DynamicPropertySource
