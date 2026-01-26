@@ -43,6 +43,10 @@ public class GameMatchService {
     private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
 
+    public Optional<GameMatch> getGameMatch(UUID id) {
+        return gameMatchRepository.findByUuid(id);
+    }
+
     public GameMatch createMatch(
             User creatingUser,
             Team teamA,
