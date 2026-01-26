@@ -17,6 +17,8 @@ import org.bytefight.webserver.submission.domain.SubmissionDTO;
 import org.bytefight.webserver.submission.domain.UploadSubmissionDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -31,6 +33,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/submission")
+@Tag(name = "Submissions", description = "Upload submissions and access submission files")
 public class SubmissionController {
     private final SubmissionService submissionService;
     private final GameMatchService gameMatchService;
@@ -40,6 +43,10 @@ public class SubmissionController {
     private final PermissionsService permissionsService;
 
     @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            operationId = "uploadSubmission",
+            summary = "Upload a submission for a team"
+    )
     public ResponseEntity<SubmissionDTO> uploadSubmission(
             @AuthenticationPrincipal User user,
             @PathVariable UUID teamUuid,
@@ -79,6 +86,10 @@ public class SubmissionController {
     }
 
     @GetMapping("get-download-url")
+    @Operation(
+            operationId = "getSubmissionDownloadUrl",
+            summary = "Get a signed download URL for a submission"
+    )
     public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
         return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, user));
     }
