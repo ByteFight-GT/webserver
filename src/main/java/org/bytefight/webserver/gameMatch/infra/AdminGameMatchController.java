@@ -2,7 +2,6 @@ package org.bytefight.webserver.gameMatch.infra;
 
 import org.bytefight.webserver.gameMatch.application.AdminGameMatchService;
 import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import com.example.botfightwebserver.gameMatch.domain.*;
 import org.bytefight.webserver.gameMatch.domain.GameMatch;
 import org.bytefight.webserver.gameMatch.domain.MatchReason;
 import org.bytefight.webserver.gameMatch.domain.MatchStatus;

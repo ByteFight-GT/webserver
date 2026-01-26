@@ -7,7 +7,6 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.application.SubmissionService;
-import com.example.botfightwebserver.team.domain.*;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamMember;
 import org.bytefight.webserver.team.domain.TeamType;
