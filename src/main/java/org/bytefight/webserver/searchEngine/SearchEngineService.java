@@ -1,6 +1,6 @@
 package org.bytefight.webserver.searchEngine;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.team.domain.dto.PublicTeamDto;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.application.TeamService;

@@ -1,7 +1,7 @@
 package org.bytefight.webserver.team.domain;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,8 +1,8 @@
 package org.bytefight.webserver.scrimmageMatch;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;

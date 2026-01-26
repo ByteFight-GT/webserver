@@ -1,9 +1,9 @@
 package org.bytefight.webserver.scrimmageMatch;
 
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.submission.domain.Submission;

@@ -1,4 +1,4 @@
-package org.bytefight.webserver.gameMatch.domain;
+package org.bytefight.webserver.gamematch.domain;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
 import org.bytefight.webserver.team.domain.Team;

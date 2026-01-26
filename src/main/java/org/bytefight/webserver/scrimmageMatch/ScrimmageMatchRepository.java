@@ -1,6 +1,6 @@
 package org.bytefight.webserver.scrimmageMatch;
 
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

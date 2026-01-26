@@ -1,4 +1,4 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

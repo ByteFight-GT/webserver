@@ -1,7 +1,7 @@
 package org.bytefight.webserver.rabbitMQ.application;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatchResult;
-import org.bytefight.webserver.gameMatch.application.GameMatchResultHandler;
+import org.bytefight.webserver.gamematch.domain.GameMatchResult;
+import org.bytefight.webserver.gamematch.application.GameMatchResultHandler;
 import org.bytefight.webserver.rabbitMQ.infra.RabbitMQConfiguration;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
