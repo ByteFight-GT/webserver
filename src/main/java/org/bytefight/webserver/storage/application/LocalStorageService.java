@@ -58,7 +58,7 @@ public class LocalStorageService {
         return sb.toString();
     }
 
-    public StoredObject store(MultipartFile file, String logicalPath, String desiredName) throws IOException {
+    public FileRecord store(MultipartFile file, String logicalPath, String desiredName) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is null or empty");
         }
@@ -135,7 +135,7 @@ public class LocalStorageService {
             finalizeFile(tempTarget, target, savedRecord);
         }
 
-        return StoredObject.from(savedRecord);
+        return savedRecord;
     }
 
     private void finalizeFile(Path tempTarget, Path target, FileRecord record) {

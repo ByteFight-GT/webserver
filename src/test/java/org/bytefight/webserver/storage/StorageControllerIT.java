@@ -109,7 +109,7 @@ class StorageControllerIT extends FullStackIntegrationTestBase {
                 contentBytes
         );
 
-        StoredObject stored = localStorageService.store(file, "downloads/test/", "expired.txt");
+        StoredObject stored = StoredObject.from(localStorageService.store(file, "downloads/test/", "expired.txt"));
         long exp = Instant.now().minusSeconds(60).getEpochSecond();
         String sig = hmacService.sign(stored, exp);
 

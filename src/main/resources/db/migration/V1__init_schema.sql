@@ -20,7 +20,8 @@ CREATE TYPE "match_reason" AS ENUM (
 CREATE TYPE "submission_validity" AS ENUM (
     'valid',
     'invalid',
-    'not_evaluated'
+    'not_evaluated',
+    'not_evaluated_autoset'
     );
 
 CREATE TYPE "team_type" AS ENUM (
