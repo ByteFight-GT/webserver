@@ -1,5 +1,6 @@
 package org.bytefight.webserver.gamematch.application;
 
+import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
@@ -8,10 +9,11 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
-import org.bytefight.webserver.rabbitMQ.application.RabbitMQService;
-import org.bytefight.webserver.submission.application.SubmissionService;
+import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
+import org.bytefight.webserver.submission.domain.Submission;
+import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.StatsDTO;
-import org.bytefight.webserver.team.application.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -35,41 +38,64 @@ import java.util.Optional;
 public class GameMatchService {
 
     private final GameMatchRepository gameMatchRepository;
-    private final TeamService teamService;
-    private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
     private final GameMatchProperties gameMatchProperties;
     private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
 
-    public List<GameMatch> getGameMatches() {
-        return gameMatchRepository.findAll();
-    }
+    public GameMatch createMatch(
+            User creatingUser,
+            Team teamA,
+            Team teamB,
+            Submission submissionA,
+            Submission submissionB,
+            String ladder,
+            MatchReason reason,
+            MatchmakingEvent matchmakingEvent
+    ) {
+        if(teamA == null || teamB == null) {
+            throw new IllegalArgumentException("teamA and teamB are required");
+        }
 
-    public GameMatch createMatch(String team1Uuid, String team2Uuid, String submission1Uuid, String submission2Uuid, MatchReason reason) {
-        teamService.validateTeams(team1Uuid, team2Uuid);
-        submissionService.validateSubmissions(submission1Uuid, submission2Uuid);
+        if(submissionA == null || submissionB == null) {
+            throw new IllegalArgumentException("submissionA and submissionB are required");
+        }
+
+        if(!teamA.getCompetition().equals(teamB.getCompetition())) {
+            throw new IllegalArgumentException("Both teams must be from the same competition");
+        }
+
         GameMatch gameMatch = new GameMatch();
-//        gameMatch.setTeamOne(teamService.getTeamByUuid(UUID.fromString(team1Uuid)).orElseThrow());
-//        gameMatch.setTeamTwo(teamService.getTeamByUuid(UUID.fromString(team2Uuid)).orElseThrow());
-//        gameMatch.setSubmissionOne(submissionService.getSubmissionByUuid(submission1Uuid));
-//        gameMatch.setSubmissionTwo(submissionService.getSubmissionByUuid(submission2Uuid));
-//        gameMatch.setStatus(MatchStatus.WAITING);
+        gameMatch.setUuid(UUID.randomUUID());
+        gameMatch.setCompetition(teamA.getCompetition());
+        gameMatch.setTeamA(teamA);
+        gameMatch.setTeamB(teamB);
+        gameMatch.setSubmissionA(submissionA);
+        gameMatch.setSubmissionB(submissionB);
+        gameMatch.setStatus(MatchStatus.created);
+        gameMatch.setLadder(ladder.trim().toLowerCase());
         gameMatch.setReason(reason);
+        gameMatch.setMatchmakingEvent(matchmakingEvent);
+
+        gameMatch.setCreatedByUser(creatingUser);
+        gameMatch.setUpdatedByUser(creatingUser);
+
+        gameMatchRepository.save(gameMatch);
+
         return gameMatch;
     }
 
-    public GameMatch queueMatch(GameMatch match) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                GameMatchJob job = GameMatchJob.from(match);
-                rabbitMQService.enqueueGameMatchJob(job);
-            }
-        });
+    public GameMatch scheduleMatch(GameMatch match) {
+        GameMatchJob job = GameMatchJob.from(match);
+        try {
+            rabbitMQService.enqueueGameMatchJob(job);
+        } catch (RuntimeException ex) {
+            throw new IllegalStateException("Failed to enqueue game match job", ex);
+        }
 
-//        match.setQueuedAt(LocalDateTime.now(clock));
-//        match.incrementTimesQueued();
+        match.setStatus(MatchStatus.waiting);
+        match.setScheduledAt(Instant.now());
+
         return gameMatchRepository.save(match);
     }
 
@@ -121,18 +147,6 @@ public class GameMatchService {
     public boolean isGameMatchWaiting(String uuid) {
         return false;
 //        return gameMatchRepository.findByUuid(UUID.fromString(uuid)).orElseThrow().getStatus() == MatchStatus.WAITING;
-    }
-
-    public List<GameMatchJob> deleteQueuedMatches() {
-        List<GameMatchJob> removedMatches = rabbitMQService.deleteGameMatchQueue();
-//        for (GameMatchJob job : removedMatches) {
-//            setGameMatchStatus(job.gameMatchUuid(), MatchStatus.MANUALLY_FAILED);
-//        }
-        return removedMatches;
-    }
-
-    public List<GameMatchJob> peekQueuedMatches() {
-        return rabbitMQService.peekGameMatchQueue();
     }
 
     public List<GameMatch> getFailedMatches() {

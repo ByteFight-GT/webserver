@@ -32,31 +32,20 @@ public class GameMatchController {
     private final GameMatchService gameMatchService;
     private final PlayerService playerService;
 
-    @PostMapping("/submit/match")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GameMatchDto> submitMatch(@RequestBody MatchSubmissionRequest request) {
-        // add validation logic here for match reason
-        GameMatch match = gameMatchService.createMatch(
-                request.getTeam1Uuid(),
-                request.getTeam2Uuid(),
-                request.getSubmission1Uuid(),
-                request.getSubmission2Uuid(),
-                request.getReason()
-        );
-        gameMatchService.queueMatch(match);
-        return ResponseEntity.ok(GameMatchDto.fromEntity(match));
-    }
-
-    @PostMapping("/queue/remove_all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<GameMatchJob>> removeAllQueuedMatches() {
-        return ResponseEntity.ok(gameMatchService.deleteQueuedMatches());
-    }
-
-    @GetMapping("/queued")
-    public ResponseEntity<List<GameMatchJob>> queued() {
-        return ResponseEntity.ok(gameMatchService.peekQueuedMatches());
-    }
+//    @PostMapping("/submit/match")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<GameMatchDto> submitMatch(@RequestBody MatchSubmissionRequest request) {
+//        // add validation logic here for match reason
+//        GameMatch match = gameMatchService.createMatch(
+//                request.getTeam1Uuid(),
+//                request.getTeam2Uuid(),
+//                request.getSubmission1Uuid(),
+//                request.getSubmission2Uuid(),
+//                request.getReason()
+//        );
+//        gameMatchService.queueMatch(match);
+//        return ResponseEntity.ok(GameMatchDto.fromEntity(match));
+//    }
 
     @GetMapping("/public/stats")
     public ResponseEntity<StatsDTO> stats(@RequestParam Long teamId, @RequestParam MatchReason reason) {

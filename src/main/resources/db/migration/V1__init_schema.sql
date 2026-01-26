@@ -158,6 +158,7 @@ CREATE TABLE "game_matches" (
                                 "team_b_id" bigint NOT NULL,
                                 "submission_a_id" bigint NOT NULL,
                                 "submission_b_id" bigint NOT NULL,
+                                "match_settings" jsonb NOT NULL,
                                 "status" match_status NOT NULL DEFAULT 'scheduling',
                                 "reason" match_reason NOT NULL DEFAULT 'other',
                                 "matchmaking_event_id" bigint,

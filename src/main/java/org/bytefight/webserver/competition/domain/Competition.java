@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,4 +33,9 @@ public class Competition extends BaseEntity {
 
     @Column(name = "max_players_per_team", nullable = false)
     private int maxPlayersPerTeam;
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(slug);
+    }
 }
