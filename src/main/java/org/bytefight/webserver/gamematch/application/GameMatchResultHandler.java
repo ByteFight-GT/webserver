@@ -2,9 +2,11 @@ package org.bytefight.webserver.gamematch.application;
 
 
 import org.bytefight.webserver.gamematch.domain.GameMatch;
-import org.bytefight.webserver.gamematch.domain.GameMatchResult;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.GlickoCalculator;
 import org.bytefight.webserver.glicko.GlickoChanges;
 import org.bytefight.webserver.glicko.GlickoHistoryService;
@@ -17,14 +19,17 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
 @Slf4j
 public class GameMatchResultHandler {
-
     private final GameMatchService gameMatchService;
+    private final GameMatchRepository gameMatchRepository;
+
     private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
@@ -32,6 +37,19 @@ public class GameMatchResultHandler {
     private final GameMatchLogService gameMatchLogService;
     private final GlickoHistoryService glickoHistoryService;
 
+    /**
+     * This method handles lightweight match status updates emitted by the engine
+     * @param gameMatchUpdate
+     */
+    public void handleGameMatchUpdate(GameMatchUpdate gameMatchUpdate) {
+        GameMatch gameMatch = gameMatchService.getGameMatch(UUID.fromString(gameMatchUpdate.getUuid())).orElseThrow();
+
+        if(gameMatchUpdate.isStarted()) {
+            gameMatch.setStatus(MatchStatus.in_progress);
+            gameMatch.setStartedAt(Instant.now());
+            gameMatchRepository.save(gameMatch);
+        }
+    }
 
     public void handleGameMatchResult(GameMatchResult result) {
         String gameMatchUuid = result.matchUuid();

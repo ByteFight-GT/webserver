@@ -64,6 +64,6 @@ class RabbitMQServiceIT extends FullStackIntegrationTestBase {
         GameMatchJob received = (GameMatchJob) message;
         assertThat(received.getCompetitionSlug()).isEqualTo("test");
         assertThat(received.getLadder()).isEqualTo("ladder1");
-        assertThat(received.getGameMatchUuid()).isEqualTo("match-1");
+        assertThat(received.getUuid()).isEqualTo("match-1");
     }
 }

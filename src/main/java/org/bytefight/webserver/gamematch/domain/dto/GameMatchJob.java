@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class GameMatchJob implements Serializable {
-    @NotNull private String gameMatchUuid;
+    @NotNull private String uuid;
     @NotNull private String competitionSlug;
     @NotNull private String teamAUuid;
     @NotNull private String teamBUuid;
@@ -22,7 +22,7 @@ public class GameMatchJob implements Serializable {
     }
 
     public GameMatchJob(
-            String gameMatchUuid,
+            String uuid,
             String competitionSlug,
             String teamAUuid,
             String teamBUuid,
@@ -32,7 +32,7 @@ public class GameMatchJob implements Serializable {
             MatchReason reason,
             Map<String, Object> matchSettings
     ) {
-        this.gameMatchUuid = gameMatchUuid;
+        this.uuid = uuid;
         this.competitionSlug = competitionSlug;
         this.teamAUuid = teamAUuid;
         this.teamBUuid = teamBUuid;
@@ -57,12 +57,12 @@ public class GameMatchJob implements Serializable {
         );
     }
 
-    public String getGameMatchUuid() {
-        return gameMatchUuid;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setGameMatchUuid(String gameMatchUuid) {
-        this.gameMatchUuid = gameMatchUuid;
+    public void setUuid(String gameMatchUuid) {
+        this.uuid = gameMatchUuid;
     }
 
     public String getCompetitionSlug() {
