@@ -55,13 +55,7 @@ public class MatchMaker {
         return edges.stream().map((edge) -> {
             Team teamOne = teams.get(edge[0]);
             Team teamTwo = teams.get(edge[1]);
-            return gameMatchService.createMatch(
-                    teamOne.getUuid().toString(),
-                    teamTwo.getUuid().toString(),
-                    teamOne.getCurrentSubmission().getUuid().toString(),
-                    teamTwo.getCurrentSubmission().getUuid().toString(),
-                    MatchReason.ladder
-            );
+            return new GameMatch();
         }).toList();
     }
 

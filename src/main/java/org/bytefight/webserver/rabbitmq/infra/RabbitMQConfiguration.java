@@ -1,9 +1,10 @@
-package org.bytefight.webserver.rabbitMQ.infra;
+package org.bytefight.webserver.rabbitmq.infra;
 
 
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.core.Queue;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,8 +22,8 @@ public class RabbitMQConfiguration {
     @Value("${spring.rabbitmq.uri}")
     private String rabbitMQUri;
 
-    public static final String GAME_MATCH_QUEUE = "gameMatchQueue";
-    public static final String GAME_MATCH_RESULTS = "gameMatchResults";
+    public static final String GAME_MATCH_EXCHANGE = "match.schedule";
+    public static final String GAME_MATCH_RESULTS = "match.results";
 
     @Bean
     public ConnectionFactory connectionFactory() {
@@ -40,15 +41,13 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public Queue gameMatchJobQueue() {
-        Map<String, Object> args = new HashMap<>();
-        args.put("x-max-priority", 10);
-        return new Queue(GAME_MATCH_QUEUE, true, false, false, args);
+    public Queue gameMatchResultQueue() {
+        return new Queue(GAME_MATCH_RESULTS, true);
     }
 
     @Bean
-    public Queue gameMatchResultQueue() {
-        return new Queue(GAME_MATCH_RESULTS, true);
+    public TopicExchange gameMatchExchange() {
+        return new TopicExchange(GAME_MATCH_EXCHANGE, true, false);
     }
 
     @Bean

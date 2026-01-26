@@ -51,6 +51,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers:3.3.5")
     testImplementation("org.testcontainers:postgresql:1.18.3")
     testImplementation("org.testcontainers:junit-jupiter:1.18.3")
+    testImplementation("org.testcontainers:rabbitmq:1.18.3")
     testImplementation("org.postgresql:postgresql")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.security:spring-security-test")

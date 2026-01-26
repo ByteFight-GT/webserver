@@ -1,8 +1,8 @@
-package org.bytefight.webserver.rabbitMQ.application;
+package org.bytefight.webserver.rabbitmq.application;
 
 import org.bytefight.webserver.gamematch.domain.GameMatchResult;
 import org.bytefight.webserver.gamematch.application.GameMatchResultHandler;
-import org.bytefight.webserver.rabbitMQ.infra.RabbitMQConfiguration;
+import org.bytefight.webserver.rabbitmq.infra.RabbitMQConfiguration;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
