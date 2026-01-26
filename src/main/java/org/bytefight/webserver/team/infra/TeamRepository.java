@@ -1,0 +1,31 @@
+package org.bytefight.webserver.team.infra;
+
+import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.team.domain.Team;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+
+@Repository
+public interface TeamRepository extends JpaRepository<Team, Long> {
+    boolean existsByCompetitionAndNameNormalized(Competition competition, String nameNormalized);
+    boolean existsByJoinCode(String joinCode);
+
+    Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
+    Optional<Team> findByCompetitionAndJoinCodeAndIsDeletedIsFalse(Competition competition, String joinCode);
+
+    int countByCurrentSubmissionNotNull();
+    Optional<Team> findByJoinCode(String joinCode);
+    Optional<Team> findByUuid(UUID uuid);
+    boolean existsByUuid(UUID uuid);
+
+    List<Team> findAllByIsDeletedFalse();
+
+//    Optional<Integer> findRankByUuid(UUID uuid);
+
+    Optional<Team> findByCompetitionAndUuid(Competition competition, UUID uuid);
+}
