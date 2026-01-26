@@ -1,9 +1,9 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchSearchService;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchDto;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.application.GameMatchSearchService;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

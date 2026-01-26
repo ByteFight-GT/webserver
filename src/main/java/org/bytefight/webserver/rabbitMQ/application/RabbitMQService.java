@@ -1,7 +1,7 @@
 package org.bytefight.webserver.rabbitMQ.application;
 
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchJob;
-import org.bytefight.webserver.gameMatch.domain.GameMatchResult;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
+import org.bytefight.webserver.gamematch.domain.GameMatchResult;
 import org.bytefight.webserver.rabbitMQ.infra.RabbitMQConfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;

@@ -1,8 +1,8 @@
-package org.bytefight.webserver.gameMatch.application;
+package org.bytefight.webserver.gamematch.application;
 
-import org.bytefight.webserver.gameMatch.domain.dto.AdminGameMatchDto;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.domain.dto.AdminGameMatchDto;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

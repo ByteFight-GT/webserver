@@ -1,4 +1,4 @@
-package org.bytefight.webserver.gameMatch.application;
+package org.bytefight.webserver.gamematch.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

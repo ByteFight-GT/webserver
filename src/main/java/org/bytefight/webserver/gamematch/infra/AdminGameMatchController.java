@@ -1,11 +1,11 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
-import org.bytefight.webserver.gameMatch.application.AdminGameMatchService;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
-import org.bytefight.webserver.gameMatch.domain.dto.AdminGameMatchDto;
+import org.bytefight.webserver.gamematch.application.AdminGameMatchService;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.dto.AdminGameMatchDto;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

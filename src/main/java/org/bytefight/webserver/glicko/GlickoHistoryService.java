@@ -1,7 +1,7 @@
 package org.bytefight.webserver.glicko;
 
 import org.bytefight.webserver.config.ClockConfig;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;

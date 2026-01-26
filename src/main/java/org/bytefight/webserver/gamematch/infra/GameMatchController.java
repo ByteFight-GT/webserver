@@ -1,11 +1,11 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
-import org.bytefight.webserver.gameMatch.domain.MatchSubmissionRequest;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchDto;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchJob;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchSubmissionRequest;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.team.domain.dto.StatsDTO;
 import lombok.RequiredArgsConstructor;

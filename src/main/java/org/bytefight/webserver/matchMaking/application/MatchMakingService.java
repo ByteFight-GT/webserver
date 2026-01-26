@@ -1,9 +1,9 @@
 package org.bytefight.webserver.matchMaking.application;
 
 import org.bytefight.webserver.config.ClockConfig;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.matchMaking.domain.MATCHMAKING_REASON;
 import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.matchMaking.infra.MatchMakingEventRepository;

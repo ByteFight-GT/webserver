@@ -1,6 +1,6 @@
 package org.bytefight.webserver.glicko;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

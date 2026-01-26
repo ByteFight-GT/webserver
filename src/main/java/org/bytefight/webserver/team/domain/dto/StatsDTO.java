@@ -1,6 +1,6 @@
 package org.bytefight.webserver.team.domain.dto;
 
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import lombok.Builder;
 import lombok.Data;
 
