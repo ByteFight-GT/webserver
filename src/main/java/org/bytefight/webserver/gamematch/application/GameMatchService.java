@@ -87,6 +87,10 @@ public class GameMatchService {
     }
 
     public GameMatch scheduleMatch(GameMatch match) {
+        if(!match.getCompetition().isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
+        }
+
         GameMatchJob job = GameMatchJob.from(match);
         try {
             rabbitMQService.enqueueGameMatchJob(job);
