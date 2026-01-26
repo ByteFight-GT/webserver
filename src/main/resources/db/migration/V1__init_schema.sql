@@ -17,6 +17,12 @@ CREATE TYPE "match_reason" AS ENUM (
     'other'
     );
 
+CREATE TYPE "game_match_file_visibility" AS ENUM (
+    'everyone',
+    'team',
+    'admin'
+    );
+
 CREATE TYPE "submission_validity" AS ENUM (
     'valid',
     'invalid',
@@ -178,7 +184,8 @@ CREATE TABLE "game_match_files" (
                                     "uuid" uuid NOT NULL,
                                     "slug" varchar(50) NOT NULL,
                                     "file_record_id" bigint NOT NULL,
-                                    "team_id" bigint
+                                    "team_id" bigint,
+                                    "visibility" game_match_file_visibility NOT NULL
 );
 
 CREATE TABLE "matchmaking_events" (
