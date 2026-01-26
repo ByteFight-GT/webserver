@@ -5,15 +5,18 @@ import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
+import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.domain.StoredObject;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.SubmissionDTO;
+import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,21 +37,21 @@ public class SubmissionService {
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-    public Submission createSubmission(String teamUuid, MultipartFile file, Boolean isAutoSet) throws IOException {
+    public Submission createSubmission(Team team, String description, MultipartFile file, Boolean isAutoSet) throws IOException {
         validateFile(file);
-
-        Team team = teamRepository.findByUuid(UUID.fromString(teamUuid))
-            .orElseThrow(() -> new EntityNotFoundException("Team not found with uuid: " + teamUuid));
-
-        StoredObject storedObject = storageService.store(file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
+        FileRecord storedFile = storageService.store(file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
 
         Submission submission = new Submission();
-//        submission.setStorageFileUuid(storedObject.getUuid());
-//        submission.setSubmissionValidity(SubmissionValidity.NOT_EVALUATED);
-//        submission.setSource(STORAGE_SOURCE.LOCAL);
-//        submission.setTeam(team);
-//        submission.setName(file.getOriginalFilename());
-//        submission.setIsAutoSet(isAutoSet);
+        submission.setUuid(storedFile.getUuid());
+        submission.setFileRecord(storedFile);
+        submission.setTeam(team);
+        submission.setDescription(description);
+
+        if(isAutoSet) {
+            submission.setValidity(SubmissionValidity.not_evaluated_autoset);
+        } else {
+            submission.setValidity(SubmissionValidity.not_evaluated);
+        }
 
         return submissionRepository.save(submission);
     }

@@ -5,9 +5,7 @@ import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.UUID;
 
 public class GameMatchJob implements Serializable {
     @NotNull private String gameMatchUuid;
@@ -46,44 +44,17 @@ public class GameMatchJob implements Serializable {
     }
 
     public static GameMatchJob from(GameMatch gameMatch) {
-        Object competition = getField(gameMatch, "competition");
-        Object teamA = getField(gameMatch, "teamA");
-        Object teamB = getField(gameMatch, "teamB");
-        Object submissionA = getField(gameMatch, "submissionA");
-        Object submissionB = getField(gameMatch, "submissionB");
-        UUID matchUuid = getField(gameMatch, "uuid");
-        String ladder = getField(gameMatch, "ladder");
-        MatchReason reason = getField(gameMatch, "reason");
-        Map<String, Object> matchSettings = getField(gameMatch, "matchSettings");
-
-        String competitionSlug = competition != null ? getField(competition, "slug") : null;
-        UUID teamAUuid = teamA != null ? getField(teamA, "uuid") : null;
-        UUID teamBUuid = teamB != null ? getField(teamB, "uuid") : null;
-        UUID submissionAUuid = submissionA != null ? getField(submissionA, "uuid") : null;
-        UUID submissionBUuid = submissionB != null ? getField(submissionB, "uuid") : null;
-
         return new GameMatchJob(
-                matchUuid != null ? matchUuid.toString() : null,
-                competitionSlug,
-                teamAUuid != null ? teamAUuid.toString() : null,
-                teamBUuid != null ? teamBUuid.toString() : null,
-                submissionAUuid != null ? submissionAUuid.toString() : null,
-                submissionBUuid != null ? submissionBUuid.toString() : null,
-                ladder,
-                reason,
-                matchSettings
+                gameMatch.getUuid().toString(),
+                gameMatch.getCompetition().getSlug(),
+                gameMatch.getTeamA().getUuid().toString(),
+                gameMatch.getTeamB().getUuid().toString(),
+                gameMatch.getSubmissionA().getUuid().toString(),
+                gameMatch.getSubmissionB().getUuid().toString(),
+                gameMatch.getLadder(),
+                gameMatch.getReason(),
+                gameMatch.getMatchSettings()
         );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T getField(Object target, String name) {
-        try {
-            Field field = target.getClass().getDeclaredField(name);
-            field.setAccessible(true);
-            return (T) field.get(target);
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
-            throw new IllegalStateException("Missing field " + name, ex);
-        }
     }
 
     public String getGameMatchUuid() {
