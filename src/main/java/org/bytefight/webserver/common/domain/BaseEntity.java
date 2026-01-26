@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * Contains fields common to all entities. All entities in this project should be a direct/indirect subclass of this entity.
@@ -31,5 +32,16 @@ public abstract class BaseEntity {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = Instant.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BaseEntity that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

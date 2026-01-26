@@ -73,17 +73,17 @@ public class ScrimmageMatchController {
 
         List<ScrimmageMatchDTO> scrimmages = new ArrayList<ScrimmageMatchDTO>();
         for (int i = 0; i < number; i++) {
-            GameMatch match = gameMatchService.createMatch(
-                    selfTeam.getUuid().toString(),
-                    opponentTeam.getUuid().toString(),
-                    team1CurrentSubmission.get().getUuid().toString(),
-                    team2CurrentSubmission.get().getUuid().toString(),
-                    MatchReason.scrimmage
-            );
-
-            gameMatchService.queueMatch(match);
-            ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, selfTeam));
-            scrimmages.add(scrimmageMatchDTO);
+//            GameMatch match = gameMatchService.createMatch(
+//                    selfTeam.getUuid().toString(),
+//                    opponentTeam.getUuid().toString(),
+//                    team1CurrentSubmission.get().getUuid().toString(),
+//                    team2CurrentSubmission.get().getUuid().toString(),
+//                    MatchReason.scrimmage
+//            );
+//
+//            gameMatchService.queueMatch(match);
+//            ScrimmageMatchDTO scrimmageMatchDTO = ScrimmageMatchDTO.fromEntity(scrimmageMatchService.createScrimmageMatchData(match, selfTeam));
+//            scrimmages.add(scrimmageMatchDTO);
         }
         return ResponseEntity.ok(scrimmages);
     }
