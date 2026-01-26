@@ -1,8 +1,8 @@
-package org.bytefight.webserver.gameMatch.domain.dto;
+package org.bytefight.webserver.gamematch.domain.dto;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameMatchDto {
+public class AdminGameMatchDto {
+    @NotNull private Long id;
     @NotNull private String uuid;
     @NotNull private String teamOneName;
     @NotNull private String teamTwoName;
@@ -31,9 +32,10 @@ public class GameMatchDto {
     private String map;
 
     // Convert from Entity to DTO
-    public static GameMatchDto fromEntity(GameMatch gameMatch) {
-        return GameMatchDto.builder()
-//            .uuid(gameMatch.getUuid().toString())
+    public static AdminGameMatchDto fromEntity(GameMatch gameMatch) {
+        return AdminGameMatchDto.builder()
+            .id(gameMatch.getId())
+            .uuid(gameMatch.getUuid().toString())
 //            .teamOneName(gameMatch.getTeamOne().getName())
 //            .teamTwoName(gameMatch.getTeamTwo().getName())
 //            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())

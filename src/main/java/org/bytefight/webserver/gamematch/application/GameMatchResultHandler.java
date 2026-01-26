@@ -1,9 +1,9 @@
-package org.bytefight.webserver.gameMatch.application;
+package org.bytefight.webserver.gamematch.application;
 
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.GameMatchResult;
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatchResult;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.glicko.GlickoCalculator;
 import org.bytefight.webserver.glicko.GlickoChanges;

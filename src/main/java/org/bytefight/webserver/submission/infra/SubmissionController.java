@@ -1,7 +1,7 @@
 package org.bytefight.webserver.submission.infra;
 
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.rabbitMQ.application.RabbitMQService;

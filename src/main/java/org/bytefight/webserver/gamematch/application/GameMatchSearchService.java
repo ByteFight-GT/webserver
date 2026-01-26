@@ -1,9 +1,9 @@
-package org.bytefight.webserver.gameMatch.application;
+package org.bytefight.webserver.gamematch.application;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchDto;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
-import org.bytefight.webserver.gameMatch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import jakarta.annotation.PostConstruct;

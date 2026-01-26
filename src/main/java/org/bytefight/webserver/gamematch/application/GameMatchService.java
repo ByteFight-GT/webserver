@@ -1,12 +1,12 @@
-package org.bytefight.webserver.gameMatch.application;
+package org.bytefight.webserver.gamematch.application;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchDto;
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchJob;
-import org.bytefight.webserver.gameMatch.infra.GameMatchProperties;
-import org.bytefight.webserver.gameMatch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
+import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.rabbitMQ.application.RabbitMQService;
 import org.bytefight.webserver.submission.application.SubmissionService;

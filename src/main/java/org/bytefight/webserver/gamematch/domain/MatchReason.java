@@ -1,4 +1,4 @@
-package org.bytefight.webserver.gameMatch.domain;
+package org.bytefight.webserver.gamematch.domain;
 
 public enum MatchReason {
     validation,

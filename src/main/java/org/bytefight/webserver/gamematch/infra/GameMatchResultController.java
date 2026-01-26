@@ -1,7 +1,7 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchResultHandler;
-import org.bytefight.webserver.gameMatch.domain.GameMatchResult;
+import org.bytefight.webserver.gamematch.application.GameMatchResultHandler;
+import org.bytefight.webserver.gamematch.domain.GameMatchResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

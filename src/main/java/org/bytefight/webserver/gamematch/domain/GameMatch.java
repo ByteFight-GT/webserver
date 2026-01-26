@@ -1,4 +1,4 @@
-package org.bytefight.webserver.gameMatch.domain;
+package org.bytefight.webserver.gamematch.domain;
 
 import org.bytefight.webserver.common.domain.AuditableEntity;
 import org.bytefight.webserver.competition.domain.Competition;

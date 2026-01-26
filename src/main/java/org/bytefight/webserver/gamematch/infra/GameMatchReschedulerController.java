@@ -1,6 +1,6 @@
-package org.bytefight.webserver.gameMatch.infra;
+package org.bytefight.webserver.gamematch.infra;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
