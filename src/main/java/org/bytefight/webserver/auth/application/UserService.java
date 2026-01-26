@@ -1,6 +1,5 @@
 package org.bytefight.webserver.auth.application;
 
-import com.example.botfightwebserver.auth.domain.*;
 import org.bytefight.webserver.auth.domain.EmailAlreadyRegisteredException;
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import org.bytefight.webserver.auth.domain.User;

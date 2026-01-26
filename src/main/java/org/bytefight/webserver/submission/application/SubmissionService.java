@@ -6,7 +6,6 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.StoredObject;
-import com.example.botfightwebserver.submission.domain.*;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.SubmissionDTO;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
