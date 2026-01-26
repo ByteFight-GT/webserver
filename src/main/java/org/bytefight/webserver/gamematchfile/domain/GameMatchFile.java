@@ -1,12 +1,16 @@
-package org.bytefight.webserver.gamematch.domain;
+package org.bytefight.webserver.gamematchfile.domain;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bytefight.webserver.storage.domain.FileRecord;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -42,4 +46,9 @@ public class GameMatchFile extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "visibility", nullable = false, columnDefinition = "game_match_file_visibility")
+    private GameMatchFileVisibility visibility;
 }
