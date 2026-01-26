@@ -72,6 +72,7 @@ public class GameMatchService {
         gameMatch.setTeamB(teamB);
         gameMatch.setSubmissionA(submissionA);
         gameMatch.setSubmissionB(submissionB);
+        gameMatch.setMatchSettings(java.util.Collections.emptyMap());
         gameMatch.setStatus(MatchStatus.created);
         gameMatch.setLadder(ladder.trim().toLowerCase());
         gameMatch.setReason(reason);

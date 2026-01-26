@@ -54,10 +54,12 @@ public class GameMatch extends AuditableEntity {
     private Map<String, Object> matchSettings;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "match_status")
     private MatchStatus status = MatchStatus.scheduling;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "reason", nullable = false, columnDefinition = "match_reason")
     private MatchReason reason = MatchReason.other;
 
