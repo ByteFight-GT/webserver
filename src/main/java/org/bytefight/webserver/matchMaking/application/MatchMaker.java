@@ -1,8 +1,8 @@
 package org.bytefight.webserver.matchMaking.application;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.glicko.GlickoHistoryService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.application.TeamService;

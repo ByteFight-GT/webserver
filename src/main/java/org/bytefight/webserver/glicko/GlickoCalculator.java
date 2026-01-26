@@ -1,6 +1,6 @@
 package org.bytefight.webserver.glicko;
 
-import org.bytefight.webserver.gameMatch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

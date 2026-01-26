@@ -1,7 +1,7 @@
-package org.bytefight.webserver.gameMatch.domain.dto;
+package org.bytefight.webserver.gamematch.domain.dto;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.submission.domain.STORAGE_SOURCE;
 
 import java.io.Serializable;

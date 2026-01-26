@@ -1,6 +1,6 @@
 package org.bytefight.webserver.gameMatchLogs;
 
-import org.bytefight.webserver.gameMatch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;

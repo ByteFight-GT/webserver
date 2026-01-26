@@ -1,6 +1,6 @@
 package org.bytefight.webserver.gameMatchLogs;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
