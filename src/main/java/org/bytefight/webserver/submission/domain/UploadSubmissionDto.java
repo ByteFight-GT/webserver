@@ -6,5 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Value
 public class UploadSubmissionDto {
     MultipartFile file;
+    String description;
     Boolean isAutoSet;
 }

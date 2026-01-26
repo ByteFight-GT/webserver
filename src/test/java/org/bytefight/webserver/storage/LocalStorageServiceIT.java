@@ -71,7 +71,7 @@ class LocalStorageServiceIT extends FullStackIntegrationTestBase {
                 content
         );
 
-        StoredObject stored = localStorageService.store(file, "submissions/test/", "example.txt");
+        StoredObject stored = StoredObject.from(localStorageService.store(file, "submissions/test/", "example.txt"));
 
         assertThat(stored).isNotNull();
 
