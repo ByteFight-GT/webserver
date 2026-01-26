@@ -4,7 +4,7 @@ import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
-import org.bytefight.webserver.rabbitMQ.application.RabbitMQService;
+import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.submission.application.SubmissionService;
 import lombok.RequiredArgsConstructor;

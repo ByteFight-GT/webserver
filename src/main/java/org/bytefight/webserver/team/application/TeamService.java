@@ -215,15 +215,6 @@ public class TeamService {
         return -1;
     }
 
-    public void validateTeams(String team1Uuid, String team2Uuid) {
-        if (team1Uuid == null || team2Uuid == null) {
-            throw new IllegalArgumentException("TeamIds cannot be null");
-        }
-        if (!teamRepository.existsByUuid(UUID.fromString(team1Uuid)) || !teamRepository.existsByUuid(UUID.fromString(team2Uuid))) {
-            throw new IllegalArgumentException("One or both teams do not exist");
-        }
-    }
-
     public Team updateAfterMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
                                  boolean isWin, boolean isDraw) {
         if (isWin && isDraw) {

@@ -8,7 +8,7 @@ import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.glicko.GlickoCalculator;
 import org.bytefight.webserver.glicko.GlickoChanges;
 import org.bytefight.webserver.glicko.GlickoHistoryService;
-import org.bytefight.webserver.rabbitMQ.application.RabbitMQService;
+import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.application.SubmissionService;
 import org.bytefight.webserver.team.domain.Team;

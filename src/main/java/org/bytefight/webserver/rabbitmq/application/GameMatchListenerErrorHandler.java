@@ -1,4 +1,4 @@
-package org.bytefight.webserver.rabbitMQ.application;
+package org.bytefight.webserver.rabbitmq.application;
 
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
