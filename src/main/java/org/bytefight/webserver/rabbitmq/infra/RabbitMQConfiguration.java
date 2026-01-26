@@ -23,6 +23,7 @@ public class RabbitMQConfiguration {
     private String rabbitMQUri;
 
     public static final String GAME_MATCH_EXCHANGE = "match.schedule";
+    public static final String GAME_MATCH_UPDATES = "match.updates";
     public static final String GAME_MATCH_RESULTS = "match.results";
 
     @Bean
@@ -38,6 +39,11 @@ public class RabbitMQConfiguration {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jsonMessageConverter());
         return factory;
+    }
+
+    @Bean
+    public Queue gameMatchUpdateQueue() {
+        return new Queue(GAME_MATCH_UPDATES, true);
     }
 
     @Bean

@@ -92,7 +92,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
         GameMatchJob received = (GameMatchJob) message;
         assertThat(received.getCompetitionSlug()).isEqualTo(competition.getSlug());
         assertThat(received.getLadder()).isEqualTo(ladder);
-        assertThat(received.getGameMatchUuid()).isEqualTo(match.getUuid().toString());
+        assertThat(received.getUuid()).isEqualTo(match.getUuid().toString());
     }
 
     private Submission createSubmission(Team team) {
