@@ -22,8 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-@Tag(name = "Competitions (Private)", description = """
-        """)
+@Tag(name = "Competitions (Private)", description = "Private competition-specific endpoints")
 @RestController
 @RequestMapping("/api/v1/competition")
 @RequiredArgsConstructor
