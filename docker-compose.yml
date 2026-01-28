@@ -29,14 +29,15 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./storage:/app/storage
+      - storage:/app/storage
     networks:
       - bytefight-net
 
 volumes:
   db_data:
     driver: local
-  pgadmin_data:
+  storage:
+    driver: local
 
 networks:
   bytefight-net:
