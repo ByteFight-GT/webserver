@@ -16,7 +16,7 @@ jobs:
 
       - name: Deploy
         env:
-          COMPOSE_PROJECT_NAME: bytefight-staging
+          COMPOSE_PROJECT_NAME: bytefight-staging-webserver
         run: |
           set -euo pipefail
           docker compose up -d --build --remove-orphans
