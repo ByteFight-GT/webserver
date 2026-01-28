@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -27,7 +25,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:8080"
+      - "${HOST_PORT}:8080"
     volumes:
       - storage:/app/storage
     networks:
