@@ -1,0 +1,38 @@
+name: Staging CI + Deploy
+
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  integration_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Run tests
+        run: ./gradlew test
+
+  deploy:
+    needs: integration_tests
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy env file
+        run: cp /srv/staging/backend/.env .env
+
+      - name: Deploy
+        env:
+          COMPOSE_PROJECT_NAME: bytefight-staging
+        run: |
+          set -euo pipefail
+          docker compose up -d --build --remove-orphans
