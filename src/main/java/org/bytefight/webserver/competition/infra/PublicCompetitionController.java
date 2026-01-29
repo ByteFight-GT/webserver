@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Tag(name = "Competitions (Public)", description = """
         Public, read-only endpoints for browsing competitions and their related data,
         including teams, standings, and basic metadata.
@@ -35,5 +38,14 @@ public class PublicCompetitionController {
         Competition competition = competitionService.getCompetitionBySlug(slug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
         return ResponseEntity.ok(CompetitionDto.from(competition));
+    }
+
+    @GetMapping("/")
+    @Operation(
+            operationId = "getAllCompetitions",
+            summary = "Return all competitions"
+    )
+    public ResponseEntity<List<CompetitionDto>> getAllCompetitions() {
+        return ResponseEntity.ok(competitionService.getAllCompetitions().stream().map(CompetitionDto::from).collect(Collectors.toList()));
     }
 }
