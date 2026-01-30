@@ -1,4 +1,5 @@
-The ultimate goal of this project is to restructure ByteFight's webserver into a form that can be reused for all competitions in the foreseeable future, and to create a foundation that can be consistently extended to meet evolving needs. The idea is that we will never need to change the fundamentals of the codebase as much as we are today.
+The ultimate goal of this project is to restructure ByteFight's webserver into a form that can be reused for all competitions in the foreseeable future, and to create a foundation that can be consistently extended to meet evolving needs. The idea is that we will never need to change the fundamentals of the codebase this much again.
+
 ##  Summary
 
 - Multiple competition support. This is the big one. The current platform can only hold information about a single competition, and this limitation traces back to the database schema itself. Therefore, we need to restructure the database completely to define the notion of a 'competition' entity and the concept of a many-to-many relationship between competitions and players
