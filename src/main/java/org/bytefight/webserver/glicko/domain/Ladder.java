@@ -57,4 +57,48 @@ public class Ladder {
 
     @Column(name = "glicko_sigma_max")
     private Double glickoSigmaMax;
+
+    public Competition getCompetition() {
+        return competition;
+    }
+
+    public String getLadder() {
+        return ladder;
+    }
+
+    public double getGlickoDefaultRating() {
+        return glickoDefaultRating;
+    }
+
+    public double getGlickoDefaultRd() {
+        return glickoDefaultRd;
+    }
+
+    public double getGlickoRdMax() {
+        return glickoRdMax;
+    }
+
+    public Double getGlickoRdMin() {
+        return glickoRdMin;
+    }
+
+    public double getGlickoPhiInflationPerDay() {
+        return glickoPhiInflationPerDay;
+    }
+
+    public double getGlickoTau() {
+        return glickoTau;
+    }
+
+    public double getGlickoSigmaDefault() {
+        return glickoSigmaDefault;
+    }
+
+    public Double getGlickoSigmaMin() {
+        return glickoSigmaMin;
+    }
+
+    public Double getGlickoSigmaMax() {
+        return glickoSigmaMax;
+    }
 }
