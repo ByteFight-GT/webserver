@@ -38,4 +38,8 @@ public class Competition extends BaseEntity {
     public int hashCode() {
         return Objects.hashCode(slug);
     }
+
+    public String getSlug() {
+        return slug;
+    }
 }

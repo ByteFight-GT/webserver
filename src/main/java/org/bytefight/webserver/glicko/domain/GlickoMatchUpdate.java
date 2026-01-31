@@ -93,5 +93,49 @@ public class GlickoMatchUpdate {
         public int getDrawsDelta() {
             return drawsDelta;
         }
+
+        public void setTeam(Team team) {
+            this.team = team;
+        }
+
+        public void setOldRating(double oldRating) {
+            this.oldRating = oldRating;
+        }
+
+        public void setOldRd(double oldRd) {
+            this.oldRd = oldRd;
+        }
+
+        public void setOldVolatility(double oldVolatility) {
+            this.oldVolatility = oldVolatility;
+        }
+
+        public void setNewRating(double newRating) {
+            this.newRating = newRating;
+        }
+
+        public void setNewRd(double newRd) {
+            this.newRd = newRd;
+        }
+
+        public void setNewVolatility(double newVolatility) {
+            this.newVolatility = newVolatility;
+        }
+
+        public void setMatchesPlayedDelta(int matchesPlayedDelta) {
+            this.matchesPlayedDelta = matchesPlayedDelta;
+        }
+
+        public void setWinsDelta(int winsDelta) {
+            this.winsDelta = winsDelta;
+        }
+
+        public void setLossesDelta(int lossesDelta) {
+            this.lossesDelta = lossesDelta;
+        }
+
+        public void setDrawsDelta(int drawsDelta) {
+            this.drawsDelta = drawsDelta;
+        }
     }
 }
