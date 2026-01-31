@@ -20,7 +20,6 @@ public class GlickoService {
     private final TeamStatsRepository teamStatsRepository;
     private final TeamStatsService teamStatsService;
 
-    private static final double BASE_RATING = 1500.0;
     private static final double SCALE = 173.7178;
     private static final double EPSILON = 0.000001;
 
@@ -36,6 +35,7 @@ public class GlickoService {
         this.teamStatsService = teamStatsService;
     }
 
+    @Transactional
     public void processGameMatchResult(GameMatch gameMatch, boolean recalculate) {
         // Glicko updates should be idempotent or else TeamStats could diverge
         if(teamGlickoHistoryRepository.existsByGameMatch(gameMatch) && !recalculate) {
@@ -56,9 +56,10 @@ public class GlickoService {
         TeamStats teamBStats = teamStatsService.getTeamStatsCreateIfNotExist(teamB, gameMatch.getLadder());
 
         GlickoMatchUpdate glickoMatchUpdate = calculateMatchUpdate(teamAStats, teamBStats, ladder, gameMatch.getStatus());
+
+        applyGlickoMatchUpdate(glickoMatchUpdate, teamAStats, teamBStats);
     }
 
-    @Transactional
     public void applyGlickoMatchUpdate(GlickoMatchUpdate glickoMatchUpdate, TeamStats teamAStats, TeamStats teamBStats) {
         GlickoMatchUpdate.TeamUpdate teamAUpdate = glickoMatchUpdate.getTeamA();
         GlickoMatchUpdate.TeamUpdate teamBUpdate = glickoMatchUpdate.getTeamB();
@@ -126,7 +127,8 @@ public class GlickoService {
                 teamBStats.getGlickoRating(),
                 teamBStats.getGlickoRd(),
                 ladder,
-                scoreA
+                scoreA,
+                ladder.getGlickoDefaultRating()
         );
 
         TeamUpdateResult updatedB = calculateUpdatedRating(
@@ -136,7 +138,8 @@ public class GlickoService {
                 teamAStats.getGlickoRating(),
                 teamAStats.getGlickoRd(),
                 ladder,
-                scoreB
+                scoreB,
+                ladder.getGlickoDefaultRating()
         );
 
         int winsDeltaA = matchStatus == MatchStatus.team_a_win ? 1 : 0;
@@ -147,33 +150,31 @@ public class GlickoService {
         int lossesDeltaB = matchStatus == MatchStatus.team_a_win ? 1 : 0;
         int drawsDeltaB = matchStatus == MatchStatus.draw ? 1 : 0;
 
-        GlickoMatchUpdate.TeamUpdate teamAUpdate = new GlickoMatchUpdate.TeamUpdate(
-                teamAStats.getTeam(),
-                teamAStats.getGlickoRating(),
-                teamAStats.getGlickoRd(),
-                teamAStats.getGlickoVolatility(),
-                updatedA.newRating,
-                updatedA.newRd,
-                updatedA.newVolatility,
-                1,
-                winsDeltaA,
-                lossesDeltaA,
-                drawsDeltaA
-        );
+        GlickoMatchUpdate.TeamUpdate teamAUpdate = new GlickoMatchUpdate.TeamUpdate();
+        teamAUpdate.setTeam(teamAStats.getTeam());
+        teamAUpdate.setOldRating(teamAStats.getGlickoRating());
+        teamAUpdate.setOldRd(teamAStats.getGlickoRd());
+        teamAUpdate.setOldVolatility(teamAStats.getGlickoVolatility());
+        teamAUpdate.setNewRating(updatedA.newRating);
+        teamAUpdate.setNewRd(updatedA.newRd);
+        teamAUpdate.setNewVolatility(updatedA.newVolatility);
+        teamAUpdate.setMatchesPlayedDelta(1);
+        teamAUpdate.setWinsDelta(winsDeltaA);
+        teamAUpdate.setLossesDelta(lossesDeltaA);
+        teamAUpdate.setDrawsDelta(drawsDeltaA);
 
-        GlickoMatchUpdate.TeamUpdate teamBUpdate = new GlickoMatchUpdate.TeamUpdate(
-                teamBStats.getTeam(),
-                teamBStats.getGlickoRating(),
-                teamBStats.getGlickoRd(),
-                teamBStats.getGlickoVolatility(),
-                updatedB.newRating,
-                updatedB.newRd,
-                updatedB.newVolatility,
-                1,
-                winsDeltaB,
-                lossesDeltaB,
-                drawsDeltaB
-        );
+        GlickoMatchUpdate.TeamUpdate teamBUpdate = new GlickoMatchUpdate.TeamUpdate();
+        teamBUpdate.setTeam(teamBStats.getTeam());
+        teamBUpdate.setOldRating(teamBStats.getGlickoRating());
+        teamBUpdate.setOldRd(teamBStats.getGlickoRd());
+        teamBUpdate.setOldVolatility(teamBStats.getGlickoVolatility());
+        teamBUpdate.setNewRating(updatedB.newRating);
+        teamBUpdate.setNewRd(updatedB.newRd);
+        teamBUpdate.setNewVolatility(updatedB.newVolatility);
+        teamBUpdate.setMatchesPlayedDelta(1);
+        teamBUpdate.setWinsDelta(winsDeltaB);
+        teamBUpdate.setLossesDelta(lossesDeltaB);
+        teamBUpdate.setDrawsDelta(drawsDeltaB);
 
         return new GlickoMatchUpdate(ladder.getCompetition(), ladder, teamAUpdate, teamBUpdate);
     }
@@ -185,24 +186,25 @@ public class GlickoService {
             double opponentRating,
             double opponentRd,
             Ladder ladder,
-            double score
+            double score,
+            double baseRating
     ) {
-        double mu = (rating - BASE_RATING) / SCALE;
+        double mu = (rating - baseRating) / SCALE;
         double phi = rd / SCALE;
-        double muOpp = (opponentRating - BASE_RATING) / SCALE;
+        double muOpp = (opponentRating - baseRating) / SCALE;
         double phiOpp = opponentRd / SCALE;
 
         double g = 1.0 / Math.sqrt(1.0 + (3.0 * phiOpp * phiOpp) / (Math.PI * Math.PI));
         double e = 1.0 / (1.0 + Math.exp(-g * (mu - muOpp)));
         double v = 1.0 / (g * g * e * (1.0 - e));
         double delta = v * g * (score - e);
-
+    
         double newSigma = solveSigma(phi, volatility, delta, v, ladder.getGlickoTau());
         double phiStar = Math.sqrt(phi * phi + newSigma * newSigma);
         double newPhi = 1.0 / Math.sqrt((1.0 / (phiStar * phiStar)) + (1.0 / v));
         double newMu = mu + (newPhi * newPhi) * g * (score - e);
 
-        double newRating = newMu * SCALE + BASE_RATING;
+        double newRating = newMu * SCALE + baseRating;
         double newRd = newPhi * SCALE;
 
         if (ladder.getGlickoRdMax() > 0) {
