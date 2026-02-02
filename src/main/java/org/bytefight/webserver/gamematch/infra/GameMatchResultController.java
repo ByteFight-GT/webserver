@@ -29,13 +29,6 @@ public class GameMatchResultController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/submit/results")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> submitResults(@RequestBody GameMatchResult result) {
-
-        gameMatchResultHandler.submitGameMatchResults(result);
-        return ResponseEntity.accepted().build();    }
-
     @PostMapping("/queue/remove_all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GameMatchResult>> removeAllQueuedResults() {

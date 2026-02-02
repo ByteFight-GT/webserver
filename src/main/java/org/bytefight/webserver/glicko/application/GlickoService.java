@@ -38,11 +38,11 @@ public class GlickoService {
     @Transactional
     public void processGameMatchResult(GameMatch gameMatch, boolean recalculate) {
         // Glicko updates should be idempotent or else TeamStats could diverge
-        if(teamGlickoHistoryRepository.existsByGameMatch(gameMatch) && !recalculate) {
+        if (teamGlickoHistoryRepository.existsByGameMatch(gameMatch) && !recalculate) {
             return;
         }
 
-        if(gameMatch.getStatus() != MatchStatus.draw && gameMatch.getStatus() != MatchStatus.team_a_win && gameMatch.getStatus() != MatchStatus.team_b_win) {
+        if (gameMatch.getStatus() != MatchStatus.draw && gameMatch.getStatus() != MatchStatus.team_a_win && gameMatch.getStatus() != MatchStatus.team_b_win && !recalculate) {
             throw new IllegalStateException("Game match result is not draw or team_a_win or team_b_win");
         }
 
@@ -198,7 +198,7 @@ public class GlickoService {
         double e = 1.0 / (1.0 + Math.exp(-g * (mu - muOpp)));
         double v = 1.0 / (g * g * e * (1.0 - e));
         double delta = v * g * (score - e);
-    
+
         double newSigma = solveSigma(phi, volatility, delta, v, ladder.getGlickoTau());
         double phiStar = Math.sqrt(phi * phi + newSigma * newSigma);
         double newPhi = 1.0 / Math.sqrt((1.0 / (phiStar * phiStar)) + (1.0 / v));
