@@ -1,7 +1,7 @@
 package org.bytefight.webserver.tournament.application;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MATCH_STATUS;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  * Handles results for tournament GameMatch outcomes.
  *
  * Path:
- * - GameMatchResultHandler detects MATCH_REASON.TOURNAMENT
+ * - GameMatchResultHandler detects MatchReason.tournament
  * - TournamentResultHandler finds TournamentMatch by GameMatch
  * - Updates winner/loser, loss counts, elimination, and downstream slots
  * - Triggers scheduling of any newly-ready matches
@@ -45,15 +45,18 @@ public class TournamentResultHandler {
      * - Loser gains a loss; eliminated on second loss
      * - Winners and (if applicable) losers advance to next matches
      * - Grand final supports reset if winners-bracket champion loses once
+     * - Uses MatchStatus.team_a_win / team_b_win / draw from engine
      */
     @Transactional
-    public void handleTournamentResult(GameMatch gameMatch, MATCH_STATUS status) {
+    public void handleTournamentResult(GameMatch gameMatch, MatchStatus status) {
         TournamentMatch tournamentMatch = tournamentMatchRepository.findByGameMatch(gameMatch).orElseThrow();
         if (tournamentMatch.getState() == TournamentMatchState.COMPLETE || tournamentMatch.getState() == TournamentMatchState.SKIPPED) {
+            // Ignore duplicate or stale results.
             return;
         }
 
-        if (status == MATCH_STATUS.DRAW) {
+        if (status == MatchStatus.draw) {
+            // Draws do not advance the bracket; re-queue the same match later.
             tournamentMatch.setGameMatch(null);
             tournamentMatch.setState(TournamentMatchState.PENDING);
             tournamentMatchRepository.save(tournamentMatch);
@@ -64,6 +67,7 @@ public class TournamentResultHandler {
         TournamentEntry teamOne = tournamentMatch.getTeamOneEntry();
         TournamentEntry teamTwo = tournamentMatch.getTeamTwoEntry();
         if (teamOne == null || teamTwo == null) {
+            // Defensive: should not happen in normal scheduling, but treat as skip.
             tournamentMatch.setState(TournamentMatchState.SKIPPED);
             tournamentMatchRepository.save(tournamentMatch);
             matchScheduler.processTournament(tournamentMatch.getTournament());
@@ -72,10 +76,10 @@ public class TournamentResultHandler {
 
         TournamentEntry winner;
         TournamentEntry loser;
-        if (status == MATCH_STATUS.TEAM_ONE_WIN) {
+        if (status == MatchStatus.team_a_win) {
             winner = teamOne;
             loser = teamTwo;
-        } else if (status == MATCH_STATUS.TEAM_TWO_WIN) {
+        } else if (status == MatchStatus.team_b_win) {
             winner = teamTwo;
             loser = teamOne;
         } else {
@@ -87,6 +91,7 @@ public class TournamentResultHandler {
         tournamentMatch.setState(TournamentMatchState.COMPLETE);
         tournamentMatchRepository.save(tournamentMatch);
 
+        // Increment loss count and mark eliminated if this is the second loss.
         loser.setLosses(loser.getLosses() + 1);
         if (loser.getLosses() >= 2) {
             loser.setStatus(TournamentEntryStatus.ELIMINATED);
@@ -94,9 +99,11 @@ public class TournamentResultHandler {
         }
         tournamentEntryRepository.save(loser);
 
+        // Grand finals are special: the winners-bracket champion gets one extra life.
         boolean allowLoserAdvance = shouldAllowLoserAdvance(tournamentMatch, winner);
         handleGrandFinal(tournamentMatch, winner, loser);
 
+        // Advance winner always; advance loser only if still alive and allowed.
         TournamentEntry loserToAdvance = loser.getStatus() == TournamentEntryStatus.ELIMINATED || !allowLoserAdvance ? null : loser;
         matchScheduler.advanceFromCompletedMatch(tournamentMatch, winner, loserToAdvance);
         matchScheduler.processTournament(tournamentMatch.getTournament());
@@ -106,6 +113,7 @@ public class TournamentResultHandler {
         if (tournamentMatch.getBracketType() != TournamentBracketType.GRAND_FINAL) {
             return true;
         }
+        // If the winners-bracket champion loses in grand final, allow a reset match.
         return !winner.equals(tournamentMatch.getTeamOneEntry());
     }
 
@@ -118,10 +126,12 @@ public class TournamentResultHandler {
         if (tournamentMatch.getBracketType() == TournamentBracketType.GRAND_FINAL) {
             Tournament tournament = tournamentMatch.getTournament();
             if (winner.equals(tournamentMatch.getTeamOneEntry())) {
+                // Winners-bracket champion wins: tournament is complete.
                 tournament.setStatus(TournamentStatus.COMPLETE);
                 tournament.setFinishedAt(LocalDateTime.now(clock));
                 tournamentRepository.save(tournament);
             } else {
+                // Winners-bracket champion lost once: schedule grand-final reset.
                 TournamentMatch reset = tournamentMatchRepository
                         .findByTournamentAndBracketType(tournament, TournamentBracketType.GRAND_FINAL_RESET)
                         .orElseThrow();
@@ -131,6 +141,7 @@ public class TournamentResultHandler {
                 tournamentMatchRepository.save(reset);
             }
         } else if (tournamentMatch.getBracketType() == TournamentBracketType.GRAND_FINAL_RESET) {
+            // Reset winner is final champion.
             Tournament tournament = tournamentMatch.getTournament();
             tournament.setStatus(TournamentStatus.COMPLETE);
             tournament.setFinishedAt(LocalDateTime.now(clock));

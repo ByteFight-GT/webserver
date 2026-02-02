@@ -1,6 +1,6 @@
 package org.bytefight.webserver.tournament.infra;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository for bracket nodes (tournament_cursor_match table).
+ * Repository for bracket nodes (tournament_match table).
  */
 @Repository
 public interface TournamentMatchRepository extends JpaRepository<TournamentMatch, Long> {

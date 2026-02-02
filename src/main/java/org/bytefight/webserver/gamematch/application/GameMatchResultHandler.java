@@ -11,12 +11,17 @@ import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.application.GlickoService;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.application.SubmissionService;
 import org.bytefight.webserver.team.application.TeamService;
+import org.bytefight.webserver.tournament.application.TournamentResultHandler;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -26,10 +31,11 @@ public class GameMatchResultHandler {
   private final GameMatchService gameMatchService;
   private final GameMatchRepository gameMatchRepository;
 
-  private final TeamService teamService;
-  private final SubmissionService submissionService;
-  private final RabbitMQService rabbitMQService;
-  private final GlickoService glickoService;
+    private final TeamService teamService;
+    private final SubmissionService submissionService;
+    private final RabbitMQService rabbitMQService;
+    private final GlickoService glickoService;
+    private final TournamentResultHandler tournamentResultHandler;
 
   /**
    * This method handles lightweight match status updates emitted by the engine
@@ -57,6 +63,9 @@ public class GameMatchResultHandler {
     gameMatch.setFinishedAt(Instant.now());
     gameMatchRepository.save(gameMatch);
 
+        if (gameMatch.getReason() == MatchReason.tournament) {
+            tournamentResultHandler.handleTournamentResult(gameMatch, result.getStatus());
+        }
     if (gameMatch.getReason() != MatchReason.validation) {
       glickoService.processGameMatchResult(gameMatch, false);
     } else {

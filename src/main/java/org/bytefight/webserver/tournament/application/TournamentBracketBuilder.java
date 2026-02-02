@@ -45,19 +45,23 @@ public class TournamentBracketBuilder {
         int bracketSize = nextPowerOfTwo(teamCount);
         tournament.setBracketSize(bracketSize);
 
+        // Number of winners-bracket rounds for a power-of-two bracket.
         int rounds = (int) (Math.log(bracketSize) / Math.log(2));
 
         List<List<TournamentMatch>> winnersRounds = new ArrayList<>();
         List<List<TournamentMatch>> losersRounds = new ArrayList<>();
 
+        // Map seed -> entry so we can generate a standard seed order (1 vs N, 2 vs N-1, ...)
         Map<Integer, TournamentEntry> entryBySeed = entries.stream()
                 .collect(Collectors.toMap(TournamentEntry::getSeed, e -> e));
 
+        // Seed order length == bracketSize; missing seeds become null (byes)
         List<Integer> seedOrder = generateSeedOrder(bracketSize);
         List<TournamentEntry> orderedEntries = seedOrder.stream()
                 .map(seed -> entryBySeed.getOrDefault(seed, null))
                 .toList();
 
+        // Winners round 1: pair seed list into matches (with possible nulls)
         List<TournamentMatch> round1 = new ArrayList<>();
         for (int i = 0; i < bracketSize / 2; i++) {
             TournamentEntry teamOne = orderedEntries.get(i * 2);
@@ -66,6 +70,7 @@ public class TournamentBracketBuilder {
         }
         winnersRounds.add(round1);
 
+        // Winners round 2..N: empty matches that will be filled by advancement
         for (int r = 2; r <= rounds; r++) {
             int matches = bracketSize / (1 << r);
             List<TournamentMatch> round = new ArrayList<>();
@@ -75,6 +80,8 @@ public class TournamentBracketBuilder {
             winnersRounds.add(round);
         }
 
+        // Losers bracket: there are (2 * rounds) - 1 rounds in double elimination.
+        // The structure alternates between "merge" rounds and "advancement" rounds.
         int losersRoundsCount = (2 * rounds) - 1;
         for (int i = 1; i <= rounds - 1; i++) {
             int matches = 1 << (rounds - i - 1);
@@ -88,11 +95,13 @@ public class TournamentBracketBuilder {
             losersRounds.add(evenRound);
         }
         if (losersRoundsCount > 0) {
+            // Final losers bracket round (single match) if teams >= 2
             List<TournamentMatch> last = new ArrayList<>();
             last.add(createMatch(tournament, TournamentBracketType.LOSERS, losersRoundsCount, 1, null, null));
             losersRounds.add(last);
         }
 
+        // Grand final and optional reset match (if winners-bracket champion loses once)
         TournamentMatch grandFinal = createMatch(tournament, TournamentBracketType.GRAND_FINAL, 1, 1, null, null);
         TournamentMatch grandFinalReset = createMatch(tournament, TournamentBracketType.GRAND_FINAL_RESET, 1, 1, null, null);
 

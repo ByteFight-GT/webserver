@@ -44,7 +44,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
   Page<Team> findByCompetitionIdAndIdIn(Long competitionId, List<Long> ids, Pageable pageable);
 
-  //    Optional<Integer> findRankByUuid(UUID uuid);
+    List<Team> findByCompetitionAndIsDeletedFalseAndCurrentSubmissionIsNotNull(Competition competition);
+
+//    Optional<Integer> findRankByUuid(UUID uuid);
 
   Optional<Team> findByCompetitionAndUuid(Competition competition, UUID uuid);
 }

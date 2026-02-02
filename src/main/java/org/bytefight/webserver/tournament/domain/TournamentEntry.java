@@ -1,6 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
-import com.example.botfightwebserver.team.domain.Team;
+import org.bytefight.webserver.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +22,7 @@ import java.time.ZoneId;
  */
 @Entity
 @Table(
-        name = "tournament_cursor_entry",
+        name = "tournament_entry",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"tournament_id", "team_id"})
         }

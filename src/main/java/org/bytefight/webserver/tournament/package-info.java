@@ -1,5 +1,5 @@
 /**
- * Tournament Cursor module.
+ * Tournament module (competition-scoped).
  *
  * Purpose:
  * - Provide a native, DB-backed double-elimination tournament system
@@ -7,8 +7,8 @@
  * - Integrate with existing GameMatch queue and result processing
  *
  * High-level flow:
- * 1) Admin creates tournament (DRAFT)
- * 2) Admin enrolls teams (OPEN) -> TournamentEntry rows
+ * 1) Admin creates tournament for a competition (DRAFT)
+ * 2) Admin enrolls teams from that competition (OPEN) -> TournamentEntry rows
  * 3) Admin starts tournament (IN_PROGRESS)
  *    - TournamentBracketBuilder builds bracket graph (TournamentMatch rows)
  *    - TournamentMatchScheduler queues matches using GameMatchService

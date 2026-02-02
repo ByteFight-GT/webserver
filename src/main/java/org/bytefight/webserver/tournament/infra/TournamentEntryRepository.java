@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repository for tournament participants (tournament_cursor_entry table).
+ * Repository for tournament participants (tournament_entry table).
  */
 @Repository
 public interface TournamentEntryRepository extends JpaRepository<TournamentEntry, Long> {

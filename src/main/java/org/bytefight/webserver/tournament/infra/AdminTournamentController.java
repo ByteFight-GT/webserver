@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Admin endpoints for tournament lifecycle management.
+ * Admin endpoints for tournament lifecycle management, scoped to a competition.
  *
  * Data flow summary:
  * - HTTP request -> controller -> TournamentService -> repositories + bracket builder/scheduler
@@ -28,40 +28,44 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/tournament_cursor")
-public class AdminTournamentCursorController {
+@RequestMapping("/api/v1/admin/competition/{competitionSlug}/tournament")
+public class AdminTournamentController {
     private final TournamentService tournamentService;
 
     /**
-     * Creates a tournament in DRAFT state.
+     * Creates a tournament in DRAFT state for the given competition.
      *
      * Path:
      * - request body -> TournamentService.createTournament
-     * - persists Tournament in tournament_cursor table
+     * - persists Tournament in tournament table
      * - returns TournamentDto for frontend/admin confirmation
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TournamentDto> createTournament(@Valid @RequestBody CreateTournamentRequest request) {
-        return ResponseEntity.ok(tournamentService.createTournament(request));
+    public ResponseEntity<TournamentDto> createTournament(
+            @PathVariable String competitionSlug,
+            @Valid @RequestBody CreateTournamentRequest request
+    ) {
+        return ResponseEntity.ok(tournamentService.createTournament(competitionSlug, request));
     }
 
     /**
-     * Enrolls teams in a tournament and assigns seeds.
+     * Enrolls teams in a tournament and assigns seeds within the competition.
      *
      * Path:
      * - request body -> TournamentService.enrollTeams
      * - resolves teams (explicit list or all teams with submissions)
-     * - creates TournamentEntry rows (tournament_cursor_entry)
+     * - creates TournamentEntry rows (tournament_entry)
      * - returns list of TournamentEntryDto for frontend
      */
     @PostMapping("/{uuid}/entries")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<TournamentEntryDto>> enrollTeams(
+            @PathVariable String competitionSlug,
             @PathVariable String uuid,
             @RequestBody(required = false) EnrollTeamsRequest request
     ) {
-        return ResponseEntity.ok(tournamentService.enrollTeams(uuid, request));
+        return ResponseEntity.ok(tournamentService.enrollTeams(competitionSlug, uuid, request));
     }
 
     /**
@@ -70,12 +74,15 @@ public class AdminTournamentCursorController {
      * Path:
      * - controller -> TournamentService.startTournament
      * - bracket generation via TournamentBracketBuilder
-     * - TournamentMatch rows created (tournament_cursor_match)
-     * - TournamentMatchScheduler queues matches using GameMatchService (MATCH_REASON.TOURNAMENT)
+     * - TournamentMatch rows created (tournament_match)
+     * - TournamentMatchScheduler queues matches using GameMatchService (MatchReason.tournament)
      */
     @PostMapping("/{uuid}/start")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TournamentBracketDto> startTournament(@PathVariable String uuid) {
-        return ResponseEntity.ok(tournamentService.startTournament(uuid));
+    public ResponseEntity<TournamentBracketDto> startTournament(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.startTournament(competitionSlug, uuid));
     }
 }

@@ -1,6 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
-import com.example.botfightwebserver.team.domain.Team;
+import org.bytefight.webserver.team.domain.Team;
 import lombok.Builder;
 import lombok.Getter;
 

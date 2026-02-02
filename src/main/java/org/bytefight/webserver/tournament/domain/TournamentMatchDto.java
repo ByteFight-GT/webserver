@@ -1,6 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import lombok.Builder;
 import lombok.Getter;
 

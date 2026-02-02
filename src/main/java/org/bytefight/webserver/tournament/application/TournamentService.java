@@ -1,5 +1,7 @@
 package org.bytefight.webserver.tournament.application;
 
+import org.bytefight.webserver.competition.application.CompetitionService;
+import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
@@ -35,9 +37,13 @@ import java.util.UUID;
  * - Provide DTOs for visualization and frontend consumption
  *
  * Storage model:
- * - Tournament is the root table (tournament_cursor)
- * - TournamentEntry holds team + seed + loss count (tournament_cursor_entry)
- * - TournamentMatch holds bracket node graph and linkage (tournament_cursor_match)
+ * - Tournament is the root table (tournament), scoped to a Competition
+ * - TournamentEntry holds team + seed + loss count (tournament_entry)
+ * - TournamentMatch holds bracket node graph and linkage (tournament_match)
+ *
+ * Competition-aware behavior:
+ * - All reads/writes are scoped by competition slug
+ * - Teams enrolled must belong to the same competition
  */
 @Service
 @RequiredArgsConstructor
@@ -48,21 +54,31 @@ public class TournamentService {
     private final TournamentBracketBuilder bracketBuilder;
     private final TournamentMatchScheduler matchScheduler;
     private final TeamService teamService;
+    private final CompetitionService competitionService;
     private final Clock clock;
 
     /**
-     * Loads a tournament by uuid.
+     * Loads a competition by slug and normalizes it.
+     */
+    public Competition getCompetitionBySlug(String slug) {
+        return competitionService.getCompetitionBySlug(slug).orElseThrow();
+    }
+
+    /**
+     * Loads a tournament by uuid, scoped to a competition.
      * This is the root lookup for all public/admin reads.
      */
-    public Tournament getTournamentByUuid(String uuid) {
-        return tournamentRepository.findByUuid(UUID.fromString(uuid)).orElseThrow();
+    public Tournament getTournamentByUuid(String competitionSlug, String uuid) {
+        // Ensures tournament lookups are always scoped to a competition.
+        Competition competition = getCompetitionBySlug(competitionSlug);
+        return tournamentRepository.findByUuidAndCompetition(UUID.fromString(uuid), competition).orElseThrow();
     }
 
     /**
      * Lightweight tournament metadata for UI headers/status panels.
      */
-    public TournamentDto getTournamentDto(String uuid) {
-        return TournamentDto.from(getTournamentByUuid(uuid));
+    public TournamentDto getTournamentDto(String competitionSlug, String uuid) {
+        return TournamentDto.from(getTournamentByUuid(competitionSlug, uuid));
     }
 
     /**
@@ -72,12 +88,14 @@ public class TournamentService {
      * - Tournament -> TournamentEntry list (seeded teams)
      * - TournamentMatch list (bracket graph)
      */
-    public TournamentBracketDto getBracket(String uuid) {
-        Tournament tournament = getTournamentByUuid(uuid);
+    public TournamentBracketDto getBracket(String competitionSlug, String uuid) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
+        // Entries are sorted by seed to help frontend ordering.
         List<TournamentEntryDto> entries = tournamentEntryRepository.findByTournamentOrderBySeed(tournament)
                 .stream()
                 .map(TournamentEntryDto::from)
                 .toList();
+        // Matches are ordered by bracket type, round, then index for display.
         List<TournamentMatchDto> matches = tournamentMatchRepository
                 .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament)
                 .stream()
@@ -93,8 +111,8 @@ public class TournamentService {
     /**
      * Matches-only payload for timeline or bracket rendering.
      */
-    public List<TournamentMatchDto> getMatches(String uuid) {
-        Tournament tournament = getTournamentByUuid(uuid);
+    public List<TournamentMatchDto> getMatches(String competitionSlug, String uuid) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
         return tournamentMatchRepository
                 .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament)
                 .stream()
@@ -107,8 +125,11 @@ public class TournamentService {
      * No teams or matches are created here.
      */
     @Transactional
-    public TournamentDto createTournament(CreateTournamentRequest request) {
+    public TournamentDto createTournament(String competitionSlug, CreateTournamentRequest request) {
+        Competition competition = getCompetitionBySlug(competitionSlug);
+        // Tournaments are always created within a competition scope.
         Tournament tournament = Tournament.builder()
+                .competition(competition)
                 .name(request.getName())
                 .maxTeams(request.getMaxTeams())
                 .status(TournamentStatus.DRAFT)
@@ -118,7 +139,7 @@ public class TournamentService {
     }
 
     /**
-     * Enrolls teams and assigns seeds by descending glicko.
+     * Enrolls teams and assigns deterministic seeds by team name.
      *
      * Path:
      * - resolve team list (explicit UUIDs or all teams with submissions)
@@ -126,19 +147,25 @@ public class TournamentService {
      * - move tournament to OPEN
      */
     @Transactional
-    public List<TournamentEntryDto> enrollTeams(String tournamentUuid, EnrollTeamsRequest request) {
-        Tournament tournament = getTournamentByUuid(tournamentUuid);
+    public List<TournamentEntryDto> enrollTeams(String competitionSlug, String tournamentUuid, EnrollTeamsRequest request) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
         if (tournament.getStatus() != TournamentStatus.DRAFT && tournament.getStatus() != TournamentStatus.OPEN) {
             throw new IllegalArgumentException("Tournament is not open for enrollment.");
+        }
+        Competition competition = tournament.getCompetition();
+        if (!competition.isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
         }
 
         List<Team> teams;
         if (request == null || request.getTeamUuids() == null || request.getTeamUuids().isEmpty()) {
-            teams = teamService.getTeamsWithSubmission();
+            // Bulk enroll: all teams with submissions in this competition.
+            teams = teamService.getTeamsWithSubmission(competition);
         } else {
             teams = new ArrayList<>();
             for (String teamUuid : request.getTeamUuids()) {
-                Team team = teamService.getTeamByUuid(teamUuid).orElseThrow();
+                // Explicit enroll: enforce competition scope and submission availability.
+                Team team = teamService.getTeamByCompetitionAndUuid(competition, UUID.fromString(teamUuid)).orElseThrow();
                 if (team.getCurrentSubmission() == null) {
                     throw new IllegalArgumentException("Team " + team.getName() + " has no current submission.");
                 }
@@ -150,11 +177,13 @@ public class TournamentService {
             throw new IllegalArgumentException("Too many teams for this tournament.");
         }
 
-        teams.sort(Comparator.comparing(Team::getGlicko).reversed());
+        // Seed deterministically by team name (stable across environments).
+        teams.sort(Comparator.comparing(Team::getNameNormalized));
 
         List<TournamentEntry> entries = new ArrayList<>();
         int seed = 1;
         for (Team team : teams) {
+            // Each entry links a team to the tournament and tracks losses.
             TournamentEntry entry = TournamentEntry.builder()
                     .tournament(tournament)
                     .team(team)
@@ -177,16 +206,20 @@ public class TournamentService {
      * - queues initial matches into GameMatch queue
      */
     @Transactional
-    public TournamentBracketDto startTournament(String tournamentUuid) {
-        Tournament tournament = getTournamentByUuid(tournamentUuid);
+    public TournamentBracketDto startTournament(String competitionSlug, String tournamentUuid) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
         if (tournament.getStatus() == TournamentStatus.IN_PROGRESS || tournament.getStatus() == TournamentStatus.COMPLETE) {
             throw new IllegalArgumentException("Tournament already started or completed.");
+        }
+        if (!tournament.getCompetition().isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
         }
         List<TournamentEntry> entries = tournamentEntryRepository.findByTournamentOrderBySeed(tournament);
         if (entries.size() < 2) {
             throw new IllegalArgumentException("Tournament must have at least 2 teams.");
         }
 
+        // Build bracket graph in memory, then persist nodes and edges.
         TournamentBracketGraph graph = bracketBuilder.buildBracket(tournament, entries);
         tournamentMatchRepository.saveAll(graph.getAllMatches());
         bracketBuilder.wireWinnersAdvancement(graph.getWinnersRounds());
@@ -195,11 +228,12 @@ public class TournamentService {
         bracketBuilder.wireGrandFinalReset(graph.getGrandFinal(), graph.getGrandFinalReset());
         tournamentMatchRepository.saveAll(graph.getAllMatches());
 
+        // Mark tournament live and queue initial matches.
         tournament.setStatus(TournamentStatus.IN_PROGRESS);
         tournament.setStartedAt(LocalDateTime.now(clock));
         tournamentRepository.save(tournament);
 
         matchScheduler.processTournament(tournament);
-        return getBracket(tournamentUuid);
+        return getBracket(competitionSlug, tournamentUuid);
     }
 }

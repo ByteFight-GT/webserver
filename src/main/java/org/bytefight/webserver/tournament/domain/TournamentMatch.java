@@ -1,6 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ import java.util.UUID;
  * - Links to an actual GameMatch when queued/executed
  */
 @Entity
-@Table(name = "tournament_cursor_match")
+@Table(name = "tournament_match")
 @Getter
 @Setter
 @NoArgsConstructor

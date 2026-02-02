@@ -1,8 +1,8 @@
 package org.bytefight.webserver.tournament.application;
 
-import org.bytefight.webserver.gameMatch.application.GameMatchService;
-import org.bytefight.webserver.gameMatch.domain.GameMatch;
-import org.bytefight.webserver.gameMatch.domain.MATCH_REASON;
+import org.bytefight.webserver.gamematch.application.GameMatchService;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.tournament.domain.Tournament;
@@ -23,6 +23,10 @@ import java.util.List;
  * - Place winners/losers into downstream bracket nodes
  *
  * This is the bridge between tournament bracket graph and GameMatch queueing.
+ *
+ * Competition-aware behavior:
+ * - Only teams from the tournament's competition should appear here
+ * - Match creation uses MatchReason.tournament and ladder "tournament"
  */
 @Service
 @RequiredArgsConstructor
@@ -47,15 +51,18 @@ public class TournamentMatchScheduler {
                     .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament);
             for (TournamentMatch match : matches) {
                 if (match.getState() != TournamentMatchState.PENDING) {
+                    // Only process matches that haven't been queued or completed.
                     continue;
                 }
                 if (match.getTeamOneEntry() == null && match.getTeamTwoEntry() == null) {
+                    // Empty node (no teams feed into it). Mark skipped and move on.
                     match.setState(TournamentMatchState.SKIPPED);
                     tournamentMatchRepository.save(match);
                     changed = true;
                     continue;
                 }
                 if (match.getTeamOneEntry() == null || match.getTeamTwoEntry() == null) {
+                    // Bye scenario: single team auto-advances.
                     TournamentEntry winner = match.getTeamOneEntry() != null ? match.getTeamOneEntry() : match.getTeamTwoEntry();
                     match.setWinnerEntry(winner);
                     match.setState(TournamentMatchState.SKIPPED);
@@ -66,6 +73,7 @@ public class TournamentMatchScheduler {
             }
         } while (changed);
 
+        // Queue any remaining matches that now have two participants.
         List<TournamentMatch> pending = tournamentMatchRepository.findByTournamentAndState(tournament, TournamentMatchState.PENDING);
         for (TournamentMatch match : pending) {
             if (match.getTeamOneEntry() != null && match.getTeamTwoEntry() != null) {
@@ -98,10 +106,12 @@ public class TournamentMatchScheduler {
         }
         TournamentMatch target = tournamentMatchRepository.findById(nextMatchId).orElseThrow();
         if (slot == 1) {
+            // Slot 1 corresponds to teamOneEntry in the target match.
             if (target.getTeamOneEntry() == null) {
                 target.setTeamOneEntry(entry);
             }
         } else {
+            // Slot 2 corresponds to teamTwoEntry in the target match.
             if (target.getTeamTwoEntry() == null) {
                 target.setTeamTwoEntry(entry);
             }
@@ -111,27 +121,38 @@ public class TournamentMatchScheduler {
 
     /**
      * Creates and queues a GameMatch for a tournament match.
-     * Uses MATCH_REASON.TOURNAMENT so results route back here.
+     * Uses MatchReason.tournament so results route back here.
      */
     private void queueMatch(TournamentMatch match) {
         if (match.getGameMatch() != null) {
+            // Already queued/linked.
             return;
         }
         Team teamOne = match.getTeamOneEntry().getTeam();
         Team teamTwo = match.getTeamTwoEntry().getTeam();
+        if (!teamOne.getCompetition().equals(match.getTournament().getCompetition())
+                || !teamTwo.getCompetition().equals(match.getTournament().getCompetition())) {
+            throw new IllegalArgumentException("Tournament match teams must belong to the tournament competition.");
+        }
         Submission submissionOne = teamOne.getCurrentSubmission();
         Submission submissionTwo = teamTwo.getCurrentSubmission();
         if (submissionOne == null || submissionTwo == null) {
+            // Tournament rules require an active submission for both teams.
             throw new IllegalArgumentException("Tournament match cannot be queued without current submissions.");
         }
+        // Create a GameMatch tied to this tournament match.
         GameMatch gameMatch = gameMatchService.createMatch(
-                teamOne.getUuid().toString(),
-                teamTwo.getUuid().toString(),
-                submissionOne.getUuid().toString(),
-                submissionTwo.getUuid().toString(),
-                MATCH_REASON.TOURNAMENT
+                null,
+                teamOne,
+                teamTwo,
+                submissionOne,
+                submissionTwo,
+                "tournament",
+                MatchReason.tournament,
+                null
         );
-        gameMatchService.queueMatch(gameMatch);
+        // Scheduling pushes the match job to RabbitMQ.
+        gameMatchService.scheduleMatch(gameMatch);
         match.setGameMatch(gameMatch);
         match.setState(TournamentMatchState.QUEUED);
         tournamentMatchRepository.save(match);

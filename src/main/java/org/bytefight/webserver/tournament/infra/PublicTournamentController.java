@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Public read-only endpoints for tournament visualization.
+ * Public read-only endpoints for tournament visualization, scoped to a competition.
  *
  * Data flow summary:
  * - HTTP request -> controller -> TournamentService -> repositories
@@ -22,8 +22,8 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/tournament_cursor")
-public class PublicTournamentCursorController {
+@RequestMapping("/api/v1/public/competition/{competitionSlug}/tournament")
+public class PublicTournamentController {
     private final TournamentService tournamentService;
 
     /**
@@ -31,11 +31,14 @@ public class PublicTournamentCursorController {
      *
      * Path:
      * - controller -> TournamentService.getTournamentDto
-     * - reads Tournament by uuid (tournament_cursor table)
+     * - reads Tournament by uuid (tournament table)
      */
     @GetMapping("/{uuid}")
-    public ResponseEntity<TournamentDto> getTournament(@PathVariable String uuid) {
-        return ResponseEntity.ok(tournamentService.getTournamentDto(uuid));
+    public ResponseEntity<TournamentDto> getTournament(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getTournamentDto(competitionSlug, uuid));
     }
 
     /**
@@ -47,8 +50,11 @@ public class PublicTournamentCursorController {
      * - maps to DTOs for frontend to render bracket graph
      */
     @GetMapping("/{uuid}/bracket")
-    public ResponseEntity<TournamentBracketDto> getBracket(@PathVariable String uuid) {
-        return ResponseEntity.ok(tournamentService.getBracket(uuid));
+    public ResponseEntity<TournamentBracketDto> getBracket(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getBracket(competitionSlug, uuid));
     }
 
     /**
@@ -59,7 +65,10 @@ public class PublicTournamentCursorController {
      * - reads TournamentMatch rows and maps to TournamentMatchDto
      */
     @GetMapping("/{uuid}/matches")
-    public ResponseEntity<List<TournamentMatchDto>> getMatches(@PathVariable String uuid) {
-        return ResponseEntity.ok(tournamentService.getMatches(uuid));
+    public ResponseEntity<List<TournamentMatchDto>> getMatches(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getMatches(competitionSlug, uuid));
     }
 }

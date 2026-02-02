@@ -6,12 +6,13 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 /**
- * Read-only tournament metadata for API responses.
+ * Read-only tournament metadata for API responses, scoped to a competition.
  */
 @Getter
 @Builder
 public class TournamentDto {
     private final String uuid;
+    private final String competitionSlug;
     private final String name;
     private final TournamentStatus status;
     private final Integer maxTeams;
@@ -23,6 +24,7 @@ public class TournamentDto {
     public static TournamentDto from(Tournament tournament) {
         return TournamentDto.builder()
                 .uuid(tournament.getUuid().toString())
+                .competitionSlug(tournament.getCompetition().getSlug())
                 .name(tournament.getName())
                 .status(tournament.getStatus())
                 .maxTeams(tournament.getMaxTeams())

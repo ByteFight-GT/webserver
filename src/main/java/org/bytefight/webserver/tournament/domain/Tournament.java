@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.bytefight.webserver.competition.domain.Competition;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -19,9 +20,10 @@ import java.util.UUID;
  * - Represents a single tournament event
  * - Holds global metadata (status, max teams, bracket size)
  * - Acts as the parent for entries and matches
+ * - Scoped to a single competition (multi-competition support)
  */
 @Entity
-@Table(name = "tournament_cursor")
+@Table(name = "tournament")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,6 +36,10 @@ public class Tournament {
 
     @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "competition_id", nullable = false)
+    private Competition competition;
 
     @Column(nullable = false)
     private String name;
