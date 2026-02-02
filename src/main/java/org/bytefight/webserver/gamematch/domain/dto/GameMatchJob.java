@@ -1,12 +1,14 @@
 package org.bytefight.webserver.gamematch.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 
 import java.io.Serializable;
 import java.util.Map;
 
+@Getter
 public class GameMatchJob implements Serializable {
     @NotNull private String uuid;
     @NotNull private String competitionSlug;
@@ -55,77 +57,5 @@ public class GameMatchJob implements Serializable {
                 gameMatch.getReason(),
                 gameMatch.getMatchSettings()
         );
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String gameMatchUuid) {
-        this.uuid = gameMatchUuid;
-    }
-
-    public String getCompetitionSlug() {
-        return competitionSlug;
-    }
-
-    public void setCompetitionSlug(String competitionSlug) {
-        this.competitionSlug = competitionSlug;
-    }
-
-    public String getTeamAUuid() {
-        return teamAUuid;
-    }
-
-    public void setTeamAUuid(String teamAUuid) {
-        this.teamAUuid = teamAUuid;
-    }
-
-    public String getTeamBUuid() {
-        return teamBUuid;
-    }
-
-    public void setTeamBUuid(String teamBUuid) {
-        this.teamBUuid = teamBUuid;
-    }
-
-    public String getSubmissionAUuid() {
-        return submissionAUuid;
-    }
-
-    public void setSubmissionAUuid(String submissionAUuid) {
-        this.submissionAUuid = submissionAUuid;
-    }
-
-    public String getSubmissionBUuid() {
-        return submissionBUuid;
-    }
-
-    public void setSubmissionBUuid(String submissionBUuid) {
-        this.submissionBUuid = submissionBUuid;
-    }
-
-    public String getLadder() {
-        return ladder;
-    }
-
-    public void setLadder(String ladder) {
-        this.ladder = ladder;
-    }
-
-    public MatchReason getReason() {
-        return reason;
-    }
-
-    public void setReason(MatchReason reason) {
-        this.reason = reason;
-    }
-
-    public Map<String, Object> getMatchSettings() {
-        return matchSettings;
-    }
-
-    public void setMatchSettings(Map<String, Object> matchSettings) {
-        this.matchSettings = matchSettings;
     }
 }

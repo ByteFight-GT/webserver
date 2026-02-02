@@ -2,11 +2,13 @@ package org.bytefight.webserver.gamematch.application;
 
 
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.glicko.application.GlickoService;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.application.SubmissionService;
@@ -30,7 +32,7 @@ public class GameMatchResultHandler {
     private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
-    private final GameMatchLogService gameMatchLogService;
+    private final GlickoService glickoService;
 
     /**
      * This method handles lightweight match status updates emitted by the engine
@@ -47,72 +49,16 @@ public class GameMatchResultHandler {
     }
 
     public void handleGameMatchResult(GameMatchResult result) {
-        String gameMatchUuid = result.matchUuid();
-        if (!gameMatchService.isGameMatchUuidExist(gameMatchUuid)) {
-            throw new IllegalArgumentException("Game match id " + gameMatchUuid + " does not exist");
-        }
-        if (!gameMatchService.isGameMatchWaiting(gameMatchUuid)) {
-            throw new UnsupportedOperationException("Game match is already played {}" + result);
-        }
-        MatchStatus status = result.status();
-        GameMatch gameMatch = gameMatchService.getReferenceByUuid(gameMatchUuid).orElseThrow();
-//        Team team1 = gameMatch.getTeamOne();
-//        Team team2 = gameMatch.getTeamTwo();
-//
-//        log.info("Processing match result for game {}: {} vs {}, status: {}",
-//                gameMatchUuid, team1.getName(), team2.getName(), status);
-//
-//        GlickoChanges glickoChanges = new GlickoChanges();
-//        if (gameMatch.getReason() == MatchReason.LADDER) {
-//            glickoChanges = glickoCalculator.calculateGlicko(team1, team2, status);
-//            log.info("Handling ladder match: team1 {}, team2 {}", team1.getId(), team2.getId());
-//            handleLadderResult(team1, team2, status, glickoChanges, gameMatch);
-//            log.info("Ladder match handled");
-//        } else if (gameMatch.getReason() == MatchReason.VALIDATION) {
-//            Submission submission = gameMatch.getSubmissionOne();
-//            log.info("Processing validation match for team {} and submission {}", team1.getId(), submission.getId());
-//            handleValidationResult(team1, submission, status);
-//            log.info("Validation match handled");
-//        } else if (gameMatch.getReason() == MatchReason.TOURNAMENT) {
-//            log.info("Processing tournament match for team1 {} team2 {}", team1.getId(), team2.getId());
-//            handleTournamentResult(gameMatch.getId(), status, team1, team2);
-//        } else if (gameMatch.getReason() == MatchReason.SCRIMMAGE) {
-//            log.info("Processing Scrimmage match for team1 {} team2 {}", team1.getId(), team2.getId());
-//            handleScrimmageResult(team1, team2, status);
-//        }
-//        else {
-//            log.info("Can't process match");
-//        }
-        gameMatchService.setGameMatchStatus(gameMatchUuid, status);
-//        gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
-    }
+        GameMatch gameMatch = gameMatchService.getGameMatch(UUID.fromString(result.getUuid()))
+                .orElseThrow(() -> new IllegalArgumentException("Game match not found"));
 
-//    private void handleLadderResult(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges, GameMatch gameMatch) {
-//        updateTeamStats(team1, team2, status, glickoChanges);
-//        glickoHistoryService.save(team1, gameMatch);
-//        glickoHistoryService.save(team2, gameMatch);
-//    }
-//
-//    private void handleScrimmageResult(Team team1, Team team2, MatchStatus status) {
-//        updateTeamStats(team1, team2, status, new GlickoChanges());
-//    }
+        MatchStatus status = gameMatch.getStatus();
+        gameMatch.setStatus(status);
+        gameMatchRepository.save(gameMatch);
 
-    public void submitGameMatchResults(GameMatchResult result) {
-        if (!gameMatchService.isGameMatchUuidExist(result.matchUuid())) {
-            throw new RuntimeException("Game match id " + result.matchUuid() + " does not exist");
+        if(gameMatch.getReason() != MatchReason.validation) {
+            glickoService.processGameMatchResult(gameMatch, false);
         }
-        rabbitMQService.enqueueGameMatchResult(result);
-    }
-
-    private  void handleValidationResult(Team team, Submission submission, MatchStatus status) {
-//        if (status == MatchStatus.TEAM_ONE_WIN) {
-//            submissionService.validateSubmissionAfterMatch(submission.getId());
-//            if (teamService.getCurrentSubmission(team.getId()).isEmpty() || submission.getIsAutoSet()) {
-//                teamService.setCurrentSubmission(team.getId(), submission.getUuid().toString());
-//            }
-//        } else {
-//            submissionService.invalidateSubmissionAfterMatch(submission.getId());
-//        }
     }
 
     public List<GameMatchResult> deleteQueuedMatches() {
