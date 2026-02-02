@@ -2,7 +2,6 @@ package org.bytefight.webserver.team.infra;
 
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.config.ClockConfig;
-import org.bytefight.webserver.glicko.GlickoHistoryService;
 import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
@@ -33,7 +32,6 @@ public class PrivateTeamController {
     private final TeamService teamService;
     private final PlayerService playerService;
     private final Clock clock;
-    private final GlickoHistoryService glickoHistoryService;
     private final ClockConfig clockConfig;
     private final PermissionsService permissionsService;
 
