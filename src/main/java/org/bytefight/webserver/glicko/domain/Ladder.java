@@ -1,5 +1,6 @@
 package org.bytefight.webserver.glicko.domain;
 
+import lombok.*;
 import org.bytefight.webserver.competition.domain.Competition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,13 +10,10 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -44,6 +42,7 @@ public class Ladder {
     private Double glickoRdMin;
 
     @Column(name = "glicko_phi_inflation_per_day", nullable = false)
+    @Builder.Default
     private double glickoPhiInflationPerDay = 0.0;
 
     @Column(name = "glicko_tau", nullable = false)
