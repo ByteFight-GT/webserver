@@ -7,9 +7,6 @@ import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
-import org.bytefight.webserver.glicko.GlickoCalculator;
-import org.bytefight.webserver.glicko.GlickoChanges;
-import org.bytefight.webserver.glicko.GlickoHistoryService;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.application.SubmissionService;
@@ -33,9 +30,7 @@ public class GameMatchResultHandler {
     private final TeamService teamService;
     private final SubmissionService submissionService;
     private final RabbitMQService rabbitMQService;
-    private final GlickoCalculator glickoCalculator;
     private final GameMatchLogService gameMatchLogService;
-    private final GlickoHistoryService glickoHistoryService;
 
     /**
      * This method handles lightweight match status updates emitted by the engine
@@ -92,29 +87,15 @@ public class GameMatchResultHandler {
 //        gameMatchLogService.createGameMatchLog(gameMatch, result.matchLog(), glickoChanges.getTeam1Change(), glickoChanges.getTeam2Change());
     }
 
-    private void handleLadderResult(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges, GameMatch gameMatch) {
-        updateTeamStats(team1, team2, status, glickoChanges);
-        glickoHistoryService.save(team1, gameMatch);
-        glickoHistoryService.save(team2, gameMatch);
-    }
-
-    private void handleScrimmageResult(Team team1, Team team2, MatchStatus status) {
-        updateTeamStats(team1, team2, status, new GlickoChanges());
-    }
-
-    private void updateTeamStats(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges) {
-//        if (status == MatchStatus.TEAM_ONE_WIN) {
-//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), true, false);
-//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, false);
-//        } else if (status == MatchStatus.TEAM_TWO_WIN) {
-//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, false);
-//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), true, false);
-//        } else if (status == MatchStatus.DRAW) {
-//            teamService.updateAfterMatch(team1, glickoChanges.getTeam1Change(), glickoChanges.getTeam1PhiChange(),glickoChanges.getTeam1SigmaChange(), false, true);
-//            teamService.updateAfterMatch(team2, glickoChanges.getTeam2Change(), glickoChanges.getTeam2PhiChange(), glickoChanges.getTeam2SigmaChange(), false, true);
-//        }
-    }
-
+//    private void handleLadderResult(Team team1, Team team2, MatchStatus status, GlickoChanges glickoChanges, GameMatch gameMatch) {
+//        updateTeamStats(team1, team2, status, glickoChanges);
+//        glickoHistoryService.save(team1, gameMatch);
+//        glickoHistoryService.save(team2, gameMatch);
+//    }
+//
+//    private void handleScrimmageResult(Team team1, Team team2, MatchStatus status) {
+//        updateTeamStats(team1, team2, status, new GlickoChanges());
+//    }
 
     public void submitGameMatchResults(GameMatchResult result) {
         if (!gameMatchService.isGameMatchUuidExist(result.matchUuid())) {

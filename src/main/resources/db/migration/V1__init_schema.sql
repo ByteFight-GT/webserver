@@ -80,15 +80,15 @@ CREATE TABLE "competitions" (
 CREATE TABLE "ladders" (
                            "competition_id" bigint NOT NULL,
                            "ladder" varchar(50) NOT NULL,
-                           "glicko_default_rating" double NOT NULL,
-                           "glicko_default_rd" double NOT NULL,
-                           "glicko_rd_max" double NOT NULL,
-                           "glicko_rd_min" double,
-                           "glicko_phi_inflation_per_day" double NOT NULL DEFAULT 0,
-                           "glicko_tau" double NOT NULL,
-                           "glicko_sigma_default" double NOT NULL,
-                           "glicko_sigma_min" double,
-                           "glicko_sigma_max" double,
+                           "glicko_default_rating" float8 NOT NULL,
+                           "glicko_default_rd" float8 NOT NULL,
+                           "glicko_rd_max" float8 NOT NULL,
+                           "glicko_rd_min" float8,
+                           "glicko_phi_inflation_per_day" float8 NOT NULL DEFAULT 0,
+                           "glicko_tau" float8 NOT NULL,
+                           "glicko_sigma_default" float8 NOT NULL,
+                           "glicko_sigma_min" float8,
+                           "glicko_sigma_max" float8,
                            PRIMARY KEY ("competition_id", "ladder")
 );
 
@@ -130,9 +130,9 @@ CREATE TABLE "team_stats" (
                               "wins" integer NOT NULL DEFAULT 0,
                               "losses" integer NOT NULL DEFAULT 0,
                               "draws" integer NOT NULL DEFAULT 0,
-                              "glicko_rating" double NOT NULL,
-                              "glicko_rd" double precision NOT NULL,
-                              "glicko_volatility" double precision NOT NULL
+                              "glicko_rating" float8 NOT NULL,
+                              "glicko_rd" float8 NOT NULL,
+                              "glicko_volatility" float8 NOT NULL
 );
 
 CREATE TABLE "team_members" (
@@ -152,8 +152,8 @@ CREATE TABLE "team_glicko_history" (
                                        "competition_id" bigint NOT NULL,
                                        "ladder" varchar(50) NOT NULL,
                                        "game_match_id" bigint,
-                                       "old_glicko" double NOT NULL,
-                                       "new_glicko" double NOT NULL
+                                       "old_glicko" float8 NOT NULL,
+                                       "new_glicko" float8 NOT NULL
 );
 
 CREATE TABLE "submissions" (
@@ -272,8 +272,6 @@ ALTER TABLE "game_match_files" ADD FOREIGN KEY ("game_match_id") REFERENCES "gam
 ALTER TABLE "game_match_files" ADD FOREIGN KEY ("file_record_id") REFERENCES "file_records" ("id");
 
 ALTER TABLE "game_match_files" ADD FOREIGN KEY ("team_id") REFERENCES "teams" ("id");
-
-ALTER TABLE "team_stats" ADD FOREIGN KEY ("team_id") REFERENCES "teams" ("updated_by_user_id");
 
 ALTER TABLE "game_matches" ADD FOREIGN KEY ("competition_id", "ladder") REFERENCES "ladders" ("competition_id", "ladder");
 
