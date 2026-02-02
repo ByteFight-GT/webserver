@@ -1,7 +1,6 @@
 package org.bytefight.webserver.team.infra;
 
 import org.bytefight.webserver.config.ClockConfig;
-import org.bytefight.webserver.glicko.GlickoHistoryService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.dto.PublicTeamDto;
@@ -23,7 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PublicTeamController {
     private final TeamService teamService;
-    private final GlickoHistoryService glickoHistoryService;
     private final ClockConfig clockConfig;
 
     @GetMapping("/{uuid}")

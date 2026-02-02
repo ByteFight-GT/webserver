@@ -2,8 +2,6 @@ package org.bytefight.webserver.matchMaking.application;
 
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
-import org.bytefight.webserver.gamematch.domain.MatchReason;
-import org.bytefight.webserver.glicko.GlickoHistoryService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.application.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ public class MatchMaker {
 
     private final TeamService teamService;
     private final GameMatchService gameMatchService;
-    private final GlickoHistoryService glickoHistoryService;
 
     private static final Random RANDOM = new Random();
 
