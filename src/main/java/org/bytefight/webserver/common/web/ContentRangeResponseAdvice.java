@@ -1,7 +1,6 @@
 package org.bytefight.webserver.common.web;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.bytefight.webserver.common.domain.dto.ListResponseDto;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -9,6 +8,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,7 +33,7 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
             ServerHttpRequest request,
             ServerHttpResponse response
     ) {
-        if (!(body instanceof ListResponseDto<?> listBody)) {
+        if (!(body instanceof Page<?> pageBody)) {
             return body;
         }
 
@@ -42,10 +42,10 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String resourceName = resourceNameFromPath(httpRequest.getRequestURI());
             int page = parsePositiveInt(httpRequest.getParameter("page"), DEFAULT_PAGE);
-            int perPage = parsePositiveInt(httpRequest.getParameter("perPage"), listBody.data() == null ? 0 : listBody.data().size());
+            int perPage = parsePositiveInt(httpRequest.getParameter("perPage"), pageBody.getSize());
 
-            long total = listBody.total();
-            int size = listBody.data() == null ? 0 : listBody.data().size();
+            long total = pageBody.getTotalElements();
+            int size = pageBody.getNumberOfElements();
             long start = Math.max((long) (page - 1) * perPage, 0);
             long end = size == 0 ? start : start + size - 1;
 
@@ -53,7 +53,7 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
             servletResponse.getServletResponse().setHeader("Content-Range", contentRange);
         }
 
-        return listBody;
+        return pageBody.getContent();
     }
 
     private static int parsePositiveInt(String value, int fallback) {
