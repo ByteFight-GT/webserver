@@ -7,9 +7,9 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 
 @Configuration
-public class SupabaseConfig {
+public class AuthConfiguration {
     @Bean
-    HttpClient supabaseHttpClient(SupabaseProperties p) {
+    HttpClient supabaseHttpClient(AuthProperties p) {
         return HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(p.connectTimeoutMs() == null ? 3000 : p.connectTimeoutMs()))
                 .build();
