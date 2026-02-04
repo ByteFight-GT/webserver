@@ -55,6 +55,8 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
     @Test
     void createAndScheduleMatchEnqueuesByCompetitionAndLadder() {
         Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+        String ladder = "ladder1";
+        testDataFactory.createLadder(competition, ladder);
         Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         User user = testDataFactory.createUser();
@@ -62,7 +64,6 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
         Submission submissionA = createSubmission(teamA);
         Submission submissionB = createSubmission(teamB);
 
-        String ladder = "ladder1";
         String routingKey = "competition." + competition.getSlug() + "." + ladder;
 
         Queue queue = QueueBuilder.nonDurable("test.match.queue").autoDelete().build();
