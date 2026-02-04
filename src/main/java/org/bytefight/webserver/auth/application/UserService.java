@@ -24,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
-    private final SupabaseService supabaseService;
+    private final AuthService authService;
 
     static String normalize(String raw) {
         return raw == null ? null : raw.trim().toLowerCase();
@@ -66,13 +66,13 @@ public class UserService {
 
             playerService.createPlayer(user, input.getName());
 
-            SupabaseDtos.SupabaseUser supabaseUser = supabaseService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
+            SupabaseDtos.SupabaseUser supabaseUser = authService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
 
             user.setUuid(UUID.fromString(supabaseUser.id()));
             user = userRepository.save(user);
 
             return user;
-        } catch(SupabaseService.SupabaseServiceException e) {
+        } catch(AuthService.AuthServiceException e) {
             throw new RegistrationException(e.getMessage());
         }
     }
