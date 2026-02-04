@@ -96,6 +96,7 @@ class SubmissionControllerIT extends FullStackIntegrationTestBase {
     @Test
     void uploadSubmissionCreatesSubmissionAndQueuesValidationMatch() throws Exception {
         Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+        testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
         Team team = testDataFactory.createTeam(competition);
         User user = testDataFactory.createUser();
         var player = testDataFactory.createPlayer(user);

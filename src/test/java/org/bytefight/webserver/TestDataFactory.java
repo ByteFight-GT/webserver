@@ -4,6 +4,8 @@ import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.infra.UserRepository;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.bytefight.webserver.glicko.domain.Ladder;
+import org.bytefight.webserver.glicko.infra.LadderRepository;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.domain.Team;
@@ -18,15 +20,18 @@ public class TestDataFactory {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final PlayerRepository playerRepository;
+    private final LadderRepository ladderRepository;
 
     public TestDataFactory(CompetitionRepository competitionRepository,
                            TeamRepository teamRepository,
                            UserRepository userRepository,
-                           PlayerRepository playerRepository) {
+                           PlayerRepository playerRepository,
+                           LadderRepository ladderRepository) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.playerRepository = playerRepository;
+        this.ladderRepository = ladderRepository;
     }
 
     public Competition createCompetition() {
@@ -59,6 +64,22 @@ public class TestDataFactory {
             team.softDelete();
         }
         return teamRepository.save(team);
+    }
+
+    public Ladder createLadder(Competition competition, String ladderSlug) {
+        Ladder ladder = new Ladder();
+        ladder.setCompetition(competition);
+        ladder.setLadder(ladderSlug);
+        ladder.setGlickoDefaultRating(1500.0);
+        ladder.setGlickoDefaultRd(350.0);
+        ladder.setGlickoRdMax(350.0);
+        ladder.setGlickoRdMin(30.0);
+        ladder.setGlickoPhiInflationPerDay(0.0);
+        ladder.setGlickoTau(0.5);
+        ladder.setGlickoSigmaDefault(0.06);
+        ladder.setGlickoSigmaMin(0.03);
+        ladder.setGlickoSigmaMax(0.2);
+        return ladderRepository.save(ladder);
     }
 
     public User createUser() {
