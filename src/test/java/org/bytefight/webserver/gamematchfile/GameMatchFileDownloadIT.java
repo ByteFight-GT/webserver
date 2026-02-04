@@ -198,6 +198,7 @@ class GameMatchFileDownloadIT extends FullStackIntegrationTestBase {
 
     private MatchSetup createMatchSetup() {
         Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 4);
+        testDataFactory.createLadder(competition, "ladder");
         Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         User admin = testDataFactory.createUser("admin@example.com", true);
