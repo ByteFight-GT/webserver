@@ -2,10 +2,10 @@ package org.bytefight.webserver.auth.infra;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "supabase")
-public record SupabaseProperties(
-        String projectUrl,
-        String serviceRole,
+@ConfigurationProperties(prefix = "app.auth")
+public record AuthProperties(
+        String baseUrl,
+        String adminSecret,
         Integer connectTimeoutMs,
         Integer readTimeoutMs
 ) { }
