@@ -17,23 +17,6 @@ import java.time.ZonedDateTime;
 @RequestMapping("/api/v1/public/matches")
 @RequiredArgsConstructor
 public class PublicMatchMakerController {
-    private final ScheduledMatchMaker scheduler;
     private final MatchMakingProperties props;
     private final MatchMakingService matchMakingService;
-
-    @GetMapping("/status")
-    public ResponseEntity<MatchMakingStatusDto> getMatchMakingStatus() {
-        ZoneId zone = ZoneId.of(props.getTz() == null ? "UTC" : props.getTz());
-        CronExpression expr = CronExpression.parse(props.getCron());
-        ZonedDateTime now = ZonedDateTime.now(zone);
-        ZonedDateTime next = expr.next(now);
-
-        return ResponseEntity.ok(
-                MatchMakingStatusDto.builder()
-                        .running(matchMakingService.isEnabled())
-                        .lastRunAt(scheduler.getLastRun())
-                        .nextRunAt(matchMakingService.isEnabled() ? next.toInstant() : null)
-                        .build()
-        );
-    }
 }

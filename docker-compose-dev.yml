@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: bytefightdb
+      POSTGRES_USER: bytefight
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  auth-db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: gotrue
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  supabase-auth:
+    image: supabase/gotrue:v2.132.0
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./private_key.pem:/etc/gotrue/private_key.pem:ro
+    environment:
+      DATABASE_URL: postgres://postgres:localpassword@auth-db:5432/gotrue?sslmode=disable
+      GOTRUE_JWT_ALGORITHM: RS256
+      GOTRUE_JWT_PRIVATE_KEY_PATH: /etc/gotrue/private_key.pem
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "false"
+
+volumes:
+  dev_db_data:
+    driver: local
