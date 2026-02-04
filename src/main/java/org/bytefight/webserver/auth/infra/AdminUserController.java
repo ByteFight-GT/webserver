@@ -4,15 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.auth.application.AdminUserService;
 import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.auth.domain.dto.AdminUserDto;
 import org.bytefight.webserver.auth.domain.dto.SelfUserDto;
-import org.bytefight.webserver.common.web.RestPageable;
+import org.bytefight.webserver.common.web.RestPageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -38,24 +39,17 @@ public class AdminUserController {
             operationId = "adminListAllUsers",
             summary = "REST endpoint to list all users"
     )
-    public ResponseEntity<List<SelfUserDto>> listAll(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer perPage,
-            @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String order
+    public ResponseEntity<List<AdminUserDto>> listAll(
+            @ModelAttribute RestPageRequest pageRequest
     ) {
-        Pageable pageable = RestPageable.fromRestParams(
-                page,
-                perPage,
-                sort,
-                order,
+        Pageable pageable = pageRequest.toPageable(
                 DEFAULT_PAGE_SIZE,
                 MAX_PAGE_SIZE,
                 DEFAULT_SORT_FIELD,
                 ALLOWED_SORT_FIELDS
         );
         Page<User> usersPage = adminUserService.listUsers(pageable);
-        List<SelfUserDto> data = usersPage.stream().map(SelfUserDto::from).toList();
+        List<AdminUserDto> data = usersPage.stream().map(AdminUserDto::from).toList();
 
         long total = usersPage.getTotalElements();
         int size = data.size();
