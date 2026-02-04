@@ -66,6 +66,8 @@ class GameMatchQueueIT extends FullStackIntegrationTestBase {
     void scheduleMatchAndUpdateStatusThroughQueue() throws Exception {
         String competitionSlug = "comp";
         Competition competition = testDataFactory.createCompetition(competitionSlug, "Competition", true, 2);
+        String ladder = "ladder1";
+        testDataFactory.createLadder(competition, ladder);
         Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         User user = testDataFactory.createUser();
@@ -73,7 +75,6 @@ class GameMatchQueueIT extends FullStackIntegrationTestBase {
         Submission submissionA = createSubmission(teamA);
         Submission submissionB = createSubmission(teamB);
 
-        String ladder = "ladder1";
         String routingKey = "competition." + competitionSlug + "." + ladder;
 
         Queue scheduleQueue = QueueBuilder.nonDurable("test.match.queue").autoDelete().build();

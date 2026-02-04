@@ -92,6 +92,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
     @Test
     void uploadGameMatchFileCreatesRecordForAdmin() throws Exception {
         Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+        testDataFactory.createLadder(competition, "ladder");
         Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         User user = testDataFactory.createUser();
@@ -141,6 +142,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
     @Test
     void uploadGameMatchFileForbiddenForNonAdmin() throws Exception {
         Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+        testDataFactory.createLadder(competition, "ladder");
         Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
         User user = testDataFactory.createUser();
