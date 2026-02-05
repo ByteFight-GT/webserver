@@ -10,8 +10,8 @@ public class DefaultLadderSettings {
                 .glickoPhiInflationPerDay(0.0)
                 .glickoTau(0.5)
                 .glickoSigmaDefault(0.06)
-                .glickoSigmaMin(0.03)
-                .glickoSigmaMax(0.02)
+                .glickoSigmaMin(0.02)
+                .glickoSigmaMax(0.03)
                 .build();
     }
 }
