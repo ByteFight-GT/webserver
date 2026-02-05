@@ -1,0 +1,20 @@
+package org.bytefight.webserver.glicko.domain.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+public record AdminCreateLadderDto(
+        @NotNull Long competitionId,
+        @NotBlank String ladder,
+        @Positive Double glickoDefaultRating,
+        @Positive Double glickoDefaultRd,
+        @Positive Double glickoRdMax,
+        @Positive Double glickoRdMin,
+        @PositiveOrZero Double glickoPhiInflationPerDay,
+        @Positive Double glickoTau,
+        @Positive Double glickoSigmaDefault,
+        @Positive Double glickoSigmaMin,
+        @Positive Double glickoSigmaMax
+) {
+}
