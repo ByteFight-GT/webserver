@@ -47,7 +47,6 @@ public class AdminUserController {
                 ALLOWED_SORT_FIELDS
         );
         Page<User> usersPage = adminUserService.listUsers(pageable);
-        var data = usersPage.stream().map(AdminUserDto::from).toList();
-        return new PageImpl<>(data, usersPage.getPageable(), usersPage.getTotalElements());
+        return usersPage.map(AdminUserDto::from);
     }
 }
