@@ -3,6 +3,8 @@ package org.bytefight.webserver.team.infra;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,6 +26,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByUuid(UUID uuid);
 
     List<Team> findAllByIsDeletedFalse();
+
+    Page<Team> findByIsDeleted(boolean isDeleted, Pageable pageable);
+    Page<Team> findByCompetitionIdAndIsDeleted(Long competitionId, boolean isDeleted, Pageable pageable);
 
 //    Optional<Integer> findRankByUuid(UUID uuid);
 
