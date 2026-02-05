@@ -22,7 +22,7 @@ spring:
 app:
   auth:
     jwt-secret: jwt-secret
-    admin-secret: admin-secret
+    admin-secret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiaWF0IjowLCJleHAiOjQwNzA5MzA0MDB9.Miry4pSPJUo9407_m8Q1JtAavwND0wJzXFnVAi-SjAc
     base-url: http://localhost:9999
     read-timeout-ms: 5000
     connect-timeout-ms: 3000
