@@ -1,21 +1,23 @@
 package org.bytefight.webserver.glicko.domain.dto;
 
+import lombok.Value;
 import org.bytefight.webserver.glicko.domain.Ladder;
 
-public record AdminLadderDto(
-        Long id,
-        String ladder,
-        Long competitionId,
-        double glickoDefaultRating,
-        double glickoDefaultRd,
-        double glickoRdMax,
-        Double glickoRdMin,
-        double glickoPhiInflationPerDay,
-        double glickoTau,
-        double glickoSigmaDefault,
-        Double glickoSigmaMin,
-        Double glickoSigmaMax
-) {
+@Value
+public class AdminLadderDto {
+    Long id;
+    String ladder;
+    Long competitionId;
+    double glickoDefaultRating;
+    double glickoDefaultRd;
+    double glickoRdMax;
+    Double glickoRdMin;
+    double glickoPhiInflationPerDay;
+    double glickoTau;
+    double glickoSigmaDefault;
+    Double glickoSigmaMin;
+    Double glickoSigmaMax;
+
     public static AdminLadderDto from(Ladder ladder) {
         return new AdminLadderDto(
                 ladder.getId(),

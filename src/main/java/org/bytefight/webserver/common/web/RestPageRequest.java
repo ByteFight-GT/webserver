@@ -150,12 +150,39 @@ public class RestPageRequest {
         }
     }
 
-    private record Range(long start, long end) {
-        long size() {
+    private static final class Range {
+        private final long start;
+        private final long end;
+
+        private Range(long start, long end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        private long start() {
+            return start;
+        }
+
+        private long size() {
             return end - start + 1;
         }
     }
 
-    private record SortSpec(String field, String order) {
+    private static final class SortSpec {
+        private final String field;
+        private final String order;
+
+        private SortSpec(String field, String order) {
+            this.field = field;
+            this.order = order;
+        }
+
+        private String field() {
+            return field;
+        }
+
+        private String order() {
+            return order;
+        }
     }
 }
