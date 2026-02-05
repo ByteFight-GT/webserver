@@ -36,12 +36,12 @@ public class AuthService {
                                                 Map<String, Object> userMetadata,
                                                 Map<String, Object> appMetadata) {
         var body = new SupabaseDtos.CreateUserRequest(email, password, emailConfirmed, userMetadata, appMetadata);
-        return post("/auth/v1/admin/users", body, SupabaseDtos.SupabaseUser.class);
+        return post("/admin/users", body, SupabaseDtos.SupabaseUser.class);
     }
 
     public SupabaseDtos.SupabaseMagicLink createMagicSignInLink(String email) {
         var body = new SupabaseDtos.GenerateLinkRequest(email);
-        return post("/auth/v1/admin/generate_link", body, SupabaseDtos.SupabaseMagicLink.class);
+        return post("/admin/generate_link", body, SupabaseDtos.SupabaseMagicLink.class);
     }
 
     private <T> T post(String path, Object body, Class<T> type) {
