@@ -62,4 +62,5 @@ public class Team extends AuditableSoftDeletableEntity {
             this.nameNormalized = name.trim().toLowerCase();
         }
     }
+
 }

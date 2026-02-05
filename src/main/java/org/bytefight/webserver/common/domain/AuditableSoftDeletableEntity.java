@@ -19,4 +19,5 @@ public class AuditableSoftDeletableEntity extends AuditableEntity {
         this.isDeleted = true;
         this.deletedAt = Instant.now();
     }
+
 }
