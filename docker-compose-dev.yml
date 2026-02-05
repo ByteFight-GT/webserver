@@ -1,3 +1,5 @@
+name: bytefight-webserver-dev
+
 services:
   db:
     image: postgres:16.4
@@ -10,9 +12,13 @@ services:
 
   auth-db:
     image: postgres:16.4
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     environment:
-      POSTGRES_DB: gotrue
-      POSTGRES_PASSWORD: password
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
+      - DB_NAMESPACE=auth
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -34,22 +40,19 @@ services:
       retries: 5
 
   supabase-auth:
-    image: supabase/gotrue:v2.132.0
+    image: supabase/auth:v2.186.0
     depends_on:
       auth-db:
         condition: service_healthy
     ports:
-      - "9999:9999"
-    volumes:
-      - ./private_key.pem:/etc/gotrue/private_key.pem:ro
+      - "9999:8081"
     environment:
-      DATABASE_URL: postgres://postgres:localpassword@auth-db:5432/gotrue?sslmode=disable
-      GOTRUE_JWT_ALGORITHM: RS256
-      GOTRUE_JWT_PRIVATE_KEY_PATH: /etc/gotrue/private_key.pem
+      DATABASE_URL: postgres://postgres:root@auth-db:5432/postgres?sslmode=disable&options=-c%20search_path=auth
+      API_EXTERNAL_URL: http://localhost:9999
+      GOTRUE_JWT_SECRET: jwt-secret
       GOTRUE_JWT_EXP: 3600
       GOTRUE_MAILER_AUTOCONFIRM: "true"
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "false"
-
-volumes:
-  dev_db_data:
-    driver: local
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_SITE_URL: http://localhost:3000
