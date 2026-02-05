@@ -66,7 +66,11 @@ public class TeamService {
     }
 
     public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto) {
-        if(!competition.isActive()) {
+        return createTeam(competition, teamSettingsDto, true);
+    }
+
+    public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto, boolean requireActive) {
+        if (!competition.isActive() && requireActive) {
             throw new IllegalArgumentException("Competition is not active");
         }
 
@@ -109,11 +113,11 @@ public class TeamService {
             throw new IllegalArgumentException("Team must belong to a competition");
         }
 
-        if(!competition.isActive()) {
+        if (!competition.isActive()) {
             throw new IllegalArgumentException("Competition is not active");
         }
 
-        if(!whitelistService.isCompetitionParticipationAllowed(competition, player.getUser())) {
+        if (!whitelistService.isCompetitionParticipationAllowed(competition, player.getUser())) {
             throw new IllegalArgumentException("You must be whitelisted to participate in this competition");
         }
 
@@ -121,7 +125,7 @@ public class TeamService {
             throw new IllegalArgumentException("Player is already in a team for this competition");
         }
 
-        if(countPlayersForTeam(team) >= competition.getMaxPlayersPerTeam()) {
+        if (countPlayersForTeam(team) >= competition.getMaxPlayersPerTeam()) {
             throw new IllegalArgumentException("Team is full");
         }
 
@@ -137,7 +141,7 @@ public class TeamService {
             throw new IllegalArgumentException("Competition and player are required");
         }
 
-        if(!competition.isActive()) {
+        if (!competition.isActive()) {
             throw new IllegalArgumentException("Competition is not active");
         }
 
@@ -148,7 +152,7 @@ public class TeamService {
 
         teamMemberRepository.delete(member);
 
-        if(countPlayersForTeam(team) == 0) {
+        if (countPlayersForTeam(team) == 0) {
             team.softDelete();
             teamRepository.save(team);
         }
@@ -313,7 +317,7 @@ public class TeamService {
             team.setName(teamSettingsDto.getName());
         }
         if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
-        if(teamSettingsDto.getDisplayMembers() != null) team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
+        if (teamSettingsDto.getDisplayMembers() != null) team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
 
         teamRepository.save(team);
     }
