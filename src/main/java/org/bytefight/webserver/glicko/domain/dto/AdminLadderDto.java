@@ -5,7 +5,6 @@ import org.bytefight.webserver.glicko.domain.Ladder;
 public record AdminLadderDto(
         String id,
         Long competitionId,
-        String ladder,
         double glickoDefaultRating,
         double glickoDefaultRd,
         double glickoRdMax,
@@ -20,9 +19,8 @@ public record AdminLadderDto(
         Long competitionId = ladder.getCompetition().getId();
         String ladderSlug = ladder.getLadder();
         return new AdminLadderDto(
-                competitionId + ":" + ladderSlug,
-                competitionId,
                 ladderSlug,
+                competitionId,
                 ladder.getGlickoDefaultRating(),
                 ladder.getGlickoDefaultRd(),
                 ladder.getGlickoRdMax(),
