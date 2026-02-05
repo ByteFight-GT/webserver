@@ -32,13 +32,10 @@ public class AdminTeamService {
     }
 
     public Team createTeam(AdminCreateTeamDto input) {
-        Competition competition = competitionRepository.findById(input.competitionId())
+        Competition competition = competitionRepository.findById(input.getCompetitionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
-        TeamSettingsDto settings = TeamSettingsDto.builder()
-                .name(input.name())
-                .quote(input.quote())
-                .displayMembers(input.displayMembers() != null ? input.displayMembers() : false)
-                .build();
-        return teamService.createTeam(competition, settings, false);
+        Boolean displayMembers = input.getDisplayMembers() != null ? input.getDisplayMembers() : Boolean.FALSE;
+        TeamSettingsDto settings = new TeamSettingsDto(input.getName(), input.getQuote(), displayMembers);
+        return teamService.createTeam(competition, settings);
     }
 }

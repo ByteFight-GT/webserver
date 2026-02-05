@@ -34,10 +34,11 @@ public abstract class BaseEntity {
         this.updatedAt = Instant.now();
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BaseEntity that)) return false;
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(id, that.id);
     }
 
     @Override

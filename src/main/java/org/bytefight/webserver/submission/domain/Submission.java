@@ -37,4 +37,5 @@ public class Submission extends AuditableSoftDeletableEntity {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "validity", nullable = false, columnDefinition = "submission_validity")
     private SubmissionValidity validity = SubmissionValidity.not_evaluated;
+
 }

@@ -37,25 +37,25 @@ public class AdminLadderService {
     }
 
     public Ladder createLadder(AdminCreateLadderDto input) {
-        Competition competition = competitionRepository.findById(input.competitionId())
+        Competition competition = competitionRepository.findById(input.getCompetitionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
-        ladderRepository.findByCompetitionAndLadder(competition, input.ladder())
+        ladderRepository.findByCompetitionAndLadder(competition, input.getLadder())
                 .ifPresent(existing -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Ladder already exists");
                 });
 
         Ladder ladder = new Ladder();
         ladder.setCompetition(competition);
-        ladder.setLadder(input.ladder());
-        ladder.setGlickoDefaultRating(valueOrDefault(input.glickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING));
-        ladder.setGlickoDefaultRd(valueOrDefault(input.glickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD));
-        ladder.setGlickoRdMax(valueOrDefault(input.glickoRdMax(), DEFAULT_GLICKO_RD_MAX));
-        ladder.setGlickoRdMin(valueOrDefault(input.glickoRdMin(), DEFAULT_GLICKO_RD_MIN));
-        ladder.setGlickoPhiInflationPerDay(valueOrDefault(input.glickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY));
-        ladder.setGlickoTau(valueOrDefault(input.glickoTau(), DEFAULT_GLICKO_TAU));
-        ladder.setGlickoSigmaDefault(valueOrDefault(input.glickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT));
-        ladder.setGlickoSigmaMin(valueOrDefault(input.glickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN));
-        ladder.setGlickoSigmaMax(valueOrDefault(input.glickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
+        ladder.setLadder(input.getLadder());
+        ladder.setGlickoDefaultRating(valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING));
+        ladder.setGlickoDefaultRd(valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD));
+        ladder.setGlickoRdMax(valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX));
+        ladder.setGlickoRdMin(valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN));
+        ladder.setGlickoPhiInflationPerDay(valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY));
+        ladder.setGlickoTau(valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU));
+        ladder.setGlickoSigmaDefault(valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT));
+        ladder.setGlickoSigmaMin(valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN));
+        ladder.setGlickoSigmaMax(valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
 
         return ladderRepository.save(ladder);
     }
@@ -64,32 +64,32 @@ public class AdminLadderService {
         Ladder ladder = ladderRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ladder not found"));
 
-        if (input.glickoDefaultRating() != null) {
-            ladder.setGlickoDefaultRating(input.glickoDefaultRating());
+        if (input.getGlickoDefaultRating() != null) {
+            ladder.setGlickoDefaultRating(input.getGlickoDefaultRating());
         }
-        if (input.glickoDefaultRd() != null) {
-            ladder.setGlickoDefaultRd(input.glickoDefaultRd());
+        if (input.getGlickoDefaultRd() != null) {
+            ladder.setGlickoDefaultRd(input.getGlickoDefaultRd());
         }
-        if (input.glickoRdMax() != null) {
-            ladder.setGlickoRdMax(input.glickoRdMax());
+        if (input.getGlickoRdMax() != null) {
+            ladder.setGlickoRdMax(input.getGlickoRdMax());
         }
-        if (input.glickoRdMin() != null) {
-            ladder.setGlickoRdMin(input.glickoRdMin());
+        if (input.getGlickoRdMin() != null) {
+            ladder.setGlickoRdMin(input.getGlickoRdMin());
         }
-        if (input.glickoPhiInflationPerDay() != null) {
-            ladder.setGlickoPhiInflationPerDay(input.glickoPhiInflationPerDay());
+        if (input.getGlickoPhiInflationPerDay() != null) {
+            ladder.setGlickoPhiInflationPerDay(input.getGlickoPhiInflationPerDay());
         }
-        if (input.glickoTau() != null) {
-            ladder.setGlickoTau(input.glickoTau());
+        if (input.getGlickoTau() != null) {
+            ladder.setGlickoTau(input.getGlickoTau());
         }
-        if (input.glickoSigmaDefault() != null) {
-            ladder.setGlickoSigmaDefault(input.glickoSigmaDefault());
+        if (input.getGlickoSigmaDefault() != null) {
+            ladder.setGlickoSigmaDefault(input.getGlickoSigmaDefault());
         }
-        if (input.glickoSigmaMin() != null) {
-            ladder.setGlickoSigmaMin(input.glickoSigmaMin());
+        if (input.getGlickoSigmaMin() != null) {
+            ladder.setGlickoSigmaMin(input.getGlickoSigmaMin());
         }
-        if (input.glickoSigmaMax() != null) {
-            ladder.setGlickoSigmaMax(input.glickoSigmaMax());
+        if (input.getGlickoSigmaMax() != null) {
+            ladder.setGlickoSigmaMax(input.getGlickoSigmaMax());
         }
 
         return ladderRepository.save(ladder);
