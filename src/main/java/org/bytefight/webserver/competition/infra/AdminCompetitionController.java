@@ -5,6 +5,7 @@ import org.bytefight.webserver.competition.application.AdminCompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.AdminCompetitionDto;
 import org.bytefight.webserver.competition.domain.dto.AdminCreateCompetitionDto;
+import org.bytefight.webserver.competition.domain.dto.AdminUpdateCompetitionDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
@@ -12,9 +13,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +54,8 @@ public class AdminCompetitionController {
         );
 
         Page<Competition> competitionsPage = adminCompetitionService.listCompetitions(pageable);
-        return competitionsPage.map(AdminCompetitionDto::from);
+        var data = competitionsPage.stream().map(AdminCompetitionDto::from).toList();
+        return new PageImpl<>(data, competitionsPage.getPageable(), competitionsPage.getTotalElements());
     }
 
     @PostMapping
@@ -65,5 +68,28 @@ public class AdminCompetitionController {
     ) {
         Competition competition = adminCompetitionService.createCompetition(input);
         return ResponseEntity.status(HttpStatus.CREATED).body(AdminCompetitionDto.from(competition));
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(
+            operationId = "adminUpdateCompetition",
+            summary = "REST endpoint to update a competition"
+    )
+    public AdminCompetitionDto updateCompetition(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateCompetitionDto input
+    ) {
+        Competition competition = adminCompetitionService.updateCompetition(id, input);
+        return AdminCompetitionDto.from(competition);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+            operationId = "adminGetCompetition",
+            summary = "REST endpoint to get a competition"
+    )
+    public AdminCompetitionDto getCompetition(@PathVariable Long id) {
+        Competition competition = adminCompetitionService.getCompetition(id);
+        return AdminCompetitionDto.from(competition);
     }
 }
