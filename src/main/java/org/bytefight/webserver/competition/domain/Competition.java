@@ -32,7 +32,7 @@ public class Competition extends BaseEntity {
     private boolean isWhitelisted = false;
 
     @Column(name = "max_players_per_team", nullable = false)
-    private int maxPlayersPerTeam;
+    private int maxPlayersPerTeam = 2;
 
     @Override
     public int hashCode() {

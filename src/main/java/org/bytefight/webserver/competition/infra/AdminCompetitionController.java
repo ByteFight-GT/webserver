@@ -39,7 +39,6 @@ public class AdminCompetitionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             operationId = "adminListCompetitions",
             summary = "REST endpoint to list all competitions"
@@ -53,12 +52,10 @@ public class AdminCompetitionController {
         );
 
         Page<Competition> competitionsPage = adminCompetitionService.listCompetitions(pageable);
-        var data = competitionsPage.stream().map(AdminCompetitionDto::from).toList();
-        return new PageImpl<>(data, competitionsPage.getPageable(), competitionsPage.getTotalElements());
+        return competitionsPage.map(AdminCompetitionDto::from);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             operationId = "adminCreateCompetition",
             summary = "REST endpoint to create a competition"

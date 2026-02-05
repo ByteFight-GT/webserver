@@ -30,10 +30,7 @@ public class AdminCompetitionService {
         Competition competition = new Competition();
         competition.setSlug(slug);
         competition.setName(input.getName());
-        competition.setDescription(input.getDescription());
-        competition.setActive(input.getIsActive());
-        competition.setWhitelisted(input.getIsWhitelisted());
-        competition.setMaxPlayersPerTeam(input.getMaxPlayersPerTeam());
+        competition.setActive(false);
 
         return competitionRepository.save(competition);
     }
