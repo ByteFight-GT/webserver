@@ -4,6 +4,7 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.glicko.domain.Ladder;
 import org.bytefight.webserver.glicko.domain.dto.AdminCreateLadderDto;
+import org.bytefight.webserver.glicko.domain.dto.AdminUpdateLadderDto;
 import org.bytefight.webserver.glicko.infra.LadderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +58,46 @@ public class AdminLadderService {
         ladder.setGlickoSigmaMax(valueOrDefault(input.glickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
 
         return ladderRepository.save(ladder);
+    }
+
+    public Ladder updateLadder(Long id, AdminUpdateLadderDto input) {
+        Ladder ladder = ladderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ladder not found"));
+
+        if (input.glickoDefaultRating() != null) {
+            ladder.setGlickoDefaultRating(input.glickoDefaultRating());
+        }
+        if (input.glickoDefaultRd() != null) {
+            ladder.setGlickoDefaultRd(input.glickoDefaultRd());
+        }
+        if (input.glickoRdMax() != null) {
+            ladder.setGlickoRdMax(input.glickoRdMax());
+        }
+        if (input.glickoRdMin() != null) {
+            ladder.setGlickoRdMin(input.glickoRdMin());
+        }
+        if (input.glickoPhiInflationPerDay() != null) {
+            ladder.setGlickoPhiInflationPerDay(input.glickoPhiInflationPerDay());
+        }
+        if (input.glickoTau() != null) {
+            ladder.setGlickoTau(input.glickoTau());
+        }
+        if (input.glickoSigmaDefault() != null) {
+            ladder.setGlickoSigmaDefault(input.glickoSigmaDefault());
+        }
+        if (input.glickoSigmaMin() != null) {
+            ladder.setGlickoSigmaMin(input.glickoSigmaMin());
+        }
+        if (input.glickoSigmaMax() != null) {
+            ladder.setGlickoSigmaMax(input.glickoSigmaMax());
+        }
+
+        return ladderRepository.save(ladder);
+    }
+
+    public Ladder getLadder(Long id) {
+        return ladderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ladder not found"));
     }
 
     private static double valueOrDefault(Double value, double fallback) {
