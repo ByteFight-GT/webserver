@@ -14,10 +14,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
     private static final int DEFAULT_PAGE = 1;
+    private static final Pattern RANGE_PATTERN = Pattern.compile("\\[\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\]");
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -41,13 +45,21 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
                 && request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String resourceName = resourceNameFromPath(httpRequest.getRequestURI());
-            int page = parsePositiveInt(httpRequest.getParameter("page"), DEFAULT_PAGE);
-            int perPage = parsePositiveInt(httpRequest.getParameter("perPage"), pageBody.getSize());
+            String pageParam = httpRequest.getParameter("page");
+            String perPageParam = httpRequest.getParameter("perPage");
+            Range range = parseRange(httpRequest.getParameter("range"));
+            int page = parsePositiveInt(pageParam, DEFAULT_PAGE);
+            int perPage = parsePositiveInt(perPageParam, pageBody.getSize());
 
             long total = pageBody.getTotalElements();
             int size = pageBody.getNumberOfElements();
             long start = Math.max((long) (page - 1) * perPage, 0);
             long end = size == 0 ? start : start + size - 1;
+
+            if (range != null && isBlank(pageParam) && isBlank(perPageParam)) {
+                start = range.start();
+                end = size == 0 ? start : start + size - 1;
+            }
 
             String contentRange = String.format("%s %d-%d/%d", resourceName, start, end, total);
             servletResponse.getServletResponse().setHeader("Content-Range", contentRange);
@@ -78,5 +90,28 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
             return "resource";
         }
         return trimmed.substring(lastSlash + 1);
+    }
+
+    private static Range parseRange(String range) {
+        if (range == null || range.isBlank()) {
+            return null;
+        }
+        Matcher matcher = RANGE_PATTERN.matcher(range);
+        if (!matcher.matches()) {
+            return null;
+        }
+        long start = Long.parseLong(matcher.group(1));
+        long end = Long.parseLong(matcher.group(2));
+        if (end < start) {
+            return null;
+        }
+        return new Range(start, end);
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private record Range(long start, long end) {
     }
 }
