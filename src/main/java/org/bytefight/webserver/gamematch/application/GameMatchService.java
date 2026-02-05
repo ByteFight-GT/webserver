@@ -8,7 +8,6 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
-import org.bytefight.webserver.gameMatchLogs.GameMatchLogService;
 import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
@@ -40,7 +39,6 @@ public class GameMatchService {
     private final GameMatchRepository gameMatchRepository;
     private final RabbitMQService rabbitMQService;
     private final GameMatchProperties gameMatchProperties;
-    private final GameMatchLogService gameMatchLogService;
     private final Clock clock;
 
     public Optional<GameMatch> getGameMatch(UUID id) {
@@ -106,24 +104,6 @@ public class GameMatchService {
         match.setScheduledAt(Instant.now());
 
         return gameMatchRepository.save(match);
-    }
-
-    public void setGameMatchStatus(String gameMatchUuid, MatchStatus status) {
-        Optional maybeGameMatch = gameMatchRepository.findByUuid(UUID.fromString(gameMatchUuid));
-        if (maybeGameMatch.isEmpty()) {
-            throw new IllegalStateException("Failed setting match to" + status + " Game Id doesn't exist" + gameMatchUuid);
-        }
-        GameMatch gameMatch = (GameMatch) maybeGameMatch.get();
-        gameMatch.setStatus(status);
-//        if (!MatchStatus.WAITING.equals(gameMatch.getStatus())) {
-//            gameMatch.setProcessedAt(LocalDateTime.now(clock));
-//        }
-//        if (status == MatchStatus.TEAM_ONE_WIN) {
-//            gameMatch.setWinningTeam(gameMatch.getTeamOne());
-//        } else if (status == MatchStatus.TEAM_TWO_WIN) {
-//            gameMatch.setWinningTeam(gameMatch.getTeamTwo());
-//        }
-        gameMatchRepository.save(gameMatch);
     }
 
     public GameMatchDto getDTOById(Long id) {
