@@ -85,7 +85,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("dev")
     public JwtDecoder jwtDecoderDev(@Value("${app.auth.jwt-secret}") String secret) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
 

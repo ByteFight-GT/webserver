@@ -22,7 +22,6 @@ public class ScheduledMatchMaker {
 
     private final AtomicReference<Instant> lastRun = new AtomicReference<>(null);
 
-    @Scheduled(cron = "${matchmaking.cron}", zone = "${matchmaking.tz:UTC}")
     public void scheduleMatchGeneration() {
         if(matchMakingService.isEnabled()) {
             log.info("Scheduling Matches");
