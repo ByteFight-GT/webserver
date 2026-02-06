@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class AdminGameMatchService {
     private final CompetitionRepository competitionRepository;
@@ -31,6 +30,22 @@ public class AdminGameMatchService {
     private final TeamRepository teamRepository;
     private final SubmissionRepository submissionRepository;
     private final GameMatchService gameMatchService;
+
+    public AdminGameMatchService(
+            CompetitionRepository competitionRepository,
+            GameMatchRepository gameMatchRepository,
+            LadderRepository ladderRepository,
+            TeamRepository teamRepository,
+            SubmissionRepository submissionRepository,
+            GameMatchService gameMatchService
+    ) {
+        this.competitionRepository = competitionRepository;
+        this.gameMatchRepository = gameMatchRepository;
+        this.ladderRepository = ladderRepository;
+        this.teamRepository = teamRepository;
+        this.submissionRepository = submissionRepository;
+        this.gameMatchService = gameMatchService;
+    }
 
     public Page<AdminGameMatchDto> list(Specification<GameMatch> specs, Pageable pageable) {
         return gameMatchRepository.findAll(specs, pageable).map(AdminGameMatchDto::fromEntity);

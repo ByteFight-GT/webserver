@@ -1,53 +1,50 @@
 package org.bytefight.webserver.gamematch.domain.dto;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Value;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Value
 public class AdminGameMatchDto {
-    @NotNull private Long id;
-    @NotNull private String uuid;
-    @NotNull private String teamOneName;
-    @NotNull private String teamTwoName;
-    @NotNull private String teamOneUuid;
-    @NotNull private String teamTwoUuid;
-    private String submissionOneName;
-    private String submissionTwoName;
-    private MatchStatus status;
-    private MatchReason reason;
-    @NotNull private LocalDateTime createdAt;
-    @NotNull private LocalDateTime processedAt;
-    private Integer timesQueued;
-    private String map;
+    @NotNull Long id;
+    @NotNull String uuid;
+    @NotNull Long competitionId;
+    @NotNull String ladder;
+    @NotNull Long teamAId;
+    @NotNull Long teamBId;
+    @NotNull String teamAUuid;
+    @NotNull String teamBUuid;
+    @NotNull Long submissionAId;
+    @NotNull Long submissionBId;
+    MatchStatus status;
+    MatchReason reason;
+    Instant scheduledAt;
+    Instant startedAt;
+    Instant finishedAt;
+    @NotNull Instant createdAt;
 
-    // Convert from Entity to DTO
     public static AdminGameMatchDto fromEntity(GameMatch gameMatch) {
-        return AdminGameMatchDto.builder()
-            .id(gameMatch.getId())
-            .uuid(gameMatch.getUuid().toString())
-//            .teamOneName(gameMatch.getTeamOne().getName())
-//            .teamTwoName(gameMatch.getTeamTwo().getName())
-//            .teamOneUuid(gameMatch.getTeamOne().getUuid().toString())
-//            .teamTwoUuid(gameMatch.getTeamTwo().getUuid().toString())
-//            .submissionOneName(gameMatch.getSubmissionOne().getName())
-//            .submissionTwoName(gameMatch.getSubmissionTwo().getName())
-//            .status(gameMatch.getStatus())
-//            .reason(gameMatch.getReason())
-//            .createdAt(gameMatch.getCreatedAt())
-//            .processedAt(gameMatch.getProcessedAt())
-//            .timesQueued(gameMatch.getTimesQueued())
-//            .map(gameMatch.getMap())
-            .build();
+        return new AdminGameMatchDto(
+                gameMatch.getId(),
+                gameMatch.getUuid().toString(),
+                gameMatch.getCompetition().getId(),
+                gameMatch.getLadder(),
+                gameMatch.getTeamA().getId(),
+                gameMatch.getTeamB().getId(),
+                gameMatch.getTeamA().getUuid().toString(),
+                gameMatch.getTeamB().getUuid().toString(),
+                gameMatch.getSubmissionA().getId(),
+                gameMatch.getSubmissionB().getId(),
+                gameMatch.getStatus(),
+                gameMatch.getReason(),
+                gameMatch.getScheduledAt(),
+                gameMatch.getStartedAt(),
+                gameMatch.getFinishedAt(),
+                gameMatch.getCreatedAt()
+        );
     }
 }
