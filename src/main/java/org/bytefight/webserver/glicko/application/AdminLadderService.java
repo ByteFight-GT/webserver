@@ -8,6 +8,7 @@ import org.bytefight.webserver.glicko.domain.dto.AdminUpdateLadderDto;
 import org.bytefight.webserver.glicko.infra.LadderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +35,10 @@ public class AdminLadderService {
 
     public Page<Ladder> listByCompetitionId(Long competitionId, Pageable pageable) {
         return ladderRepository.findByCompetitionId(competitionId, pageable);
+    }
+
+    public Page<Ladder> listLadders(Specification<Ladder> specification, Pageable pageable) {
+        return ladderRepository.findAll(specification, pageable);
     }
 
     public Ladder createLadder(AdminCreateLadderDto input) {
