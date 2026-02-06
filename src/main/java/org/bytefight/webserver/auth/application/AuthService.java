@@ -65,7 +65,8 @@ public class AuthService {
 
         return HttpRequest.newBuilder(URI.create(props.baseUrl() + path))
                 .timeout(readTimeout)
-                .header("Authorization", "Bearer " + props.adminSecret());
+                .header("Authorization", "Bearer " + props.adminSecret())
+                .header("apikey", props.adminSecret());
     }
 
     private <T> T handle(HttpResponse<String> resp, Class<T> type) {

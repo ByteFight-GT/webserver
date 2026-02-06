@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: BotFightWebServer
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+  rabbitmq:
+    uri: ${RABBIT_HOST}
+
+app:
+  auth:
+    supabase:
+      jwks-uri: ${SUPABASE_JWKS_URI}
+      issuer: ${SUPABASE_ISSUER}
+    admin-secret: ${SUPABASE_SERVICE_ROLE}
+    base-url: ${SUPABASE_PROJECT_URL}/auth/v1
+    read-timeout-ms: 5000
+    connect-timeout-ms: 3000
+
+storage:
+  root: ./storage
+  hmac-secret: ${STORAGE_HMAC_SECRET}
+
+logging:
+  file:
+    name: logs/application.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+hibernate:
+  search:
+    default:
+      directory_provider: filesystem
+      indexBase: ./data/index/default
+
+server:
+  forward-headers-strategy: framework
+  error:
+    include-stacktrace: never
