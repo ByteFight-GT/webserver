@@ -13,4 +13,5 @@ import java.util.List;
 @Setter
 public class EnrollTeamsRequest {
     private List<String> teamUuids;
+    private String seedLadder;
 }

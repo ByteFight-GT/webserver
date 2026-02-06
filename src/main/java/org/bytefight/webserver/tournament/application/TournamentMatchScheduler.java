@@ -54,13 +54,6 @@ public class TournamentMatchScheduler {
                     // Only process matches that haven't been queued or completed.
                     continue;
                 }
-                if (match.getTeamOneEntry() == null && match.getTeamTwoEntry() == null) {
-                    // Empty node (no teams feed into it). Mark skipped and move on.
-                    match.setState(TournamentMatchState.SKIPPED);
-                    tournamentMatchRepository.save(match);
-                    changed = true;
-                    continue;
-                }
                 if (match.getTeamOneEntry() == null || match.getTeamTwoEntry() == null) {
                     // Bye scenario: single team auto-advances.
                     TournamentEntry winner = match.getTeamOneEntry() != null ? match.getTeamOneEntry() : match.getTeamTwoEntry();

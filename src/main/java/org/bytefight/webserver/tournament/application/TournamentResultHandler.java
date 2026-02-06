@@ -130,6 +130,13 @@ public class TournamentResultHandler {
                 tournament.setStatus(TournamentStatus.COMPLETE);
                 tournament.setFinishedAt(LocalDateTime.now(clock));
                 tournamentRepository.save(tournament);
+                tournamentMatchRepository.findByTournamentAndBracketType(tournament, TournamentBracketType.GRAND_FINAL_RESET)
+                        .ifPresent(reset -> {
+                            if (reset.getState() == TournamentMatchState.PENDING) {
+                                reset.setState(TournamentMatchState.SKIPPED);
+                                tournamentMatchRepository.save(reset);
+                            }
+                        });
             } else {
                 // Winners-bracket champion lost once: schedule grand-final reset.
                 TournamentMatch reset = tournamentMatchRepository

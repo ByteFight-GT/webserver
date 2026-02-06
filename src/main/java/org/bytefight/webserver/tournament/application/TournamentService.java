@@ -16,6 +16,8 @@ import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
 import org.bytefight.webserver.tournament.infra.TournamentRepository;
+import org.bytefight.webserver.glicko.domain.TeamStats;
+import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,9 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -48,6 +52,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TournamentService {
+    private static final String DEFAULT_SEED_LADDER = "ladder";
+
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
     private final TournamentMatchRepository tournamentMatchRepository;
@@ -55,6 +61,7 @@ public class TournamentService {
     private final TournamentMatchScheduler matchScheduler;
     private final TeamService teamService;
     private final CompetitionService competitionService;
+    private final TeamStatsRepository teamStatsRepository;
     private final Clock clock;
 
     /**
@@ -139,7 +146,7 @@ public class TournamentService {
     }
 
     /**
-     * Enrolls teams and assigns deterministic seeds by team name.
+     * Enrolls teams and assigns deterministic seeds by team rank.
      *
      * Path:
      * - resolve team list (explicit UUIDs or all teams with submissions)
@@ -177,8 +184,21 @@ public class TournamentService {
             throw new IllegalArgumentException("Too many teams for this tournament.");
         }
 
-        // Seed deterministically by team name (stable across environments).
-        teams.sort(Comparator.comparing(Team::getNameNormalized));
+        // Seed by rank using glicko rating on the specified ladder; fall back to name for ties/unranked.
+        String seedLadder = (request != null && request.getSeedLadder() != null && !request.getSeedLadder().isBlank())
+                ? request.getSeedLadder().trim().toLowerCase()
+                : DEFAULT_SEED_LADDER;
+        Map<Long, Double> ratingByTeamId = new HashMap<>();
+        List<TeamStats> stats = teamStatsRepository.findByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
+        for (TeamStats teamStats : stats) {
+            ratingByTeamId.put(teamStats.getTeam().getId(), teamStats.getGlickoRating());
+        }
+
+        teams.sort(
+                Comparator.<Team>comparingDouble(team -> ratingByTeamId.getOrDefault(team.getId(), Double.NEGATIVE_INFINITY))
+                        .reversed()
+                        .thenComparing(Team::getNameNormalized)
+        );
 
         List<TournamentEntry> entries = new ArrayList<>();
         int seed = 1;
