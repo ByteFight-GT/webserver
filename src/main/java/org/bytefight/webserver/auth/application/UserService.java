@@ -47,6 +47,11 @@ public class UserService {
 
     @Transactional
     public User signup(RegisterUserDto input) {
+        return signup(input, false);
+    }
+
+    @Transactional
+    public User signup(RegisterUserDto input, boolean confirmEmail) {
         String normalizedEmail = normalize(input.getEmail());
         String normalizedUsername = normalize(input.getName());
 
@@ -66,7 +71,7 @@ public class UserService {
 
             playerService.createPlayer(user, input.getName());
 
-            SupabaseDtos.SupabaseUser supabaseUser = authService.createUser(normalizedEmail, input.getPassword(), false, Map.of(), Map.of());
+            SupabaseDtos.SupabaseUser supabaseUser = authService.createUser(normalizedEmail, input.getPassword(), confirmEmail, Map.of(), Map.of());
 
             user.setUuid(UUID.fromString(supabaseUser.id()));
             user = userRepository.save(user);
