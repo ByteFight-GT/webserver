@@ -6,12 +6,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-    networks:
-      - bytefight-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -27,17 +23,14 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:8080"
+      - "${HOST_PORT}:8080"
     volumes:
-      - ./storage:/app/storage
-    networks:
-      - bytefight-net
+      - storage:/app/storage
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
 
 volumes:
   db_data:
     driver: local
-  pgadmin_data:
-
-networks:
-  bytefight-net:
-    external: true
+  storage:
+    driver: local
