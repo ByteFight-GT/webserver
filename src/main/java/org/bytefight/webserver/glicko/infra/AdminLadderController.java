@@ -11,6 +11,7 @@ import org.bytefight.webserver.glicko.domain.dto.AdminUpdateLadderDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
 import jakarta.validation.Valid;
-import java.util.Map;
 import java.util.Set;
 
 @Tag(name = "Ladder (Admin)")
@@ -61,17 +59,14 @@ public class AdminLadderController {
     public Page<AdminLadderDto> listLadders(
             @ModelAttribute RestPageRequest pageRequest
     ) {
-        Long competitionId = parseCompetitionId(pageRequest.getFilter());
-        if (competitionId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "competitionId filter is required");
-        }
+        Specification<Ladder> specification = LadderSpecifications.fromFilter(pageRequest.getFilter());
         Pageable pageable = pageRequest.toPageable(
                 DEFAULT_PAGE_SIZE,
                 MAX_PAGE_SIZE,
                 DEFAULT_SORT_FIELD,
                 ALLOWED_SORT_FIELDS
         );
-        Page<Ladder> ladders = adminLadderService.listByCompetitionId(competitionId, pageable);
+        Page<Ladder> ladders = adminLadderService.listLadders(specification, pageable);
         var data = ladders.stream().map(AdminLadderDto::from).toList();
         return new PageImpl<>(data, ladders.getPageable(), ladders.getTotalElements());
     }
@@ -111,21 +106,4 @@ public class AdminLadderController {
         return AdminLadderDto.from(ladder);
     }
 
-    private static Long parseCompetitionId(Map<String, Object> filter) {
-        if (filter == null || filter.isEmpty()) {
-            return null;
-        }
-        Object value = filter.get("competitionId");
-        if (value instanceof Number number) {
-            return number.longValue();
-        }
-        if (value instanceof String text && !text.isBlank()) {
-            try {
-                return Long.parseLong(text);
-            } catch (NumberFormatException ex) {
-                return null;
-            }
-        }
-        return null;
-    }
 }
