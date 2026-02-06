@@ -5,15 +5,18 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.dto.AdminCreateMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.AdminGameMatchDto;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,27 +44,11 @@ public class AdminGameMatchController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public Page<AdminGameMatchDto> adminListGameMatches(
-            Pageable pageable,
-            @RequestParam(required = false) List<MatchStatus> status,
-            @RequestParam(required = false) List<MatchReason> reason
+    @PostMapping
+    public ResponseEntity<AdminGameMatchDto> adminCreateGameMatch(
+            @Valid @RequestBody AdminCreateMatchDto input
     ) {
-        Specification<GameMatch> specs = (root, cq, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if(status != null) {
-                predicates.add(root.get("status").in(status));
-            }
-
-            if(reason != null) {
-                predicates.add(root.get("reason").in(reason));
-            }
-
-            return cb.and(predicates.toArray(Predicate[]::new));
-        };
-
-        return adminGameMatchService.list(specs, pageable);
+        GameMatch match = adminGameMatchService.createMatch(input);
+        return ResponseEntity.status(HttpStatus.CREATED).body(AdminGameMatchDto.fromEntity(match));
     }
 }
