@@ -49,10 +49,11 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:root@auth-db:5432/postgres?sslmode=disable&options=-c%20search_path=auth
       API_EXTERNAL_URL: http://localhost:9999
-      GOTRUE_JWT_SECRET: jwt-secret
+      GOTRUE_JWT_SECRET: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs
       GOTRUE_JWT_EXP: 3600
-      GOTRUE_MAILER_AUTOCONFIRM: "true"
-      GOTRUE_EXTERNAL_EMAIL_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: true
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_NAMESPACE: auth
       GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: http://localhost:5173
