@@ -52,7 +52,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TournamentService {
-    private static final String DEFAULT_SEED_LADDER = "ladder";
+    private static final String DEFAULT_SEED_LADDER = "tournament";
 
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
