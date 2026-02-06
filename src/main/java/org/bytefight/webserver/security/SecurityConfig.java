@@ -85,7 +85,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoderDev(@Value("${app.auth.jwt-secret}") String secret) throws Exception {
+    @Profile("!prod")
+    public JwtDecoder jwtDecoderDev(@Value("${app.auth.jwt-secret}") String secret) {
         SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
 
         return NimbusJwtDecoder.withSecretKey(secretKey)
@@ -96,8 +97,8 @@ public class SecurityConfig {
     @Bean
     @Profile("prod")
     public JwtDecoder jwtDecoderProd(
-            @Value("${supabase.jwks-uri}") String jwks,
-            @Value("${supabase.issuer}") String issuer
+            @Value("${app.auth.supabase.jwks-uri}") String jwks,
+            @Value("${app.auth.supabase.issuer}") String issuer
     ) {
         var decoder = NimbusJwtDecoder.withJwkSetUri(jwks)
                 .jwsAlgorithm(SignatureAlgorithm.ES256)

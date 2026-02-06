@@ -8,8 +8,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
-    networks:
-      - bytefight-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -28,15 +26,11 @@ services:
       - "${HOST_PORT}:8080"
     volumes:
       - storage:/app/storage
-    networks:
-      - bytefight-net
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
 
 volumes:
   db_data:
     driver: local
   storage:
     driver: local
-
-networks:
-  bytefight-net:
-    external: true
