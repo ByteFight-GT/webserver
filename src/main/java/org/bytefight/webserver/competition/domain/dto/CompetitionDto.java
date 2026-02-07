@@ -1,5 +1,6 @@
 package org.bytefight.webserver.competition.domain.dto;
 
+import jakarta.validation.constraints.NotNull;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.Competition;
 import lombok.Builder;
@@ -8,12 +9,12 @@ import lombok.Value;
 @Value
 @Builder
 public class CompetitionDto {
-    String slug;
-    String name;
+    @NotNull String slug;
+    @NotNull String name;
     String description;
-    boolean isActive;
-    boolean isWhitelisted;
-    TimestampsDto timestamps;
+    @NotNull boolean isActive;
+    @NotNull boolean isWhitelisted;
+    @NotNull TimestampsDto timestamps;
 
     public static CompetitionDto from(Competition competition) {
         return CompetitionDto.builder()
