@@ -1,7 +1,7 @@
 package org.bytefight.webserver.team.application;
 
 import org.bytefight.webserver.competition.domain.Competition;
-import org.bytefight.webserver.leaderboard.LeaderboardDTO;
+import org.bytefight.webserver.leaderboard.domain.LeaderboardDto;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
@@ -326,11 +326,11 @@ public class TeamService {
         return !team.isDeleted();
     }
 
-    public List<LeaderboardDTO> getLeaderboard() {
+    public List<LeaderboardDto> getLeaderboard() {
         return getLeaderboard(0, Integer.MAX_VALUE).toList();
     }
 
-    public Page<LeaderboardDTO> getLeaderboard(int page, int size) {
+    public Page<LeaderboardDto> getLeaderboard(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         AtomicInteger rank = new AtomicInteger(1 + page * size);
         Page<Team> teamPage = null;
@@ -347,21 +347,8 @@ public class TeamService {
         return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement(), membersByTeamUuid.get(team.getUuid())));
     }
 
-    private LeaderboardDTO teamToLeaderboardDTO(Team team, int rank, List<String> memberNames) {
-        LeaderboardDTO.LeaderboardDTOBuilder builder = LeaderboardDTO.builder();
-        builder.teamUuid(team.getUuid().toString())
-                .rank(rank)
-//                .glicko(team.getCurrentSubmission() != null ? team.getGlicko() : -1)
-                .teamName(team.getName())
-//                .createdAt(team.getCreationDateTime())
-                .type(team.getType())
-                .quote(team.getQuote());
-
-        if (team.isDisplayMembers()) {
-            builder.members(memberNames);
-        }
-
-        return builder.build();
+    private LeaderboardDto teamToLeaderboardDTO(Team team, int rank, List<String> memberNames) {
+        return null;
     }
 
     public Team findTeamByCode(String code) {

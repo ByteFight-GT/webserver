@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +24,9 @@ import java.io.IOException;
 import java.util.Set;
 
 @Tag(name = "Submissions (Admin)")
-@RestController
 @RequestMapping("/api/v1/admin/submission")
+@PreAuthorize("hasRole('ADMIN')")
+@RestController
 public class AdminSubmissionController {
     private static final int DEFAULT_PAGE_SIZE = 25;
     private static final int MAX_PAGE_SIZE = 100;
