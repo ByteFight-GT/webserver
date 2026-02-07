@@ -2,13 +2,11 @@ package org.bytefight.webserver.leaderboard.domain;
 
 import org.bytefight.webserver.team.domain.TeamType;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
 
 @Value
-@Builder
 public class LeaderboardDto {
     @NotNull String teamUuid;
     @NotNull String teamName;
@@ -16,6 +14,24 @@ public class LeaderboardDto {
     @NotNull TeamType type;
 
     @NotNull double glicko;
-    Double rank;
-    List<String> members;
+    Integer rank;
+    List<MemberSummaryDto> members;
+
+    public LeaderboardDto(
+            String teamUuid,
+            String teamName,
+            String teamQuote,
+            TeamType type,
+            double glicko,
+            Integer rank,
+            List<MemberSummaryDto> members
+    ) {
+        this.teamUuid = teamUuid;
+        this.teamName = teamName;
+        this.teamQuote = teamQuote;
+        this.type = type;
+        this.glicko = glicko;
+        this.rank = rank;
+        this.members = members;
+    }
 }
