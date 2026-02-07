@@ -1,24 +1,21 @@
-package org.bytefight.webserver.leaderboard;
+package org.bytefight.webserver.leaderboard.domain;
 
 import org.bytefight.webserver.team.domain.TeamType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Value
 @Builder
-public class LeaderboardDTO {
+public class LeaderboardDto {
     @NotNull String teamUuid;
     @NotNull String teamName;
-    @NotNull String quote;
-    @NotNull LocalDateTime createdAt;
+    @NotNull String teamQuote;
     @NotNull TeamType type;
 
-    @NotNull int rank;
     @NotNull double glicko;
+    Double rank;
     List<String> members;
-
 }
