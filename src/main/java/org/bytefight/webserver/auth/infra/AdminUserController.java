@@ -19,6 +19,7 @@ import java.util.Set;
 
 @Tag(name = "User (Admin)")
 @RequestMapping("/api/v1/admin/user")
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 public class AdminUserController {
     private static final int DEFAULT_PAGE_SIZE = 25;
