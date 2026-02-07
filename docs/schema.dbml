@@ -1,0 +1,257 @@
+TablePartial base_template {
+  id bigint [primary key, increment]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+}
+
+TablePartial soft_delete_template {
+  is_deleted boolean [not null, default: false]
+  deleted_at timestamp
+}
+
+TablePartial user_audit_template {
+  created_by_user_id bigint [ref: > users.id]
+  updated_by_user_id bigint [ref: > users.id]
+}
+
+enum match_status {
+  created // The match just got created
+  scheduling // (might also enter this state on reschedule)
+  waiting // Match is in queue
+  in_progress // Match is currently being played out on an engine
+  failed
+  team_a_win
+  team_b_win
+  draw
+}
+
+enum match_reason {
+  validation
+  scrimmage
+  ladder
+  tournament
+  other
+}
+
+enum game_match_file_visibility {
+  everyone
+  team
+  admin
+}
+
+enum submission_validity {
+  valid
+  invalid
+  not_evaluated
+  not_evaluated_autoset
+}
+
+enum team_type {
+  regular
+  ta_bot
+}
+
+// File Storage System
+Table file_records {
+  ~base_template
+  uuid uuid [not null, unique]
+  filename varchar [not null]
+  content_type varchar(255) [not null]
+  size bigint [not null]
+  sha256 varchar [not null]
+  storage_path varchar [not null]
+}
+
+// Stores high level account related information.
+// Each entity here corresponds one-to-one with a row in
+// supabase auth.
+Table users {
+  ~base_template
+  uuid uuid [not null, unique, note: 'corresponds with supabase user UUID']
+  email varchar(255) [not null, unique]
+  is_admin boolean [not null, default: false]
+}
+
+// Stores platform-wide player related information (username,
+// badges, achievements, etc.)
+Table players {
+  ~base_template
+  user_id bigint [not null, unique, ref: - users.id]
+  username varchar(50) [not null, unique]
+  username_normalized varchar(50) [not null, unique]
+}
+
+// A specific competition. Each competition has its own teams,
+// matches, rules, etc.
+Table competitions {
+  ~base_template
+  slug varchar(255) [not null, unique]
+  name varchar [not null]
+  description varchar
+  is_active boolean [not null, default: false]
+  is_whitelisted boolean [not null, default: false]
+  max_players_per_team integer [not null]
+}
+
+Table ladders {
+  ~base_template
+
+  competition_id bigint [not null, ref: > competitions.id]
+  ladder varchar(50) [not null]
+
+  glicko_default_rating float8 [not null]
+  glicko_default_rd float8 [not null]
+  glicko_rd_max float8 [not null]
+  glicko_rd_min float8
+  glicko_phi_inflation_per_day float8 [not null, default: 0.0]
+  glicko_tau float8 [not null]
+  glicko_sigma_default float8 [not null]
+  glicko_sigma_min float8
+  glicko_sigma_max float8
+
+  indexes {
+    (competition_id, ladder) [pk]
+  }
+}
+
+// Entries for whitelisted players on whitelist enforced
+// competitions
+Table whitelist_entries {
+  ~base_template
+  competition_id bigint [not null, ref: > competitions.id]
+  email varchar(255)
+}
+
+// Teams
+Table teams {
+  ~base_template
+  competition_id bigint [not null, ref: > competitions.id]
+  uuid uuid [not null, unique, default: `gen_random_uuid()`]
+  name varchar(50) [not null]
+  name_normalized varchar(50) [not null]
+  quote varchar
+  join_code varchar(50) [unique]
+  display_members boolean [not null]
+  active_submission_id bigint [ref: > submissions.id]
+  type team_type [not null, default: 'regular']
+
+  ~soft_delete_template
+  ~user_audit_template
+
+  Indexes {
+    (competition_id, name_normalized) [unique]
+  }
+}
+
+// Stores team statistics for a specific ladder
+Table team_stats {
+  ~base_template
+  team_id bigint [not null, ref: > teams.id]
+  competition_id bigint [not null, ref: > competitions.id]
+
+  ladder varchar(50) [not null]
+  matches_played integer [not null, default: 0]
+  wins integer [not null, default: 0]
+  losses integer [not null, default: 0]
+  draws integer [not null, default: 0]
+  glicko_rating float8 [not null]
+  glicko_rd float8 [not null]
+  glicko_volatility float8 [not null]
+
+  Indexes {
+    (team_id, ladder) [unique]
+  }
+}
+
+// Join table storing player team membership for a specific
+// competition
+Table team_members {
+  ~base_template
+  player_id bigint [not null, ref: > players.id]
+  team_id bigint [not null, ref: > teams.id]
+  competition_id bigint [not null, ref: > competitions.id]
+
+  Indexes {
+    (team_id, player_id) [unique]
+    (competition_id, player_id) [unique]
+  }
+}
+
+Table team_glicko_history {
+  ~base_template
+  team_id bigint [not null, ref: > teams.id]
+  competition_id bigint [not null, ref: > competitions.id]
+
+  ladder varchar(50) [not null]
+  game_match_id bigint [ref: > game_matches.id]
+
+  old_glicko float8 [not null]
+  new_glicko float8 [not null]
+
+  Indexes {
+    (team_id, game_match_id)
+  }
+}
+
+Table submissions {
+  ~base_template
+  uuid uuid [not null] // note that this is not the storage file uuid
+  file_record_id bigint [not null, ref: - file_records.id]
+  team_id bigint [not null, ref: > teams.id]
+  description varchar(512)
+  validity submission_validity [not null, default: 'not_evaluated']
+
+  ~soft_delete_template
+  ~user_audit_template
+}
+
+Table game_matches {
+  ~base_template
+  uuid uuid [not null, default: `gen_random_uuid()`]
+  competition_id bigint [not null, ref: > competitions.id]
+  ladder varchar(50) [not null]
+
+  team_a_id bigint [not null, ref: > teams.id]
+  team_b_id bigint [not null, ref: > teams.id]
+
+  submission_a_id bigint [not null, ref: > submissions.id]
+  submission_b_id bigint [not null, ref: > submissions.id]
+
+  match_settings jsonb [not null]
+
+  status match_status [not null, default: 'scheduling']
+  reason match_reason [not null, default: 'other']
+
+  matchmaking_event_id bigint [ref: > matchmaking_events.id]
+
+  scheduled_at timestamp
+  started_at timestamp
+  finished_at timestamp
+
+  ~user_audit_template
+}
+
+// A result file associated with a game match.
+// Could contain stdout/stderr, a json play-by-play,
+// etc.
+Table game_match_files {
+  ~base_template
+  game_match_id bigint [not null, ref: > game_matches.id]
+  uuid uuid [not null]
+  slug varchar(50) [not null] // what is this file for?
+  file_record_id bigint [not null, ref: - file_records.id]
+  team_id bigint [ref: > teams.id]
+  visibility game_match_file_visibility [not null]
+
+  Indexes {
+    (game_match_id, slug, team_id) [unique]
+  }
+}
+
+Table matchmaking_events {
+  ~base_template
+}
+
+Ref: game_matches.(competition_id, ladder) > ladders.(competition_id, ladder)
+Ref: team_stats.(competition_id, ladder) > ladders.(competition_id, ladder)
+Ref: team_glicko_history.(competition_id, ladder) > ladders.(competition_id, ladder)
