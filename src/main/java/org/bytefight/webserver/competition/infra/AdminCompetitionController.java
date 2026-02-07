@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,8 +27,9 @@ import jakarta.validation.Valid;
 import java.util.Set;
 
 @Tag(name = "Competition (Admin)")
-@RestController
 @RequestMapping("/api/v1/admin/competition")
+@PreAuthorize("hasRole('ADMIN')")
+@RestController
 public class AdminCompetitionController {
     private static final int DEFAULT_PAGE_SIZE = 25;
     private static final int MAX_PAGE_SIZE = 100;
