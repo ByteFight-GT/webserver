@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
-@RestController
 @RequestMapping("/api/v1/admin/game-match")
+@PreAuthorize("hasRole('ADMIN')")
+@RestController
 public class AdminGameMatchController {
     private static final int DEFAULT_PAGE_SIZE = 25;
     private static final int MAX_PAGE_SIZE = 100;
