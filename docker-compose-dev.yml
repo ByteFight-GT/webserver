@@ -1,0 +1,59 @@
+name: bytefight-webserver-dev
+
+services:
+  db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: bytefightdb
+      POSTGRES_USER: bytefight
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  auth-db:
+    image: postgres:16.4
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
+      - DB_NAMESPACE=auth
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  supabase-auth:
+    image: supabase/auth:v2.186.0
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    ports:
+      - "9999:8081"
+    environment:
+      DATABASE_URL: postgres://postgres:root@auth-db:5432/postgres?sslmode=disable&options=-c%20search_path=auth
+      API_EXTERNAL_URL: http://localhost:9999
+      GOTRUE_JWT_SECRET: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_MAILER_AUTOCONFIRM: true
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: http://localhost:5173
