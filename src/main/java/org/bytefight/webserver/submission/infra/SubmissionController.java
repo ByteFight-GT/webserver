@@ -5,7 +5,6 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
@@ -40,7 +39,6 @@ public class SubmissionController {
     private final RabbitMQService rabbitMQService;
     private final TeamService teamService;
     private final PlayerService playerService;
-    private final PermissionsService permissionsService;
 
     @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
