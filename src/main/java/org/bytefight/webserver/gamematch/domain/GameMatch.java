@@ -75,24 +75,4 @@ public class GameMatch extends AuditableEntity {
 
     @Column(name = "finished_at")
     private Instant finishedAt;
-
-    public Team getTeamA() {
-        return teamA;
-    }
-
-    public Team getTeamB() {
-        return teamB;
-    }
-
-    public Competition getCompetition() {
-        return competition;
-    }
-
-    public String getLadder() {
-        return ladder;
-    }
-
-    public MatchStatus getStatus() {
-        return status;
-    }
 }
