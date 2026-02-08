@@ -8,7 +8,6 @@ import org.bytefight.webserver.matchMaking.domain.MATCHMAKING_REASON;
 import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.matchMaking.infra.MatchMakingEventRepository;
 import org.bytefight.webserver.matchMaking.infra.MatchMakingProperties;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ public class MatchMakingService {
     private final MatchMakingEventRepository matchMakingEventRepository;
     private final ClockConfig clockConfig;
     private final MatchMakingProperties props;
-    private final PermissionsService permissionsService;
 
     @Transactional
     public MatchmakingEvent createEvent(MATCHMAKING_REASON reason) {
@@ -60,9 +58,5 @@ public class MatchMakingService {
 
     public Optional<MatchmakingEvent> getLastScheduledEvent() {
         return matchMakingEventRepository.findFirstByOrderByCreatedAtDesc();
-    }
-
-    public boolean isEnabled() {
-        return props.isEnabled() && permissionsService.get().getRunScheduledMatchmaking();
     }
 }

@@ -1,7 +1,6 @@
 package org.bytefight.webserver.player.application;
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.infra.TeamRepository;
@@ -18,7 +17,6 @@ import java.util.UUID;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final PermissionsService permissionsService;
     private final TeamRepository teamRepository;
 
     public Player getPlayer(Long playerId) {

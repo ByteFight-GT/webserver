@@ -22,15 +22,6 @@ public class ScheduledMatchMaker {
 
     private final AtomicReference<Instant> lastRun = new AtomicReference<>(null);
 
-    public void scheduleMatchGeneration() {
-        if(matchMakingService.isEnabled()) {
-            log.info("Scheduling Matches");
-            MatchmakingEvent event = matchMakingService.createEvent(MATCHMAKING_REASON.SCHEDULED);
-            matchMakingService.queueEvent(event);
-            lastRun.set(Instant.now());
-        }
-    }
-
     public Instant getLastRun() {
         return lastRun.get();
     }
