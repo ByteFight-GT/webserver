@@ -65,6 +65,16 @@ public class TeamService {
         return builder.toString();
     }
 
+    public Optional<Team> findTeamByCompetitionAndPlayer(
+            Competition competition,
+            Player player
+    ) {
+        return teamMemberRepository
+                .findByCompetitionAndPlayer(competition, player)
+                .map(TeamMember::getTeam);
+    }
+
+
     public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto) {
         return createTeam(competition, teamSettingsDto, true);
     }
