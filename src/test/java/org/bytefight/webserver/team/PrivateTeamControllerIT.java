@@ -5,7 +5,6 @@ import org.bytefight.webserver.TestDataFactory;
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.permissions.infra.PermissionsRespository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
@@ -41,9 +40,6 @@ class PrivateTeamControllerIT extends FullStackIntegrationTestBase {
 
     @Autowired
     private TeamRepository teamRepository;
-
-    @Autowired
-    private PermissionsRespository permissionsRespository;
 
     @Test
     void editTeamUpdatesTeamSettings() throws Exception {
