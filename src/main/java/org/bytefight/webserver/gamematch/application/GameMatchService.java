@@ -1,6 +1,8 @@
 package org.bytefight.webserver.gamematch.application;
 
+import jakarta.persistence.criteria.Predicate;
 import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -26,6 +29,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
@@ -104,6 +108,28 @@ public class GameMatchService {
         match.setScheduledAt(Instant.now());
 
         return gameMatchRepository.save(match);
+    }
+
+    public Page<GameMatch> getPaginatedMatches(
+            Competition competition,
+            String ladderSlug,
+            PageRequest page
+    ) {
+        Specification<GameMatch> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(competition != null) {
+                predicates.add(cb.equal(root.get("competition"), competition));
+            }
+
+            if(ladderSlug != null) {
+                predicates.add(cb.equal(root.get("ladder"), ladderSlug));
+            }
+
+            return predicates.isEmpty() ? cb.conjunction() : cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return gameMatchRepository.findAll(spec, page);
     }
 
     public GameMatchDto getDTOById(Long id) {
