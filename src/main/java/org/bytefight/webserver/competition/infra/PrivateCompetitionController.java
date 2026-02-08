@@ -56,6 +56,30 @@ public class PrivateCompetitionController {
         return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
     }
 
+
+    @GetMapping("/{competitionSlug}/teams/my-team")
+    @Transactional
+    @Operation(
+            operationId = "getMyCompetitionTeam",
+            summary = "Gets the current team a player is on"
+    )
+    public ResponseEntity<SelfTeamDto> getMyCompetitionTeam(
+            @AuthenticationPrincipal User user,
+            @PathVariable String competitionSlug
+    ) {
+        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        Team team = teamService.findTeamByCompetitionAndPlayer(competition, player)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player does not have team for the competition"));
+
+        List<Player> teamMembers = teamService.getPlayersForTeam(team);
+        return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
+    }
+
     @PostMapping("/{competitionSlug}/teams/join")
     @Transactional
     @Operation(
