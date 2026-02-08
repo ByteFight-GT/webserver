@@ -65,8 +65,7 @@ public class PrivateCompetitionController {
     )
     public ResponseEntity<SelfTeamDto> getMyCompetitionTeam(
             @AuthenticationPrincipal User user,
-            @PathVariable String competitionSlug,
-            @RequestBody TeamSettingsDto teamSettingsDto
+            @PathVariable String competitionSlug
     ) {
         Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
