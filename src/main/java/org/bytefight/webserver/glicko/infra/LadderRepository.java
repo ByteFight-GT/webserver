@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface LadderRepository extends JpaRepository<Ladder, Long>, JpaSpecificationExecutor<Ladder> {
+    List<Ladder> findAllByCompetition(Competition competition);
     Optional<Ladder> findByCompetitionAndLadder(Competition competition, String ladder);
-
     Page<Ladder> findByCompetitionId(Long competitionId, Pageable pageable);
 }
