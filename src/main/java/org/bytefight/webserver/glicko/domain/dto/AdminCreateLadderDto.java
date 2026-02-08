@@ -19,4 +19,48 @@ public class AdminCreateLadderDto {
     @Positive Double glickoSigmaDefault;
     @Positive Double glickoSigmaMin;
     @Positive Double glickoSigmaMax;
+
+    public Long getCompetitionId() {
+        return competitionId;
+    }
+
+    public String getLadder() {
+        return ladder;
+    }
+
+    public Double getGlickoDefaultRating() {
+        return glickoDefaultRating;
+    }
+
+    public Double getGlickoDefaultRd() {
+        return glickoDefaultRd;
+    }
+
+    public Double getGlickoRdMax() {
+        return glickoRdMax;
+    }
+
+    public Double getGlickoRdMin() {
+        return glickoRdMin;
+    }
+
+    public Double getGlickoPhiInflationPerDay() {
+        return glickoPhiInflationPerDay;
+    }
+
+    public Double getGlickoTau() {
+        return glickoTau;
+    }
+
+    public Double getGlickoSigmaDefault() {
+        return glickoSigmaDefault;
+    }
+
+    public Double getGlickoSigmaMin() {
+        return glickoSigmaMin;
+    }
+
+    public Double getGlickoSigmaMax() {
+        return glickoSigmaMax;
+    }
 }
