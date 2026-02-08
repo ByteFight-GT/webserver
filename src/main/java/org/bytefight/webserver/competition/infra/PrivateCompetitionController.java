@@ -83,7 +83,7 @@ public class PrivateCompetitionController {
 
 
 
-    @PostMapping("/{competitionSlug}/teams/join")
+    @GetMapping("/{competitionSlug}/teams/join")
     @Transactional
     @Operation(
             operationId = "joinCompetitionTeam",
