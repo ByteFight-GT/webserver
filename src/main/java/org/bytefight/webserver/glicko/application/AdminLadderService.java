@@ -1,5 +1,6 @@
 package org.bytefight.webserver.glicko.application;
 
+import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.glicko.domain.Ladder;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class AdminLadderService {
     private static final double DEFAULT_GLICKO_DEFAULT_RATING = 1500.0;
     private static final double DEFAULT_GLICKO_DEFAULT_RD = 350.0;
@@ -27,17 +29,6 @@ public class AdminLadderService {
 
     private final CompetitionRepository competitionRepository;
     private final LadderRepository ladderRepository;
-    private final LadderService ladderService;
-
-    public AdminLadderService(
-            CompetitionRepository competitionRepository,
-            LadderRepository ladderRepository,
-            LadderService ladderService
-    ) {
-        this.competitionRepository = competitionRepository;
-        this.ladderRepository = ladderRepository;
-        this.ladderService = ladderService;
-    }
 
     public Page<Ladder> listByCompetitionId(Long competitionId, Pageable pageable) {
         return ladderRepository.findByCompetitionId(competitionId, pageable);
@@ -50,19 +41,25 @@ public class AdminLadderService {
     public Ladder createLadder(AdminCreateLadderDto input) {
         Competition competition = competitionRepository.findById(input.getCompetitionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
-        return ladderService.createLadder(
-                competition,
-                input.getLadder(),
-                valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING),
-                valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD),
-                valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX),
-                valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN),
-                valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY),
-                valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU),
-                valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT),
-                valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN),
-                valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX)
-        );
+        ladderRepository.findByCompetitionAndLadder(competition, input.getLadder())
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Ladder already exists");
+                });
+
+        Ladder ladder = new Ladder();
+        ladder.setCompetition(competition);
+        ladder.setLadder(input.getLadder());
+        ladder.setGlickoDefaultRating(valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING));
+        ladder.setGlickoDefaultRd(valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD));
+        ladder.setGlickoRdMax(valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX));
+        ladder.setGlickoRdMin(valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN));
+        ladder.setGlickoPhiInflationPerDay(valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY));
+        ladder.setGlickoTau(valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU));
+        ladder.setGlickoSigmaDefault(valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT));
+        ladder.setGlickoSigmaMin(valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN));
+        ladder.setGlickoSigmaMax(valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
+
+        return ladderRepository.save(ladder);
     }
 
     public Ladder updateLadder(Long id, AdminUpdateLadderDto input) {
