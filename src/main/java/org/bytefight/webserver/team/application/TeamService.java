@@ -114,13 +114,16 @@ public class TeamService {
             team.setQuote(teamSettingsDto.getQuote());
         }
 
-        List<Ladder> ladders = ladderRepository.findAllByCompetition(competition);
+        // ✅ SAVE FIRST - team needs an ID before being used in relationships
+        team = teamRepository.save(team);
 
+        // ✅ NOW create team stats - team has an ID
+        List<Ladder> ladders = ladderRepository.findAllByCompetition(competition);
         for(Ladder ladder : ladders) {
             teamStatsService.getTeamStatsCreateIfNotExist(team, ladder.getLadder());
         }
 
-        return teamRepository.save(team);
+        return team;
     }
 
     public TeamMember joinTeam(Player player, Team team) {
