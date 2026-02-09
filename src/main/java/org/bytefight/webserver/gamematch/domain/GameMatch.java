@@ -2,7 +2,7 @@ package org.bytefight.webserver.gamematch.domain;
 
 import org.bytefight.webserver.common.domain.AuditableEntity;
 import org.bytefight.webserver.competition.domain.Competition;
-import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
 import jakarta.persistence.*;

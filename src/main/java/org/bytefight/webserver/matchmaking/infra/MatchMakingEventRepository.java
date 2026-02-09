@@ -1,6 +1,6 @@
-package org.bytefight.webserver.matchMaking.infra;
+package org.bytefight.webserver.matchmaking.infra;
 
-import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -80,7 +80,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
                 submissionA,
                 submissionB,
                 ladder,
-                MatchReason.ladder,
+                MatchReason.matchmaking,
                 null
         );
         match.setMatchSettings(Map.of("map", "arena_01"));

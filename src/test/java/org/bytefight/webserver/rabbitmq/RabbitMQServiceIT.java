@@ -52,7 +52,7 @@ class RabbitMQServiceIT extends FullStackIntegrationTestBase {
                 "sub-a",
                 "sub-b",
                 "ladder1",
-                MatchReason.ladder,
+                MatchReason.matchmaking,
                 Map.of("map", "arena_01")
         );
 

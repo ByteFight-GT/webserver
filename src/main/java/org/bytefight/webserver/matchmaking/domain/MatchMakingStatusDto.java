@@ -1,4 +1,4 @@
-package org.bytefight.webserver.matchMaking.domain;
+package org.bytefight.webserver.matchmaking.domain;
 
 import lombok.Builder;
 import lombok.Value;
