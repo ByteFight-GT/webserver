@@ -27,6 +27,12 @@ public class Ladder extends BaseEntity {
     @Column(name = "ladder", nullable = false, length = 50)
     private String ladder;
 
+    @Column(name = "allow_user_matches", nullable = false)
+    private boolean allowUserMatches = false;
+
+    @Column(name = "matchmaking_interval_seconds", nullable = true)
+    private Integer matchmakingIntervalSeconds;
+
     @Column(name = "glicko_default_rating", nullable = false)
     private double glickoDefaultRating;
 
