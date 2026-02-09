@@ -83,6 +83,8 @@ CREATE TABLE "ladders" (
                            "updated_at" timestamp NOT NULL DEFAULT (now()),
                            "competition_id" bigint NOT NULL,
                            "ladder" varchar(50) NOT NULL,
+                           "allow_user_matches" boolean NOT NULL DEFAULT false,
+                           "matchmaking_interval_seconds" integer,
                            "glicko_default_rating" float8 NOT NULL,
                            "glicko_default_rd" float8 NOT NULL,
                            "glicko_rd_max" float8 NOT NULL,
