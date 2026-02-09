@@ -1,6 +1,9 @@
 package org.bytefight.webserver.team.application;
 
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.glicko.application.TeamStatsService;
+import org.bytefight.webserver.glicko.domain.Ladder;
+import org.bytefight.webserver.glicko.infra.LadderRepository;
 import org.bytefight.webserver.leaderboard.domain.LeaderboardDto;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
@@ -38,6 +41,8 @@ public class TeamService {
     private static final int JOIN_CODE_LENGTH = 8;
     private static final int JOIN_CODE_MAX_ATTEMPTS = 10;
 
+    private final LadderRepository ladderRepository;
+    private final TeamStatsService teamStatsService;
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final PlayerRepository playerRepository;
@@ -74,7 +79,6 @@ public class TeamService {
                 .map(TeamMember::getTeam);
     }
 
-
     public Team createTeam(Competition competition, TeamSettingsDto teamSettingsDto) {
         return createTeam(competition, teamSettingsDto, true);
     }
@@ -108,6 +112,12 @@ public class TeamService {
 
         if (teamSettingsDto.getQuote() != null) {
             team.setQuote(teamSettingsDto.getQuote());
+        }
+
+        List<Ladder> ladders = ladderRepository.findAllByCompetition(competition);
+
+        for(Ladder ladder : ladders) {
+            teamStatsService.getTeamStatsCreateIfNotExist(team, ladder.getLadder());
         }
 
         return teamRepository.save(team);

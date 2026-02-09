@@ -16,7 +16,7 @@ public class TeamStatsService {
     private final TeamStatsRepository teamStatsRepository;
     private final LadderRepository ladderRepository;
 
-    TeamStats getTeamStatsCreateIfNotExist(Team team, String ladderSlug) {
+    public TeamStats getTeamStatsCreateIfNotExist(Team team, String ladderSlug) {
         Optional<TeamStats> teamStats = teamStatsRepository.findByTeamAndLadder(team, ladderSlug);
 
         if (teamStats.isPresent()) {
