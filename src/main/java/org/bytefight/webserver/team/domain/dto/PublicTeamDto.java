@@ -1,5 +1,6 @@
 package org.bytefight.webserver.team.domain.dto;
 
+import org.bytefight.webserver.common.domain.dto.DeletionDto;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.dto.CompetitionDto;
 import org.bytefight.webserver.player.domain.Player;
@@ -21,6 +22,7 @@ public class PublicTeamDto {
     @NotNull Boolean displayMembers;
     @NotNull TeamType type;
     @NotNull TimestampsDto timestampsDto;
+    @NotNull DeletionDto deletionDto;
     List<PublicPlayerDto> members;
 
     public static PublicTeamDto from(Team team, List<Player> members) {
@@ -33,6 +35,7 @@ public class PublicTeamDto {
                 .type(team.getType())
                 .members(members != null ? members.stream().map(PublicPlayerDto::from).toList() : null)
                 .timestampsDto(TimestampsDto.from(team))
+                .deletionDto(DeletionDto.from(team))
                 .build();
     }
 }
