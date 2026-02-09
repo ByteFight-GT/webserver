@@ -17,6 +17,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByCompetitionAndNameNormalized(Competition competition, String nameNormalized);
     boolean existsByJoinCode(String joinCode);
 
+    List<Team> findAllByCompetition(Competition competition);
+
     Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
     Optional<Team> findByCompetitionAndJoinCodeAndIsDeletedIsFalse(Competition competition, String joinCode);
 

@@ -80,9 +80,6 @@ public class PrivateCompetitionController {
         return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
     }
 
-
-
-
     @PostMapping("/{competitionSlug}/teams/join")
     @Transactional
     @Operation(
