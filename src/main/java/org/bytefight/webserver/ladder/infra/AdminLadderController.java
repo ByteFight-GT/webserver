@@ -1,13 +1,13 @@
-package org.bytefight.webserver.glicko.infra;
+package org.bytefight.webserver.ladder.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.common.web.RestPageRequest;
-import org.bytefight.webserver.glicko.application.AdminLadderService;
-import org.bytefight.webserver.glicko.domain.Ladder;
-import org.bytefight.webserver.glicko.domain.dto.AdminCreateLadderDto;
-import org.bytefight.webserver.glicko.domain.dto.AdminLadderDto;
-import org.bytefight.webserver.glicko.domain.dto.AdminUpdateLadderDto;
+import org.bytefight.webserver.ladder.application.AdminLadderService;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.domain.dto.AdminCreateLadderDto;
+import org.bytefight.webserver.ladder.domain.dto.AdminLadderDto;
+import org.bytefight.webserver.ladder.domain.dto.AdminUpdateLadderDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,6 @@
-package org.bytefight.webserver.glicko.infra;
+package org.bytefight.webserver.ladder.infra;
 
-import org.bytefight.webserver.glicko.domain.Ladder;
+import org.bytefight.webserver.ladder.domain.Ladder;
 import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.Predicate;

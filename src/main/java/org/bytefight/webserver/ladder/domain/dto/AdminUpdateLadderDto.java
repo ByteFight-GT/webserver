@@ -1,4 +1,4 @@
-package org.bytefight.webserver.glicko.domain.dto;
+package org.bytefight.webserver.ladder.domain.dto;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;

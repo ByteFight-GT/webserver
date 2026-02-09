@@ -2,9 +2,8 @@ package org.bytefight.webserver.team.application;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
-import org.bytefight.webserver.glicko.domain.Ladder;
-import org.bytefight.webserver.glicko.infra.LadderRepository;
-import org.bytefight.webserver.leaderboard.domain.LeaderboardDto;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
@@ -19,19 +18,12 @@ import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.whitelist.application.WhitelistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
