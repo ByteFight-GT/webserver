@@ -19,30 +19,21 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameMatchDto {
-    @NotNull
-    private String uuid;
-    @NotNull
-    private String competitionSlug;
-    @NotNull
-    private String teamAName;
-    @NotNull
-    private String teamBName;
-    @NotNull
-    private String teamAUuid;
-    @NotNull
-    private String teamBUuid;
-    @NotNull
-    private Map<String, Object> matchSettings;
+    @NotNull private String uuid;
+    @NotNull private String competitionSlug;
+    @NotNull private String teamAName;
+    @NotNull private String teamBName;
+    @NotNull private String teamAUuid;
+    @NotNull private String teamBUuid;
+    @NotNull private String submissionAName;
+    @NotNull private String submissionBName;
+    @NotNull private Map<String, Object> matchSettings;
     private MatchStatus status;
     private MatchReason reason;
-    @NotNull
-    private Instant scheduledAt;
-    @NotNull
-    private Instant startedAt;
-    @NotNull
-    private Instant finishedAt;
-    @NotNull
-    TimestampsDto timestampsDto;
+    @NotNull private Instant scheduledAt;
+    @NotNull private Instant startedAt;
+    @NotNull private Instant finishedAt;
+    @NotNull TimestampsDto timestampsDto;
 
     // Convert from Entity to DTO
     public static GameMatchDto fromEntity(GameMatch gameMatch) {
@@ -53,6 +44,8 @@ public class GameMatchDto {
                 .teamBName(gameMatch.getTeamB().getName())
                 .teamAUuid(gameMatch.getTeamA().getUuid().toString())
                 .teamBUuid(gameMatch.getTeamB().getUuid().toString())
+                .submissionAName(gameMatch.getSubmissionA().getFileRecord().getFilename())
+                .submissionBName(gameMatch.getSubmissionB().getFileRecord().getFilename())
                 .matchSettings(gameMatch.getMatchSettings())
                 .status(gameMatch.getStatus())
                 .reason(gameMatch.getReason())

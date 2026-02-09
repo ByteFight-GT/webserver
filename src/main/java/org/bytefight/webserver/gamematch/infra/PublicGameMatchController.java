@@ -33,13 +33,14 @@ public class PublicGameMatchController {
     @GetMapping
     public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
             @RequestParam String competitionSlug,
+            @RequestParam(required = false) String teamUuid,
             @RequestParam(required = false) String ladder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "scheduledAt"));
         Competition competition = competitionService.getCompetitionBySlug(competitionSlug).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Page<GameMatch> gameMatches = gameMatchService.getPaginatedMatches(competition, ladder, pageRequest);
+        Page<GameMatch> gameMatches = gameMatchService.getPaginatedMatches(competition, ladder, teamUuid, pageRequest);
 
         return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
     }
