@@ -1,4 +1,4 @@
-package org.bytefight.webserver.glicko.domain;
+package org.bytefight.webserver.ladder.domain;
 
 import lombok.*;
 import org.bytefight.webserver.common.domain.BaseEntity;
@@ -6,8 +6,6 @@ import org.bytefight.webserver.competition.domain.Competition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -29,6 +27,9 @@ public class Ladder extends BaseEntity {
 
     @Column(name = "allow_user_matches", nullable = false)
     private boolean allowUserMatches = false;
+
+    @Column(name = "scheduled_matchmaking_enabled", nullable = false)
+    private boolean scheduledMatchmakingEnabled = false;
 
     @Column(name = "matchmaking_interval_seconds", nullable = true)
     private Integer matchmakingIntervalSeconds;

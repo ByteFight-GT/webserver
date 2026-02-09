@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.team.domain.Team;
 
 @Getter

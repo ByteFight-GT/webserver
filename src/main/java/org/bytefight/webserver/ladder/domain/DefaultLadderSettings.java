@@ -1,4 +1,4 @@
-package org.bytefight.webserver.glicko.domain;
+package org.bytefight.webserver.ladder.domain;
 
 public class DefaultLadderSettings {
     public static Ladder baseline1500NoInflation() {

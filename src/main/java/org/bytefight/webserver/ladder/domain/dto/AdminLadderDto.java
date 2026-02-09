@@ -1,7 +1,7 @@
-package org.bytefight.webserver.glicko.domain.dto;
+package org.bytefight.webserver.ladder.domain.dto;
 
 import lombok.Value;
-import org.bytefight.webserver.glicko.domain.Ladder;
+import org.bytefight.webserver.ladder.domain.Ladder;
 
 @Value
 public class AdminLadderDto {

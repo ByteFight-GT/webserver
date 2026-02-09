@@ -1,11 +1,11 @@
-package org.bytefight.webserver.glicko.application;
+package org.bytefight.webserver.ladder.application;
 
 import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
-import org.bytefight.webserver.glicko.domain.Ladder;
-import org.bytefight.webserver.glicko.domain.dto.AdminCreateLadderDto;
-import org.bytefight.webserver.glicko.infra.LadderRepository;
+import org.bytefight.webserver.glicko.application.TeamStatsService;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import org.springframework.http.HttpStatus;
