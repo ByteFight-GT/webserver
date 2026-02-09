@@ -28,6 +28,7 @@ public class AdminLadderService {
     private static final double DEFAULT_GLICKO_SIGMA_MAX = 0.2;
 
     private final CompetitionRepository competitionRepository;
+    private final LadderService ladderService;
     private final LadderRepository ladderRepository;
 
     public Page<Ladder> listByCompetitionId(Long competitionId, Pageable pageable) {
@@ -41,25 +42,20 @@ public class AdminLadderService {
     public Ladder createLadder(AdminCreateLadderDto input) {
         Competition competition = competitionRepository.findById(input.getCompetitionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
-        ladderRepository.findByCompetitionAndLadder(competition, input.getLadder())
-                .ifPresent(existing -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Ladder already exists");
-                });
 
-        Ladder ladder = new Ladder();
-        ladder.setCompetition(competition);
-        ladder.setLadder(input.getLadder());
-        ladder.setGlickoDefaultRating(valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING));
-        ladder.setGlickoDefaultRd(valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD));
-        ladder.setGlickoRdMax(valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX));
-        ladder.setGlickoRdMin(valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN));
-        ladder.setGlickoPhiInflationPerDay(valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY));
-        ladder.setGlickoTau(valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU));
-        ladder.setGlickoSigmaDefault(valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT));
-        ladder.setGlickoSigmaMin(valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN));
-        ladder.setGlickoSigmaMax(valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
-
-        return ladderRepository.save(ladder);
+        return ladderService.createLadder(
+                competition,
+                input.getLadder(),
+                valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING),
+                valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD),
+                valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX),
+                valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN),
+                valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY),
+                valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU),
+                valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT),
+                valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN),
+                valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX)
+        );
     }
 
     public Ladder updateLadder(Long id, AdminUpdateLadderDto input) {
