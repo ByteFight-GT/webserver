@@ -106,13 +106,15 @@ public class TeamService {
             team.setQuote(teamSettingsDto.getQuote());
         }
 
+        Team savedTeam = teamRepository.save(team);
+
         List<Ladder> ladders = ladderRepository.findAllByCompetition(competition);
 
-        for(Ladder ladder : ladders) {
-            teamStatsService.getTeamStatsCreateIfNotExist(team, ladder.getLadder());
+        for (Ladder ladder : ladders) {
+            teamStatsService.getTeamStatsCreateIfNotExist(savedTeam, ladder.getLadder());
         }
 
-        return teamRepository.save(team);
+        return savedTeam;
     }
 
     public TeamMember joinTeam(Player player, Team team) {
@@ -210,11 +212,8 @@ public class TeamService {
         return teamRepository.findByCompetitionAndUuid(competition, uuid);
     }
 
-    public List<Team> getTeamsWithSubmission() {
-        return teamRepository.findAllByIsDeletedFalse()
-                .stream()
-                .filter(team -> team.getCurrentSubmission() != null)
-                .toList();
+    public List<Team> getTeamsWithSubmission(Competition competition) {
+        return teamRepository.findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(competition);
     }
 
     public Team getTeamById(Long id) {

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -78,39 +79,39 @@ class PublicLeaderboardControllerIT extends FullStackIntegrationTestBase {
         JsonNode second = leaderboard.get(1);
         JsonNode third = leaderboard.get(2);
 
-        assertThat(first.get("teamUuid").asText()).isEqualTo(teamA.getUuid().toString());
+        assertThat(first.get("teamUuid").asText()).isEqualTo(((java.util.UUID) ReflectionTestUtils.getField(teamA, "uuid")).toString());
         assertThat(first.get("rank").asInt()).isEqualTo(1);
         assertThat(memberUsernames(first.get("members"))).containsExactlyInAnyOrder("alpha1", "alpha2");
 
-        assertThat(second.get("teamUuid").asText()).isEqualTo(teamB.getUuid().toString());
+        assertThat(second.get("teamUuid").asText()).isEqualTo(((java.util.UUID) ReflectionTestUtils.getField(teamB, "uuid")).toString());
         assertThat(second.get("rank").asInt()).isEqualTo(2);
         assertThat(memberUsernames(second.get("members"))).containsExactly("beta1");
 
-        assertThat(third.get("teamUuid").asText()).isEqualTo(teamC.getUuid().toString());
+        assertThat(third.get("teamUuid").asText()).isEqualTo(((java.util.UUID) ReflectionTestUtils.getField(teamC, "uuid")).toString());
         assertThat(third.get("rank").isNull()).isTrue();
         assertThat(memberUsernames(third.get("members"))).containsExactly("gamma1");
     }
 
     private static TeamStats teamStats(Competition competition, Team team, String ladder, double rating, int matchesPlayed) {
         TeamStats stats = new TeamStats();
-        stats.setCompetition(competition);
-        stats.setTeam(team);
-        stats.setLadder(ladder);
-        stats.setGlickoRating(rating);
-        stats.setMatchesPlayed(matchesPlayed);
-        stats.setWins(0);
-        stats.setLosses(0);
-        stats.setDraws(0);
-        stats.setGlickoRd(350.0);
-        stats.setGlickoVolatility(0.06);
+        ReflectionTestUtils.setField(stats, "competition", competition);
+        ReflectionTestUtils.setField(stats, "team", team);
+        ReflectionTestUtils.setField(stats, "ladder", ladder);
+        ReflectionTestUtils.setField(stats, "glickoRating", rating);
+        ReflectionTestUtils.setField(stats, "matchesPlayed", matchesPlayed);
+        ReflectionTestUtils.setField(stats, "wins", 0);
+        ReflectionTestUtils.setField(stats, "losses", 0);
+        ReflectionTestUtils.setField(stats, "draws", 0);
+        ReflectionTestUtils.setField(stats, "glickoRd", 350.0);
+        ReflectionTestUtils.setField(stats, "glickoVolatility", 0.06);
         return stats;
     }
 
     private static TeamMember member(Competition competition, Team team, Player player) {
         TeamMember member = new TeamMember();
-        member.setCompetition(competition);
-        member.setTeam(team);
-        member.setPlayer(player);
+        ReflectionTestUtils.setField(member, "competition", competition);
+        ReflectionTestUtils.setField(member, "team", team);
+        ReflectionTestUtils.setField(member, "player", player);
         return member;
     }
 

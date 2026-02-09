@@ -3,7 +3,7 @@ package org.bytefight.webserver.gamematch.domain;
 public enum MatchReason {
     validation,
     scrimmage,
-    ladder,
+    matchmaking,
     tournament,
     other
 }

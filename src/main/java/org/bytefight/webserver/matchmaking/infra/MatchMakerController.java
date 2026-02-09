@@ -1,6 +1,6 @@
-package org.bytefight.webserver.matchMaking.infra;
+package org.bytefight.webserver.matchmaking.infra;
 
-import org.bytefight.webserver.matchMaking.application.MatchMakingService;
+import org.bytefight.webserver.matchmaking.application.MatchmakingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
 public class MatchMakerController {
-    private final MatchMakingService matchMakingService;
+    private final MatchmakingService matchMakingService;
 
     @PostMapping("/generate")
     @PreAuthorize("hasRole('ADMIN')")

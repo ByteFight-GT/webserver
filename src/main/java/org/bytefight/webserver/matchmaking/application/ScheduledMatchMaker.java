@@ -1,12 +1,9 @@
-package org.bytefight.webserver.matchMaking.application;
+package org.bytefight.webserver.matchmaking.application;
 
-import org.bytefight.webserver.matchMaking.domain.MATCHMAKING_REASON;
-import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
-import org.bytefight.webserver.matchMaking.infra.MatchMakingProperties;
+import org.bytefight.webserver.matchmaking.infra.MatchMakingProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @ConditionalOnProperty(name = "is-prod-env", havingValue = "true")
 public class ScheduledMatchMaker {
     private final MatchMakingProperties props;
-    private final MatchMakingService matchMakingService;
+    private final MatchmakingService matchMakingService;
 
     private final AtomicReference<Instant> lastRun = new AtomicReference<>(null);
 

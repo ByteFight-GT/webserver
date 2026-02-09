@@ -1,42 +1,86 @@
-package org.bytefight.webserver.matchMaking.application;
+package org.bytefight.webserver.matchmaking.application;
 
+import com.nimbusds.jose.util.Pair;
+import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.config.ClockConfig;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
-import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.glicko.application.TeamStatsService;
+import org.bytefight.webserver.glicko.domain.TeamStats;
+import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.infra.MatchMakingEventRepository;
 import org.bytefight.webserver.team.application.TeamService;
+import org.bytefight.webserver.team.domain.Team;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+@Service
 @RequiredArgsConstructor
-@Component
-public class MatchMaker {
-
+public class MatchmakingService {
     private final TeamService teamService;
+    private final TeamStatsService teamStatsService;
     private final GameMatchService gameMatchService;
+    private final TeamStatsRepository teamStatsRepository;
+    private final MatchMakingEventRepository matchMakingEventRepository;
 
-    private static final Random RANDOM = new Random();
+    @Transactional
+    public MatchmakingEvent createAndScheduleEvent(Competition competition, String ladder) {
+        if (!competition.isActive()) {
+            throw new IllegalArgumentException("Competition is not active");
+        }
 
-    public List<GameMatch> generateMatches(List<Team> playableTeams) {
-        final List<Team> teams =
-            playableTeams.stream().toList();
+        List<Team> playableTeams = teamService.getTeamsWithSubmission(competition);
+        List<TeamStats> teamStats = teamStatsRepository.findAllByCompetitionAndLadderAndTeamIn(competition, ladder, playableTeams);
+        Map<Long, TeamStats> statsByTeamId = teamStats.stream().collect(Collectors.toMap(ts -> ts.getTeam().getId(), Function.identity()));
+
+        MatchmakingEvent event = MatchmakingEvent.builder()
+                .competition(competition)
+                .ladder(ladder)
+                .build();
+
+        List<Pair<Team, TeamStats>> participants = playableTeams.stream()
+                .map(team -> {
+                    TeamStats stats = statsByTeamId.get(team.getId());
+                    if (stats == null) {
+                        return Pair.of(team, teamStatsService.getTeamStatsCreateIfNotExist(team, ladder));
+                    } else {
+                        return Pair.of(team, stats);
+                    }
+                }).toList();
+
+        List<GameMatch> matches = generateMatches(event, ladder, participants);
+
+        matchMakingEventRepository.save(event);
+
+        for (GameMatch match : matches) {
+            gameMatchService.scheduleMatch(match);
+        }
+
+        return event;
+    }
+
+    private List<GameMatch> generateMatches(MatchmakingEvent event, String ladder, List<Pair<Team, TeamStats>> participants) {
+        List<Pair<Team, TeamStats>> sortedParticipants = new ArrayList<>(participants);
+        sortedParticipants.sort(Comparator.comparingDouble(teamTeamStatsPair -> -teamTeamStatsPair.getRight().getGlickoRating()));
 
         List<int[]> edges;
-        if (teams.size() <= 4) {
+        if (sortedParticipants.size() <= 4) {
             edges = new ArrayList<>();
-            for (int j = 0; j < teams.size(); j++) {
+            for (int j = 0; j < sortedParticipants.size(); j++) {
                 for (int i = 0; i < j; i++) {
-                    edges.add(new int[] {i, j});
+                    edges.add(new int[]{i, j});
                 }
             }
         } else {
-            edges = generate4RegularGraph(teams.size());
+            edges = generate4RegularGraph(sortedParticipants.size());
         }
         Random random = new Random();
         for (int i = 0; i < edges.size(); i++) {
@@ -50,9 +94,19 @@ public class MatchMaker {
 
         Collections.shuffle(edges, random);
         return edges.stream().map((edge) -> {
-            Team teamOne = teams.get(edge[0]);
-            Team teamTwo = teams.get(edge[1]);
-            return new GameMatch();
+            Team teamA = sortedParticipants.get(edge[0]).getLeft();
+            Team teamB = sortedParticipants.get(edge[1]).getLeft();
+
+            return gameMatchService.createMatch(
+                    null,
+                    teamA,
+                    teamB,
+                    teamA.getCurrentSubmission(),
+                    teamB.getCurrentSubmission(),
+                    ladder,
+                    MatchReason.matchmaking,
+                    event
+            );
         }).toList();
     }
 
@@ -131,7 +185,7 @@ public class MatchMaker {
         for (int i = 0; i < n; i++) {
             for (int j : adjList.get(i)) {
                 if (j > i) {
-                    edges.add(new int[] {i, j});
+                    edges.add(new int[]{i, j});
                 }
             }
         }
@@ -148,4 +202,3 @@ public class MatchMaker {
         adjList.get(v).add(u);
     }
 }
-

@@ -10,7 +10,7 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
-import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
@@ -23,8 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.Clock;
 import java.time.Instant;

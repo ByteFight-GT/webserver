@@ -93,7 +93,7 @@ class GameMatchQueueIT extends FullStackIntegrationTestBase {
                 submissionA,
                 submissionB,
                 ladder,
-                MatchReason.ladder,
+                MatchReason.matchmaking,
                 null
         );
 
