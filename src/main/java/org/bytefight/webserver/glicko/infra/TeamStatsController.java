@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
+import org.bytefight.webserver.glicko.domain.dto.AggregateTeamStatsDto;
 import org.bytefight.webserver.glicko.domain.dto.TeamStatsDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
@@ -26,7 +27,6 @@ public class TeamStatsController {
     private final TeamStatsService teamStatsService;
     private final TeamService teamService;
 
-
     @GetMapping("/{teamUuid}/{ladderSlug}")
     @Operation(
             summary = "Get a teams stats"
@@ -36,6 +36,18 @@ public class TeamStatsController {
         TeamStats teamStats = teamStatsService.getTeamStatsCreateIfNotExist(team, ladderSlug);
 
         return ResponseEntity.ok(TeamStatsDto.from(teamStats));
+    }
+
+
+    @GetMapping("/{teamUuid}/")
+    @Operation(
+            summary = "Get a teams stats for all ladders"
+    )
+    public ResponseEntity<AggregateTeamStatsDto> getAggregateTeamStatsByUuid(@PathVariable UUID teamUuid, @PathVariable String ladderSlug){
+        Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        TeamStats teamStats = teamStatsService.getAggregateWDL(team);
+
+        return ResponseEntity.ok(AggregateTeamStatsDto.from(teamStats));
     }
 
 }

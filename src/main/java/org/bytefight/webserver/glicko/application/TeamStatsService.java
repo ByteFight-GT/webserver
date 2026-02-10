@@ -8,6 +8,7 @@ import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +16,39 @@ import java.util.Optional;
 public class TeamStatsService {
     private final TeamStatsRepository teamStatsRepository;
     private final LadderRepository ladderRepository;
+
+    public TeamStats getAggregateWDL(Team team){
+        List<Ladder> ladders = ladderRepository.findAllByCompetition(team.getCompetition());
+
+        int matchesPlayed = 0;
+        int wins = 0;
+        int draws = 0;
+        int losses = 0;
+
+        for(Ladder ladder: ladders){
+            Optional<TeamStats> teamStats = teamStatsRepository.findByTeamAndLadder(team, ladder.getLadder());
+
+            if (teamStats.isPresent()) {
+                wins += teamStats.get().getWins();
+                losses += teamStats.get().getLosses();
+                draws += teamStats.get().getDraws();
+                matchesPlayed += teamStats.get().getMatchesPlayed();
+            }
+        }
+
+        return TeamStats.builder()
+                .team(team)
+                .competition(team.getCompetition())
+                .ladder("")
+                .wins(wins)
+                .losses(losses)
+                .draws(draws)
+                .glickoRating(0)
+                .glickoRd(0)
+                .glickoVolatility(0)
+                .build();
+
+    }
 
     public TeamStats getTeamStatsCreateIfNotExist(Team team, String ladderSlug) {
         Optional<TeamStats> teamStats = teamStatsRepository.findByTeamAndLadder(team, ladderSlug);
