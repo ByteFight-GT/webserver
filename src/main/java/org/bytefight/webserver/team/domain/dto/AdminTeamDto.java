@@ -1,6 +1,7 @@
 package org.bytefight.webserver.team.domain.dto;
 
 import lombok.Value;
+import org.bytefight.webserver.common.domain.dto.DeletionDto;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamType;
@@ -17,6 +18,7 @@ public class AdminTeamDto {
     TeamType type;
     boolean isDeleted;
     TimestampsDto timestamps;
+    DeletionDto deletion;
 
     public static AdminTeamDto from(Team team) {
         return new AdminTeamDto(
@@ -29,7 +31,8 @@ public class AdminTeamDto {
                 team.isDisplayMembers(),
                 team.getType(),
                 team.isDeleted(),
-                TimestampsDto.from(team)
+                TimestampsDto.from(team),
+                DeletionDto.from(team)
         );
     }
 }

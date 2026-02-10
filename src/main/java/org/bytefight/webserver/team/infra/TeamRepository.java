@@ -27,7 +27,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
 
-    List<Team> findAllByIsDeletedFalse();
+    List<Team> findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(Competition competition);
 
     Page<Team> findByIsDeleted(boolean isDeleted, Pageable pageable);
     Page<Team> findByCompetitionIdAndIsDeleted(Long competitionId, boolean isDeleted, Pageable pageable);

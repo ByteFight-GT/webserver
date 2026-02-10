@@ -9,12 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
     Optional<TeamStats> findByTeamAndLadder(Team team, String ladder);
+    List<TeamStats> findAllByCompetitionAndLadderAndTeamIn(Competition competition, String ladder, Collection<Team> teams);
     List<TeamStats> findAllByCompetitionAndLadderOrderByGlickoRatingDesc(Competition competition, String ladder);
 
     @Query(value = """

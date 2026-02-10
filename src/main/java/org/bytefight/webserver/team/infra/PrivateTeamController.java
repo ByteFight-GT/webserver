@@ -2,7 +2,6 @@ package org.bytefight.webserver.team.infra;
 
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.config.ClockConfig;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.team.application.TeamService;
@@ -28,12 +27,10 @@ import java.util.*;
 @RequiredArgsConstructor
 @Transactional
 public class PrivateTeamController {
-
     private final TeamService teamService;
     private final PlayerService playerService;
     private final Clock clock;
     private final ClockConfig clockConfig;
-    private final PermissionsService permissionsService;
 
     @PostMapping("/{uuid}")
     @Operation(
@@ -61,13 +58,4 @@ public class PrivateTeamController {
         List<Player> members = teamService.getPlayersForTeam(team);
         return ResponseEntity.ok(SelfTeamDto.from(team, members));
     }
-
-//    @PostMapping("/set-submission")
-//    public ResponseEntity<Void> setCurrentSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-//        permissionsService.validateAllowSetSubmission();
-//        Player player = playerService.getPlayer(user);
-//        Long teamId = player.getTeam().getId();
-//        teamService.setCurrentSubmission(teamId, submissionUuid);
-//        return ResponseEntity.ok().build();
-//    }
 }

@@ -15,9 +15,10 @@ import java.util.List;
 
 @Repository
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
-    boolean existsByCompetitionAndPlayer(Competition competition, Player player);
-    boolean existsByTeamAndPlayer(Team team, Player player);
-    Optional<TeamMember> findByCompetitionAndPlayer(Competition competition, Player player);
+    boolean existsByCompetitionAndPlayerAndTeamIsDeletedFalse(Competition competition, Player player);
+    Optional<TeamMember> findByCompetitionAndPlayerAndTeamIsDeletedFalse(Competition competition, Player player);
+    boolean existsByTeamAndPlayerAndTeamIsDeletedFalse(Team team, Player player);
+
     List<TeamMember> findByTeam(Team team);
     long countByTeam(Team team);
 

@@ -1,3 +1,11 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 app:
   auth:
     jwt-secret: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs

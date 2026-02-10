@@ -38,14 +38,6 @@ public class LeaderboardController {
         return ResponseEntity.ok(leaderboardService.getFullLeaderboardByCompetitionAndLadder(competition, ladderSlug));
     }
 
-    @GetMapping("/all/paginated")
-    public ResponseEntity<Page<LeaderboardDto>> paginateLeaderboard(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok(teamService.getLeaderboard(page,size));
-    }
-
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleException(Exception e) {
