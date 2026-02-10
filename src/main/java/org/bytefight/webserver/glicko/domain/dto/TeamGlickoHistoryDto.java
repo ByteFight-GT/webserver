@@ -1,0 +1,31 @@
+package org.bytefight.webserver.glicko.domain.dto;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.Value;
+import org.bytefight.webserver.glicko.domain.TeamGlickoHistory;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Value
+@Builder
+public class TeamGlickoHistoryDto {
+    @NotNull UUID teamId;
+    @NotNull String competitionSlug;
+    @NotNull String ladder;
+    @NotNull Instant recordedAt;
+
+    double oldGlicko;
+    double newGlicko;
+
+    public static TeamGlickoHistoryDto from(TeamGlickoHistory history) {
+        return TeamGlickoHistoryDto.builder()
+                .teamId(history.getTeam().getUuid())
+                .competitionSlug(history.getCompetition().getSlug())
+                .ladder(history.getLadder())
+                .recordedAt(history.getCreatedAt()) // Inherited from BaseEntity
+                .oldGlicko(history.getOldGlicko())
+                .newGlicko(history.getNewGlicko())
+                .build();
+    }
+}
