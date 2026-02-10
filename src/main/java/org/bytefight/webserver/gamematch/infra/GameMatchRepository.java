@@ -46,7 +46,7 @@ public interface GameMatchRepository extends JpaRepository<GameMatch, Long>, Jpa
     List<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("statusList") List<MatchStatus> statusList);
 
     @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamA.id = :teamId OR gm.teamB.id = :teamId) AND gm.reason IN :reasonList ORDER BY gm.finishedAt DESC")
-    List<GameMatch> findTeamMatchesByReason(@Param("teamId") Long teamId, @Param("reasonList") List<MatchReason> reasonList);
+    List<GameMatch> findTeamMatchesByReason(@Param("teamUuid") UUID teamId, @Param("reasonList") List<MatchReason> reasonList);
 
     @Query("SELECT gm FROM GameMatch gm WHERE (gm.teamA.uuid = :teamUuid OR gm.teamB.uuid = :teamUuid) AND gm.status NOT IN :statusList AND gm.reason NOT IN :reasonList ORDER BY gm.finishedAt DESC")
     Page<GameMatch> findTeamMatches(@Param("teamUuid") UUID teamUuid, @Param("statusList") List<MatchStatus> statusList, @Param("reasonList") List<MatchReason> reasonList, Pageable pageable);
