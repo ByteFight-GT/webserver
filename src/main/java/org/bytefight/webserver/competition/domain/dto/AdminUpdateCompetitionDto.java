@@ -9,6 +9,11 @@ public class AdminUpdateCompetitionDto {
     String description;
     Boolean isActive;
     Boolean isWhitelisted;
+    Boolean allowNewSubmission;
+    Boolean allowSetSubmission;
+    Boolean allowCreateTeam;
+    Boolean allowJoinTeam;
+    Boolean allowLeaveTeam;
 
     @Min(1)
     Integer maxPlayersPerTeam;
