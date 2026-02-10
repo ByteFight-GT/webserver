@@ -35,7 +35,7 @@ public class TeamGlickoHistoryController {
     @Operation(
             summary = "Get a teams Glicko History"
     )
-    public ResponseEntity<List<TeamGlickoHistoryDto>> getTeamStatsByTeamUuidAndLadder(@PathVariable UUID teamUuid, @PathVariable String ladderSlug){
+    public ResponseEntity<List<TeamGlickoHistoryDto>> getGlickoHistoryByTeamUuidAndLadder(@PathVariable UUID teamUuid, @PathVariable String ladderSlug){
         Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         List<TeamGlickoHistory> teamGlickoHistories = glickoService.getTeamGlickoHistoryByTeamAndLadder(team, ladderSlug);
 
