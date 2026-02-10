@@ -13,6 +13,8 @@ import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GlickoService {
     private final LadderRepository ladderRepository;
@@ -33,6 +35,10 @@ public class GlickoService {
         this.teamGlickoHistoryRepository = teamGlickoHistoryRepository;
         this.teamStatsRepository = teamStatsRepository;
         this.teamStatsService = teamStatsService;
+    }
+
+    public List<TeamGlickoHistory> getTeamGlickoHistoryByTeamAndLadder(Team team, String ladder) {
+        return teamGlickoHistoryRepository.findAllByTeamAndLadderOrderByCreatedAtAsc(team, ladder);
     }
 
     @Transactional
