@@ -74,12 +74,7 @@ CREATE TABLE "competitions" (
                                 "description" varchar,
                                 "is_active" boolean NOT NULL DEFAULT false,
                                 "is_whitelisted" boolean NOT NULL DEFAULT false,
-                                "max_players_per_team" integer NOT NULL,
-                                "allow_new_submission" boolean NOT NULL DEFAULT false,
-                                "allow_set_submission" boolean NOT NULL DEFAULT false,
-                                "allow_create_team" boolean NOT NULL DEFAULT false,
-                                "allow_join_team" boolean NOT NULL DEFAULT false,
-                                "allow_leave_team" boolean NOT NULL DEFAULT false
+                                "max_players_per_team" integer NOT NULL
 );
 
 CREATE TABLE "ladders" (
