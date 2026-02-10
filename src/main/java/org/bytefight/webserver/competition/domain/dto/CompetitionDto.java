@@ -14,6 +14,11 @@ public class CompetitionDto {
     String description;
     @NotNull boolean isActive;
     @NotNull boolean isWhitelisted;
+    @NotNull boolean allowNewSubmission;
+    @NotNull boolean allowSetSubmission;
+    @NotNull boolean allowCreateTeam;
+    @NotNull boolean allowJoinTeam;
+    @NotNull boolean allowLeaveTeam;
     @NotNull TimestampsDto timestamps;
 
     public static CompetitionDto from(Competition competition) {
@@ -23,6 +28,11 @@ public class CompetitionDto {
                 .description(competition.getDescription())
                 .isActive(competition.isActive())
                 .isWhitelisted(competition.isWhitelisted())
+                .allowNewSubmission(competition.isAllowNewSubmission())
+                .allowSetSubmission(competition.isAllowSetSubmission())
+                .allowCreateTeam(competition.isAllowCreateTeam())
+                .allowJoinTeam(competition.isAllowJoinTeam())
+                .allowLeaveTeam(competition.isAllowLeaveTeam())
                 .timestamps(TimestampsDto.from(competition))
                 .build();
     }
