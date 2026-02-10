@@ -51,17 +51,19 @@ public class Tournament extends BaseEntity {
     /**
      * The tournament champion (1st place).
      * Set when the grand final or grand-final reset concludes.
+     * OneToOne: each entry belongs to one tournament and can only be first place there.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "first_place_entry_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "first_place_entry_id", unique = true)
     private TournamentEntry firstPlaceEntry;
 
     /**
      * The runner-up (2nd place).
      * Set when the grand final or grand-final reset concludes.
+     * OneToOne: each entry belongs to one tournament and can only be second place there.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "second_place_entry_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "second_place_entry_id", unique = true)
     private TournamentEntry secondPlaceEntry;
 
     private LocalDateTime startedAt;

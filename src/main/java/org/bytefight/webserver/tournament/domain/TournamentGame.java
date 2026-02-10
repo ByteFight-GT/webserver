@@ -32,8 +32,8 @@ public class TournamentGame extends BaseEntity {
     @JoinColumn(name = "tournament_match_id", nullable = false)
     private TournamentMatch tournamentMatch;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "game_match_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "game_match_id", nullable = false, unique = true)
     private GameMatch gameMatch;
 
     /**

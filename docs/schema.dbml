@@ -256,6 +256,126 @@ Table game_matches {
   ~user_audit_template
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Tournament system (double-elimination with Bo5/Bo7 series)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum tournament_status {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  COMPLETE
+}
+
+enum tournament_entry_status {
+  ACTIVE
+  ELIMINATED
+}
+
+enum tournament_bracket_type {
+  WINNERS
+  LOSERS
+  GRAND_FINAL
+  GRAND_FINAL_RESET
+}
+
+enum tournament_match_state {
+  PENDING
+  QUEUED
+  IN_PROGRESS
+  COMPLETE
+  SKIPPED
+}
+
+// Root tournament table – scoped to a single competition, holds global metadata
+// and final standings (1st/2nd place).
+Table tournament {
+  ~base_template
+
+  uuid uuid [not null, unique, note: 'Public identifier for the tournament']
+  competition_id bigint [not null, ref: > competitions.id]
+
+  name varchar [not null]
+  status tournament_status [not null, default: 'DRAFT']
+
+  max_teams integer
+  bracket_size integer
+
+  // Final standings (OneToOne: each entry belongs to one tournament)
+  first_place_entry_id bigint [ref: - tournament_entry.id]
+  second_place_entry_id bigint [ref: - tournament_entry.id]
+
+  started_at timestamp
+  finished_at timestamp
+}
+
+// Tournament participant row: links a team to a tournament and tracks its
+// seed, loss count and elimination status without mutating the Team record.
+Table tournament_entry {
+  ~base_template
+
+  tournament_id bigint [not null, ref: > tournament.id]
+  team_id bigint [not null, ref: > teams.id]
+
+  seed integer [not null, note: '1-based seed assigned at enrollment']
+  losses integer [not null, default: 0]
+  status tournament_entry_status [not null, default: 'ACTIVE']
+
+  eliminated_at timestamp
+
+  Indexes {
+    (tournament_id, team_id) [unique]
+  }
+}
+
+// Bracket node table – each row is a BEST-OF SERIES (not a single game).
+// Stores the double-elimination graph (winners/losers brackets + grand finals).
+Table tournament_match {
+  ~base_template
+
+  uuid uuid [not null, unique]
+  tournament_id bigint [not null, ref: > tournament.id]
+
+  bracket_type tournament_bracket_type [not null]
+  round_number integer [not null]
+  match_index integer [not null, note: '1-based index within the round']
+
+  team_one_entry_id bigint [ref: > tournament_entry.id]
+  team_two_entry_id bigint [ref: > tournament_entry.id]
+
+  state tournament_match_state [not null, default: 'PENDING']
+
+  // Series configuration and current score
+  series_length integer [not null, note: '5 for normal matches, 7 for grand finals']
+  team_one_series_wins integer [not null, default: 0]
+  team_two_series_wins integer [not null, default: 0]
+
+  // Series winner/loser once the series is decided
+  winner_entry_id bigint [ref: > tournament_entry.id]
+  loser_entry_id bigint [ref: > tournament_entry.id]
+
+  // Graph edges for bracket advancement (winner/loser flows)
+  next_winner_match_id bigint [ref: > tournament_match.id]
+  next_winner_slot integer [note: '1 = team_one_entry, 2 = team_two_entry']
+  next_loser_match_id bigint [ref: > tournament_match.id]
+  next_loser_slot integer [note: '1 = team_one_entry, 2 = team_two_entry']
+}
+
+// Individual games within a best-of series. OneToOne with game_match: each
+// GameMatch belongs to exactly one TournamentGame.
+Table tournament_game {
+  ~base_template
+
+  tournament_match_id bigint [not null, ref: > tournament_match.id]
+  game_match_id bigint [not null, ref: - game_matches.id]
+
+  game_number integer [not null, note: '1-based game number within the series']
+
+  Indexes {
+    (tournament_match_id, game_number) [unique]
+  }
+}
+
 // A result file associated with a game match.
 // Could contain stdout/stderr, a json play-by-play,
 // etc.
