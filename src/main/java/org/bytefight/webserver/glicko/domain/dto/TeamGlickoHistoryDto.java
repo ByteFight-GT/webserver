@@ -1,11 +1,14 @@
 package org.bytefight.webserver.glicko.domain.dto;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import org.bytefight.webserver.glicko.domain.TeamGlickoHistory;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Value
 @Builder
@@ -27,5 +30,19 @@ public class TeamGlickoHistoryDto {
                 .oldGlicko(history.getOldGlicko())
                 .newGlicko(history.getNewGlicko())
                 .build();
+    }
+
+    // Method to convert a list of TeamGlickoHistory into a list of TeamGlickoHistoryDto
+    public static List<TeamGlickoHistoryDto> listFrom(List<TeamGlickoHistory> historyList) {
+        return historyList.stream()
+                .map(TeamGlickoHistoryDto::from) // Convert each TeamGlickoHistory to TeamGlickoHistoryDto
+                .collect(Collectors.toList());   // Collect them into a List
+    }
+
+    // Method to convert a list of TeamGlickoHistory into an array of TeamGlickoHistoryDto
+    public static TeamGlickoHistoryDto[] arrayFrom(List<TeamGlickoHistory> historyList) {
+        return historyList.stream()
+                .map(TeamGlickoHistoryDto::from) // Convert each TeamGlickoHistory to TeamGlickoHistoryDto
+                .toArray(TeamGlickoHistoryDto[]::new); // Collect them into an array
     }
 }
