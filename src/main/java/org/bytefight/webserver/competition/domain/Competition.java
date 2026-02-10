@@ -34,6 +34,21 @@ public class Competition extends BaseEntity {
     @Column(name = "max_players_per_team", nullable = false)
     private int maxPlayersPerTeam = 2;
 
+    @Column(name = "allow_new_submission", nullable = false)
+    private boolean allowNewSubmission;
+
+    @Column(name = "allow_set_submission", nullable = false)
+    private boolean allowSetSubmission;
+
+    @Column(name = "allow_create_team", nullable = false)
+    private boolean allowCreateTeam;
+
+    @Column(name = "allow_join_team", nullable = false)
+    private boolean allowJoinTeam;
+
+    @Column(name = "allow_leave_team", nullable = false)
+    private boolean allowLeaveTeam;
+
     @Override
     public int hashCode() {
         return Objects.hashCode(slug);

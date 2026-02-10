@@ -48,6 +48,10 @@ public class PrivateCompetitionController {
         Player player = playerService.getPlayer(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
+        if(!competition.isAllowCreateTeam()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to create a team at this time");
+        }
+
         Team team = teamService.createTeam(competition, teamSettingsDto);
         teamService.joinTeam(player, team);
 
@@ -97,6 +101,10 @@ public class PrivateCompetitionController {
         Player player = playerService.getPlayer(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
+        if(!competition.isAllowJoinTeam()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to join a team at this time");
+        }
+
         teamService.joinTeamByJoinCode(competition, player, joinTeamDto.getJoinCode());
 
         return ResponseEntity.ok().build();
@@ -117,6 +125,10 @@ public class PrivateCompetitionController {
 
         Player player = playerService.getPlayer(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        if(!competition.isAllowLeaveTeam()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to leave your team at this time");
+        }
 
         teamService.leaveTeam(competition, player);
 
