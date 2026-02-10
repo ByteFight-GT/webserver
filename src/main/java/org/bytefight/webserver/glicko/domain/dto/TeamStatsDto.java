@@ -5,12 +5,10 @@ import lombok.Builder;
 import lombok.Value;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 
-import java.util.UUID;
-
 @Value
 @Builder
 public class TeamStatsDto {
-    @NotNull UUID teamId;
+    @NotNull String teamId;
     @NotNull String competitionSlug;
     @NotNull String ladder;
 
@@ -25,7 +23,7 @@ public class TeamStatsDto {
 
     public static TeamStatsDto from(TeamStats stats) {
         return TeamStatsDto.builder()
-                .teamId(stats.getTeam().getUuid())
+                .teamId(stats.getTeam().getUuid().toString())
                 .competitionSlug(stats.getCompetition().getSlug())
                 .ladder(stats.getLadder())
                 .matchesPlayed(stats.getMatchesPlayed())
