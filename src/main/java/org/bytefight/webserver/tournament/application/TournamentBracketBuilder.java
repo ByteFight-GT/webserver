@@ -14,20 +14,32 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Builds a double-elimination bracket graph.
+ * Builds a double-elimination bracket graph with best-of series support.
  *
  * Output:
- * - Winners bracket rounds
- * - Losers bracket rounds
- * - Grand final and optional reset match
+ * - Winners bracket rounds (each match is a Bo5 series)
+ * - Losers bracket rounds  (each match is a Bo5 series)
+ * - Grand final (Bo7 series)
+ * - Optional grand-final reset (Bo7 series)
+ *
+ * Series length constants:
+ * - NORMAL_SERIES_LENGTH  = 5  (first to 3 wins)
+ * - GRAND_FINAL_SERIES_LENGTH = 7 (first to 4 wins)
  *
  * Storage notes:
- * - TournamentMatch rows act as nodes in a graph
+ * - TournamentMatch rows act as nodes in a graph; each node is a full series
+ * - Individual games within a series are tracked by TournamentGame entities
  * - nextWinnerMatchId/nextLoserMatchId encode directed edges between nodes
  */
 @Service
 @RequiredArgsConstructor
 public class TournamentBracketBuilder {
+
+    /** Normal matches (winners/losers bracket) are best-of-5. */
+    public static final int NORMAL_SERIES_LENGTH = 5;
+
+    /** Grand final matches (initial + reset) are best-of-7. */
+    public static final int GRAND_FINAL_SERIES_LENGTH = 7;
 
     /**
      * Builds the bracket in memory.
@@ -35,8 +47,8 @@ public class TournamentBracketBuilder {
      * Steps:
      * - Expand team count to next power of two (byes)
      * - Generate seed order (1 vs N, 2 vs N-1, etc.)
-     * - Create winners and losers round match nodes
-     * - Add grand final + reset node
+     * - Create winners and losers round match nodes (each as a Bo5 series)
+     * - Add grand final + reset node (each as a Bo7 series)
      *
      * Wiring is done by separate methods so ids can be assigned first.
      */
@@ -61,7 +73,7 @@ public class TournamentBracketBuilder {
                 .map(seed -> entryBySeed.getOrDefault(seed, null))
                 .toList();
 
-        // Winners round 1: pair seed list into matches (with possible nulls)
+        // Winners round 1: pair seed list into matches (with possible nulls for byes)
         List<TournamentMatch> round1 = new ArrayList<>();
         for (int i = 0; i < bracketSize / 2; i++) {
             TournamentEntry teamOne = orderedEntries.get(i * 2);
@@ -102,6 +114,7 @@ public class TournamentBracketBuilder {
         }
 
         // Grand final and optional reset match (if winners-bracket champion loses once)
+        // Both are Bo7 series (set via createMatch which checks bracket type)
         TournamentMatch grandFinal = createMatch(tournament, TournamentBracketType.GRAND_FINAL, 1, 1, null, null);
         TournamentMatch grandFinalReset = createMatch(tournament, TournamentBracketType.GRAND_FINAL_RESET, 1, 1, null, null);
 
@@ -214,12 +227,24 @@ public class TournamentBracketBuilder {
         grandFinal.setNextLoserSlot(1);
     }
 
+    /**
+     * Creates a match (series) node with the appropriate series length.
+     *
+     * Series length is determined by bracket type:
+     * - WINNERS / LOSERS -> Bo5 (NORMAL_SERIES_LENGTH)
+     * - GRAND_FINAL / GRAND_FINAL_RESET -> Bo7 (GRAND_FINAL_SERIES_LENGTH)
+     */
     private TournamentMatch createMatch(Tournament tournament,
                                         TournamentBracketType bracketType,
                                         int round,
                                         int matchIndex,
                                         TournamentEntry teamOne,
                                         TournamentEntry teamTwo) {
+        int seriesLen = (bracketType == TournamentBracketType.GRAND_FINAL
+                || bracketType == TournamentBracketType.GRAND_FINAL_RESET)
+                ? GRAND_FINAL_SERIES_LENGTH
+                : NORMAL_SERIES_LENGTH;
+
         return TournamentMatch.builder()
                 .tournament(tournament)
                 .bracketType(bracketType)
@@ -228,6 +253,9 @@ public class TournamentBracketBuilder {
                 .teamOneEntry(teamOne)
                 .teamTwoEntry(teamTwo)
                 .state(TournamentMatchState.PENDING)
+                .seriesLength(seriesLen)
+                .teamOneSeriesWins(0)
+                .teamTwoSeriesWins(0)
                 .build();
     }
 

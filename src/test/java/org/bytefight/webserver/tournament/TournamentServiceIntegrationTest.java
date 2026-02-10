@@ -9,11 +9,14 @@ import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.tournament.application.TournamentBracketBuilder;
 import org.bytefight.webserver.tournament.application.TournamentService;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
 import org.bytefight.webserver.tournament.domain.EnrollTeamsRequest;
 import org.bytefight.webserver.tournament.domain.Tournament;
+import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
+import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
@@ -158,8 +161,14 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
         assertEquals(TournamentStatus.IN_PROGRESS, tournament.getStatus());
         assertEquals(4, tournament.getBracketSize());
-        assertTrue(tournamentMatchRepository.findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament).size() > 0);
-        assertTrue(tournamentMatchRepository.findByTournamentAndState(tournament, TournamentMatchState.QUEUED).size() > 0);
+
+        List<TournamentMatch> allMatches = tournamentMatchRepository
+                .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament);
+        assertTrue(allMatches.size() > 0);
+
+        List<TournamentMatch> queued = tournamentMatchRepository
+                .findByTournamentAndState(tournament, TournamentMatchState.QUEUED);
+        assertTrue(queued.size() > 0, "At least one series should be queued (game 1)");
     }
 
     @Test
@@ -186,6 +195,56 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
         assertTrue(tournamentMatchRepository.findByTournamentAndState(tournament, TournamentMatchState.SKIPPED).size() > 0);
     }
+
+    /**
+     * Verifies that bracket matches are assigned the correct series lengths:
+     * - Winners/Losers bracket matches: Bo5
+     * - Grand final and reset: Bo7
+     */
+    @Test
+    void startTournamentAssignsCorrectSeriesLengths() {
+        Competition competition = createCompetition("comp-series", true);
+        CreateTournamentRequest request = new CreateTournamentRequest();
+        request.setName("Series Cup");
+        request.setMaxTeams(8);
+        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
+
+        Team teamA = createTeam(competition, "Alpha", true);
+        Team teamB = createTeam(competition, "Beta", true);
+        Team teamC = createTeam(competition, "Gamma", true);
+        Team teamD = createTeam(competition, "Delta", true);
+
+        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
+        enrollTeamsRequest.setTeamUuids(List.of(
+                teamA.getUuid().toString(),
+                teamB.getUuid().toString(),
+                teamC.getUuid().toString(),
+                teamD.getUuid().toString()
+        ));
+        tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest);
+        tournamentService.startTournament(competition.getSlug(), dto.getUuid());
+
+        Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
+        List<TournamentMatch> allMatches = tournamentMatchRepository
+                .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament);
+
+        for (TournamentMatch match : allMatches) {
+            assertNotNull(match.getSeriesLength(), "Series length should be set for match " + match.getId());
+            if (match.getBracketType() == TournamentBracketType.GRAND_FINAL
+                    || match.getBracketType() == TournamentBracketType.GRAND_FINAL_RESET) {
+                assertEquals(TournamentBracketBuilder.GRAND_FINAL_SERIES_LENGTH, match.getSeriesLength(),
+                        "Grand final matches should be Bo" + TournamentBracketBuilder.GRAND_FINAL_SERIES_LENGTH);
+            } else {
+                assertEquals(TournamentBracketBuilder.NORMAL_SERIES_LENGTH, match.getSeriesLength(),
+                        "Regular bracket matches should be Bo" + TournamentBracketBuilder.NORMAL_SERIES_LENGTH);
+            }
+            // Series wins should be initialized to 0
+            assertEquals(0, match.getTeamOneSeriesWins());
+            assertEquals(0, match.getTeamTwoSeriesWins());
+        }
+    }
+
+    // ── Helper methods ──────────────────────────────────────────────────────
 
     private Competition createCompetition(String slug, boolean active) {
         Competition competition = new Competition();

@@ -51,8 +51,9 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TournamentService {
-    private static final String DEFAULT_SEED_LADDER = "tournament";
+    private static final String DEFAULT_SEED_LADDER = "ranked";
 
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
@@ -131,7 +132,6 @@ public class TournamentService {
      * Creates a new tournament in DRAFT state.
      * No teams or matches are created here.
      */
-    @Transactional
     public TournamentDto createTournament(String competitionSlug, CreateTournamentRequest request) {
         Competition competition = getCompetitionBySlug(competitionSlug);
         // Tournaments are always created within a competition scope.
@@ -153,7 +153,6 @@ public class TournamentService {
      * - create TournamentEntry rows (seeded)
      * - move tournament to OPEN
      */
-    @Transactional
     public List<TournamentEntryDto> enrollTeams(String competitionSlug, String tournamentUuid, EnrollTeamsRequest request) {
         Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
         if (tournament.getStatus() != TournamentStatus.DRAFT && tournament.getStatus() != TournamentStatus.OPEN) {
@@ -185,9 +184,9 @@ public class TournamentService {
         }
 
         // Seed by rank using glicko rating on the specified ladder; fall back to name for ties/unranked.
-        String seedLadder = (request != null && request.getSeedLadder() != null && !request.getSeedLadder().isBlank())
+        String seedLadder = (request != null)
                 ? request.getSeedLadder().trim().toLowerCase()
-                : DEFAULT_SEED_LADDER;
+                : DEFAULT_SEED_LADDER; // seedLadder is not nullable
         Map<Long, Double> ratingByTeamId = new HashMap<>();
         List<TeamStats> stats = teamStatsRepository.findByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
         for (TeamStats teamStats : stats) {
@@ -225,7 +224,6 @@ public class TournamentService {
      * - wires winner/loser advancement graph
      * - queues initial matches into GameMatch queue
      */
-    @Transactional
     public TournamentBracketDto startTournament(String competitionSlug, String tournamentUuid) {
         Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
         if (tournament.getStatus() == TournamentStatus.IN_PROGRESS || tournament.getStatus() == TournamentStatus.COMPLETE) {

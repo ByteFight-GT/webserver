@@ -1,5 +1,7 @@
 package org.bytefight.webserver.tournament.domain;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,5 +15,7 @@ import java.util.List;
 @Setter
 public class EnrollTeamsRequest {
     private List<String> teamUuids;
-    private String seedLadder;
+    @NotNull
+    @NotBlank
+    private String seedLadder; // make it not nullable
 }
