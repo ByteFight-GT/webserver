@@ -301,7 +301,7 @@ public class TournamentService {
                 ? request.getSeedLadder().trim().toLowerCase()
                 : DEFAULT_SEED_LADDER; // seedLadder is not nullable
         Map<Long, Double> ratingByTeamId = new HashMap<>();
-        List<TeamStats> stats = teamStatsRepository.findByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
+        List<TeamStats> stats = teamStatsRepository.findAllByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
         for (TeamStats teamStats : stats) {
             ratingByTeamId.put(teamStats.getTeam().getId(), teamStats.getGlickoRating());
         }
