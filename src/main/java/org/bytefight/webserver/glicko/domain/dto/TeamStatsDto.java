@@ -8,7 +8,7 @@ import org.bytefight.webserver.glicko.domain.TeamStats;
 @Value
 @Builder
 public class TeamStatsDto {
-    @NotNull String teamId;
+    @NotNull String teamUuid;
     @NotNull String competitionSlug;
     @NotNull String ladder;
 
@@ -23,7 +23,7 @@ public class TeamStatsDto {
 
     public static TeamStatsDto from(TeamStats stats) {
         return TeamStatsDto.builder()
-                .teamId(stats.getTeam().getUuid().toString())
+                .teamUuid(stats.getTeam().getUuid().toString())
                 .competitionSlug(stats.getCompetition().getSlug())
                 .ladder(stats.getLadder())
                 .matchesPlayed(stats.getMatchesPlayed())
