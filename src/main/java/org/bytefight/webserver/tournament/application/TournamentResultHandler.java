@@ -173,12 +173,11 @@ public class TournamentResultHandler {
     private void handleGrandFinal(TournamentMatch match, TournamentEntry winner, TournamentEntry loser) {
         if (match.getBracketType() == TournamentBracketType.GRAND_FINAL) {
             Tournament tournament = match.getTournament();
-            // verify that the winner has not lost even once in the tournament and not that it is the teamOneEntry
+            // Verify that the winner has not lost even once in the tournament
+            // (i.e., they came through the winners bracket undefeated).
             if (winner.getLosses() == 0) {
                 // Winners-bracket champion wins: tournament is complete.
-                tournament.setStatus(TournamentStatus.COMPLETE);
-                tournament.setFinishedAt(LocalDateTime.now(clock));
-                tournamentRepository.save(tournament);
+                completeTournament(tournament, winner, loser);
                 // Skip the reset match since it's no longer needed.
                 tournamentMatchRepository.findByTournamentAndBracketType(tournament, TournamentBracketType.GRAND_FINAL_RESET)
                         .ifPresent(reset -> {
@@ -200,10 +199,22 @@ public class TournamentResultHandler {
             }
         } else if (match.getBracketType() == TournamentBracketType.GRAND_FINAL_RESET) {
             // Reset series winner is the final champion.
-            Tournament tournament = match.getTournament();
-            tournament.setStatus(TournamentStatus.COMPLETE);
-            tournament.setFinishedAt(LocalDateTime.now(clock));
-            tournamentRepository.save(tournament);
+            completeTournament(match.getTournament(), winner, loser);
         }
+    }
+
+    /**
+     * Marks the tournament as COMPLETE and records final standings.
+     *
+     * @param tournament  the tournament to complete
+     * @param champion    the series winner (1st place)
+     * @param runnerUp    the series loser (2nd place)
+     */
+    private void completeTournament(Tournament tournament, TournamentEntry champion, TournamentEntry runnerUp) {
+        tournament.setStatus(TournamentStatus.COMPLETE);
+        tournament.setFinishedAt(LocalDateTime.now(clock));
+        tournament.setFirstPlaceEntry(champion);
+        tournament.setSecondPlaceEntry(runnerUp);
+        tournamentRepository.save(tournament);
     }
 }

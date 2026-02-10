@@ -50,6 +50,24 @@ public class Tournament {
     private Integer maxTeams;
     private Integer bracketSize;
 
+    // ── Final standings (set when tournament completes) ──────────────────────
+
+    /**
+     * The tournament champion (1st place).
+     * Set when the grand final or grand-final reset concludes.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "first_place_entry_id")
+    private TournamentEntry firstPlaceEntry;
+
+    /**
+     * The runner-up (2nd place).
+     * Set when the grand final or grand-final reset concludes.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "second_place_entry_id")
+    private TournamentEntry secondPlaceEntry;
+
     private LocalDateTime createdAt;
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
