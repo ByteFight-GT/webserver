@@ -5,13 +5,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/bytefightdb
     username: bytefight
     password: password
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
   servlet:
     multipart:
       max-file-size: 50MB

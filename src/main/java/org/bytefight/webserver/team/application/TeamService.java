@@ -2,9 +2,8 @@ package org.bytefight.webserver.team.application;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
-import org.bytefight.webserver.glicko.domain.Ladder;
-import org.bytefight.webserver.glicko.infra.LadderRepository;
-import org.bytefight.webserver.leaderboard.domain.LeaderboardDto;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
@@ -19,19 +18,12 @@ import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.whitelist.application.WhitelistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +67,7 @@ public class TeamService {
             Player player
     ) {
         return teamMemberRepository
-                .findByCompetitionAndPlayer(competition, player)
+                .findByCompetitionAndPlayerAndTeamIsDeletedFalse(competition, player)
                 .map(TeamMember::getTeam);
     }
 
@@ -114,16 +106,15 @@ public class TeamService {
             team.setQuote(teamSettingsDto.getQuote());
         }
 
-        // ✅ SAVE FIRST - team needs an ID before being used in relationships
-        team = teamRepository.save(team);
+        Team savedTeam = teamRepository.save(team);
 
-        // ✅ NOW create team stats - team has an ID
         List<Ladder> ladders = ladderRepository.findAllByCompetition(competition);
-        for(Ladder ladder : ladders) {
-            teamStatsService.getTeamStatsCreateIfNotExist(team, ladder.getLadder());
+
+        for (Ladder ladder : ladders) {
+            teamStatsService.getTeamStatsCreateIfNotExist(savedTeam, ladder.getLadder());
         }
 
-        return team;
+        return savedTeam;
     }
 
     public TeamMember joinTeam(Player player, Team team) {
@@ -144,7 +135,7 @@ public class TeamService {
             throw new IllegalArgumentException("You must be whitelisted to participate in this competition");
         }
 
-        if (teamMemberRepository.existsByCompetitionAndPlayer(competition, player)) {
+        if (teamMemberRepository.existsByCompetitionAndPlayerAndTeamIsDeletedFalse(competition, player)) {
             throw new IllegalArgumentException("Player is already in a team for this competition");
         }
 
@@ -168,7 +159,7 @@ public class TeamService {
             throw new IllegalArgumentException("Competition is not active");
         }
 
-        TeamMember member = teamMemberRepository.findByCompetitionAndPlayer(competition, player)
+        TeamMember member = teamMemberRepository.findByCompetitionAndPlayerAndTeamIsDeletedFalse(competition, player)
                 .orElseThrow(() -> new IllegalArgumentException("Player is not in a team for this competition"));
 
         Team team = member.getTeam();
@@ -206,7 +197,7 @@ public class TeamService {
             throw new IllegalArgumentException("Team and player are required");
         }
 
-        return teamMemberRepository.existsByTeamAndPlayer(team, player);
+        return teamMemberRepository.existsByTeamAndPlayerAndTeamIsDeletedFalse(team, player);
     }
 
     public long countPlayersForTeam(Team team) {
@@ -221,104 +212,18 @@ public class TeamService {
         return teamRepository.findByCompetitionAndUuid(competition, uuid);
     }
 
-    public List<Team> getTeams() {
-        return teamRepository.findAll()
-                .stream()
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    public List<Team> getTeamsWithSubmission() {
-        return teamRepository.findAllByIsDeletedFalse()
-                .stream()
-                .filter(team -> team.getCurrentSubmission() != null)
-                .toList();
+    public List<Team> getTeamsWithSubmission(Competition competition) {
+        return teamRepository.findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(competition);
     }
 
     public Team getTeamById(Long id) {
         return teamRepository.getReferenceById(id);
     }
 
-    public Integer getRankForTeam(Team team) {
-        return -1;
-    }
-
-    public Team updateAfterMatch(Team team, double glickoChange, double phiChange, double sigmaChange,
-                                 boolean isWin, boolean isDraw) {
-        if (isWin && isDraw) {
-            throw new IllegalArgumentException("Result can't be a win and a draw");
-        }
-//        double currentGlicko = team.getGlicko();
-//        double currentPhi = team.getPhi();
-//        double currentSigma = team.getSigma();
-//        double newGlicko = currentGlicko + glickoChange;
-//        double newPhi = currentPhi + phiChange;
-//        double newSigma = currentSigma + sigmaChange;
-//        team.setGlicko(newGlicko);
-//        team.setPhi(newPhi);
-//        team.setSigma(newSigma);
-//        team.setMatchesPlayed(team.getMatchesPlayed() + 1);
-//        if (!isWin && !isDraw) {
-//            team.setNumberLosses(team.getNumberLosses() + 1);
-//        } else if (isWin) {
-//            team.setNumberWins(team.getNumberWins() + 1);
-//        } else if (isDraw) {
-//            team.setNumberDraws(team.getNumberDraws() + 1);
-//        }
-        return teamRepository.save(team);
-    }
-
-
-    public void setCurrentSubmission(Long teamId, String submissionUuid) {
-        if (!submissionService.isSubmissionValid(submissionUuid)) {
-            throw new IllegalArgumentException("Submission is not valid");
-        }
-        Team team = teamRepository.findById(teamId).get();
-        team.setCurrentSubmission(submissionService.getSubmissionByUuid(submissionUuid));
-    }
-
     public Optional<Submission> getCurrentSubmission(Long teamId) {
         Optional<Submission> submission = teamRepository.findById(teamId)
                 .map(Team::getCurrentSubmission);
         return submission;
-    }
-
-    public boolean setCurrentSubmissionIfNone(Long teamId, Long submissionId) {
-        Team team = teamRepository.findById(teamId).get();
-        if (team.getCurrentSubmission() == null) {
-            team.setCurrentSubmission(submissionService.getSubmissionReferenceById(submissionId));
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isExistById(Long teamId) {
-        return teamRepository.existsById(teamId);
-    }
-
-
-    public List<Team> pagination(int page, int size) {
-        if (page < 0) {
-            throw new IllegalArgumentException("Page index must be zero or greater");
-        }
-        if (size <= 0) {
-            throw new IllegalArgumentException("Page size must be greater than 0");
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "glicko"));
-
-        Page<Team> teamPage = teamRepository.findAll(pageable);
-
-        // Return the teams as a list
-        return teamPage.getContent();
-    }
-
-    @Transactional
-    public void editTeam(Long teamId, TeamSettingsDto teamSettingsDto) {
-        if (!teamRepository.existsById(teamId)) {
-            throw new IllegalArgumentException("Team with id " + teamId + " does not exist");
-        }
-        Team team = teamRepository.findById(teamId).get();
-        editTeam(team, teamSettingsDto);
     }
 
     @Transactional
@@ -343,40 +248,6 @@ public class TeamService {
         if (teamSettingsDto.getDisplayMembers() != null) team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
 
         teamRepository.save(team);
-    }
-
-    public boolean isTeamJoinable(Team team) {
-        return !team.isDeleted();
-    }
-
-    public List<LeaderboardDto> getLeaderboard() {
-        return getLeaderboard(0, Integer.MAX_VALUE).toList();
-    }
-
-    public Page<LeaderboardDto> getLeaderboard(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        AtomicInteger rank = new AtomicInteger(1 + page * size);
-        Page<Team> teamPage = null;
-
-        List<UUID> teamUuids = teamPage.map(Team::getUuid).stream().toList();
-        List<Player> teamPlayers = playerRepository.findMembersByTeamUuids(teamUuids);
-
-        Map<UUID, List<String>> membersByTeamUuid = teamPlayers.stream()
-                .collect(Collectors.groupingBy(
-                        p -> p.getTeam().getUuid(),
-                        Collectors.mapping(Player::getUsername, Collectors.toList())
-                ));
-
-        return teamPage.map(team -> teamToLeaderboardDTO(team, rank.getAndIncrement(), membersByTeamUuid.get(team.getUuid())));
-    }
-
-    private LeaderboardDto teamToLeaderboardDTO(Team team, int rank, List<String> memberNames) {
-        return null;
-    }
-
-    public Team findTeamByCode(String code) {
-        Optional<Team> team = teamRepository.findByJoinCode(code);
-        return team.orElseThrow(() -> new IllegalArgumentException("Team with code " + code + " does not exist"));
     }
 
     public int countTeamsWithSubmission() {

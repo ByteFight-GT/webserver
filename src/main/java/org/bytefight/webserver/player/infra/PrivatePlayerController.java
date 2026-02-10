@@ -1,7 +1,6 @@
 package org.bytefight.webserver.player.infra;
 
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.SelfPlayerDto;
@@ -31,7 +30,6 @@ import jakarta.validation.Valid;
 public class PrivatePlayerController {
     private final PlayerService playerService;
     private final TeamService teamService;
-    private final PermissionsService permissionsService;
 
     @Operation(
             operationId = "getCurrentPlayer",

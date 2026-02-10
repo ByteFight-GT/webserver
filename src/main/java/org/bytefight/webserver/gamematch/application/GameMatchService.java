@@ -10,7 +10,7 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
-import org.bytefight.webserver.matchMaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
@@ -23,8 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -59,15 +57,15 @@ public class GameMatchService {
             MatchReason reason,
             MatchmakingEvent matchmakingEvent
     ) {
-        if(teamA == null || teamB == null) {
+        if (teamA == null || teamB == null) {
             throw new IllegalArgumentException("teamA and teamB are required");
         }
 
-        if(submissionA == null || submissionB == null) {
+        if (submissionA == null || submissionB == null) {
             throw new IllegalArgumentException("submissionA and submissionB are required");
         }
 
-        if(!teamA.getCompetition().equals(teamB.getCompetition())) {
+        if (!teamA.getCompetition().equals(teamB.getCompetition())) {
             throw new IllegalArgumentException("Both teams must be from the same competition");
         }
 
@@ -93,7 +91,7 @@ public class GameMatchService {
     }
 
     public GameMatch scheduleMatch(GameMatch match) {
-        if(!match.getCompetition().isActive()) {
+        if (!match.getCompetition().isActive()) {
             throw new IllegalArgumentException("Competition is not active");
         }
 
@@ -113,17 +111,25 @@ public class GameMatchService {
     public Page<GameMatch> getPaginatedMatches(
             Competition competition,
             String ladderSlug,
+            String teamUuid,
             PageRequest page
     ) {
         Specification<GameMatch> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if(competition != null) {
+            if (competition != null) {
                 predicates.add(cb.equal(root.get("competition"), competition));
             }
 
-            if(ladderSlug != null) {
+            if (ladderSlug != null) {
                 predicates.add(cb.equal(root.get("ladder"), ladderSlug));
+            }
+
+            if (teamUuid != null) {
+                predicates.add(cb.or(
+                        cb.equal(root.get("teamA").get("uuid"), UUID.fromString(teamUuid)),
+                        cb.equal(root.get("teamB").get("uuid"), UUID.fromString(teamUuid))
+                ));
             }
 
             return predicates.isEmpty() ? cb.conjunction() : cb.and(predicates.toArray(new Predicate[0]));
@@ -138,7 +144,7 @@ public class GameMatchService {
 
     public Optional<GameMatchDto> getDTOByUuid(String uuid) {
         Optional<GameMatch> dto = gameMatchRepository.findByUuid(UUID.fromString(uuid));
-        if(dto.isEmpty()) return Optional.empty();
+        if (dto.isEmpty()) return Optional.empty();
 
         return Optional.of(GameMatchDto.fromEntity(dto.get()));
     }

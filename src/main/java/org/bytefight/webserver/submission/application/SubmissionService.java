@@ -1,7 +1,6 @@
 package org.bytefight.webserver.submission.application;
 
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.permissions.application.PermissionsService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
@@ -33,7 +32,6 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final LocalStorageService storageService;
     private final TeamRepository teamRepository;
-    private final PermissionsService permissionsService;
 
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
