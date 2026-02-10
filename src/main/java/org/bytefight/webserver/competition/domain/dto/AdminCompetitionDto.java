@@ -11,7 +11,13 @@ public record AdminCompetitionDto(
         boolean isActive,
         boolean isWhitelisted,
         int maxPlayersPerTeam,
-        TimestampsDto timestamps
+        TimestampsDto timestamps,
+        boolean allowNewSubmission,
+        boolean allowSetSubmission,
+        boolean allowCreateTeam,
+        boolean allowJoinTeam,
+        boolean allowLeaveTeam
+
 ) {
     public static AdminCompetitionDto from(Competition competition) {
         return new AdminCompetitionDto(
@@ -22,7 +28,12 @@ public record AdminCompetitionDto(
                 competition.isActive(),
                 competition.isWhitelisted(),
                 competition.getMaxPlayersPerTeam(),
-                TimestampsDto.from(competition)
+                TimestampsDto.from(competition),
+                competition.isAllowNewSubmission(),
+                competition.isAllowSetSubmission(),
+                competition.isAllowCreateTeam(),
+                competition.isAllowJoinTeam(),
+                competition.isAllowLeaveTeam()
         );
     }
 }
