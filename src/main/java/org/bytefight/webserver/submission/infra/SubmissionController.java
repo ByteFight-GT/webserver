@@ -50,13 +50,15 @@ public class SubmissionController {
             @PathVariable UUID teamUuid,
             UploadSubmissionDto uploadSubmissionDto
     ) {
-//        permissionsService.validateAllowNewSubmission();
-
         Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if(!teamService.isMember(team, player)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
+        }
+
+        if(!team.getCompetition().isAllowNewSubmission()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to create a new submission at this time");
         }
 
         Submission submission = null;
