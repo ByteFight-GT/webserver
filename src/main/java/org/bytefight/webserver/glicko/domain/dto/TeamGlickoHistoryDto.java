@@ -18,8 +18,8 @@ public class TeamGlickoHistoryDto {
     @NotNull String ladder;
     @NotNull Instant recordedAt;
 
-    double oldGlicko;
-    double newGlicko;
+    @NotNull  double oldGlicko;
+    @NotNull  double newGlicko;
 
     public static TeamGlickoHistoryDto from(TeamGlickoHistory history) {
         return TeamGlickoHistoryDto.builder()
