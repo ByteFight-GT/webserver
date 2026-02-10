@@ -1,5 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
+import org.bytefight.webserver.common.domain.BaseEntity;
 import org.bytefight.webserver.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,9 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 /**
  * Tournament participant row.
@@ -32,10 +31,7 @@ import java.time.ZoneId;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TournamentEntry {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class TournamentEntry extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tournament_id", nullable = false)
@@ -51,17 +47,13 @@ public class TournamentEntry {
     @Enumerated(EnumType.STRING)
     private TournamentEntryStatus status;
 
-    private LocalDateTime createdAt;
     private LocalDateTime eliminatedAt;
 
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
     /**
-     * Initializes timestamps, losses, and status on insert.
+     * Initializes losses and status on insert.
      */
     @PrePersist
     public void onCreate() {
-        createdAt = LocalDateTime.now(clock);
         if (losses == null) {
             losses = 0;
         }

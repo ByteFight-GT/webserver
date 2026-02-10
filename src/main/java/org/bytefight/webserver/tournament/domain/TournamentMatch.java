@@ -6,10 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.bytefight.webserver.common.domain.BaseEntity;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,10 +36,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TournamentMatch {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class TournamentMatch extends BaseEntity {
 
     @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
@@ -114,16 +109,11 @@ public class TournamentMatch {
     private Long nextLoserMatchId;
     private Integer nextLoserSlot;
 
-    private LocalDateTime createdAt;
-
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
     /**
-     * Initializes timestamps, state, UUID, and series counters on insert.
+     * Initializes state, UUID, and series counters on insert.
      */
     @PrePersist
     public void onCreate() {
-        createdAt = LocalDateTime.now(clock);
         if (state == null) {
             state = TournamentMatchState.PENDING;
         }

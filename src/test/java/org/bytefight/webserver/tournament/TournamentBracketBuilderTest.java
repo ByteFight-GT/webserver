@@ -43,9 +43,8 @@ public class TournamentBracketBuilderTest {
 
         TournamentBracketGraph graph = builder.buildBracket(tournament, entries);
 
-        long id = 1;
         for (TournamentMatch match : graph.getAllMatches()) {
-            match.setId(id++);
+            match.setUuid(UUID.randomUUID());
         }
 
         builder.wireWinnersAdvancement(graph.getWinnersRounds());

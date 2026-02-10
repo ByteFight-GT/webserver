@@ -4,6 +4,7 @@ import org.bytefight.webserver.team.domain.Team;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -21,7 +22,7 @@ public class TournamentDto {
     private final TournamentStatus status;
     private final Integer maxTeams;
     private final Integer bracketSize;
-    private final LocalDateTime createdAt;
+    private final Instant createdAt;
     private final LocalDateTime startedAt;
     private final LocalDateTime finishedAt;
 

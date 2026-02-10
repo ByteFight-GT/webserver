@@ -1,5 +1,6 @@
 package org.bytefight.webserver.tournament.domain;
 
+import org.bytefight.webserver.common.domain.BaseEntity;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,10 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 /**
  * Represents a single game within a best-of series (TournamentMatch).
@@ -29,10 +26,7 @@ import java.time.ZoneId;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TournamentGame {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class TournamentGame extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tournament_match_id", nullable = false)
@@ -46,13 +40,4 @@ public class TournamentGame {
      * 1-based game number within the series (e.g., game 1 of 5).
      */
     private Integer gameNumber;
-
-    private LocalDateTime createdAt;
-
-    private static Clock clock = Clock.system(ZoneId.of("America/New_York"));
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now(clock);
-    }
 }
