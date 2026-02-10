@@ -8,10 +8,13 @@ import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
 import org.bytefight.webserver.tournament.domain.EnrollTeamsRequest;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketDto;
+import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
+// import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
+import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
@@ -117,7 +120,8 @@ public class TournamentService {
     }
 
     /**
-     * Matches-only payload for timeline or bracket rendering.
+     * All matches (series) across every bracket type and round.
+     * Ordered by bracket type, round number, match index for display.
      */
     public List<TournamentMatchDto> getMatches(String competitionSlug, String uuid) {
         Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
@@ -127,6 +131,115 @@ public class TournamentService {
                 .map(TournamentMatchDto::from)
                 .toList();
     }
+
+    // ── New public read APIs ────────────────────────────────────────────────
+
+    /**
+     * Returns all enrolled teams (entries) for a tournament, ordered by seed.
+     *
+     * Path:
+     * - Tournament -> TournamentEntry list -> TournamentEntryDto list
+     */
+    public List<TournamentEntryDto> getTeams(String competitionSlug, String uuid) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
+        return tournamentEntryRepository.findByTournamentOrderBySeed(tournament)
+                .stream()
+                .map(TournamentEntryDto::from)
+                .toList();
+    }
+
+    /**
+     * Returns matches (series) filtered by bracket type and/or round range.
+     *
+     * All parameters are optional:
+     * - bracketType: WINNERS, LOSERS, GRAND_FINAL, GRAND_FINAL_RESET (null = all)
+     * - fromRound: inclusive lower bound on roundNumber (null = no lower bound)
+     * - toRound: inclusive upper bound on roundNumber (null = no upper bound)
+     *
+     * Filtering is done in-memory from the full match list since the total number
+     * of matches per tournament is bounded (a few hundred max).
+     */
+    public List<TournamentMatchDto> getMatchesByRound(String competitionSlug, String uuid,
+                                                      TournamentBracketType bracketType,
+                                                      Integer fromRound, Integer toRound) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
+        return tournamentMatchRepository
+                .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament)
+                .stream()
+                .filter(m -> bracketType == null || m.getBracketType() == bracketType)
+                .filter(m -> fromRound == null || m.getRoundNumber() >= fromRound)
+                .filter(m -> toRound == null || m.getRoundNumber() <= toRound)
+                .map(TournamentMatchDto::from)
+                .toList();
+    }
+
+    /**
+     * Returns final rankings for all teams in a completed tournament.
+     *
+     * Ranking logic:
+     * - 1st place: Tournament.firstPlaceEntry (champion)
+     * - 2nd place: Tournament.secondPlaceEntry (runner-up)
+     * - Remaining teams: sorted by eliminatedAt DESC (later elimination = better placing),
+     *   then by seed ASC as tiebreaker
+     *
+     * Only available when the tournament status is COMPLETE.
+     *
+     * In double elimination, all eliminated teams have exactly 2 losses.
+     * The differentiator is *when* they were eliminated — teams eliminated later
+     * survived more rounds and are ranked higher.
+     */
+    public List<TournamentRankingDto> getRankings(String competitionSlug, String uuid) {
+        Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
+        if (tournament.getStatus() != TournamentStatus.COMPLETE) {
+            throw new IllegalArgumentException("Rankings are only available after the tournament is complete.");
+        }
+
+        TournamentEntry first = tournament.getFirstPlaceEntry();
+        TournamentEntry second = tournament.getSecondPlaceEntry();
+        List<TournamentEntry> allEntries = tournamentEntryRepository.findByTournamentOrderBySeed(tournament);
+
+        // Separate the champion and runner-up from the rest.
+        List<TournamentEntry> remaining = allEntries.stream()
+                .filter(e -> !e.getId().equals(first.getId()) && !e.getId().equals(second.getId()))
+                .sorted(
+                        // Fewer losses = went further (should appear first among remaining).
+                        Comparator.<TournamentEntry>comparingInt(TournamentEntry::getLosses)
+                                // Among same loss count, later elimination = better placing.
+                                .thenComparing(
+                                        Comparator.comparing(
+                                                TournamentEntry::getEliminatedAt,
+                                                Comparator.nullsFirst(Comparator.reverseOrder())
+                                        )
+                                )
+                                // Final tiebreaker: original seed (lower seed = stronger).
+                                .thenComparingInt(TournamentEntry::getSeed)
+                )
+                .toList();
+
+        List<TournamentRankingDto> rankings = new ArrayList<>();
+        rankings.add(buildRanking(1, first));
+        rankings.add(buildRanking(2, second));
+        int rank = 3;
+        for (TournamentEntry entry : remaining) {
+            rankings.add(buildRanking(rank++, entry));
+        }
+        return rankings;
+    }
+
+    private TournamentRankingDto buildRanking(int rank, TournamentEntry entry) {
+        Team team = entry.getTeam();
+        return TournamentRankingDto.builder()
+                .rank(rank)
+                .entryId(entry.getId())
+                .teamUuid(team.getUuid().toString())
+                .teamName(team.getName())
+                .seed(entry.getSeed())
+                .losses(entry.getLosses())
+                .status(entry.getStatus())
+                .build();
+    }
+
+    // ── Admin / lifecycle methods ───────────────────────────────────────────
 
     /**
      * Creates a new tournament in DRAFT state.
