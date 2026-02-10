@@ -263,8 +263,8 @@ public class GameMatchService {
         return null;
     }
 
-    public StatsDTO getTeamStatsByMatchReason(Long teamId, MatchReason reason) {
-        List<GameMatch> matches = gameMatchRepository.findTeamMatchesByReason(teamId, List.of(reason));
+    public StatsDTO getTeamStatsByMatchReason(String teamUuid, MatchReason reason) {
+        List<GameMatch> matches = gameMatchRepository.findTeamMatchesByReason(UUID.fromString(teamUuid), List.of(reason));
         int wins = 0;
         int losses = 0;
         int draws = 0;

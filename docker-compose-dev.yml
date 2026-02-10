@@ -49,8 +49,10 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:root@auth-db:5432/postgres?sslmode=disable&options=-c%20search_path=auth
       API_EXTERNAL_URL: http://localhost:9999
+      ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjIwMDAwMDAwMDB9.JW2jqU8yDaS3BUvEex6aH0qWXNpmMj06-1b2Kp8WoFE
+      SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.Z6_RQRLkjvCjPyGn4LOdPTq8v5our0qk8a4Y_SB6dZY
       GOTRUE_JWT_SECRET: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs
-      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_EXP: 60000
       GOTRUE_MAILER_AUTOCONFIRM: true
       GOTRUE_EXTERNAL_EMAIL_ENABLED: true
       GOTRUE_DB_DRIVER: postgres
