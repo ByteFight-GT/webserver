@@ -70,6 +70,10 @@ public class SubmissionService {
         }
     }
 
+    public Optional<Submission> getSubmission(UUID uuid) {
+        return submissionRepository.findSubmissionByUuid(uuid);
+    }
+
     public List<Submission> listSubmissionsByTeam(Team team) {
         return submissionRepository.findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team);
     }

@@ -9,6 +9,7 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.application.SubmissionService;
+import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamMember;
 import org.bytefight.webserver.team.domain.TeamType;
@@ -214,6 +215,20 @@ public class TeamService {
 
     public List<Team> getTeamsWithSubmission(Competition competition) {
         return teamRepository.findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(competition);
+    }
+
+    public void setTeamCurrentSubmission(Team team, Submission submission) {
+        if(submission.getValidity() != SubmissionValidity.valid) {
+            throw new IllegalArgumentException("Submission is invalid");
+        }
+
+        if(!team.equals(submission.getTeam())) {
+            throw new IllegalArgumentException("Submission does not belong to team");
+        }
+
+        team.setCurrentSubmission(submission);
+
+        teamRepository.save(team);
     }
 
     public Team getTeamById(Long id) {
