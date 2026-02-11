@@ -1,4 +1,4 @@
-package org.bytefight.webserver.submission.domain;
+package org.bytefight.webserver.submission.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
-
-import java.time.LocalDateTime;
+import org.bytefight.webserver.submission.domain.Submission;
+import org.bytefight.webserver.submission.domain.SubmissionValidity;
 
 @Data
 @Builder
