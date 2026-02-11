@@ -1,6 +1,7 @@
 package org.bytefight.webserver.submission.infra;
 
 import org.bytefight.webserver.submission.domain.Submission;
+import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-    List<Submission> findSubmissionsByTeamIdOrderByCreatedAtDesc(Long teamId);
+    List<Submission> findSubmissionsByTeamAndDeletedIsFalseOrderByCreatedAtDesc(Team team);
     Optional<Submission> findSubmissionByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
     Page<Submission> findByIsDeleted(boolean isDeleted, Pageable pageable);
