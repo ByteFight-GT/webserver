@@ -45,6 +45,11 @@ public class TestDataFactory {
         competition.setName(name != null ? name : "Test Competition (" + randomUuid + ")");
         competition.setActive(active);
         competition.setMaxPlayersPerTeam(maxPlayersPerTeam);
+        competition.setAllowCreateTeam(true);
+        competition.setAllowJoinTeam(true);
+        competition.setAllowLeaveTeam(true);
+        competition.setAllowNewSubmission(true);
+        competition.setAllowSetSubmission(true);
         return competitionRepository.save(competition);
     }
 
