@@ -2,6 +2,7 @@ package org.bytefight.webserver.ladder.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.ladder.application.LadderService;
@@ -16,9 +17,10 @@ import java.util.List;
 @Tag(name = "Ladder (Public)")
 @RequestMapping({"/api/v1/ladder"})
 @RestController
+@RequiredArgsConstructor
 public class LadderController {
-    LadderService ladderService;
-    CompetitionService competitionService;
+    private final LadderService ladderService;
+    private final CompetitionService competitionService;
 
     @GetMapping("/{competitionSlug}")
     @Operation(
