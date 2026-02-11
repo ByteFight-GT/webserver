@@ -5,17 +5,13 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
-import org.bytefight.webserver.storage.domain.StoredObject;
 import org.bytefight.webserver.submission.domain.Submission;
-import org.bytefight.webserver.submission.domain.SubmissionDTO;
 import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
