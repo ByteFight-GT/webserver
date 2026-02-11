@@ -54,8 +54,24 @@ public class SubmissionService {
         return submissionRepository.save(submission);
     }
 
+    @Transactional
+    public void onSubmissionValidationComplete(Submission submission, boolean isValid) {
+        if(isValid) {
+            if (submission.getValidity() == SubmissionValidity.not_evaluated_autoset) {
+                submission.getTeam().setCurrentSubmission(submission);
+                teamRepository.save(submission.getTeam());
+            }
+
+            submission.setValidity(SubmissionValidity.valid);
+            submissionRepository.save(submission);
+        } else {
+            submission.setValidity(SubmissionValidity.invalid);
+            submissionRepository.save(submission);
+        }
+    }
+
     public List<Submission> listSubmissionsByTeam(Team team) {
-        return submissionRepository.findSubmissionsByTeamAndDeletedIsFalseOrderByCreatedAtDesc(team);
+        return submissionRepository.findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team);
     }
 
     public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {

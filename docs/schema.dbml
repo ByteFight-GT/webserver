@@ -23,12 +23,14 @@ enum match_status {
   team_a_win
   team_b_win
   draw
+  submission_valid
+  submission_invalid
 }
 
 enum match_reason {
   validation
   scrimmage
-  ladder
+  matchmaking
   tournament
   other
 }
@@ -91,6 +93,12 @@ Table competitions {
   is_active boolean [not null, default: false]
   is_whitelisted boolean [not null, default: false]
   max_players_per_team integer [not null]
+
+  allow_create_team boolean [not null, default: false]
+  allow_join_team boolean [not null, default: false]
+  allow_leave_team boolean [not null, default: false]
+  allow_new_submission boolean [not null, default: false]
+  allow_set_submission boolean [not null, default: false]
 }
 
 Table ladders {
@@ -98,6 +106,10 @@ Table ladders {
 
   competition_id bigint [not null, ref: > competitions.id]
   ladder varchar(50) [not null]
+
+  allow_user_matches boolean [not null, default: false]
+  scheduled_matchmaking_enabled boolean [not null, default: false]
+  matchmaking_interval_seconds integer
 
   glicko_default_rating float8 [not null]
   glicko_default_rd float8 [not null]
@@ -110,7 +122,7 @@ Table ladders {
   glicko_sigma_max float8
 
   indexes {
-    (competition_id, ladder) [pk]
+    (competition_id, ladder) [unique]
   }
 }
 
@@ -250,6 +262,8 @@ Table game_match_files {
 
 Table matchmaking_events {
   ~base_template
+  competition_id bigint [not null, ref: > competitions.id]
+  ladder varchar(50) [not null]
 }
 
 Ref: game_matches.(competition_id, ladder) > ladders.(competition_id, ladder)
