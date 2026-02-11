@@ -5,7 +5,7 @@ import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.dto.CompetitionDto;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.domain.PublicPlayerDto;
-import org.bytefight.webserver.submission.domain.SubmissionDTO;
+import org.bytefight.webserver.submission.domain.SubmissionDto;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamType;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +22,7 @@ public class SelfTeamDto {
     @NotNull String quote;
     String joinCode;
     @NotNull Boolean displayMembers;
-    SubmissionDTO currentSubmissionDTO;
+    SubmissionDto currentSubmissionDTO;
     @NotNull TeamType type;
     @NotNull List<PublicPlayerDto> members;
     @NotNull TimestampsDto timestampsDto;
@@ -37,7 +37,7 @@ public class SelfTeamDto {
                 .joinCode(team.getJoinCode())
                 .displayMembers(team.isDisplayMembers())
                 .currentSubmissionDTO(
-                        team.getCurrentSubmission() != null ? SubmissionDTO.from(team.getCurrentSubmission()) : null)
+                        team.getCurrentSubmission() != null ? SubmissionDto.from(team.getCurrentSubmission()) : null)
                 .type(team.getType())
                 .members(members.stream().map(PublicPlayerDto::from).toList())
                 .timestampsDto(TimestampsDto.from(team))
