@@ -12,10 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class LadderService {
-    private final CompetitionRepository competitionRepository;
     private final TeamStatsService teamStatsService;
     private final LadderRepository ladderRepository;
     private final TeamRepository teamRepository;
@@ -59,5 +60,9 @@ public class LadderService {
         }
 
         return ladder;
+    }
+
+    public List<Ladder> getLaddersByCompetition(Competition competition){
+        return ladderRepository.findAllByCompetition(competition);
     }
 }
