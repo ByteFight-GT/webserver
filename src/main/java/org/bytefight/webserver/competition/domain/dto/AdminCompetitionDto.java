@@ -10,6 +10,11 @@ public record AdminCompetitionDto(
         String description,
         boolean isActive,
         boolean isWhitelisted,
+        boolean allowNewSubmission,
+        boolean allowSetSubmission,
+        boolean allowCreateTeam,
+        boolean allowJoinTeam,
+        boolean allowLeaveTeam,
         int maxPlayersPerTeam,
         TimestampsDto timestamps
 ) {
@@ -21,6 +26,11 @@ public record AdminCompetitionDto(
                 competition.getDescription(),
                 competition.isActive(),
                 competition.isWhitelisted(),
+                competition.isAllowNewSubmission(),
+                competition.isAllowSetSubmission(),
+                competition.isAllowCreateTeam(),
+                competition.isAllowJoinTeam(),
+                competition.isAllowLeaveTeam(),
                 competition.getMaxPlayersPerTeam(),
                 TimestampsDto.from(competition)
         );
