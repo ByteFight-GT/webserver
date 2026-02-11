@@ -54,27 +54,8 @@ public class SubmissionService {
         return submissionRepository.save(submission);
     }
 
-    public Submission getSubmissionReferenceById(Long id) {
-        return submissionRepository.getReferenceById(id);
-    }
-
-    public Submission getSubmissionByUuid(String uuid) {
-        return submissionRepository.findSubmissionByUuid(UUID.fromString(uuid)).orElseThrow();
-    }
-
-    public Submission deleteSubmission(String submissionUuid, Long teamId) {
-        Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid))
-                .orElseThrow(() -> new EntityNotFoundException("Submission not found with uuid: " + submissionUuid));
-
-        if (!submission.getTeam().getId().equals(teamId)) {
-            throw new IllegalArgumentException("You do not own this submission, so it cannot be deleted.");
-        }
-
-//        submission.setIsDeleted(true);
-
-        submissionRepository.save(submission);
-
-        return submission;
+    public List<Submission> listSubmissionsByTeam(Team team) {
+        return submissionRepository.findSubmissionsByTeamAndDeletedIsFalseOrderByCreatedAtDesc(team);
     }
 
     public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {
@@ -103,43 +84,10 @@ public class SubmissionService {
             throw new IllegalArgumentException("File is empty");
         }
 
-        if (file.getSize()  > MAX_FILE_SIZE) {
+        if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("File is too large");
         }
 
         String contentType = file.getContentType();
     }
-
-    public void validateSubmissions(String submission1Uuid, String submission2Uuid) {
-        if(!submissionRepository.existsByUuid(UUID.fromString(submission1Uuid)) || !submissionRepository.existsByUuid(UUID.fromString(submission2Uuid))) {
-            throw new IllegalArgumentException("Submission 1 or 2 does not exist");
-        }
-    }
-
-    public void validateSubmissionAfterMatch(long submissionId) {
-        Submission submission = submissionRepository.findById(submissionId).get();
-//        submission.setSubmissionValidity(SubmissionValidity.VALID);
-        submissionRepository.save(submission);
-    }
-
-    public void invalidateSubmissionAfterMatch(long submissionId) {
-        Submission submission = submissionRepository.findById(submissionId).get();
-//        submission.setSubmissionValidity(SubmissionValidity.INVALID);
-        submissionRepository.save(submission);
-    }
-
-    public boolean isSubmissionValid(String submissionUuid) {
-        Optional<Submission> maybeSubmission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid));
-        if (maybeSubmission.isPresent()) {
-//            return maybeSubmission.get().getSubmissionValidity() == SubmissionValidity.VALID;
-        }
-        return false;
-    }
-
-    public List<SubmissionDTO> getTeamSubmissions(Long teamId) {
-        List<Submission> submissions =submissionRepository.findSubmissionsByTeamIdOrderByCreatedAtDesc(teamId);
-//        return submissions.stream().filter((a) -> !a.getIsDeleted()).map(SubmissionDTO::from).toList();
-        return null;
-    }
-
 }

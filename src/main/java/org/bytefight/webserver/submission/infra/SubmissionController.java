@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,9 +39,24 @@ import java.util.UUID;
 public class SubmissionController {
     private final SubmissionService submissionService;
     private final GameMatchService gameMatchService;
-    private final RabbitMQService rabbitMQService;
     private final TeamService teamService;
     private final PlayerService playerService;
+
+    @GetMapping("/team/{teamUuid}")
+    @Operation(summary = "List all submissions for a team")
+    public ResponseEntity<List<SubmissionDTO>> getAllSubmissionsByTeam(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID teamUuid
+    ) {
+        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if(!teamService.isMember(team, player)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
+        }
+
+        return ResponseEntity.ok(submissionService.listSubmissionsByTeam(team).stream().map(SubmissionDTO::from).toList());
+    }
 
     @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
