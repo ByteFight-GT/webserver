@@ -10,3 +10,12 @@ The goal is to get the best of both worlds:
 
 This document explains how to safely make database changes without causing schema drift.
 
+```
+docker cp 'ByteFight.sql' bytefight-webserver-dev-db-1:/
+
+dropdb -U bytefight bytefight_migrate
+
+createdb -U bytefight bytefight_migrate
+
+psql -U bytefight -d bytefight_migrate -f ByteFight.sql
+```

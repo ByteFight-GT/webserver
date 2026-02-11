@@ -10,6 +10,7 @@ import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.application.GlickoService;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.application.SubmissionService;
+import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.team.application.TeamService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,8 @@ public class GameMatchResultHandler {
 
         if(gameMatch.getReason() != MatchReason.validation) {
             glickoService.processGameMatchResult(gameMatch, false);
+        } else {
+            submissionService.onSubmissionValidationComplete(gameMatch.getSubmissionA(), result.getStatus() == MatchStatus.submission_valid);
         }
     }
 

@@ -8,5 +8,7 @@ public enum MatchStatus {
     failed,
     team_a_win,
     team_b_win,
-    draw
+    draw,
+    submission_valid,
+    submission_invalid,
 }
