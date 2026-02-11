@@ -1,5 +1,6 @@
 package org.bytefight.webserver.submission.infra;
 
+import jakarta.transaction.Transactional;
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
@@ -46,6 +47,7 @@ public class SubmissionController {
             operationId = "uploadSubmission",
             summary = "Upload a submission for a team"
     )
+    @Transactional
     public ResponseEntity<SubmissionDTO> uploadSubmission(
             @AuthenticationPrincipal User user,
             @PathVariable UUID teamUuid,
