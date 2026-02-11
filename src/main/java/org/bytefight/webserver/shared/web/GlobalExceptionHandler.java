@@ -2,6 +2,7 @@ package org.bytefight.webserver.shared.web;
 
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import jakarta.validation.ConstraintViolationException;
+import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -60,5 +61,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
         return problem(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    }
+
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ProblemDetail handlePermissionDenied(PermissionDeniedException ex) {
+        return problem(HttpStatus.CONFLICT, "Permission Denied", ex.getMessage());
     }
 }

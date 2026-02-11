@@ -1,6 +1,7 @@
 package org.bytefight.webserver.competition.infra;
 
 import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.JoinTeamDto;
@@ -49,7 +50,7 @@ public class PrivateCompetitionController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
         if(!competition.isAllowCreateTeam()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to create a team at this time");
+            throw new PermissionDeniedException("You are not allowed to create a team at this time");
         }
 
         Team team = teamService.createTeam(competition, teamSettingsDto);
@@ -102,7 +103,7 @@ public class PrivateCompetitionController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
         if(!competition.isAllowJoinTeam()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to join a team at this time");
+            throw new PermissionDeniedException("You are not allowed to join a team at this time");
         }
 
         teamService.joinTeamByJoinCode(competition, player, joinTeamDto.getJoinCode());
@@ -127,7 +128,7 @@ public class PrivateCompetitionController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
         if(!competition.isAllowLeaveTeam()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to leave your team at this time");
+            throw new PermissionDeniedException("You are not allowed to leave your team at this time");
         }
 
         teamService.leaveTeam(competition, player);

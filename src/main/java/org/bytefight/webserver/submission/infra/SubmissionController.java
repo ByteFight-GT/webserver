@@ -1,6 +1,7 @@
 package org.bytefight.webserver.submission.infra;
 
 import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
@@ -58,7 +59,7 @@ public class SubmissionController {
         }
 
         if(!team.getCompetition().isAllowNewSubmission()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to create a new submission at this time");
+            throw new PermissionDeniedException("You are not allowed to create a new submission at this time");
         }
 
         Submission submission = null;
