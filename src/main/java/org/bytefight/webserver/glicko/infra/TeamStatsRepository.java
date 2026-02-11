@@ -36,6 +36,7 @@ public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
         JOIN teams t ON t.id = ts.team_id
         WHERE ts.competition_id = :#{#competition.id}
           AND ts.ladder = :ladder
+          AND t.is_deleted = false
         ORDER BY (ts.matches_played = 0) ASC, ts.glicko_rating DESC, t.id ASC
         """, nativeQuery = true)
     List<LeaderboardRow> findLeaderboardRowsByCompetitionAndLadder(@Param("competition") Competition competition, @Param("ladder") String ladder);
