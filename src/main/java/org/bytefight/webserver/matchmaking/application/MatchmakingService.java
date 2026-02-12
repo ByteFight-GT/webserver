@@ -2,11 +2,9 @@ package org.bytefight.webserver.matchmaking.application;
 
 import com.nimbusds.jose.util.Pair;
 import org.bytefight.webserver.competition.domain.Competition;
-import org.bytefight.webserver.config.ClockConfig;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
-import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
