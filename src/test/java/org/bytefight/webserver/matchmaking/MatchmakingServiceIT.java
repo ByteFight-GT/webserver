@@ -9,7 +9,6 @@ import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.matchmaking.application.MatchmakingService;
-import org.bytefight.webserver.rabbitmq.infra.RabbitMQConfiguration;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
