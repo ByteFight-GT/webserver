@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Teams (Public)", description = "Public read-only team endpoints")
+@Tag(name = "Team (Public)", description = "Public read-only team endpoints")
 @RestController
 @RequestMapping("/api/v1/public/team")
 @RequiredArgsConstructor

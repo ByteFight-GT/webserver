@@ -39,23 +39,31 @@ public class GameMatchFileService {
         return gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeam(gameMatchId, slug, team);
     }
 
-    public DownloadLinkDto getDownloadLink(User requestingUser, GameMatchFile gameMatchFile) {
-        if(requestingUser.isAdmin()) {
+    public DownloadLinkDto getPublicDownloadLink(GameMatchFile gameMatchFile) {
+        if (gameMatchFile.getVisibility() == GameMatchFileVisibility.everyone) {
             return storageService.getDownloadLink(gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
         }
 
-        if(gameMatchFile.getVisibility() == GameMatchFileVisibility.admin) {
+        throw new AccessDeniedException("You do not have permission to access this file");
+    }
+
+    public DownloadLinkDto getDownloadLink(User requestingUser, GameMatchFile gameMatchFile) {
+        if (requestingUser.isAdmin()) {
+            return storageService.getDownloadLink(gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
+        }
+
+        if (gameMatchFile.getVisibility() == GameMatchFileVisibility.admin) {
             throw new AccessDeniedException("You do not have permission to access this file");
         }
 
-        if(gameMatchFile.getVisibility() == GameMatchFileVisibility.team && gameMatchFile.getTeam() != null) {
+        if (gameMatchFile.getVisibility() == GameMatchFileVisibility.team && gameMatchFile.getTeam() != null) {
             Player player = playerService.getPlayer(requestingUser).orElseThrow(() -> new AccessDeniedException("You do not have permission to access this file"));
-            if(teamService.isMember(gameMatchFile.getTeam(), player)) {
+            if (teamService.isMember(gameMatchFile.getTeam(), player)) {
                 return storageService.getDownloadLink(gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
             }
         }
 
-        if(gameMatchFile.getVisibility() == GameMatchFileVisibility.everyone) {
+        if (gameMatchFile.getVisibility() == GameMatchFileVisibility.everyone) {
             return storageService.getDownloadLink(gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
         }
 
@@ -64,7 +72,7 @@ public class GameMatchFileService {
 
     @Transactional
     public GameMatchFile uploadGameMatchFile(MultipartFile file, String slug, GameMatch gameMatch, GameMatchFileVisibility visibility, Team team) throws IOException {
-        if(visibility == GameMatchFileVisibility.team && team == null) {
+        if (visibility == GameMatchFileVisibility.team && team == null) {
             throw new IllegalArgumentException("You must specify a team when using visibility 'team'");
         }
 

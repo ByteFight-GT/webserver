@@ -28,7 +28,7 @@ public class AdminCompetitionService {
     }
 
     public Competition createCompetition(AdminCreateCompetitionDto input) {
-        String slug = input.getSlug();
+        String slug = input.getSlug().toLowerCase().trim();
         if (competitionRepository.findBySlug(slug).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Competition slug already exists");
         }

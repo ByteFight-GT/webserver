@@ -1,5 +1,6 @@
 package org.bytefight.webserver.gamematch.infra;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
+@Tag(name = "Game Match (Admin)")
 @RequestMapping("/api/v1/admin/game-match")
 @PreAuthorize("hasRole('ADMIN')")
 @RestController
