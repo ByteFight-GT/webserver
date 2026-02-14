@@ -24,7 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Clock;
 import java.util.*;
 
-@Tag(name = "Teams (Private)")
+@Tag(name = "Team (Private)")
 @RestController
 @RequestMapping("/api/v1/team")
 @RequiredArgsConstructor
