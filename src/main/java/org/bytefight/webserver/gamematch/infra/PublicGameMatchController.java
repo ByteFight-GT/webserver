@@ -1,5 +1,6 @@
 package org.bytefight.webserver.gamematch.infra;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+@Tag(name = "Game Match (Public)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/game-match")
