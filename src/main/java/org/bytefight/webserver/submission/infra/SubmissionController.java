@@ -119,15 +119,15 @@ public class SubmissionController {
 //        return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
 //    }
 //
-    @DeleteMapping("")
-    public ResponseEntity<SubmissionDto> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
-        Long teamId = player.getTeam().getId();
-
-        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
-
-        return ResponseEntity.ok(SubmissionDTO.from(deleted));
-    }
+//    @DeleteMapping("")
+//    public ResponseEntity<SubmissionDto> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
+//        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+//        Long teamId = player.getTeam().getId();
+//
+//        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
+//
+//        return ResponseEntity.ok(SubmissionDTO.from(deleted));
+//    }
 
 
     @ExceptionHandler(Exception.class)
