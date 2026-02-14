@@ -61,9 +61,11 @@ public class GlickoService {
         TeamStats teamAStats = teamStatsService.getTeamStatsCreateIfNotExist(teamA, gameMatch.getLadder());
         TeamStats teamBStats = teamStatsService.getTeamStatsCreateIfNotExist(teamB, gameMatch.getLadder());
 
-        GlickoMatchUpdate glickoMatchUpdate = calculateMatchUpdate(teamAStats, teamBStats, ladder, gameMatch.getStatus());
-
-        applyGlickoMatchUpdate(glickoMatchUpdate, teamAStats, teamBStats);
+        // Don't update stats for matches against self
+        if(!teamA.equals(teamB)) {
+            GlickoMatchUpdate glickoMatchUpdate = calculateMatchUpdate(teamAStats, teamBStats, ladder, gameMatch.getStatus());
+            applyGlickoMatchUpdate(glickoMatchUpdate, teamAStats, teamBStats);
+        }
     }
 
     public void applyGlickoMatchUpdate(GlickoMatchUpdate glickoMatchUpdate, TeamStats teamAStats, TeamStats teamBStats) {

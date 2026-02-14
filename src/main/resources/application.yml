@@ -6,6 +6,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  flyway:
+    baseline-on-migrate: true
 app:
   auth:
     jwt-secret: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs

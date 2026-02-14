@@ -44,6 +44,9 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
         if (response instanceof ServletServerHttpResponse servletResponse
                 && request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
+            if (!isAdminPath(httpRequest.getRequestURI())) {
+                return body;
+            }
             String resourceName = resourceNameFromPath(httpRequest.getRequestURI());
             String pageParam = httpRequest.getParameter("page");
             String perPageParam = httpRequest.getParameter("perPage");
@@ -66,6 +69,13 @@ public class ContentRangeResponseAdvice implements ResponseBodyAdvice<Object> {
         }
 
         return pageBody.getContent();
+    }
+
+    private static boolean isAdminPath(String path) {
+        if (path == null || path.isBlank()) {
+            return false;
+        }
+        return path.startsWith("/api/v1/admin/");
     }
 
     private static int parsePositiveInt(String value, int fallback) {

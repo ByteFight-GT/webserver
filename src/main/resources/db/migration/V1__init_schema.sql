@@ -6,7 +6,9 @@ CREATE TYPE "match_status" AS ENUM (
     'failed',
     'team_a_win',
     'team_b_win',
-    'draw'
+    'draw',
+    'submission_valid',
+    'submission_invalid'
     );
 
 CREATE TYPE "match_reason" AS ENUM (
@@ -74,7 +76,12 @@ CREATE TABLE "competitions" (
                                 "description" varchar,
                                 "is_active" boolean NOT NULL DEFAULT false,
                                 "is_whitelisted" boolean NOT NULL DEFAULT false,
-                                "max_players_per_team" integer NOT NULL
+                                "max_players_per_team" integer NOT NULL,
+                                "allow_create_team" boolean NOT NULL DEFAULT false,
+                                "allow_join_team" boolean NOT NULL DEFAULT false,
+                                "allow_leave_team" boolean NOT NULL DEFAULT false,
+                                "allow_new_submission" boolean NOT NULL DEFAULT false,
+                                "allow_set_submission" boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE "ladders" (
