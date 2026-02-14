@@ -1,6 +1,7 @@
 package org.bytefight.webserver.leaderboard.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.leaderboard.application.LeaderboardService;
@@ -16,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Tag(name = "Leaderboard (Public)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/leaderboard")

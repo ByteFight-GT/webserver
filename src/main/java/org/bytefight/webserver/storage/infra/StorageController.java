@@ -1,5 +1,6 @@
 package org.bytefight.webserver.storage.infra;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.storage.application.HmacService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.StoredObject;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Tag(name = "File Service")
 @RestController
 @RequestMapping("/files")
 @RequiredArgsConstructor
