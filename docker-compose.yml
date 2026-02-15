@@ -29,6 +29,21 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    depends_on:
+      - postgres
+    entrypoint: cloudflared
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
+      - --token
+      - "${CLOUDFLARE_TOKEN}"
+    env_file:
+      - .env
+
 volumes:
   db_data:
     driver: local
