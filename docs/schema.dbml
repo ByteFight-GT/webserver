@@ -99,6 +99,7 @@ Table competitions {
   allow_leave_team boolean [not null, default: false]
   allow_new_submission boolean [not null, default: false]
   allow_set_submission boolean [not null, default: false]
+  allow_edit_team_name boolean [not null, default: false]
 }
 
 Table ladders {

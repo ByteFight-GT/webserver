@@ -49,6 +49,9 @@ public class Competition extends BaseEntity {
     @Column(name = "allow_leave_team", nullable = false)
     private boolean allowLeaveTeam;
 
+    @Column(name = "allow_edit_team_name", nullable = false)
+    private boolean allowEditTeamName;
+
     @Override
     public int hashCode() {
         return Objects.hashCode(slug);
