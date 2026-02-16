@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: BotFightWebServer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bytefightdb
+    username: bytefight
+    password: password
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+  rabbitmq:
+    uri: amqp://guest:guest@localhost:5672
+
+app:
+  dev:
+    admin-user:
+      enabled: true
+      email: admin@example.com
+      password: password
+      username: admin
+
+storage:
+  root: ./storage
+  hmac-secret: secret
+
+logging:
+  file:
+    name: logs/application.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+hibernate:
+  search:
+    default:
+      directory_provider: filesystem
+      indexBase: ./data/index/default
+
+server:
+  forward-headers-strategy: framework
