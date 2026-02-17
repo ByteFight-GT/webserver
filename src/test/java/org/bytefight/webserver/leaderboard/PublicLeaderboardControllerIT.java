@@ -52,6 +52,10 @@ class PublicLeaderboardControllerIT extends FullStackIntegrationTestBase {
         Team teamB = testDataFactory.createTeam(competition);
         Team teamC = testDataFactory.createTeam(competition);
 
+        teamA.setDisplayMembers(true);
+        teamB.setDisplayMembers(true);
+        teamC.setDisplayMembers(false);
+
         Player a1 = testDataFactory.createUserWithPlayer("a1@example.com", "alpha1");
         Player a2 = testDataFactory.createUserWithPlayer("a2@example.com", "alpha2");
         Player b1 = testDataFactory.createUserWithPlayer("b1@example.com", "beta1");
@@ -89,7 +93,7 @@ class PublicLeaderboardControllerIT extends FullStackIntegrationTestBase {
 
         assertThat(third.get("teamUuid").asText()).isEqualTo(((java.util.UUID) ReflectionTestUtils.getField(teamC, "uuid")).toString());
         assertThat(third.get("rank").isNull()).isTrue();
-        assertThat(memberUsernames(third.get("members"))).containsExactly("gamma1");
+        assertThat(memberUsernames(third.get("members"))).isEmpty();
     }
 
     private static TeamStats teamStats(Competition competition, Team team, String ladder, double rating, int matchesPlayed) {
