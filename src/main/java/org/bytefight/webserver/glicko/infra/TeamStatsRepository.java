@@ -26,6 +26,7 @@ public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
             t.quote AS teamQuote,
             t.type::text AS teamType,
             ts.glicko_rating AS glickoRating,
+            t.display_members AS teamDisplayMembers,
             CASE
                 WHEN ts.matches_played = 0 THEN NULL
                 ELSE DENSE_RANK() OVER (
