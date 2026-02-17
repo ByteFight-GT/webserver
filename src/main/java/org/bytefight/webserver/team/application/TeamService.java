@@ -1,5 +1,6 @@
 package org.bytefight.webserver.team.application;
 
+import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.ladder.domain.Ladder;
@@ -251,7 +252,11 @@ public class TeamService {
             throw new IllegalArgumentException("This team is deleted and cannot be edited.");
         }
 
-        if (teamSettingsDto.getName() != null) {
+        if (teamSettingsDto.getName() != null && !teamSettingsDto.getName().equals(team.getName())) {
+            if(!team.getCompetition().isAllowEditTeamName()) {
+                throw new PermissionDeniedException("You may not edit your team's name at this time");
+            }
+
             String normalizedName = teamSettingsDto.getName().trim().toLowerCase();
             if (!normalizedName.equals(team.getNameNormalized())
                     && teamRepository.existsByCompetitionAndNameNormalized(team.getCompetition(), normalizedName)) {
@@ -259,6 +264,7 @@ public class TeamService {
             }
             team.setName(teamSettingsDto.getName());
         }
+
         if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
         if (teamSettingsDto.getDisplayMembers() != null) team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
 

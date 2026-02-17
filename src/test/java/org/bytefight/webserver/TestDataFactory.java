@@ -48,6 +48,7 @@ public class TestDataFactory {
         competition.setAllowCreateTeam(true);
         competition.setAllowJoinTeam(true);
         competition.setAllowLeaveTeam(true);
+        competition.setAllowEditTeamName(true);
         competition.setAllowNewSubmission(true);
         competition.setAllowSetSubmission(true);
         return competitionRepository.save(competition);
