@@ -3,11 +3,9 @@ package org.bytefight.webserver.auth.infra;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bytefight.webserver.auth.application.AdminUserService;
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.auth.domain.dto.AdminUserDto;
+import org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto;
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +36,7 @@ public class AdminUserController {
             operationId = "adminListAllUsers",
             summary = "REST endpoint to list all users"
     )
-    public Page<AdminUserDto> listAll(
+    public Page<AdminUserWithPlayerDto> listAll(
             @ModelAttribute RestPageRequest pageRequest
     ) {
         Pageable pageable = pageRequest.toPageable(
@@ -47,7 +45,6 @@ public class AdminUserController {
                 DEFAULT_SORT_FIELD,
                 ALLOWED_SORT_FIELDS
         );
-        Page<User> usersPage = adminUserService.listUsers(pageable);
-        return usersPage.map(AdminUserDto::from);
+        return adminUserService.listUsers(pageable);
     }
 }
