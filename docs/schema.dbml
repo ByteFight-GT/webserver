@@ -370,6 +370,8 @@ Table tournament_game {
   game_match_id bigint [not null, ref: - game_matches.id]
 
   game_number integer [not null, note: '1-based game number within the series']
+  result_processed boolean [not null, default: false, note: 'prevents duplicate result handling']
+  
 
   Indexes {
     (tournament_match_id, game_number) [unique]

@@ -70,11 +70,18 @@ public class TournamentResultHandler {
         );
         TournamentMatch match = tournamentGame.getTournamentMatch();
 
+        if (tournamentGame.isResultProcessed()) {
+            return;
+        }
+
         // ── Step 2: Ignore stale/duplicate results ──────────────────────────
         if (match.getState() == TournamentMatchState.COMPLETE
                 || match.getState() == TournamentMatchState.SKIPPED) {
             return;
         }
+
+        tournamentGame.setResultProcessed(true);
+        tournamentGameRepository.save(tournamentGame);
 
         TournamentEntry teamOne = match.getTeamOneEntry();
         TournamentEntry teamTwo = match.getTeamTwoEntry();

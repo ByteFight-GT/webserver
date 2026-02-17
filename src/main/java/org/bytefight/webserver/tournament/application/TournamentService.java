@@ -72,7 +72,8 @@ public class TournamentService {
      * Loads a competition by slug and normalizes it.
      */
     public Competition getCompetitionBySlug(String slug) {
-        return competitionService.getCompetitionBySlug(slug).orElseThrow();
+        return competitionService.getCompetitionBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Competition not found: " + slug));
     }
 
     /**
@@ -82,7 +83,8 @@ public class TournamentService {
     public Tournament getTournamentByUuid(String competitionSlug, String uuid) {
         // Ensures tournament lookups are always scoped to a competition.
         Competition competition = getCompetitionBySlug(competitionSlug);
-        return tournamentRepository.findByUuidAndCompetition(UUID.fromString(uuid), competition).orElseThrow();
+        return tournamentRepository.findByUuidAndCompetition(UUID.fromString(uuid), competition)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found: " + uuid));
     }
 
     /**
@@ -275,6 +277,9 @@ public class TournamentService {
         if (!competition.isActive()) {
             throw new IllegalArgumentException("Competition is not active");
         }
+        if (tournamentEntryRepository.existsByTournament(tournament)) {
+            throw new IllegalArgumentException("Tournament already has enrolled teams; clear existing entries before re-running enrollment.");
+        }
 
         List<Team> teams;
         if (request == null || request.getTeamUuids() == null || request.getTeamUuids().isEmpty()) {
@@ -284,7 +289,8 @@ public class TournamentService {
             teams = new ArrayList<>();
             for (String teamUuid : request.getTeamUuids()) {
                 // Explicit enroll: enforce competition scope and submission availability.
-                Team team = teamService.getTeamByCompetitionAndUuid(competition, UUID.fromString(teamUuid)).orElseThrow();
+                Team team = teamService.getTeamByCompetitionAndUuid(competition, UUID.fromString(teamUuid))
+                        .orElseThrow(() -> new IllegalArgumentException("Team " + teamUuid + " not found in competition " + competition.getSlug()));
                 if (team.getCurrentSubmission() == null) {
                     throw new IllegalArgumentException("Team " + team.getName() + " has no current submission.");
                 }
@@ -297,9 +303,10 @@ public class TournamentService {
         }
 
         // Seed by rank using glicko rating on the specified ladder; fall back to name for ties/unranked.
-        String seedLadder = (request != null)
-                ? request.getSeedLadder().trim().toLowerCase()
-                : DEFAULT_SEED_LADDER; // seedLadder is not nullable
+        String seedLadder = DEFAULT_SEED_LADDER;
+        if (request != null && request.getSeedLadder() != null && !request.getSeedLadder().trim().isEmpty()) {
+            seedLadder = request.getSeedLadder().trim().toLowerCase();
+        }
         Map<Long, Double> ratingByTeamId = new HashMap<>();
         List<TeamStats> stats = teamStatsRepository.findAllByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
         for (TeamStats teamStats : stats) {

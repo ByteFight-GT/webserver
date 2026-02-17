@@ -40,4 +40,8 @@ public class TournamentGame extends BaseEntity {
      * 1-based game number within the series (e.g., game 1 of 5).
      */
     private Integer gameNumber;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean resultProcessed = false;
 }

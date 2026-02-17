@@ -66,17 +66,23 @@ public class TournamentMatchScheduler {
                     // Only process matches that haven't been queued or completed.
                     continue;
                 }
-                if (match.getTeamOneEntry() == null || match.getTeamTwoEntry() == null) {
-                    // Bye scenario: single team auto-advances (no series needed).
-                    TournamentEntry winner = match.getTeamOneEntry() != null
-                            ? match.getTeamOneEntry()
-                            : match.getTeamTwoEntry();
-                    match.setWinnerEntry(winner);
-                    match.setState(TournamentMatchState.SKIPPED);
-                    tournamentMatchRepository.save(match);
-                    advanceWinner(match, winner);
-                    changed = true;
+                boolean hasTeamOne = match.getTeamOneEntry() != null;
+                boolean hasTeamTwo = match.getTeamTwoEntry() != null;
+                if (!hasTeamOne && !hasTeamTwo) {
+                    // This match is still waiting for both participants (later round), skip it.
+                    continue;
                 }
+                if (hasTeamOne && hasTeamTwo) {
+                    // Both teams are present; the match will be queued below.
+                    continue;
+                }
+                // Bye scenario: single team auto-advances (no series needed).
+                TournamentEntry winner = hasTeamOne ? match.getTeamOneEntry() : match.getTeamTwoEntry();
+                match.setWinnerEntry(winner);
+                match.setState(TournamentMatchState.SKIPPED);
+                tournamentMatchRepository.save(match);
+                advanceWinner(match, winner);
+                changed = true;
             }
         } while (changed);
 
