@@ -7,4 +7,5 @@ public interface LeaderboardRow {
     String getTeamType();
     Double getGlickoRating();
     Integer getRank();
+    Boolean getTeamDisplayMembers();
 }
