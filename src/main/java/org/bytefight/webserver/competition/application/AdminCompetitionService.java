@@ -75,27 +75,6 @@ public class AdminCompetitionService {
         if (input.getMaxPlayersPerTeam() != null) {
             competition.setMaxPlayersPerTeam(input.getMaxPlayersPerTeam());
         }
-
-        if (input.getAllowSetSubmission() != null) {
-            competition.setAllowSetSubmission(input.getAllowSetSubmission());
-        }
-
-        if (input.getAllowNewSubmission() != null) {
-            competition.setAllowNewSubmission(input.getAllowNewSubmission());
-        }
-
-        if(input.getAllowJoinTeam() != null) {
-            competition.setAllowJoinTeam(input.getAllowJoinTeam());
-        }
-
-        if(input.getAllowLeaveTeam() != null) {
-            competition.setAllowLeaveTeam(input.getAllowLeaveTeam());
-        }
-
-        if(input.getAllowCreateTeam() != null) {
-            competition.setAllowCreateTeam(input.getAllowCreateTeam());
-        }
-
         if(input.getAllowEditTeamName() != null) {
             competition.setAllowEditTeamName(input.getAllowEditTeamName());
         }
