@@ -19,6 +19,7 @@ public class CompetitionDto {
     @NotNull boolean allowCreateTeam;
     @NotNull boolean allowJoinTeam;
     @NotNull boolean allowLeaveTeam;
+    @NotNull boolean allowEditTeamName;
     @NotNull TimestampsDto timestamps;
 
     public static CompetitionDto from(Competition competition) {
@@ -33,6 +34,7 @@ public class CompetitionDto {
                 .allowCreateTeam(competition.isAllowCreateTeam())
                 .allowJoinTeam(competition.isAllowJoinTeam())
                 .allowLeaveTeam(competition.isAllowLeaveTeam())
+                .allowEditTeamName(competition.isAllowEditTeamName())
                 .timestamps(TimestampsDto.from(competition))
                 .build();
     }
