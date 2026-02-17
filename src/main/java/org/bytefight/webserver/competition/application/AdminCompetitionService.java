@@ -96,6 +96,10 @@ public class AdminCompetitionService {
             competition.setAllowCreateTeam(input.getAllowCreateTeam());
         }
 
+        if(input.getAllowJoinTeam() != null) {
+            competition.setAllowEditTeamName(input.getAllowJoinTeam());
+        }
+
         return competitionRepository.save(competition);
     }
 }
