@@ -49,7 +49,7 @@ public class LeaderboardService {
                         TeamType.valueOf(row.getTeamType()),
                         row.getGlickoRating(),
                         row.getRank(),
-                        membersByTeamUuid.getOrDefault(row.getTeamUuid(), List.of())
+                        row.getTeamDisplayMembers() ? membersByTeamUuid.getOrDefault(row.getTeamUuid(), List.of()) : null
                 ))
                 .toList();
     }
