@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,12 +61,12 @@ public class AdminTeamController {
 
         Map<String, Object> filter = pageRequest.getFilter();
         Long competitionId = parseCompetitionId(filter);
+        List<Long> teamIds = parseTeamIds(filter);
         Boolean isDeleted = parseIsDeleted(filter);
         boolean resolvedIsDeleted = isDeleted != null ? isDeleted : false;
 
-        Page<Team> teams = adminTeamService.listTeams(competitionId, resolvedIsDeleted, pageable);
-        var data = teams.stream().map(AdminTeamDto::from).toList();
-        return new PageImpl<>(data, teams.getPageable(), teams.getTotalElements());
+        Page<Team> teams = adminTeamService.listTeams(competitionId, teamIds, resolvedIsDeleted, pageable);
+        return teams.map(AdminTeamDto::from);
     }
 
     @PostMapping
@@ -129,6 +132,53 @@ public class AdminTeamController {
         }
         if (value instanceof String text && !text.isBlank()) {
             return Boolean.parseBoolean(text);
+        }
+        return null;
+    }
+
+    private static List<Long> parseTeamIds(Map<String, Object> filter) {
+        if (filter == null || filter.isEmpty()) {
+            return List.of();
+        }
+        Object value = filter.get("id");
+        if (value == null) {
+            return List.of();
+        }
+        if (value instanceof Collection<?> values) {
+            List<Long> ids = new ArrayList<>();
+            for (Object item : values) {
+                Long parsed = parseLong(item);
+                if (parsed != null) {
+                    ids.add(parsed);
+                }
+            }
+            return ids;
+        }
+        if (value instanceof String text && !text.isBlank()) {
+            String[] parts = text.split(",");
+            List<Long> ids = new ArrayList<>();
+            for (String part : parts) {
+                Long parsed = parseLong(part);
+                if (parsed != null) {
+                    ids.add(parsed);
+                }
+            }
+            return ids;
+        }
+        Long single = parseLong(value);
+        return single != null ? List.of(single) : List.of();
+    }
+
+    private static Long parseLong(Object value) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value instanceof String text && !text.isBlank()) {
+            try {
+                return Long.parseLong(text.trim());
+            } catch (NumberFormatException ex) {
+                return null;
+            }
         }
         return null;
     }
