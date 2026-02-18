@@ -1,12 +1,13 @@
 package org.bytefight.webserver.auth.application;
 
-import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto;
 import org.bytefight.webserver.auth.infra.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 @Service
 public class AdminUserService {
@@ -16,7 +17,10 @@ public class AdminUserService {
         this.userRepository = userRepository;
     }
 
-    public Page<User> listUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public Page<AdminUserWithPlayerDto> listUsers(Pageable pageable, List<Long> userIds) {
+        if (userIds != null && !userIds.isEmpty()) {
+            return userRepository.findAllWithPlayersByIdIn(userIds, pageable);
+        }
+        return userRepository.findAllWithPlayers(pageable);
     }
 }
