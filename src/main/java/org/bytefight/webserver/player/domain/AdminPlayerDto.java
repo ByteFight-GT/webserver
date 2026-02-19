@@ -9,6 +9,7 @@ import lombok.Value;
 @Builder
 public class AdminPlayerDto {
     @NotNull Long id;
+    @NotNull Long userId;
     @NotNull String uuid;
     @NotNull String username;
     @NotNull TimestampsDto timestampsDto;
@@ -16,6 +17,7 @@ public class AdminPlayerDto {
     public static AdminPlayerDto from(Player player) {
         return AdminPlayerDto.builder()
                 .id(player.getId())
+                .userId(player.getUser().getId())
                 .uuid(player.getUser().getUuid().toString())
                 .username(player.getUsername())
                 .timestampsDto(TimestampsDto.from(player))
