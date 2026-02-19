@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class AdminTeamService {
     private final CompetitionRepository competitionRepository;
@@ -25,7 +27,13 @@ public class AdminTeamService {
         this.teamService = teamService;
     }
 
-    public Page<Team> listTeams(Long competitionId, boolean isDeleted, Pageable pageable) {
+    public Page<Team> listTeams(Long competitionId, List<Long> teamIds, boolean isDeleted, Pageable pageable) {
+        if (teamIds != null && !teamIds.isEmpty()) {
+            if (competitionId != null) {
+                return teamRepository.findByCompetitionIdAndIdIn(competitionId, teamIds, pageable);
+            }
+            return teamRepository.findByIdIn(teamIds, pageable);
+        }
         if (competitionId != null) {
             return teamRepository.findByCompetitionIdAndIsDeleted(competitionId, isDeleted, pageable);
         }

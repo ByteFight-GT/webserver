@@ -31,6 +31,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     Page<Team> findByIsDeleted(boolean isDeleted, Pageable pageable);
     Page<Team> findByCompetitionIdAndIsDeleted(Long competitionId, boolean isDeleted, Pageable pageable);
+    Page<Team> findByIdIn(List<Long> ids, Pageable pageable);
+    Page<Team> findByCompetitionIdAndIdIn(Long competitionId, List<Long> ids, Pageable pageable);
 
 //    Optional<Integer> findRankByUuid(UUID uuid);
 
