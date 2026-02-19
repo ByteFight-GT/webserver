@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -55,6 +52,7 @@ public class GameMatchService {
             Submission submissionB,
             String ladder,
             MatchReason reason,
+            Map<String, Object> matchSettings,
             MatchmakingEvent matchmakingEvent
     ) {
         if (teamA == null || teamB == null) {
@@ -76,11 +74,12 @@ public class GameMatchService {
         gameMatch.setTeamB(teamB);
         gameMatch.setSubmissionA(submissionA);
         gameMatch.setSubmissionB(submissionB);
-        gameMatch.setMatchSettings(java.util.Collections.emptyMap());
         gameMatch.setStatus(MatchStatus.created);
         gameMatch.setLadder(ladder.trim().toLowerCase());
         gameMatch.setReason(reason);
         gameMatch.setMatchmakingEvent(matchmakingEvent);
+
+        gameMatch.setMatchSettings(Objects.requireNonNullElse(matchSettings, Collections.emptyMap()));
 
         gameMatch.setCreatedByUser(creatingUser);
         gameMatch.setUpdatedByUser(creatingUser);

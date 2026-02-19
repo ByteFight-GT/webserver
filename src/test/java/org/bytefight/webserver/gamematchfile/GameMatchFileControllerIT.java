@@ -108,6 +108,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
                 submissionB,
                 "ladder",
                 MatchReason.matchmaking,
+                null,
                 null
         );
         UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
@@ -158,6 +159,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
                 submissionB,
                 "ladder",
                 MatchReason.matchmaking,
+                null,
                 null
         );
         UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");

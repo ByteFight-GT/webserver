@@ -95,6 +95,7 @@ public class SubmissionController {
                 submission,
                 DefaultLadders.VALIDATION,
                 MatchReason.validation,
+                null,
                 null
         );
 

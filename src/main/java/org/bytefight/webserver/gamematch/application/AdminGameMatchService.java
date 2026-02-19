@@ -87,6 +87,7 @@ public class AdminGameMatchService {
                 submissionB,
                 ladder.getLadder(),
                 input.getReason(),
+                null,
                 null
         );
 

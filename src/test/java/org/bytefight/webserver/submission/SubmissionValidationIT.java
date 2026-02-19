@@ -102,6 +102,7 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
                 submission,
                 DefaultLadders.VALIDATION,
                 MatchReason.validation,
+                null,
                 null
         );
     }
