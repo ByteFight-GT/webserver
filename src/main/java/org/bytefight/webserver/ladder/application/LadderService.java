@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +61,10 @@ public class LadderService {
         }
 
         return ladder;
+    }
+
+    public Optional<Ladder> getLadder(Competition competition, String ladderSlug) {
+        return ladderRepository.findByCompetitionAndLadder(competition, ladderSlug);
     }
 
     public List<Ladder> getLaddersByCompetition(Competition competition){

@@ -94,6 +94,7 @@ class GameMatchQueueIT extends FullStackIntegrationTestBase {
                 submissionB,
                 ladder,
                 MatchReason.matchmaking,
+                null,
                 null
         );
 
