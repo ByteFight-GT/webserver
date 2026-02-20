@@ -5,10 +5,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/bytefightdb
     username: bytefight
     password: password
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 100MB
   rabbitmq:
     uri: amqp://guest:guest@localhost:5672
 
