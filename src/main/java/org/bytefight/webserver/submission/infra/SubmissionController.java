@@ -126,6 +126,30 @@ public class SubmissionController {
         return ResponseEntity.ok(SubmissionDto.from(submission));
     }
 
+    @DeleteMapping(path = "/team/{teamUuid}/{submissionUuid}")
+    @Operation(
+            operationId = "deleteSubmission",
+            summary = "Deletes a team's submission"
+    )
+    public ResponseEntity<Void> deleteSubmission(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID teamUuid,
+            @PathVariable UUID submissionUuid
+    ) {
+        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if(!teamService.isMember(team, player)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
+        }
+
+        Submission submission = submissionService.getSubmissionByTeamAndUuid(team, submissionUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        submissionService.deleteSubmission(submission);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("get-download-url")
     @Operation(
             operationId = "getSubmissionDownloadUrl",

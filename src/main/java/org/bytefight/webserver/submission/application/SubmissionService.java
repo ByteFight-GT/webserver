@@ -50,6 +50,22 @@ public class SubmissionService {
         return submissionRepository.save(submission);
     }
 
+    public Optional<Submission> getSubmissionByTeamAndUuid(Team team, UUID uuid) {
+        return submissionRepository.findSubmissionByTeamAndUuidAndIsDeletedIsFalse(team, uuid);
+    }
+
+    @Transactional
+    public void deleteSubmission(Submission submission) {
+        if(submission.equals(submission.getTeam().getCurrentSubmission())) {
+            throw new IllegalArgumentException("You can't delete your active submission");
+        }
+
+        submission.softDelete();
+        submissionRepository.save(submission);
+
+        storageService.delete(submission.getFileRecord().getUuid().toString());
+    }
+
     @Transactional
     public void onSubmissionValidationComplete(Submission submission, boolean isValid) {
         if(isValid) {

@@ -6,6 +6,7 @@ import org.bytefight.webserver.storage.infra.StorageProperties;
 import org.bytefight.webserver.storage.domain.StoredObject;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LocalStorageService {
     private final FileRecordRepository fileRecordRepository;
     private final StorageProperties props;
@@ -163,11 +165,11 @@ public class LocalStorageService {
     }
 
     public Optional<StoredObject> stat(String uuid) {
-        return fileRecordRepository.findByUuid(UUID.fromString(uuid)).map(StoredObject::from);
+        return fileRecordRepository.findByUuidAndIsDeletedFalse(UUID.fromString(uuid)).map(StoredObject::from);
     }
 
     public Resource loadAsResource(String uuid) throws IOException {
-        FileRecord rec = fileRecordRepository.findByUuid(UUID.fromString(uuid)).orElseThrow(FileNotFoundException::new);
+        FileRecord rec = fileRecordRepository.findByUuidAndIsDeletedFalse(UUID.fromString(uuid)).orElseThrow(FileNotFoundException::new);
         Path p = Path.of(rec.getStoragePath());
         if (!Files.exists(p)) throw new FileNotFoundException(uuid);
         return new UrlResource(p.toUri());
@@ -194,5 +196,47 @@ public class LocalStorageService {
                         .toUri(),
                 exp
         );
+    }
+
+    public boolean delete(String uuid) {
+        Optional<FileRecord> existing = fileRecordRepository.findByUuid(UUID.fromString(uuid));
+        if (existing.isEmpty()) {
+            return false;
+        }
+
+        FileRecord record = existing.get();
+        boolean alreadyDeleted = record.isDeleted();
+        if (!alreadyDeleted) {
+            record.softDelete();
+            fileRecordRepository.save(record);
+        }
+
+        Path root = props.root().toAbsolutePath().normalize();
+        Path filePath = Path.of(record.getStoragePath()).toAbsolutePath().normalize();
+        if (!filePath.startsWith(root)) {
+            log.warn("Refusing to delete storage path outside root: uuid={} path={}", record.getUuid(), filePath);
+            return true;
+        }
+
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    deletePhysicalFile(filePath, record.getUuid());
+                }
+            });
+        } else {
+            deletePhysicalFile(filePath, record.getUuid());
+        }
+
+        return true;
+    }
+
+    private void deletePhysicalFile(Path path, UUID uuid) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ex) {
+            log.warn("Failed to delete storage file: uuid={} path={}", uuid, path, ex);
+        }
     }
 }

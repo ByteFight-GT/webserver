@@ -16,6 +16,7 @@ import java.util.UUID;
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(Team team);
+    Optional<Submission> findSubmissionByTeamAndUuidAndIsDeletedIsFalse(Team team, UUID uuid);
     Optional<Submission> findSubmissionByUuid(UUID uuid);
     boolean existsByUuid(UUID uuid);
     Page<Submission> findByIsDeleted(boolean isDeleted, Pageable pageable);
