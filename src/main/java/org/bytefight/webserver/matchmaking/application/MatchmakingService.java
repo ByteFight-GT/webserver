@@ -103,6 +103,7 @@ public class MatchmakingService {
                     teamB.getCurrentSubmission(),
                     ladder,
                     MatchReason.matchmaking,
+                    null, // TODO: Generated match settings for matchmaking (e.g. randomly assign map)
                     event
             );
         }).toList();

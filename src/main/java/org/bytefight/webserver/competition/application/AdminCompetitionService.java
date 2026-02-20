@@ -1,22 +1,22 @@
 package org.bytefight.webserver.competition.application;
 
+import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.AdminCreateCompetitionDto;
 import org.bytefight.webserver.competition.domain.dto.AdminUpdateCompetitionDto;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.bytefight.webserver.ladder.application.LadderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+@RequiredArgsConstructor
 @Service
 public class AdminCompetitionService {
+    private final LadderService ladderService;
     private final CompetitionRepository competitionRepository;
-
-    public AdminCompetitionService(CompetitionRepository competitionRepository) {
-        this.competitionRepository = competitionRepository;
-    }
 
     public Page<Competition> listCompetitions(Pageable pageable) {
         return competitionRepository.findAll(pageable);
@@ -38,7 +38,23 @@ public class AdminCompetitionService {
         competition.setName(input.getName());
         competition.setActive(false);
 
-        return competitionRepository.save(competition);
+        competition = competitionRepository.save(competition);
+
+        ladderService.createLadder(
+                competition,
+                "validation",
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+        );
+
+        return competition;
     }
 
     public Competition updateCompetition(Long id, AdminUpdateCompetitionDto input) {

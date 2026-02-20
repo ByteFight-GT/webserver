@@ -3,6 +3,7 @@ package org.bytefight.webserver.storage.domain;
 import org.bytefight.webserver.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.bytefight.webserver.common.domain.SoftDeletableEntity;
 
 import java.util.UUID;
 
@@ -13,8 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "file_records")
-public class FileRecord extends BaseEntity {
-
+public class FileRecord extends SoftDeletableEntity {
     @Column(name = "uuid", nullable = false, unique = true)
     private UUID uuid;
 

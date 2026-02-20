@@ -51,6 +51,7 @@ public class TestDataFactory {
         competition.setAllowEditTeamName(true);
         competition.setAllowNewSubmission(true);
         competition.setAllowSetSubmission(true);
+        competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
         return competitionRepository.save(competition);
     }
 
