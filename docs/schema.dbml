@@ -62,6 +62,8 @@ Table file_records {
   size bigint [not null]
   sha256 varchar [not null]
   storage_path varchar [not null]
+
+  ~soft_delete_template
 }
 
 // Stores high level account related information.
