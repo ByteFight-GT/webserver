@@ -93,6 +93,7 @@ Table competitions {
   is_active boolean [not null, default: false]
   is_whitelisted boolean [not null, default: false]
   max_players_per_team integer [not null]
+  team_submission_storage_size bigint [not null, default: 0]
 
   allow_create_team boolean [not null, default: false]
   allow_join_team boolean [not null, default: false]
