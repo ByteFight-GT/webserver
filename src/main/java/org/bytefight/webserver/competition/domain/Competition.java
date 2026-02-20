@@ -34,6 +34,9 @@ public class Competition extends BaseEntity {
     @Column(name = "max_players_per_team", nullable = false)
     private int maxPlayersPerTeam = 2;
 
+    @Column(name = "team_submission_storage_size", nullable = false)
+    private long teamSubmissionStorageSize = 0;
+
     @Column(name = "allow_new_submission", nullable = false)
     private boolean allowNewSubmission;
 

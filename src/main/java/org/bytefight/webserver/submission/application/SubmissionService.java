@@ -29,10 +29,15 @@ public class SubmissionService {
     private final LocalStorageService storageService;
     private final TeamRepository teamRepository;
 
-    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
-
     public Submission createSubmission(Team team, String description, MultipartFile file, Boolean isAutoSet) throws IOException {
         validateFile(file);
+        long storageLimit = team.getCompetition().getTeamSubmissionStorageSize();
+
+        Long currentUsed = submissionRepository.sumUndeletedSubmissionSizeByTeam(team);
+        long currentUsedSize = currentUsed != null ? currentUsed : 0L;
+        if (currentUsedSize + file.getSize() > storageLimit) {
+            throw new IllegalArgumentException("Team storage limit exceeded");
+        }
         FileRecord storedFile = storageService.store(file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
 
         Submission submission = new Submission();
@@ -48,6 +53,22 @@ public class SubmissionService {
         }
 
         return submissionRepository.save(submission);
+    }
+
+    public Optional<Submission> getSubmissionByTeamAndUuid(Team team, UUID uuid) {
+        return submissionRepository.findSubmissionByTeamAndUuidAndIsDeletedIsFalse(team, uuid);
+    }
+
+    @Transactional
+    public void deleteSubmission(Submission submission) {
+        if(submission.equals(submission.getTeam().getCurrentSubmission())) {
+            throw new IllegalArgumentException("You can't delete your active submission");
+        }
+
+        submission.softDelete();
+        submissionRepository.save(submission);
+
+        storageService.delete(submission.getFileRecord().getUuid().toString());
     }
 
     @Transactional
@@ -74,6 +95,14 @@ public class SubmissionService {
         return submissionRepository.findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team);
     }
 
+    public long getTeamSubmissionStorageSize(Team team) {
+        if (team == null) {
+            throw new IllegalArgumentException("Team is required");
+        }
+        Long total = submissionRepository.sumUndeletedSubmissionSizeByTeam(team);
+        return total != null ? total : 0L;
+    }
+
     public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {
         Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
@@ -98,10 +127,6 @@ public class SubmissionService {
     public void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File is too large");
         }
 
         String contentType = file.getContentType();
