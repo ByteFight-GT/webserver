@@ -74,6 +74,14 @@ public class SubmissionService {
         return submissionRepository.findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team);
     }
 
+    public long getTeamSubmissionStorageSize(Team team) {
+        if (team == null) {
+            throw new IllegalArgumentException("Team is required");
+        }
+        Long total = submissionRepository.sumUndeletedSubmissionSizeByTeam(team);
+        return total != null ? total : 0L;
+    }
+
     public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {
         Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
 
