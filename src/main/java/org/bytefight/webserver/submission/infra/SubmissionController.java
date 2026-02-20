@@ -14,6 +14,7 @@ import org.bytefight.webserver.submission.application.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.dto.SubmissionDto;
+import org.bytefight.webserver.submission.domain.dto.SubmissionStatusDto;
 import org.bytefight.webserver.submission.domain.dto.UploadSubmissionDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
@@ -55,6 +56,27 @@ public class SubmissionController {
         }
 
         return ResponseEntity.ok(submissionService.listSubmissionsByTeam(team).stream().map(SubmissionDto::from).toList());
+    }
+
+    @GetMapping("/team/{teamUuid}/status")
+    @Operation(summary = "Get status of your current submissions (e.g. amount of storage space used)")
+    public ResponseEntity<SubmissionStatusDto> getTeamSubmissionStatus(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID teamUuid
+    ) {
+        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Team team = teamService.getTeamByUuid(teamUuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if(!teamService.isMember(team, player)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
+        }
+
+        SubmissionStatusDto.SubmissionStatusDtoBuilder builder = SubmissionStatusDto.builder();
+
+        builder.totalStorageSize(team.getCompetition().getTeamSubmissionStorageSize());
+        builder.usedStorageSize(submissionService.getTeamSubmissionStorageSize(team));
+
+        return ResponseEntity.ok(builder.build());
     }
 
     @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
