@@ -110,7 +110,7 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
     private boolean waitForSubmissionValidity(UUID submissionUuid, SubmissionValidity expected) throws InterruptedException {
         Instant deadline = Instant.now().plus(Duration.ofSeconds(5));
         while (Instant.now().isBefore(deadline)) {
-            Submission refreshed = submissionRepository.findSubmissionByUuid(submissionUuid).orElse(null);
+            Submission refreshed = submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(submissionUuid).orElse(null);
             if (refreshed != null) {
                 SubmissionValidity validity = (SubmissionValidity) ReflectionTestUtils.getField(refreshed, "validity");
                 if (validity == expected) {
