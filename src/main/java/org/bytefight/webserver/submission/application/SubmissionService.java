@@ -2,20 +2,25 @@ package org.bytefight.webserver.submission.application;
 
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.player.application.PlayerService;
+import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
+import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +33,7 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final LocalStorageService storageService;
     private final TeamRepository teamRepository;
+    private final TeamService teamService;
 
     public Submission createSubmission(Team team, String description, MultipartFile file, Boolean isAutoSet) throws IOException {
         validateFile(file);
@@ -88,7 +94,7 @@ public class SubmissionService {
     }
 
     public Optional<Submission> getSubmission(UUID uuid) {
-        return submissionRepository.findSubmissionByUuid(uuid);
+        return submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(uuid);
     }
 
     public List<Submission> listSubmissionsByTeam(Team team) {
@@ -103,25 +109,19 @@ public class SubmissionService {
         return total != null ? total : 0L;
     }
 
-    public DownloadLinkDto getSubmissionDownloadUri(String submissionUuid, User user) {
-        Submission submission = submissionRepository.findSubmissionByUuid(UUID.fromString(submissionUuid)).orElseThrow();
+    public DownloadLinkDto getSubmissionDownloadUri(UUID uuid, User user) {
+        Submission submission = submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         // if user is NOT an admin, we check that they own the submission
-//        if(!user.isAdmin()) {
-//            Player player = playerService.getPlayer(user);
-//            Team team = player.getTeam();
-//
-//            if (team == null) {
-//                throw new AccessDeniedException("You are not allowed to access this submission");
-//            }
-//
-//            if (!submission.getTeam().getId().equals(team.getId())) {
-//                throw new AccessDeniedException("You are not allowed to access this submission");
-//            }
-//        }
+        if(!user.isAdmin()) {
+            Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-//        return storageService.getDownloadLink(submission.getStorageFileUuid().toString(), Duration.ofMinutes(5));
-        return null;
+            if(!teamService.isMember(submission.getTeam(), player)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
+        }
+
+        return storageService.getDownloadLink(submission.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
     }
 
     public void validateFile(MultipartFile file) {
