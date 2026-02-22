@@ -31,12 +31,8 @@ public class PublicTeamController {
     public ResponseEntity<PublicTeamDto> getPublicTeamByUuid(@PathVariable UUID uuid) {
         Team team = teamService.getTeamByUuid(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if(!team.isDisplayMembers()) {
-            return ResponseEntity.ok(PublicTeamDto.from(team, null));
-        } else {
-            List<Player> members = teamService.getPlayersForTeam(team);
-            return ResponseEntity.ok(PublicTeamDto.from(team, members));
-        }
+        List<Player> members = teamService.getPlayersForTeam(team);
+        return ResponseEntity.ok(PublicTeamDto.from(team, members));
     }
 
     @GetMapping("/teams-with-submission")
