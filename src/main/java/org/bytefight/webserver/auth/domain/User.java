@@ -25,6 +25,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin = false;
 
+    @Column(name = "resume_file", nullable = false)
+    private boolean resume_file = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -39,4 +42,5 @@ public class User extends BaseEntity implements UserDetails {
     public String getPassword() {
         return "";
     }
+
 }
