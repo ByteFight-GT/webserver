@@ -25,8 +25,8 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin = false;
 
-    @Column(name = "resume_file", nullable = false)
-    private boolean resume_file = false;
+    @Column(name = "resume_file_submitted", nullable = false)
+    private boolean resume_file_submitted = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

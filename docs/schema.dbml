@@ -72,7 +72,7 @@ Table users {
   uuid uuid [not null, unique, note: 'corresponds with supabase user UUID']
   email varchar(255) [not null, unique]
   is_admin boolean [not null, default: false]
-  resume_file boolean [not null, default: false]
+  resume_file_submitted boolean [not null, default: false]
 }
 
 // Stores platform-wide player related information (username,
