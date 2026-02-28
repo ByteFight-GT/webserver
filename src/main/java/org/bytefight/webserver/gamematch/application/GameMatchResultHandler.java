@@ -50,8 +50,7 @@ public class GameMatchResultHandler {
         GameMatch gameMatch = gameMatchService.getGameMatch(UUID.fromString(result.getUuid()))
                 .orElseThrow(() -> new IllegalArgumentException("Game match not found"));
 
-        MatchStatus status = gameMatch.getStatus();
-        gameMatch.setStatus(status);
+        gameMatch.setStatus(result.getStatus());
         gameMatchRepository.save(gameMatch);
 
         if(gameMatch.getReason() != MatchReason.validation) {
