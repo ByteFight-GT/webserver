@@ -150,36 +150,15 @@ public class SubmissionController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("get-download-url")
+    @GetMapping("/download/{uuid}")
     @Operation(
             operationId = "getSubmissionDownloadUrl",
             summary = "Get a signed download URL for a submission"
     )
-    public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(submissionUuid, user));
-    }
-
-//    @GetMapping("/team")
-//    public ResponseEntity<List<SubmissionDTO>> getTeamSubmissions(@AuthenticationPrincipal User user) {
-//        Player player = playerService.getPlayer(user);
-//        Long teamId = player.getTeam().getId();
-//        return ResponseEntity.ok(submissionService.getTeamSubmissions(teamId));
-//    }
-//
-//    @DeleteMapping("")
-//    public ResponseEntity<SubmissionDto> deleteSubmission(@AuthenticationPrincipal User user, @RequestParam String submissionUuid) {
-//        Player player = playerService.getPlayer(user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
-//        Long teamId = player.getTeam().getId();
-//
-//        Submission deleted = submissionService.deleteSubmission(submissionUuid, teamId);
-//
-//        return ResponseEntity.ok(SubmissionDTO.from(deleted));
-//    }
-
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProblemDetail handleException(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    public ResponseEntity<DownloadLinkDto> getSubmissionDownloadUrl(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID uuid
+    ) {
+        return ResponseEntity.ok(submissionService.getSubmissionDownloadUri(uuid, user));
     }
 }
