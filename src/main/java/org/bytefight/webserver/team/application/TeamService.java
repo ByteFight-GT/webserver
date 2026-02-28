@@ -39,9 +39,6 @@ public class TeamService {
     private final TeamStatsService teamStatsService;
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final PlayerRepository playerRepository;
-    private final SubmissionService submissionService;
-    private final PlayerService playerService;
     private final WhitelistService whitelistService;
 
     public String generateJoinCode() {
