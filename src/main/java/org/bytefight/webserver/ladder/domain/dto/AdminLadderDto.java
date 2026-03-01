@@ -18,6 +18,8 @@ public class AdminLadderDto {
   double glickoSigmaDefault;
   Double glickoSigmaMin;
   Double glickoSigmaMax;
+  boolean scheduledMatchmakingEnabled;
+  String scheduledMatchmakingCron;
 
   public static AdminLadderDto from(Ladder ladder) {
     return new AdminLadderDto(
@@ -32,6 +34,8 @@ public class AdminLadderDto {
         ladder.getGlickoTau(),
         ladder.getGlickoSigmaDefault(),
         ladder.getGlickoSigmaMin(),
-        ladder.getGlickoSigmaMax());
+        ladder.getGlickoSigmaMax(),
+        ladder.isScheduledMatchmakingEnabled(),
+        ladder.getScheduledMatchmakingCron());
   }
 }
