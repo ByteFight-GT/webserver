@@ -7,9 +7,9 @@ import java.util.Map;
 
 @Value
 public class CreateMatchDto {
-    @NotNull String competitionSlug;
-    @NotNull String teamAUuid;
-    @NotNull String teamBUuid;
-    @NotNull String ladder;
-    Map<String, Object> matchSettings;
+  @NotNull String competitionSlug;
+  @NotNull String teamAUuid;
+  @NotNull String teamBUuid;
+  @NotNull String ladder;
+  Map<String, Object> matchSettings;
 }
