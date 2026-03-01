@@ -21,6 +21,4 @@ public class AdminCreateLadderDto {
   @Positive Double glickoSigmaDefault;
   @Positive Double glickoSigmaMin;
   @Positive Double glickoSigmaMax;
-  Boolean scheduledMatchmakingEnabled;
-  @ValidCron String scheduledMatchmakingCron;
 }
