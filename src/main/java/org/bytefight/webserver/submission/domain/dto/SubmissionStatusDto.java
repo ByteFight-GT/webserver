@@ -7,6 +7,6 @@ import lombok.Value;
 @Value
 @Builder
 public class SubmissionStatusDto {
-    @NotNull long usedStorageSize;
-    @NotNull long totalStorageSize;
+  @NotNull long usedStorageSize;
+  @NotNull long totalStorageSize;
 }

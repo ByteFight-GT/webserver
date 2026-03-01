@@ -9,9 +9,8 @@ import lombok.Value;
 @Builder
 @AllArgsConstructor
 public class TeamSettingsDto {
-    @NotNull String name;
-    String quote;
+  @NotNull String name;
+  String quote;
 
-    @Builder.Default
-    Boolean displayMembers = false;
+  @Builder.Default Boolean displayMembers = false;
 }

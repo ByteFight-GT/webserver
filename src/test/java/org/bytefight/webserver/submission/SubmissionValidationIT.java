@@ -1,5 +1,11 @@
 package org.bytefight.webserver.submission;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
 import org.bytefight.webserver.competition.domain.Competition;
@@ -22,113 +28,108 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @TestPropertySource(properties = "is-prod-env=true")
 class SubmissionValidationIT extends FullStackIntegrationTestBase {
-    @Autowired
-    private TestDataFactory testDataFactory;
+  @Autowired private TestDataFactory testDataFactory;
 
-    @Autowired
-    private GameMatchService gameMatchService;
+  @Autowired private GameMatchService gameMatchService;
 
-    @Autowired
-    private SubmissionRepository submissionRepository;
+  @Autowired private SubmissionRepository submissionRepository;
 
-    @Autowired
-    private FileRecordRepository fileRecordRepository;
+  @Autowired private FileRecordRepository fileRecordRepository;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+  @Autowired private RabbitTemplate rabbitTemplate;
 
-    @Test
-    void validationResultMarksSubmissionValidAndAutoSetsCurrentSubmission() throws Exception {
-        Competition competition = testDataFactory.createCompetition("comp-sub-valid", "Competition", true, 2);
-        testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
-        Team team = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+  @Test
+  void validationResultMarksSubmissionValidAndAutoSetsCurrentSubmission() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("comp-sub-valid", "Competition", true, 2);
+    testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
+    Team team = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
 
-        Submission submission = createSubmission(team, SubmissionValidity.not_evaluated_autoset);
-        GameMatch match = createValidationMatch(team, submission);
+    Submission submission = createSubmission(team, SubmissionValidity.not_evaluated_autoset);
+    GameMatch match = createValidationMatch(team, submission);
 
-        GameMatchResult result = new GameMatchResult(getMatchUuid(match), MatchStatus.submission_valid);
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_RESULTS, result);
+    GameMatchResult result = new GameMatchResult(getMatchUuid(match), MatchStatus.submission_valid);
+    rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_RESULTS, result);
 
-        assertThat(waitForSubmissionValidity(getSubmissionUuid(submission), SubmissionValidity.valid)).isTrue();
-    }
+    assertThat(waitForSubmissionValidity(getSubmissionUuid(submission), SubmissionValidity.valid))
+        .isTrue();
+  }
 
-    @Test
-    void validationResultMarksSubmissionInvalidWithoutAutoSet() throws Exception {
-        Competition competition = testDataFactory.createCompetition("comp-sub-invalid", "Competition", true, 2);
-        testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
-        Team team = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+  @Test
+  void validationResultMarksSubmissionInvalidWithoutAutoSet() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("comp-sub-invalid", "Competition", true, 2);
+    testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
+    Team team = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
 
-        Submission submission = createSubmission(team, SubmissionValidity.not_evaluated);
-        GameMatch match = createValidationMatch(team, submission);
+    Submission submission = createSubmission(team, SubmissionValidity.not_evaluated);
+    GameMatch match = createValidationMatch(team, submission);
 
-        GameMatchResult result = new GameMatchResult(getMatchUuid(match), MatchStatus.submission_invalid);
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_RESULTS, result);
+    GameMatchResult result =
+        new GameMatchResult(getMatchUuid(match), MatchStatus.submission_invalid);
+    rabbitTemplate.convertAndSend(RabbitMQConfiguration.GAME_MATCH_RESULTS, result);
 
-        assertThat(waitForSubmissionValidity(getSubmissionUuid(submission), SubmissionValidity.invalid)).isTrue();
-    }
+    assertThat(waitForSubmissionValidity(getSubmissionUuid(submission), SubmissionValidity.invalid))
+        .isTrue();
+  }
 
-    private Submission createSubmission(Team team, SubmissionValidity validity) {
-        FileRecord record = new FileRecord();
-        ReflectionTestUtils.setField(record, "uuid", UUID.randomUUID());
-        ReflectionTestUtils.setField(record, "filename", "bot.zip");
-        ReflectionTestUtils.setField(record, "contentType", "application/zip");
-        ReflectionTestUtils.setField(record, "size", 1L);
-        ReflectionTestUtils.setField(record, "sha256", "deadbeef");
-        ReflectionTestUtils.setField(record, "storagePath", "/tmp/bot.zip");
-        fileRecordRepository.save(record);
+  private Submission createSubmission(Team team, SubmissionValidity validity) {
+    FileRecord record = new FileRecord();
+    ReflectionTestUtils.setField(record, "uuid", UUID.randomUUID());
+    ReflectionTestUtils.setField(record, "filename", "bot.zip");
+    ReflectionTestUtils.setField(record, "contentType", "application/zip");
+    ReflectionTestUtils.setField(record, "size", 1L);
+    ReflectionTestUtils.setField(record, "sha256", "deadbeef");
+    ReflectionTestUtils.setField(record, "storagePath", "/tmp/bot.zip");
+    fileRecordRepository.save(record);
 
-        Submission submission = new Submission();
-        ReflectionTestUtils.setField(submission, "uuid", UUID.randomUUID());
-        ReflectionTestUtils.setField(submission, "team", team);
-        ReflectionTestUtils.setField(submission, "fileRecord", record);
-        ReflectionTestUtils.setField(submission, "validity", validity);
-        return submissionRepository.save(submission);
-    }
+    Submission submission = new Submission();
+    ReflectionTestUtils.setField(submission, "uuid", UUID.randomUUID());
+    ReflectionTestUtils.setField(submission, "team", team);
+    ReflectionTestUtils.setField(submission, "fileRecord", record);
+    ReflectionTestUtils.setField(submission, "validity", validity);
+    return submissionRepository.save(submission);
+  }
 
-    private GameMatch createValidationMatch(Team team, Submission submission) {
-        return gameMatchService.createMatch(
-                null,
-                team,
-                team,
-                submission,
-                submission,
-                DefaultLadders.VALIDATION,
-                MatchReason.validation,
-                null,
-                null
-        );
-    }
+  private GameMatch createValidationMatch(Team team, Submission submission) {
+    return gameMatchService.createMatch(
+        null,
+        team,
+        team,
+        submission,
+        submission,
+        DefaultLadders.VALIDATION,
+        MatchReason.validation,
+        null,
+        null);
+  }
 
-    private boolean waitForSubmissionValidity(UUID submissionUuid, SubmissionValidity expected) throws InterruptedException {
-        Instant deadline = Instant.now().plus(Duration.ofSeconds(5));
-        while (Instant.now().isBefore(deadline)) {
-            Submission refreshed = submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(submissionUuid).orElse(null);
-            if (refreshed != null) {
-                SubmissionValidity validity = (SubmissionValidity) ReflectionTestUtils.getField(refreshed, "validity");
-                if (validity == expected) {
-                    return true;
-                }
-            }
-            Thread.sleep(200);
+  private boolean waitForSubmissionValidity(UUID submissionUuid, SubmissionValidity expected)
+      throws InterruptedException {
+    Instant deadline = Instant.now().plus(Duration.ofSeconds(5));
+    while (Instant.now().isBefore(deadline)) {
+      Submission refreshed =
+          submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(submissionUuid).orElse(null);
+      if (refreshed != null) {
+        SubmissionValidity validity =
+            (SubmissionValidity) ReflectionTestUtils.getField(refreshed, "validity");
+        if (validity == expected) {
+          return true;
         }
-        return false;
+      }
+      Thread.sleep(200);
     }
+    return false;
+  }
 
-    private UUID getSubmissionUuid(Submission submission) {
-        return (UUID) ReflectionTestUtils.getField(submission, "uuid");
-    }
+  private UUID getSubmissionUuid(Submission submission) {
+    return (UUID) ReflectionTestUtils.getField(submission, "uuid");
+  }
 
-    private String getMatchUuid(GameMatch match) {
-        UUID uuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
-        return uuid.toString();
-    }
-
+  private String getMatchUuid(GameMatch match) {
+    UUID uuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+    return uuid.toString();
+  }
 }
