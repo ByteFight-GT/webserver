@@ -4,6 +4,7 @@ import org.bytefight.webserver.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.bytefight.webserver.storage.domain.FileRecord;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,8 +26,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin = false;
 
-    @Column(name = "resume_file_submitted", nullable = false)
-    private boolean resume_file_submitted = false;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "resume_id", nullable = true, unique = true)
+    private FileRecord resume;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
