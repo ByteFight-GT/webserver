@@ -2,6 +2,7 @@ package org.bytefight.webserver.player.infra;
 
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.player.domain.Player;
+import org.bytefight.webserver.team.domain.TeamMemberDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,5 +56,21 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
         WHERE tm.team.uuid IN :uuids
     """)
     List<Player> findMembersByTeamUuids(@Param("uuids") List<UUID> uuids);
+
+    @Query("""
+        SELECT
+            tm.team.id AS teamId,
+            p.id AS playerId,
+            u.id AS playerUserId,
+            u.uuid AS playerUuid,
+            p.username AS playerUsername,
+            u.email AS playerEmail
+        FROM TeamMember tm
+        JOIN tm.player p
+        JOIN p.user u
+        WHERE tm.team.id IN :teamIds
+        ORDER BY tm.team.id ASC, p.id ASC
+    """)
+    List<TeamMemberDetails> findMemberDetailsByTeamIds(@Param("teamIds") List<Long> teamIds);
 
 }
