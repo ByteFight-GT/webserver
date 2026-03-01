@@ -15,6 +15,7 @@ import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,8 @@ public class ScheduledMatchMaker {
   private final MatchmakingService matchmakingService;
   private final LadderRepository ladderRepository;
 
-  @Scheduled(fixedRate = 60000) // Every 60 seconds
+  @Scheduled(fixedRate = 60000)
+  @Transactional
   public void runScheduledMatchmaking() {
     List<Ladder> enabledLadders =
         ladderRepository.findAllByScheduledMatchmakingEnabledTrueAndScheduledMatchmakingCronIsNotNull();
@@ -75,7 +77,7 @@ public class ScheduledMatchMaker {
 
     if (!nextExecutionInstant.isAfter(now)) {
       log.info(
-          "Running scheduled matchmaking for ladder {} (competition {})",
+          "Running scheduled matchmaking for ladder '{}' (competition '{}')",
           ladder.getLadder(),
           competition.getId());
       matchmakingService.createAndScheduleEvent(competition, ladder.getLadder());
