@@ -4,5 +4,5 @@ import lombok.Value;
 
 @Value
 public class ImpersonateUserDto {
-    String uuid;
+  String uuid;
 }

@@ -6,5 +6,5 @@ import lombok.Value;
 @Value
 @Builder
 public class JoinTeamDto {
-    String joinCode;
+  String joinCode;
 }
