@@ -7,25 +7,16 @@ import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.application.AdminTeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamMemberDetails;
-import org.bytefight.webserver.team.domain.dto.AdminCreateTeamDto;
 import org.bytefight.webserver.team.domain.dto.AdminTeamWithMemberDto;
-import org.bytefight.webserver.team.domain.dto.AdminUpdateTeamDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,40 +84,7 @@ public class AdminTeamWithMemberController {
         return new PageImpl<>(data, teams.getPageable(), teams.getTotalElements());
     }
 
-    @PostMapping
-    @Operation(
-            operationId = "adminCreateTeam",
-            summary = "REST endpoint to create a team"
-    )
-    public ResponseEntity<AdminTeamWithMemberDto> createTeam(
-            @Valid @RequestBody AdminCreateTeamDto input
-    ) {
-        Team team = adminTeamService.createTeam(input);
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdminTeamWithMemberDto.from(team));
-    }
 
-    @PatchMapping("/{id}")
-    @Operation(
-            operationId = "adminUpdateTeam",
-            summary = "REST endpoint to update a team"
-    )
-    public AdminTeamWithMemberDto updateTeam(
-            @PathVariable Long id,
-            @Valid @RequestBody AdminUpdateTeamDto input
-    ) {
-        Team team = adminTeamService.updateTeam(id, input);
-        return AdminTeamWithMemberDto.from(team);
-    }
-
-    @GetMapping("/{id}")
-    @Operation(
-            operationId = "adminGetTeam",
-            summary = "REST endpoint to get a team"
-    )
-    public AdminTeamWithMemberDto getTeam(@PathVariable Long id) {
-        Team team = adminTeamService.getTeam(id);
-        return AdminTeamWithMemberDto.from(team);
-    }
 
     private static Long parseCompetitionId(Map<String, Object> filter) {
         if (filter == null || filter.isEmpty()) {
