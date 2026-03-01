@@ -2,9 +2,11 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.6"
+    id("com.diffplug.spotless") version "6.25.0"
+    checkstyle
 }
 
-group = "com.example"
+group = "org.bytefight"
 version = "0.0.1"
 
 java {
@@ -13,66 +15,99 @@ java {
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
-extra["springCloudGcpVersion"] = "5.0.0"
-extra["springCloudVersion"] = "2023.0.0"
+val springCloudGcpVersion = "5.0.0"
+val springCloudVersion = "2023.0.0"
+val jjwtVersion = "0.11.5"
+val testcontainersVersion = "1.18.3"
+
+configurations {
+    compileOnly {
+        extendsFrom(annotationProcessor.get())
+    }
+}
 
 dependencies {
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("me.paulschwarz:spring-dotenv:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("com.h2database:h2")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
+
     implementation(platform("com.google.cloud:libraries-bom:26.29.0"))
+    implementation("com.google.cloud:google-cloud-storage")
+
     implementation(platform("org.hibernate.search:hibernate-search-bom:7.0.1.Final"))
     implementation("org.hibernate.search:hibernate-search-mapper-orm")
     implementation("org.hibernate.search:hibernate-search-backend-lucene")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.data:spring-data-commons")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.google.cloud:google-cloud-storage")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.projectlombok:lombok")
-    runtimeOnly("org.postgresql:postgresql")
-    annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    implementation("org.springframework.boot:spring-boot-starter-amqp")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers:3.3.5")
-    testImplementation("org.testcontainers:postgresql:1.18.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.18.3")
-    testImplementation("org.testcontainers:rabbitmq:1.18.3")
-    testImplementation("org.postgresql:postgresql")
-    runtimeOnly("com.h2database:h2")
-    testImplementation("org.springframework.security:spring-security-test")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("org.springframework.boot:spring-boot-testcontainers:3.3.5")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:rabbitmq:$testcontainersVersion")
+
+    testRuntimeOnly("org.postgresql:postgresql")
 }
 
 dependencyManagement {
     imports {
-        mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:${property("springCloudGcpVersion")}")
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+        mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:$springCloudGcpVersion")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        googleJavaFormat("1.17.0")
+
+        removeUnusedImports()
+
+        importOrder("", "java", "javax", "org", "com")
+
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = "10.17.0"
+    configDirectory.set(file("$rootDir/config/checkstyle"))
+}
+
+tasks.withType<Checkstyle> {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }

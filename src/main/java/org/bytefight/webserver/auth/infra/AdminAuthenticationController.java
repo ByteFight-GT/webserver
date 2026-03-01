@@ -1,10 +1,11 @@
 package org.bytefight.webserver.auth.infra;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.bytefight.webserver.auth.application.AuthService;
 import org.bytefight.webserver.auth.application.UserService;
 import org.bytefight.webserver.auth.domain.User;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.auth.domain.dto.ImpersonateUserDto;
 import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class AdminAuthenticationController {
-    private final AuthService authService;
-    private final UserService userService;
+  private final AuthService authService;
+  private final UserService userService;
 
-    @PostMapping("/impersonate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SupabaseDtos.SupabaseMagicLink> adminImpersonateUser(@Valid @RequestBody ImpersonateUserDto dto) {
-        User user = userService.findByUuid(dto.getUuid()).orElseThrow();
-        var data = authService.createMagicSignInLink(user.getEmail());
+  @PostMapping("/impersonate")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<SupabaseDtos.SupabaseMagicLink> adminImpersonateUser(
+      @Valid @RequestBody ImpersonateUserDto dto) {
+    User user = userService.findByUuid(dto.getUuid()).orElseThrow();
+    var data = authService.createMagicSignInLink(user.getEmail());
 
-        return ResponseEntity.ok(data);
-    }
+    return ResponseEntity.ok(data);
+  }
 }
