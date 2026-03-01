@@ -36,7 +36,7 @@ public class GameMatchFileController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GameMatchFileDto> uploadGameMatchFile(
+    public ResponseEntity<?> uploadGameMatchFile(
             @AuthenticationPrincipal User user,
             GameMatchFileUploadDto uploadDto
     ) {
@@ -48,7 +48,8 @@ public class GameMatchFileController {
         try {
             gameMatchFile = gameMatchFileService.uploadGameMatchFile(uploadDto.getFile(), uploadDto.getSlug(), gameMatch, uploadDto.getVisibility(), team);
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage() + " - " + java.util.Arrays.toString(e.getStackTrace()));
         }
 
         return ResponseEntity.ok(GameMatchFileDto.from(gameMatchFile, null));
