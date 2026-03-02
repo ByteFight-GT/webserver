@@ -9,14 +9,14 @@ import java.time.Instant;
 @Getter
 @MappedSuperclass
 public abstract class SoftDeletableEntity extends BaseEntity {
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
+  @Column(name = "is_deleted", nullable = false)
+  private boolean isDeleted = false;
 
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
 
-    public void softDelete() {
-        this.isDeleted = true;
-        this.deletedAt = Instant.now();
-    }
+  public void softDelete() {
+    this.isDeleted = true;
+    this.deletedAt = Instant.now();
+  }
 }

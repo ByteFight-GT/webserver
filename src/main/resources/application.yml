@@ -6,6 +6,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
 app:
   auth:
     jwt-secret: excyS1grB5eLRbxWl4oomyasIXgBeYlSicEBLOmAtzs
