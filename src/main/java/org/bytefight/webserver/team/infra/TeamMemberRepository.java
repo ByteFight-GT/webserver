@@ -22,9 +22,16 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
   boolean existsByTeamAndPlayerAndTeamIsDeletedFalse(Team team, Player player);
 
-  List<TeamMember> findByTeam(Team team);
-
-  long countByTeam(Team team);
+    List<TeamMember> findByTeam(Team team);
+    long countByTeam(Team team);
+    @Query("""
+        SELECT COUNT(tm.player.id) as playerCount
+        FROM TeamMember tm
+        JOIN tm.team t
+        WHERE t.competition.id = :competitionId
+          AND t.isDeleted = false
+    """)
+    long countPlayersByCompetitionId(@Param("competitionId") Long competitionId);
 
   @Query(
       value =
