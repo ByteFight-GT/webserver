@@ -36,6 +36,6 @@ public class AdminCompetitionPlayerCount {
         return new CompetitionPlayerCountDto(competitionId, playerCount);
     }
 
-    public record CompetitionPlayerCountDto(Long competitionId, Long playerCount) {
+    public record CompetitionPlayerCountDto(Long id, Long playerCount) {
     }
 }
