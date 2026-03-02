@@ -18,15 +18,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Testcontainers
 public abstract class FullStackIntegrationTestBase {
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
+  @Container @ServiceConnection
+  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
 
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.13-management");
+  @Container
+  static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.13-management");
 
-    @DynamicPropertySource
-    static void registerRabbitMqProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.rabbitmq.uri", rabbitMq::getAmqpUrl);
-    }
+  @DynamicPropertySource
+  static void registerRabbitMqProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.rabbitmq.uri", rabbitMq::getAmqpUrl);
+  }
 }
