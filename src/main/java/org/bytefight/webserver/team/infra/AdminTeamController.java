@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.team.application.AdminTeamService;
@@ -16,7 +18,11 @@ import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.AdminCreateTeamDto;
 import org.bytefight.webserver.team.domain.dto.AdminTeamDto;
 import org.bytefight.webserver.team.domain.dto.AdminUpdateTeamDto;
+import org.bytefight.webserver.team.domain.dto.AdminTeamWithMemberDto;
+import org.bytefight.webserver.team.domain.TeamMemberDetails;
+import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +36,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
+
+
 @Tag(name = "Team (Admin)")
 @RequestMapping("/api/v1/admin/team")
 @PreAuthorize("hasRole('ADMIN')")
 @RestController
+@RequiredArgsConstructor
 public class AdminTeamController {
   private static final int DEFAULT_PAGE_SIZE = 25;
   private static final int MAX_PAGE_SIZE = 100;
@@ -42,28 +52,50 @@ public class AdminTeamController {
       Set.of("createdAt", "id", "name", "uuid", "isDeleted", "type");
 
   private final AdminTeamService adminTeamService;
-
-  public AdminTeamController(AdminTeamService adminTeamService) {
-    this.adminTeamService = adminTeamService;
-  }
+  private final PlayerRepository playerRepository;
 
   @GetMapping
-  @Operation(operationId = "adminListTeams", summary = "REST endpoint to list all teams")
-  public Page<AdminTeamDto> listAll(@ModelAttribute RestPageRequest pageRequest) {
-    Pageable pageable =
-        pageRequest.toPageable(
-            DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
+  @Operation(
+          operationId = "adminListTeams",
+          summary = "REST endpoint to list all teams"
+  )
+  public Page<AdminTeamWithMemberDto> listAll(@ModelAttribute RestPageRequest pageRequest) {
+      Pageable pageable = pageRequest.toPageable(
+              DEFAULT_PAGE_SIZE,
+              MAX_PAGE_SIZE,
+              DEFAULT_SORT_FIELD,
+              ALLOWED_SORT_FIELDS
+      );
 
-    Map<String, Object> filter = pageRequest.getFilter();
-    Long competitionId = parseCompetitionId(filter);
-    List<Long> teamIds = parseTeamIds(filter);
-    Boolean isDeleted = parseIsDeleted(filter);
-    boolean resolvedIsDeleted = isDeleted != null ? isDeleted : false;
+      Map<String, Object> filter = pageRequest.getFilter();
+      Long competitionId = parseCompetitionId(filter);
+      List<Long> teamIds = parseTeamIds(filter);
+      Boolean isDeleted = parseIsDeleted(filter);
+      boolean resolvedIsDeleted = isDeleted != null ? isDeleted : false;
 
-    Page<Team> teams =
-        adminTeamService.listTeams(competitionId, teamIds, resolvedIsDeleted, pageable);
-    return teams.map(AdminTeamDto::from);
+      Page<Team> teams = adminTeamService.listTeams(competitionId, teamIds, resolvedIsDeleted, pageable);
+      List<Team> teamList = teams.getContent();
+      List<Long> pagedTeamIds = teamList.stream().map(Team::getId).toList();
+
+      Map<Long, List<AdminTeamWithMemberDto.MemberDto>> membersByTeamId = new HashMap<>();
+      if (!pagedTeamIds.isEmpty()) {
+          List<TeamMemberDetails> memberDetails = playerRepository.findMemberDetailsByTeamIds(pagedTeamIds);
+          for (TeamMemberDetails member : memberDetails) {
+              membersByTeamId
+                      .computeIfAbsent(member.getTeamId(), ignored -> new ArrayList<>())
+                      .add(AdminTeamWithMemberDto.MemberDto.from(member));
+          }
+      }
+
+      List<AdminTeamWithMemberDto> data = teamList.stream()
+              .map(team -> AdminTeamWithMemberDto.from(
+                      team,
+                      membersByTeamId.getOrDefault(team.getId(), List.of())
+              ))
+              .toList();
+      return new PageImpl<>(data, teams.getPageable(), teams.getTotalElements());
   }
+
 
   @PostMapping
   @Operation(operationId = "adminCreateTeam", summary = "REST endpoint to create a team")
