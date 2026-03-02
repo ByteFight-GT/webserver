@@ -44,7 +44,7 @@ public class TeamStatsController {
   @GetMapping("/{teamUuid}/")
   @Operation(summary = "Get a teams stats for all ladders")
   public ResponseEntity<AggregateTeamStatsDto> getAggregateTeamStatsByUuid(
-      @PathVariable UUID teamUuid, @PathVariable String ladderSlug) {
+      @PathVariable UUID teamUuid) {
     Team team =
         teamService
             .getTeamByUuid(teamUuid)
