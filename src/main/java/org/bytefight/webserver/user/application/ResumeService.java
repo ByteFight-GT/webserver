@@ -3,28 +3,17 @@ package org.bytefight.webserver.user.application;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.gamematch.domain.GameMatch;
-import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
-import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
-import org.bytefight.webserver.gamematchfile.infra.GameMatchFileRepository;
-import org.bytefight.webserver.player.application.PlayerService;
-import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
-import org.bytefight.webserver.team.application.TeamService;
-import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.user.infra.ResumeRepository;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.File;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

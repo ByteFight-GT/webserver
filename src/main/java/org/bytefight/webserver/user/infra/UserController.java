@@ -4,30 +4,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.gamematch.application.GameMatchService;
-import org.bytefight.webserver.gamematch.domain.GameMatch;
-import org.bytefight.webserver.gamematchfile.application.GameMatchFileService;
-import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
-import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
-import org.bytefight.webserver.gamematchfile.domain.dto.GameMatchFileDto;
-import org.bytefight.webserver.gamematchfile.domain.dto.GameMatchFileUploadDto;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
-import org.bytefight.webserver.team.application.TeamService;
-import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.user.application.ResumeService;
 import org.bytefight.webserver.user.domain.dto.ResumeDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Tag(name = "ResumeFile", description = "Endpoints for uploading and retrieving resumes")
 @RestController
