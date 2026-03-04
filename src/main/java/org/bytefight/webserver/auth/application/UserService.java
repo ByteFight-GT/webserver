@@ -9,10 +9,13 @@ import java.util.UUID;
 
 import org.bytefight.webserver.auth.domain.EmailAlreadyRegisteredException;
 import org.bytefight.webserver.auth.domain.RegistrationException;
+import org.bytefight.webserver.auth.domain.SignupSurvey;
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
 import org.bytefight.webserver.auth.domain.dto.RegisterUserDto;
+import org.bytefight.webserver.auth.domain.dto.SignupSurveyDto;
 import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
+import org.bytefight.webserver.auth.infra.SignupSurveyRepository;
 import org.bytefight.webserver.auth.infra.UserRepository;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
@@ -26,6 +29,7 @@ public class UserService {
   private final PlayerRepository playerRepository;
   private final PlayerService playerService;
   private final AuthService authService;
+  private final SignupSurveyRepository signupSurveyRepository;
 
   static String normalize(String raw) {
     return raw == null ? null : raw.trim().toLowerCase();
@@ -85,5 +89,27 @@ public class UserService {
     } catch (AuthService.AuthServiceException e) {
       throw new RegistrationException(e.getMessage());
     }
+  }
+
+  @Transactional
+  public void submitSignupSurvey(SignupSurveyDto input) {
+    String normalizedEmail = normalize(input.getEmail());
+    User user =
+        userRepository
+            .findByEmail(normalizedEmail)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "No registered user found for email: " + input.getEmail()));
+
+    if (signupSurveyRepository.existsByUser(user)) {
+      throw new IllegalStateException(
+          "Survey data already submitted for email: " + input.getEmail());
+    }
+
+    SignupSurvey survey = new SignupSurvey();
+    survey.setUser(user);
+    survey.setHeardAboutByteFight(input.getHeardAboutByteFight());
+    signupSurveyRepository.save(survey);
   }
 }

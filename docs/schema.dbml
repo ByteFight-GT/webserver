@@ -76,6 +76,13 @@ Table users {
   is_admin boolean [not null, default: false]
 }
 
+// Stores voluntary signup survey responses for registered users.
+Table signup_surveys {
+  ~base_template
+  user_id bigint [not null, unique, ref: - users.id]
+  heard_about_bytefight varchar(255) [not null]
+}
+
 // Stores platform-wide player related information (username,
 // badges, achievements, etc.)
 Table players {

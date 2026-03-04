@@ -9,6 +9,7 @@ import org.bytefight.webserver.auth.application.UserService;
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.dto.RegisterUserDto;
 import org.bytefight.webserver.auth.domain.dto.SelfUserDto;
+import org.bytefight.webserver.auth.domain.dto.SignupSurveyDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,13 @@ public class AuthenticationController {
   @PostMapping("/signup")
   public ResponseEntity<Void> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
     userService.signup(registerUserDto);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/signup/sendSurveyData")
+  public ResponseEntity<Void> sendSurveyData(@Valid @RequestBody SignupSurveyDto surveyDto) {
+    userService.submitSignupSurvey(surveyDto);
 
     return ResponseEntity.ok().build();
   }
