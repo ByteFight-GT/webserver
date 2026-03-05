@@ -32,8 +32,8 @@ public class Ladder extends BaseEntity {
   @Column(name = "scheduled_matchmaking_enabled", nullable = false)
   private boolean scheduledMatchmakingEnabled = false;
 
-  @Column(name = "matchmaking_interval_seconds", nullable = true)
-  private Integer matchmakingIntervalSeconds;
+  @Column(name = "scheduled_matchmaking_cron", nullable = true)
+  private String scheduledMatchmakingCron;
 
   @Column(name = "glicko_default_rating", nullable = false)
   private double glickoDefaultRating;
