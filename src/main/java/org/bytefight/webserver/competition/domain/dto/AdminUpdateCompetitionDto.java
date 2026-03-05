@@ -18,4 +18,7 @@ public class AdminUpdateCompetitionDto {
 
   @Min(1)
   Integer maxPlayersPerTeam;
+
+  @Min(0)
+  Long teamSubmissionStorageSize;
 }
