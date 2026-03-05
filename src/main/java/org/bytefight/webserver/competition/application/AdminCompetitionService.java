@@ -91,6 +91,9 @@ public class AdminCompetitionService {
     if (input.getAllowEditTeamName() != null) {
       competition.setAllowEditTeamName(input.getAllowEditTeamName());
     }
+    if (input.getTeamSubmissionStorageSize() != null) {
+      competition.setTeamSubmissionStorageSize(input.getTeamSubmissionStorageSize());
+    }
     //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     return competitionRepository.save(competition);
