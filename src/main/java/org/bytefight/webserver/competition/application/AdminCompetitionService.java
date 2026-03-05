@@ -1,6 +1,7 @@
 package org.bytefight.webserver.competition.application;
 
 import lombok.RequiredArgsConstructor;
+
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.AdminCreateCompetitionDto;
 import org.bytefight.webserver.competition.domain.dto.AdminUpdateCompetitionDto;
@@ -15,86 +16,83 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 @Service
 public class AdminCompetitionService {
-    private final LadderService ladderService;
-    private final CompetitionRepository competitionRepository;
+  private final LadderService ladderService;
+  private final CompetitionRepository competitionRepository;
 
-    public Page<Competition> listCompetitions(Pageable pageable) {
-        return competitionRepository.findAll(pageable);
+  public Page<Competition> listCompetitions(Pageable pageable) {
+    return competitionRepository.findAll(pageable);
+  }
+
+  public Competition getCompetition(Long id) {
+    return competitionRepository
+        .findById(id)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
+  }
+
+  public Competition createCompetition(AdminCreateCompetitionDto input) {
+    String slug = input.getSlug().toLowerCase().trim();
+    if (competitionRepository.findBySlug(slug).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Competition slug already exists");
     }
 
-    public Competition getCompetition(Long id) {
-        return competitionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
+    Competition competition = new Competition();
+    competition.setSlug(slug);
+    competition.setName(input.getName());
+    competition.setActive(false);
+
+//    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
+
+    competition = competitionRepository.save(competition);
+
+    ladderService.createLadder(
+        competition, "validation", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+    return competition;
+  }
+
+  public Competition updateCompetition(Long id, AdminUpdateCompetitionDto input) {
+    Competition competition =
+        competitionRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
+
+    if (input.getName() != null) {
+      competition.setName(input.getName());
     }
-
-    public Competition createCompetition(AdminCreateCompetitionDto input) {
-        String slug = input.getSlug().toLowerCase().trim();
-        if (competitionRepository.findBySlug(slug).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Competition slug already exists");
-        }
-
-        Competition competition = new Competition();
-        competition.setSlug(slug);
-        competition.setName(input.getName());
-        competition.setActive(false);
-
-        competition = competitionRepository.save(competition);
-
-        ladderService.createLadder(
-                competition,
-                "validation",
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-        );
-
-        return competition;
+    if (input.getDescription() != null) {
+      competition.setDescription(input.getDescription());
     }
-
-    public Competition updateCompetition(Long id, AdminUpdateCompetitionDto input) {
-        Competition competition = competitionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
-
-        if (input.getName() != null) {
-            competition.setName(input.getName());
-        }
-        if (input.getDescription() != null) {
-            competition.setDescription(input.getDescription());
-        }
-        if (input.getIsActive() != null) {
-            competition.setActive(input.getIsActive());
-        }
-        if (input.getIsWhitelisted() != null) {
-            competition.setWhitelisted(input.getIsWhitelisted());
-        }
-        if (input.getAllowNewSubmission() != null) {
-            competition.setAllowNewSubmission(input.getAllowNewSubmission());
-        }
-        if (input.getAllowSetSubmission() != null) {
-            competition.setAllowSetSubmission(input.getAllowSetSubmission());
-        }
-        if (input.getAllowCreateTeam() != null) {
-            competition.setAllowCreateTeam(input.getAllowCreateTeam());
-        }
-        if (input.getAllowJoinTeam() != null) {
-            competition.setAllowJoinTeam(input.getAllowJoinTeam());
-        }
-        if (input.getAllowLeaveTeam() != null) {
-            competition.setAllowLeaveTeam(input.getAllowLeaveTeam());
-        }
-        if (input.getMaxPlayersPerTeam() != null) {
-            competition.setMaxPlayersPerTeam(input.getMaxPlayersPerTeam());
-        }
-        if(input.getAllowEditTeamName() != null) {
-            competition.setAllowEditTeamName(input.getAllowEditTeamName());
-        }
-
-        return competitionRepository.save(competition);
+    if (input.getIsActive() != null) {
+      competition.setActive(input.getIsActive());
     }
+    if (input.getIsWhitelisted() != null) {
+      competition.setWhitelisted(input.getIsWhitelisted());
+    }
+    if (input.getAllowNewSubmission() != null) {
+      competition.setAllowNewSubmission(input.getAllowNewSubmission());
+    }
+    if (input.getAllowSetSubmission() != null) {
+      competition.setAllowSetSubmission(input.getAllowSetSubmission());
+    }
+    if (input.getAllowCreateTeam() != null) {
+      competition.setAllowCreateTeam(input.getAllowCreateTeam());
+    }
+    if (input.getAllowJoinTeam() != null) {
+      competition.setAllowJoinTeam(input.getAllowJoinTeam());
+    }
+    if (input.getAllowLeaveTeam() != null) {
+      competition.setAllowLeaveTeam(input.getAllowLeaveTeam());
+    }
+    if (input.getMaxPlayersPerTeam() != null) {
+      competition.setMaxPlayersPerTeam(input.getMaxPlayersPerTeam());
+    }
+    if (input.getAllowEditTeamName() != null) {
+      competition.setAllowEditTeamName(input.getAllowEditTeamName());
+    }
+//    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
+
+    return competitionRepository.save(competition);
+  }
 }

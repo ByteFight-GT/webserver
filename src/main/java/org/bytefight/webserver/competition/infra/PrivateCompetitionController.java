@@ -1,5 +1,11 @@
 package org.bytefight.webserver.competition.infra;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.application.CompetitionService;
@@ -11,9 +17,6 @@ import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.SelfTeamDto;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,118 +24,136 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @Tag(name = "Competitions (Private)", description = "Private competition-specific endpoints")
 @RestController
 @RequestMapping("/api/v1/competition")
 @RequiredArgsConstructor
 public class PrivateCompetitionController {
-    private final CompetitionService competitionService;
-    private final TeamService teamService;
-    private final PlayerService playerService;
+  private final CompetitionService competitionService;
+  private final TeamService teamService;
+  private final PlayerService playerService;
 
-    @PostMapping("/{competitionSlug}/teams")
-    @Transactional
-    @Operation(
-            operationId = "createCompetitionTeam",
-            summary = "Create a team within a competition and join it"
-    )
-    public ResponseEntity<SelfTeamDto> createCompetitionTeam(
-            @AuthenticationPrincipal User user,
-            @PathVariable String competitionSlug,
-            @RequestBody TeamSettingsDto teamSettingsDto
-    ) {
-        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+  @PostMapping("/{competitionSlug}/teams")
+  @Transactional
+  @Operation(
+      operationId = "createCompetitionTeam",
+      summary = "Create a team within a competition and join it")
+  public ResponseEntity<SelfTeamDto> createCompetitionTeam(
+      @AuthenticationPrincipal User user,
+      @PathVariable String competitionSlug,
+      @RequestBody TeamSettingsDto teamSettingsDto) {
+    Competition competition =
+        competitionService
+            .getCompetitionBySlug(competitionSlug)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Competition with slug not found"));
 
-        Player player = playerService.getPlayer(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+    Player player =
+        playerService
+            .getPlayer(user)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
-        if(!competition.isAllowCreateTeam()) {
-            throw new PermissionDeniedException("You are not allowed to create a team at this time");
-        }
-
-        Team team = teamService.createTeam(competition, teamSettingsDto);
-        teamService.joinTeam(player, team);
-
-        List<Player> teamMembers = teamService.getPlayersForTeam(team);
-
-        return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
+    if (!competition.isAllowCreateTeam()) {
+      throw new PermissionDeniedException("You are not allowed to create a team at this time");
     }
 
+    Team team = teamService.createTeam(competition, teamSettingsDto);
+    teamService.joinTeam(player, team);
 
-    @GetMapping("/{competitionSlug}/teams/my-team")
-    @Transactional
-    @Operation(
-            operationId = "getMyCompetitionTeam",
-            summary = "Gets the current team a player is on"
-    )
-    public ResponseEntity<SelfTeamDto> getMyCompetitionTeam(
-            @AuthenticationPrincipal User user,
-            @PathVariable String competitionSlug
-    ) {
-        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+    List<Player> teamMembers = teamService.getPlayersForTeam(team);
 
-        Player player = playerService.getPlayer(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+    return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
+  }
 
-        Team team = teamService.findTeamByCompetitionAndPlayer(competition, player)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player does not have team for the competition"));
+  @GetMapping("/{competitionSlug}/teams/my-team")
+  @Transactional
+  @Operation(operationId = "getMyCompetitionTeam", summary = "Gets the current team a player is on")
+  public ResponseEntity<SelfTeamDto> getMyCompetitionTeam(
+      @AuthenticationPrincipal User user, @PathVariable String competitionSlug) {
+    Competition competition =
+        competitionService
+            .getCompetitionBySlug(competitionSlug)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Competition with slug not found"));
 
-        List<Player> teamMembers = teamService.getPlayersForTeam(team);
-        return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
+    Player player =
+        playerService
+            .getPlayer(user)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+    Team team =
+        teamService
+            .findTeamByCompetitionAndPlayer(competition, player)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Player does not have team for the competition"));
+
+    List<Player> teamMembers = teamService.getPlayersForTeam(team);
+    return ResponseEntity.ok(SelfTeamDto.from(team, teamMembers));
+  }
+
+  @PostMapping("/{competitionSlug}/teams/join")
+  @Transactional
+  @Operation(operationId = "joinCompetitionTeam", summary = "Join a competition team by join code")
+  public ResponseEntity<SelfTeamDto> joinCompetitionTeam(
+      @AuthenticationPrincipal User user,
+      @PathVariable String competitionSlug,
+      @RequestBody JoinTeamDto joinTeamDto) {
+    Competition competition =
+        competitionService
+            .getCompetitionBySlug(competitionSlug)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Competition with slug not found"));
+
+    Player player =
+        playerService
+            .getPlayer(user)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+
+    if (!competition.isAllowJoinTeam()) {
+      throw new PermissionDeniedException("You are not allowed to join a team at this time");
     }
 
-    @PostMapping("/{competitionSlug}/teams/join")
-    @Transactional
-    @Operation(
-            operationId = "joinCompetitionTeam",
-            summary = "Join a competition team by join code"
-    )
-    public ResponseEntity<SelfTeamDto> joinCompetitionTeam(
-            @AuthenticationPrincipal User user,
-            @PathVariable String competitionSlug,
-            @RequestBody JoinTeamDto joinTeamDto
-    ) {
-        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+    teamService.joinTeamByJoinCode(competition, player, joinTeamDto.getJoinCode());
 
-        Player player = playerService.getPlayer(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
+    return ResponseEntity.ok().build();
+  }
 
-        if(!competition.isAllowJoinTeam()) {
-            throw new PermissionDeniedException("You are not allowed to join a team at this time");
-        }
+  @PostMapping("/{competitionSlug}/teams/leave")
+  @Transactional
+  @Operation(operationId = "leaveCompetitionTeam", summary = "Leave competition team")
+  public ResponseEntity<SelfTeamDto> leaveCompetitionTeam(
+      @AuthenticationPrincipal User user, @PathVariable String competitionSlug) {
+    Competition competition =
+        competitionService
+            .getCompetitionBySlug(competitionSlug)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Competition with slug not found"));
 
-        teamService.joinTeamByJoinCode(competition, player, joinTeamDto.getJoinCode());
+    Player player =
+        playerService
+            .getPlayer(user)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
 
-        return ResponseEntity.ok().build();
+    if (!competition.isAllowLeaveTeam()) {
+      throw new PermissionDeniedException("You are not allowed to leave your team at this time");
     }
 
-    @PostMapping("/{competitionSlug}/teams/leave")
-    @Transactional
-    @Operation(
-            operationId = "leaveCompetitionTeam",
-            summary = "Leave competition team"
-    )
-    public ResponseEntity<SelfTeamDto> leaveCompetitionTeam(
-            @AuthenticationPrincipal User user,
-            @PathVariable String competitionSlug
-    ) {
-        Competition competition = competitionService.getCompetitionBySlug(competitionSlug)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition with slug not found"));
+    teamService.leaveTeam(competition, player);
 
-        Player player = playerService.getPlayer(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
-
-        if(!competition.isAllowLeaveTeam()) {
-            throw new PermissionDeniedException("You are not allowed to leave your team at this time");
-        }
-
-        teamService.leaveTeam(competition, player);
-
-        return ResponseEntity.ok().build();
-    }
+    return ResponseEntity.ok().build();
+  }
 }

@@ -1,6 +1,5 @@
 package org.bytefight.webserver.team.domain.dto;
 
-import jakarta.validation.constraints.Min;
 import org.bytefight.webserver.common.domain.dto.DeletionDto;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.dto.CompetitionDto;

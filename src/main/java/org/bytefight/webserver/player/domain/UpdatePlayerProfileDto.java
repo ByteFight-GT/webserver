@@ -6,6 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class UpdatePlayerProfileDto {
-    @PlayerUsername
-    private String username;
+  @PlayerUsername private String username;
 }

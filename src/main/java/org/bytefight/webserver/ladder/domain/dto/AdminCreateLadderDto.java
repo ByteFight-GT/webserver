@@ -8,15 +8,15 @@ import lombok.Value;
 
 @Value
 public class AdminCreateLadderDto {
-    @NotNull Long competitionId;
-    @NotBlank String ladder;
-    @Positive Double glickoDefaultRating;
-    @Positive Double glickoDefaultRd;
-    @Positive Double glickoRdMax;
-    @Positive Double glickoRdMin;
-    @PositiveOrZero Double glickoPhiInflationPerDay;
-    @Positive Double glickoTau;
-    @Positive Double glickoSigmaDefault;
-    @Positive Double glickoSigmaMin;
-    @Positive Double glickoSigmaMax;
+  @NotNull Long competitionId;
+  @NotBlank String ladder;
+  @Positive Double glickoDefaultRating;
+  @Positive Double glickoDefaultRd;
+  @Positive Double glickoRdMax;
+  @Positive Double glickoRdMin;
+  @PositiveOrZero Double glickoPhiInflationPerDay;
+  @Positive Double glickoTau;
+  @Positive Double glickoSigmaDefault;
+  @Positive Double glickoSigmaMin;
+  @Positive Double glickoSigmaMax;
 }

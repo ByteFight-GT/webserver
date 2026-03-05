@@ -6,8 +6,8 @@ import lombok.Value;
 
 @Value
 public class AdminCreateTeamDto {
-    @NotNull Long competitionId;
-    @NotBlank String name;
-    String quote;
-    Boolean displayMembers;
+  @NotNull Long competitionId;
+  @NotBlank String name;
+  String quote;
+  Boolean displayMembers;
 }

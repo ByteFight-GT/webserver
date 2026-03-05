@@ -7,6 +7,6 @@ import lombok.Value;
 @Value
 @Builder
 public class GameMatchUpdate {
-    @NotNull String uuid;
-    @NotNull boolean started;
+  @NotNull String uuid;
+  @NotNull boolean started;
 }
