@@ -26,6 +26,9 @@ public class Ladder extends BaseEntity {
   @Column(name = "ladder", nullable = false, length = 50)
   private String ladder;
 
+  @Column(name = "max_queued_per_team", nullable = false)
+  private int maxQueuedPerTeam;
+
   @Column(name = "allow_user_matches", nullable = false)
   private boolean allowUserMatches = false;
 

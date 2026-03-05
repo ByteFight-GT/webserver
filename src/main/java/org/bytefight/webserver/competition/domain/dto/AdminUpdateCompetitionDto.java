@@ -1,6 +1,7 @@
 package org.bytefight.webserver.competition.domain.dto;
 
 import jakarta.validation.constraints.Min;
+import java.util.Map;
 import lombok.Value;
 
 @Value
@@ -21,4 +22,6 @@ public class AdminUpdateCompetitionDto {
 
   @Min(0)
   Long teamSubmissionStorageSize;
+
+  Map<String, Object> settings;
 }
