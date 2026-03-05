@@ -30,7 +30,8 @@ public class ScheduledMatchMaker {
   @Transactional
   public void runScheduledMatchmaking() {
     List<Ladder> enabledLadders =
-        ladderRepository.findAllByScheduledMatchmakingEnabledTrueAndScheduledMatchmakingCronIsNotNull();
+        ladderRepository
+            .findAllByScheduledMatchmakingEnabledTrueAndScheduledMatchmakingCronIsNotNull();
 
     Instant now = Instant.now();
 
