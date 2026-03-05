@@ -94,6 +94,9 @@ public class AdminCompetitionService {
     if (input.getTeamSubmissionStorageSize() != null) {
       competition.setTeamSubmissionStorageSize(input.getTeamSubmissionStorageSize());
     }
+    if (input.getSettings() != null) {
+      competition.setSettings(input.getSettings());
+    }
     //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     return competitionRepository.save(competition);
