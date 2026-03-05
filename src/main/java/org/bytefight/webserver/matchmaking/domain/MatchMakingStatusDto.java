@@ -8,7 +8,7 @@ import java.time.Instant;
 @Value
 @Builder
 public class MatchMakingStatusDto {
-    boolean running;
-    Instant lastRunAt;
-    Instant nextRunAt;
+  boolean running;
+  Instant lastRunAt;
+  Instant nextRunAt;
 }
