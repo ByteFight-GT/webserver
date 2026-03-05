@@ -9,6 +9,7 @@ public class AdminLadderDto {
   Long id;
   String ladder;
   Long competitionId;
+  boolean allowUserMatches;
   double glickoDefaultRating;
   double glickoDefaultRd;
   double glickoRdMax;
@@ -26,6 +27,7 @@ public class AdminLadderDto {
         ladder.getId(),
         ladder.getLadder(),
         ladder.getCompetition().getId(),
+        ladder.isAllowUserMatches(),
         ladder.getGlickoDefaultRating(),
         ladder.getGlickoDefaultRd(),
         ladder.getGlickoRdMax(),

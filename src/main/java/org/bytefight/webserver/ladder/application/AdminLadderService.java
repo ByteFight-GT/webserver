@@ -95,6 +95,9 @@ public class AdminLadderService {
     if (input.getGlickoSigmaMax() != null) {
       ladder.setGlickoSigmaMax(input.getGlickoSigmaMax());
     }
+    if (input.getAllowUserMatches() != null) {
+      ladder.setAllowUserMatches(input.getAllowUserMatches());
+    }
     if (input.getScheduledMatchmakingEnabled() != null) {
       ladder.setScheduledMatchmakingEnabled(input.getScheduledMatchmakingEnabled());
     }
