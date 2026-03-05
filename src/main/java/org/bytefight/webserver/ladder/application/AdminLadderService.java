@@ -95,6 +95,13 @@ public class AdminLadderService {
     if (input.getGlickoSigmaMax() != null) {
       ladder.setGlickoSigmaMax(input.getGlickoSigmaMax());
     }
+    if(input.getScheduledMatchmakingEnabled() != null) {
+      ladder.setScheduledMatchmakingEnabled(input.getScheduledMatchmakingEnabled());
+    }
+
+    if(input.getScheduledMatchmakingCron() != null) {
+      ladder.setScheduledMatchmakingCron(input.getScheduledMatchmakingCron());
+    }
 
     return ladderRepository.save(ladder);
   }
