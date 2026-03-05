@@ -44,14 +44,10 @@ public class SubmissionService {
     Long currentUsed = submissionRepository.sumUndeletedSubmissionSizeByTeam(team);
     long currentUsedSize = currentUsed != null ? currentUsed : 0L;
     if (currentUsedSize + file.getSize() > storageLimit) {
-        throw new IllegalArgumentException(
-                String.format(
-                        "Team storage limit exceeded: used=%d, uploading=%d, limit=%d",
-                        currentUsedSize,
-                        file.getSize(),
-                        storageLimit
-                )
-        );
+      throw new IllegalArgumentException(
+          String.format(
+              "Team storage limit exceeded: used=%d, uploading=%d, limit=%d",
+              currentUsedSize, file.getSize(), storageLimit));
     }
     FileRecord storedFile =
         storageService.store(

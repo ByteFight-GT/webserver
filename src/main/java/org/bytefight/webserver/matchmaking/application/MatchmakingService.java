@@ -1,12 +1,12 @@
 package org.bytefight.webserver.matchmaking.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
@@ -72,7 +72,12 @@ public class MatchmakingService {
       gameMatchService.scheduleMatch(match);
     }
 
-    log.info("{} - {}: found {} teams eligible for matchmaking. Scheduled {} matches.", competition.getSlug(), ladder, participants.size(), matches.size());
+    log.info(
+        "{} - {}: found {} teams eligible for matchmaking. Scheduled {} matches.",
+        competition.getSlug(),
+        ladder,
+        participants.size(),
+        matches.size());
 
     return event;
   }
