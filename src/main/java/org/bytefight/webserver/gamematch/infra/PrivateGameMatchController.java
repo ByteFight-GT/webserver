@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
 import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
@@ -86,6 +87,10 @@ public class PrivateGameMatchController {
 
     if (!competition.isActive()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Competition is not active.");
+    }
+
+    if (!competition.isAllowCreateUserMatch()) {
+      throw new PermissionDeniedException("You may not create matches at this time.");
     }
 
     Ladder ladder =
