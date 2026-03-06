@@ -1,5 +1,6 @@
 package org.bytefight.webserver.gamematch.infra;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -85,4 +86,13 @@ public interface GameMatchRepository
       @Param("competition") Competition competition,
       @Param("status") Collection<MatchStatus> status,
       Pageable pageable);
+
+  @Query(
+      """
+    SELECT gm
+    FROM GameMatch gm
+    WHERE gm.status = 'waiting'
+    AND gm.scheduledAt <= :cutoff
+""")
+  List<GameMatch> findStaleWaitingMatches(@Param("cutoff") Instant cutoff);
 }
