@@ -94,6 +94,9 @@ public class AdminCompetitionService {
     if (input.getTeamSubmissionStorageSize() != null) {
       competition.setTeamSubmissionStorageSize(input.getTeamSubmissionStorageSize());
     }
+    if (input.getAllowCreateUserMatch() != null) {
+      competition.setAllowCreateUserMatch(input.getAllowCreateUserMatch());
+    }
     if (input.getSettings() != null) {
       competition.setSettings(input.getSettings());
     }
