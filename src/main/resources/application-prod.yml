@@ -22,12 +22,6 @@ storage:
   root: ./storage
   hmac-secret: ${STORAGE_HMAC_SECRET}
 
-logging:
-  file:
-    name: logs/application.log
-  pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
 hibernate:
   search:
     default:
