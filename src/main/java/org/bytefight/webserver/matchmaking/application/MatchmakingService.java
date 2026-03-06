@@ -1,6 +1,7 @@
 package org.bytefight.webserver.matchmaking.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.Function;
@@ -24,6 +25,7 @@ import com.nimbusds.jose.util.Pair;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MatchmakingService {
   private final TeamService teamService;
   private final TeamStatsService teamStatsService;
@@ -69,6 +71,13 @@ public class MatchmakingService {
     for (GameMatch match : matches) {
       gameMatchService.scheduleMatch(match);
     }
+
+    log.info(
+        "{} - {}: found {} teams eligible for matchmaking. Scheduled {} matches.",
+        competition.getSlug(),
+        ladder,
+        participants.size(),
+        matches.size());
 
     return event;
   }

@@ -33,16 +33,7 @@ public class PublicTeamController {
             .getTeamByUuid(uuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    if (!team.isDisplayMembers()) {
-      return ResponseEntity.ok(PublicTeamDto.from(team, null));
-    } else {
-      List<Player> members = teamService.getPlayersForTeam(team);
-      return ResponseEntity.ok(PublicTeamDto.from(team, members));
-    }
-  }
-
-  @GetMapping("/teams-with-submission")
-  public ResponseEntity<Integer> countTeamsWithSubmission() {
-    return ResponseEntity.ok((teamService.countTeamsWithSubmission()));
+    List<Player> members = teamService.getPlayersForTeam(team);
+    return ResponseEntity.ok(PublicTeamDto.from(team, members));
   }
 }

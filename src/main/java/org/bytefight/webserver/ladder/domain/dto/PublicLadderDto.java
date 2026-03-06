@@ -16,6 +16,8 @@ public class PublicLadderDto {
   @NotNull String ladder;
   @NotNull String competitionSlug;
   @NotNull Long competitionId;
+  @NotNull boolean scheduledMatchmakingEnabled;
+  String scheduledMatchmakingCron;
 
   public static PublicLadderDto from(Ladder ladder) {
     return PublicLadderDto.builder()
@@ -23,6 +25,8 @@ public class PublicLadderDto {
         .ladder(ladder.getLadder())
         .competitionId(ladder.getCompetition().getId())
         .competitionSlug(ladder.getCompetition().getSlug())
+        .scheduledMatchmakingEnabled(ladder.isScheduledMatchmakingEnabled())
+        .scheduledMatchmakingCron(ladder.getScheduledMatchmakingCron())
         .build();
   }
 

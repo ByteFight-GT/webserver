@@ -9,6 +9,7 @@ public class AdminLadderDto {
   Long id;
   String ladder;
   Long competitionId;
+  boolean allowUserMatches;
   double glickoDefaultRating;
   double glickoDefaultRd;
   double glickoRdMax;
@@ -18,12 +19,15 @@ public class AdminLadderDto {
   double glickoSigmaDefault;
   Double glickoSigmaMin;
   Double glickoSigmaMax;
+  boolean scheduledMatchmakingEnabled;
+  String scheduledMatchmakingCron;
 
   public static AdminLadderDto from(Ladder ladder) {
     return new AdminLadderDto(
         ladder.getId(),
         ladder.getLadder(),
         ladder.getCompetition().getId(),
+        ladder.isAllowUserMatches(),
         ladder.getGlickoDefaultRating(),
         ladder.getGlickoDefaultRd(),
         ladder.getGlickoRdMax(),
@@ -32,6 +36,8 @@ public class AdminLadderDto {
         ladder.getGlickoTau(),
         ladder.getGlickoSigmaDefault(),
         ladder.getGlickoSigmaMin(),
-        ladder.getGlickoSigmaMax());
+        ladder.getGlickoSigmaMax(),
+        ladder.isScheduledMatchmakingEnabled(),
+        ladder.getScheduledMatchmakingCron());
   }
 }

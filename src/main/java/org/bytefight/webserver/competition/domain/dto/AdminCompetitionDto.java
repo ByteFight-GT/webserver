@@ -1,5 +1,7 @@
 package org.bytefight.webserver.competition.domain.dto;
 
+import java.util.Map;
+
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.Competition;
 
@@ -11,13 +13,16 @@ public record AdminCompetitionDto(
     boolean isActive,
     boolean isWhitelisted,
     int maxPlayersPerTeam,
+    long teamSubmissionStorageSize,
+    Map<String, Object> settings,
     TimestampsDto timestamps,
     boolean allowNewSubmission,
     boolean allowSetSubmission,
     boolean allowCreateTeam,
     boolean allowJoinTeam,
     boolean allowLeaveTeam,
-    boolean allowEditTeamName) {
+    boolean allowEditTeamName,
+    boolean allowCreateUserMatch) {
   public static AdminCompetitionDto from(Competition competition) {
     return new AdminCompetitionDto(
         competition.getId(),
@@ -27,12 +32,15 @@ public record AdminCompetitionDto(
         competition.isActive(),
         competition.isWhitelisted(),
         competition.getMaxPlayersPerTeam(),
+        competition.getTeamSubmissionStorageSize(),
+        competition.getSettings(),
         TimestampsDto.from(competition),
         competition.isAllowNewSubmission(),
         competition.isAllowSetSubmission(),
         competition.isAllowCreateTeam(),
         competition.isAllowJoinTeam(),
         competition.isAllowLeaveTeam(),
-        competition.isAllowEditTeamName());
+        competition.isAllowEditTeamName(),
+        competition.isAllowCreateUserMatch());
   }
 }

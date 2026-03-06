@@ -3,6 +3,7 @@ package org.bytefight.webserver.submission.infra;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Set;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Tag(name = "Submissions (Admin)")
 @RequestMapping("/api/v1/admin/submission")
 @PreAuthorize("hasRole('ADMIN')")
@@ -63,6 +65,10 @@ public class AdminSubmissionController {
   public ResponseEntity<AdminSubmissionDto> createSubmission(
       @Valid @ModelAttribute AdminCreateSubmissionDto input) throws IOException {
     Submission submission = adminSubmissionService.createSubmission(input);
+    log.info(
+        "Admin submission created via API: submissionId={}, teamId={}",
+        submission.getUuid(),
+        input.getTeamId());
     return ResponseEntity.status(HttpStatus.CREATED).body(AdminSubmissionDto.from(submission));
   }
 }

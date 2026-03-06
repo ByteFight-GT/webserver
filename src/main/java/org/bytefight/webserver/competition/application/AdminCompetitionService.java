@@ -41,7 +41,7 @@ public class AdminCompetitionService {
     competition.setName(input.getName());
     competition.setActive(false);
 
-//    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
+    //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     competition = competitionRepository.save(competition);
 
@@ -91,7 +91,16 @@ public class AdminCompetitionService {
     if (input.getAllowEditTeamName() != null) {
       competition.setAllowEditTeamName(input.getAllowEditTeamName());
     }
-//    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
+    if (input.getTeamSubmissionStorageSize() != null) {
+      competition.setTeamSubmissionStorageSize(input.getTeamSubmissionStorageSize());
+    }
+    if (input.getAllowCreateUserMatch() != null) {
+      competition.setAllowCreateUserMatch(input.getAllowCreateUserMatch());
+    }
+    if (input.getSettings() != null) {
+      competition.setSettings(input.getSettings());
+    }
+    //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     return competitionRepository.save(competition);
   }

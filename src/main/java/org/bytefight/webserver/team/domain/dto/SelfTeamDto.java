@@ -1,5 +1,6 @@
 package org.bytefight.webserver.team.domain.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -26,6 +27,11 @@ public class SelfTeamDto {
   SubmissionDto currentSubmissionDTO;
   @NotNull TeamType type;
   @NotNull List<PublicPlayerDto> members;
+
+  @NotNull
+  @Min(0)
+  Integer numMembers;
+
   @NotNull TimestampsDto timestampsDto;
   @NotNull DeletionDto deletionDto;
 
@@ -43,6 +49,7 @@ public class SelfTeamDto {
                 : null)
         .type(team.getType())
         .members(members.stream().map(PublicPlayerDto::from).toList())
+        .numMembers(members.size())
         .timestampsDto(TimestampsDto.from(team))
         .deletionDto(DeletionDto.from(team))
         .build();

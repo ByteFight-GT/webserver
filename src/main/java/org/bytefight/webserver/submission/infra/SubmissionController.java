@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/submission")
@@ -105,10 +107,15 @@ public class SubmissionController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     if (!teamService.isMember(team, player)) {
+      log.debug("Upload denied - not team member: teamId={}, userId={}", teamUuid, user.getUuid());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
     }
 
     if (!team.getCompetition().isAllowNewSubmission()) {
+      log.debug(
+          "Upload denied - submissions closed: teamId={}, competitionId={}",
+          teamUuid,
+          team.getCompetition().getSlug());
       throw new PermissionDeniedException(
           "You are not allowed to create a new submission at this time");
     }
@@ -123,6 +130,12 @@ public class SubmissionController {
               uploadSubmissionDto.getFile(),
               uploadSubmissionDto.getIsAutoSet());
     } catch (IOException e) {
+      log.error(
+          "Failed to upload submission: teamId={}, userId={}, error={}",
+          teamUuid,
+          user.getUuid(),
+          e.getMessage(),
+          e);
       return ResponseEntity.internalServerError().build();
     }
 
@@ -140,6 +153,11 @@ public class SubmissionController {
 
     gameMatchService.scheduleMatch(validation);
 
+    log.info(
+        "Submission uploaded: submissionId={}, teamId={}, userId={}",
+        submission.getUuid(),
+        teamUuid,
+        user.getUuid());
     return ResponseEntity.ok(SubmissionDto.from(submission));
   }
 
@@ -167,6 +185,11 @@ public class SubmissionController {
             .getSubmissionByTeamAndUuid(team, submissionUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+    log.info(
+        "User deleting submission: submissionId={}, teamId={}, userId={}",
+        submissionUuid,
+        teamUuid,
+        user.getUuid());
     submissionService.deleteSubmission(submission);
 
     return ResponseEntity.noContent().build();
