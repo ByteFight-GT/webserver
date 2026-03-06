@@ -21,7 +21,8 @@ public record AdminCompetitionDto(
     boolean allowCreateTeam,
     boolean allowJoinTeam,
     boolean allowLeaveTeam,
-    boolean allowEditTeamName) {
+    boolean allowEditTeamName,
+    boolean allowCreateUserMatch) {
   public static AdminCompetitionDto from(Competition competition) {
     return new AdminCompetitionDto(
         competition.getId(),
@@ -39,6 +40,7 @@ public record AdminCompetitionDto(
         competition.isAllowCreateTeam(),
         competition.isAllowJoinTeam(),
         competition.isAllowLeaveTeam(),
-        competition.isAllowEditTeamName());
+        competition.isAllowEditTeamName(),
+        competition.isAllowCreateUserMatch());
   }
 }

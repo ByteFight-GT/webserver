@@ -17,6 +17,7 @@ public class AdminUpdateCompetitionDto {
   Boolean allowJoinTeam;
   Boolean allowLeaveTeam;
   Boolean allowEditTeamName;
+  Boolean allowCreateUserMatch;
 
   @Min(1)
   Integer maxPlayersPerTeam;
