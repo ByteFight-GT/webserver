@@ -117,6 +117,7 @@ public class PrivateGameMatchController {
     GameMatch gameMatch =
         gameMatchService.createMatch(
             user,
+            initiatingTeam,
             teamA,
             teamB,
             teamA.getCurrentSubmission(),

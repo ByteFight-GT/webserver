@@ -55,6 +55,30 @@ public class GameMatchService {
       MatchReason reason,
       Map<String, Object> matchSettings,
       MatchmakingEvent matchmakingEvent) {
+    return createMatch(
+        creatingUser,
+        null,
+        teamA,
+        teamB,
+        submissionA,
+        submissionB,
+        ladder,
+        reason,
+        matchSettings,
+        matchmakingEvent);
+  }
+
+  public GameMatch createMatch(
+      User creatingUser,
+      Team initiatingTeam,
+      Team teamA,
+      Team teamB,
+      Submission submissionA,
+      Submission submissionB,
+      String ladder,
+      MatchReason reason,
+      Map<String, Object> matchSettings,
+      MatchmakingEvent matchmakingEvent) {
     if (teamA == null || teamB == null) {
       throw new IllegalArgumentException("teamA and teamB are required");
     }
@@ -78,6 +102,7 @@ public class GameMatchService {
     gameMatch.setLadder(ladder.trim().toLowerCase());
     gameMatch.setReason(reason);
     gameMatch.setMatchmakingEvent(matchmakingEvent);
+    gameMatch.setInitiatingTeam(initiatingTeam);
 
     gameMatch.setMatchSettings(Objects.requireNonNullElse(matchSettings, Collections.emptyMap()));
 
