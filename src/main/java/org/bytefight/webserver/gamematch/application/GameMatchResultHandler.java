@@ -40,7 +40,7 @@ public class GameMatchResultHandler {
     GameMatch gameMatch =
         gameMatchService.getGameMatch(UUID.fromString(gameMatchUpdate.getUuid())).orElseThrow();
 
-    if (gameMatchUpdate.isStarted()) {
+    if (gameMatchUpdate.isStarted() && gameMatch.getStatus() == MatchStatus.waiting) {
       gameMatch.setStatus(MatchStatus.in_progress);
       gameMatch.setStartedAt(Instant.now());
       gameMatchRepository.save(gameMatch);
