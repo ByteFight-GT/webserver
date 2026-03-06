@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
@@ -77,4 +78,11 @@ public interface GameMatchRepository
       @Param("team") Team team,
       @Param("ladder") String ladder,
       @Param("status") Collection<MatchStatus> status);
+
+  @Query(
+      "SELECT gm FROM GameMatch gm WHERE gm.competition = :competition AND gm.status IN :status ORDER BY gm.createdAt DESC")
+  Page<GameMatch> findByCompetitionAndStatus(
+      @Param("competition") Competition competition,
+      @Param("status") Collection<MatchStatus> status,
+      Pageable pageable);
 }
