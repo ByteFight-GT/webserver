@@ -80,7 +80,7 @@ public class ScheduledMatchMaker {
       log.info(
           "Running scheduled matchmaking for ladder '{}' (competition '{}')",
           ladder.getLadder(),
-          competition.getId());
+          competition.getSlug());
       matchmakingService.createAndScheduleEvent(competition, ladder.getLadder());
     }
   }
