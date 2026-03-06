@@ -71,7 +71,7 @@ public interface GameMatchRepository
       """
                 SELECT COUNT(gm)
                 FROM GameMatch gm
-                WHERE (gm.teamA = :team OR gm.teamB = :team)
+                WHERE (gm.initiatingTeam = :team)
                   AND gm.ladder = :ladder
                   AND gm.status IN :status
             """)
