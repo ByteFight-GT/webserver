@@ -26,6 +26,7 @@ import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -133,6 +134,17 @@ public class GameMatchService {
         };
 
     return gameMatchRepository.findAll(spec, page);
+  }
+
+  public Page<GameMatch> getFullPaginatedQueue(Competition competition, Pageable page) {
+    return gameMatchRepository.findByCompetitionAndStatus(
+        competition,
+        Set.of(
+            MatchStatus.created,
+            MatchStatus.scheduling,
+            MatchStatus.waiting,
+            MatchStatus.in_progress),
+        page);
   }
 
   public GameMatchDto getDTOById(Long id) {
