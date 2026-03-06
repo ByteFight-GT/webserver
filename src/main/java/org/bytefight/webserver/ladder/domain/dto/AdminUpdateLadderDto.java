@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Value;
 
+import org.bytefight.webserver.common.validation.ValidCron;
+
 @Value
 public class AdminUpdateLadderDto {
   @Positive Double glickoDefaultRating;
@@ -15,4 +17,7 @@ public class AdminUpdateLadderDto {
   @Positive Double glickoSigmaDefault;
   @Positive Double glickoSigmaMin;
   @Positive Double glickoSigmaMax;
+  Boolean allowUserMatches;
+  Boolean scheduledMatchmakingEnabled;
+  @ValidCron String scheduledMatchmakingCron;
 }

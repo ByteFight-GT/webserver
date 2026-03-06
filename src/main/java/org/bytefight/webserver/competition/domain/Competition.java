@@ -6,9 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.Objects;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -31,6 +34,10 @@ public class Competition extends BaseEntity {
 
   @Column(name = "is_whitelisted", nullable = false)
   private boolean isWhitelisted = false;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "settings", nullable = false)
+  private Map<String, Object> settings;
 
   @Column(name = "max_players_per_team", nullable = false)
   private int maxPlayersPerTeam = 2;
@@ -55,6 +62,9 @@ public class Competition extends BaseEntity {
 
   @Column(name = "allow_edit_team_name", nullable = false)
   private boolean allowEditTeamName;
+
+  @Column(name = "allow_create_user_match", nullable = false)
+  private boolean allowCreateUserMatch;
 
   @Override
   public int hashCode() {
