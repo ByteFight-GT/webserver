@@ -232,6 +232,8 @@ Table game_matches {
   competition_id bigint [not null, ref: > competitions.id]
   ladder varchar(50) [not null]
 
+  initiating_team_id bigint [ref: > teams.id]
+
   team_a_id bigint [not null, ref: > teams.id]
   team_b_id bigint [not null, ref: > teams.id]
 
