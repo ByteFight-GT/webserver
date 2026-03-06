@@ -23,10 +23,6 @@ public class TeamGlickoHistoryDto {
 
   public static TeamGlickoHistoryDto from(
       Competition competition, Team team, String ladder, List<TeamGlickoHistory> histories) {
-    if (histories == null || histories.isEmpty()) {
-      throw new IllegalArgumentException("histories cannot be null or empty");
-    }
-
     List<Long> timestamps = new ArrayList<>(histories.size());
     List<Double> glickos = new ArrayList<>(histories.size());
 
