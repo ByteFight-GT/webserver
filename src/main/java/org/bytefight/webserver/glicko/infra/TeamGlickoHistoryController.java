@@ -30,7 +30,7 @@ public class TeamGlickoHistoryController {
 
   @GetMapping("/{teamUuid}/{ladderSlug}")
   @Operation(summary = "Get a teams Glicko History")
-  public ResponseEntity<List<TeamGlickoHistoryDto>> getGlickoHistoryByTeamUuidAndLadder(
+  public ResponseEntity<TeamGlickoHistoryDto> getGlickoHistoryByTeamUuidAndLadder(
       @PathVariable UUID teamUuid, @PathVariable String ladderSlug) {
     Team team =
         teamService
@@ -39,6 +39,7 @@ public class TeamGlickoHistoryController {
     List<TeamGlickoHistory> teamGlickoHistories =
         glickoService.getTeamGlickoHistoryByTeamAndLadder(team, ladderSlug);
 
-    return ResponseEntity.ok(TeamGlickoHistoryDto.listFrom(teamGlickoHistories));
+    return ResponseEntity.ok(
+        TeamGlickoHistoryDto.from(team.getCompetition(), team, ladderSlug, teamGlickoHistories));
   }
 }
