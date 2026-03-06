@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.bytefight.webserver.storage.domain.FileRecord;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,6 +26,10 @@ public class User extends BaseEntity implements UserDetails {
 
   @Column(name = "is_admin", nullable = false)
   private boolean isAdmin = false;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "resumeFile", nullable = true, unique = true)
+  private FileRecord resume;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
