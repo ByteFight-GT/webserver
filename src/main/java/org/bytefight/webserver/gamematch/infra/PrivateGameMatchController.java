@@ -56,7 +56,13 @@ public class PrivateGameMatchController {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team B not found"));
 
-    if (!teamService.isMember(teamA, player) && !teamService.isMember(teamB, player)) {
+    Team initiatingTeam;
+
+    if (teamService.isMember(teamA, player)) {
+      initiatingTeam = teamA;
+    } else if (teamService.isMember(teamB, player)) {
+      initiatingTeam = teamB;
+    } else {
       throw new ResponseStatusException(
           HttpStatus.FORBIDDEN, "You must be a member of at least one of the teams.");
     }
@@ -91,6 +97,16 @@ public class PrivateGameMatchController {
     if (!ladder.isAllowUserMatches()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Ladder does not allow user created matches.");
+    }
+
+    // rate limiting
+    long currentWaitingMatches =
+        gameMatchService.countTeamQueuedMatchesByLadder(initiatingTeam, ladder);
+
+    if (currentWaitingMatches >= ladder.getMaxQueuedPerTeam()) {
+      throw new ResponseStatusException(
+          HttpStatus.TOO_MANY_REQUESTS,
+          "You already have the maximum number of matches queued. Please wait for some matches to finish before adding more.");
     }
 
     GameMatch gameMatch =

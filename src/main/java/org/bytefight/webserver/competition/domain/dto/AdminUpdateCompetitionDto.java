@@ -1,8 +1,9 @@
 package org.bytefight.webserver.competition.domain.dto;
 
 import jakarta.validation.constraints.Min;
-import java.util.Map;
 import lombok.Value;
+
+import java.util.Map;
 
 @Value
 public class AdminUpdateCompetitionDto {
