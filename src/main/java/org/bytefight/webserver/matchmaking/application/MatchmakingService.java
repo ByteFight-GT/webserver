@@ -39,6 +39,12 @@ public class MatchmakingService {
       throw new IllegalArgumentException("Competition is not active");
     }
 
+    // Create and save the event immediately to prevent duplicate scheduling
+    // from concurrent polls while the rest of matchmaking is processing
+    MatchmakingEvent event =
+        MatchmakingEvent.builder().competition(competition).ladder(ladder).build();
+    matchMakingEventRepository.saveAndFlush(event);
+
     List<Team> playableTeams = teamService.getTeamsWithSubmission(competition);
     List<TeamStats> teamStats =
         teamStatsRepository.findAllByCompetitionAndLadderAndTeamIn(
@@ -46,9 +52,6 @@ public class MatchmakingService {
     Map<Long, TeamStats> statsByTeamId =
         teamStats.stream()
             .collect(Collectors.toMap(ts -> ts.getTeam().getId(), Function.identity()));
-
-    MatchmakingEvent event =
-        MatchmakingEvent.builder().competition(competition).ladder(ladder).build();
 
     List<Pair<Team, TeamStats>> participants =
         playableTeams.stream()
@@ -65,8 +68,6 @@ public class MatchmakingService {
             .toList();
 
     List<GameMatch> matches = generateMatches(event, ladder, participants);
-
-    matchMakingEventRepository.save(event);
 
     for (GameMatch match : matches) {
       gameMatchService.scheduleMatch(match);
