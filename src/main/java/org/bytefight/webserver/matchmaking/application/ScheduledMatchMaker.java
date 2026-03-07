@@ -8,10 +8,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.ladder.infra.LadderRepository;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.infra.MatchMakingEventRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class ScheduledMatchMaker {
 
   private final MatchmakingService matchmakingService;
   private final LadderRepository ladderRepository;
+  private final MatchMakingEventRepository matchMakingEventRepository;
 
   @Scheduled(fixedRate = 60000)
   @Transactional
@@ -66,7 +70,9 @@ public class ScheduledMatchMaker {
       return;
     }
 
-    Instant windowStart = now.minus(POLLING_INTERVAL_SECONDS, ChronoUnit.SECONDS);
+    // Subtract 1 extra second to handle edge case where windowStart lands exactly on a cron time
+    // (cron.next() returns the NEXT match after the input, so it would skip the current match)
+    Instant windowStart = now.minus(POLLING_INTERVAL_SECONDS + 1, ChronoUnit.SECONDS);
     LocalDateTime windowStartLocal = LocalDateTime.ofInstant(windowStart, ZoneOffset.UTC);
     LocalDateTime nextExecution = cronExpression.next(windowStartLocal);
 
@@ -77,6 +83,17 @@ public class ScheduledMatchMaker {
     Instant nextExecutionInstant = nextExecution.toInstant(ZoneOffset.UTC);
 
     if (!nextExecutionInstant.isAfter(now)) {
+      // Check if we already ran matchmaking for this cron trigger time
+      Optional<MatchmakingEvent> lastEvent =
+          matchMakingEventRepository.findFirstByCompetitionAndLadderOrderByCreatedAtDesc(
+              competition, ladder.getLadder());
+
+      if (lastEvent.isPresent()
+          && !lastEvent.get().getCreatedAt().isBefore(nextExecutionInstant)) {
+        // Already ran matchmaking for this cron trigger, skip to prevent duplicate runs
+        return;
+      }
+
       log.info(
           "Running scheduled matchmaking for ladder '{}' (competition '{}')",
           ladder.getLadder(),
