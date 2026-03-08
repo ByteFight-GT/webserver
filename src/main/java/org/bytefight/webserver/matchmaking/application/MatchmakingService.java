@@ -15,7 +15,6 @@ import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
-import org.bytefight.webserver.matchmaking.infra.MatchMakingEventRepository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ public class MatchmakingService {
   private final TeamStatsService teamStatsService;
   private final GameMatchService gameMatchService;
   private final TeamStatsRepository teamStatsRepository;
-  private final MatchMakingEventRepository matchMakingEventRepository;
+  private final MatchmakingEventCreator matchmakingEventCreator;
 
   @Transactional
   public MatchmakingEvent createAndScheduleEvent(Competition competition, String ladder) {
@@ -39,11 +38,9 @@ public class MatchmakingService {
       throw new IllegalArgumentException("Competition is not active");
     }
 
-    // Create and save the event immediately to prevent duplicate scheduling
-    // from concurrent polls while the rest of matchmaking is processing
-    MatchmakingEvent event =
-        MatchmakingEvent.builder().competition(competition).ladder(ladder).build();
-    matchMakingEventRepository.saveAndFlush(event);
+    // Create event in a separate transaction (REQUIRES_NEW) so it commits immediately.
+    // This ensures subsequent polls see the event even if match scheduling takes a long time.
+    MatchmakingEvent event = matchmakingEventCreator.create(competition, ladder);
 
     List<Team> playableTeams = teamService.getTeamsWithSubmission(competition);
     List<TeamStats> teamStats =
