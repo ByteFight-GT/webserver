@@ -34,6 +34,10 @@ public class GameMatch extends AuditableEntity {
   @Column(name = "ladder", nullable = false, length = 50)
   private String ladder;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "initiating_team_id")
+  private Team initiatingTeam;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "team_a_id", nullable = false)
   private Team teamA;

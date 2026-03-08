@@ -97,12 +97,15 @@ Table competitions {
   max_players_per_team integer [not null]
   team_submission_storage_size bigint [not null, default: 0]
 
+  settings jsonb [not null, default: '{}']
+
   allow_create_team boolean [not null, default: false]
   allow_join_team boolean [not null, default: false]
   allow_leave_team boolean [not null, default: false]
   allow_new_submission boolean [not null, default: false]
   allow_set_submission boolean [not null, default: false]
   allow_edit_team_name boolean [not null, default: false]
+  allow_create_user_match boolean [not null, default: false]
 }
 
 Table ladders {
@@ -113,7 +116,9 @@ Table ladders {
 
   allow_user_matches boolean [not null, default: false]
   scheduled_matchmaking_enabled boolean [not null, default: false]
-  matchmaking_interval_seconds integer
+  scheduled_matchmaking_cron text
+
+  max_queued_per_team integer [not null, default: 10]
 
   glicko_default_rating float8 [not null]
   glicko_default_rd float8 [not null]
@@ -226,6 +231,8 @@ Table game_matches {
   uuid uuid [not null, default: `gen_random_uuid()`]
   competition_id bigint [not null, ref: > competitions.id]
   ladder varchar(50) [not null]
+
+  initiating_team_id bigint [ref: > teams.id]
 
   team_a_id bigint [not null, ref: > teams.id]
   team_b_id bigint [not null, ref: > teams.id]

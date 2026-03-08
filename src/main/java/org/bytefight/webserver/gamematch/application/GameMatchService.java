@@ -19,14 +19,14 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
-import org.bytefight.webserver.team.domain.dto.StatsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +47,30 @@ public class GameMatchService {
 
   public GameMatch createMatch(
       User creatingUser,
+      Team teamA,
+      Team teamB,
+      Submission submissionA,
+      Submission submissionB,
+      String ladder,
+      MatchReason reason,
+      Map<String, Object> matchSettings,
+      MatchmakingEvent matchmakingEvent) {
+    return createMatch(
+        creatingUser,
+        null,
+        teamA,
+        teamB,
+        submissionA,
+        submissionB,
+        ladder,
+        reason,
+        matchSettings,
+        matchmakingEvent);
+  }
+
+  public GameMatch createMatch(
+      User creatingUser,
+      Team initiatingTeam,
       Team teamA,
       Team teamB,
       Submission submissionA,
@@ -78,6 +102,7 @@ public class GameMatchService {
     gameMatch.setLadder(ladder.trim().toLowerCase());
     gameMatch.setReason(reason);
     gameMatch.setMatchmakingEvent(matchmakingEvent);
+    gameMatch.setInitiatingTeam(initiatingTeam);
 
     gameMatch.setMatchSettings(Objects.requireNonNullElse(matchSettings, Collections.emptyMap()));
 
@@ -134,6 +159,17 @@ public class GameMatchService {
         };
 
     return gameMatchRepository.findAll(spec, page);
+  }
+
+  public Page<GameMatch> getFullPaginatedQueue(Competition competition, Pageable page) {
+    return gameMatchRepository.findByCompetitionAndStatus(
+        competition,
+        Set.of(
+            MatchStatus.created,
+            MatchStatus.scheduling,
+            MatchStatus.waiting,
+            MatchStatus.in_progress),
+        page);
   }
 
   public GameMatchDto getDTOById(Long id) {
@@ -220,84 +256,8 @@ public class GameMatchService {
     return job;
   }
 
-  public List<GameMatchDto> getAllTeamMatches(String teamUuid) {
-    return null;
-    //        return gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
-    // List.of(MatchStatus.FAILED)).stream()
-    //                .filter((match) -> match.getReason() != MatchReason.TOURNAMENT)
-    //                .map(GameMatchDto::fromEntity)
-    //                .toList();
-  }
-
-  public Page<GameMatchDto> getTeamMatches(String teamUuid, int page, int size) {
-    //        PageRequest pageable = PageRequest.of(page, size,
-    // Sort.by("processedAt").descending());
-    //        Page<GameMatch> matches =
-    // gameMatchRepository.findTeamMatches(UUID.fromString(teamUuid),
-    //                List.of(MatchStatus.FAILED), List.of(MatchReason.TOURNAMENT), pageable);
-
-    //        return matches.map(GameMatchDto::fromEntity);
-
-    return null;
-  }
-
-  public Page<GameMatchDto> getTeamMatches(
-      String teamUuid, String otherTeamUuid, int page, int size) {
-    PageRequest pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-
-    //        Page<GameMatch> matches = gameMatchRepository.findTeamMatches(
-    //                UUID.fromString(teamUuid),
-    //                UUID.fromString(otherTeamUuid),
-    //                List.of(MatchStatus.FAILED),
-    //                List.of(MatchReason.TOURNAMENT),
-    //                pageable);
-    //
-    //        return matches.map(GameMatchDto::fromEntity);
-
-    return null;
-  }
-
-  private Page<GameMatchDto> processMatches(Page<GameMatch> matches, PageRequest pageable) {
-    //        List<GameMatchDto> filteredMatches = matches.getContent()
-    //                .stream()
-    //                .filter(match -> match.getReason() != MatchReason.TOURNAMENT)
-    //                .map(GameMatchDto::fromEntity)
-    //                .toList();
-    //
-    //        return new PageImpl<>(filteredMatches, pageable, matches.getTotalElements());
-
-    return null;
-  }
-
-  public StatsDTO getTeamStatsByMatchReason(String teamUuid, MatchReason reason) {
-    List<GameMatch> matches =
-        gameMatchRepository.findTeamMatchesByReason(UUID.fromString(teamUuid), List.of(reason));
-    int wins = 0;
-    int losses = 0;
-    int draws = 0;
-    //        for (GameMatch match : matches) {
-    //            if (reason == MatchReason.SCRIMMAGE &&
-    // match.getTeamOne().equals(match.getTeamTwo())) {
-    //                continue;
-    //            }
-    //            MatchStatus status = match.getStatus();
-    //            boolean isTeamOne = match.getTeamOne().getId().equals(teamId);
-    //            if (status == MatchStatus.DRAW) {
-    //                draws++;
-    //            } else if ((isTeamOne && status == MatchStatus.TEAM_ONE_WIN) ||
-    //                    (!isTeamOne && status == MatchStatus.TEAM_TWO_WIN)) {
-    //                wins++;
-    //            } else if ((isTeamOne && status == MatchStatus.TEAM_TWO_WIN) ||
-    //                    (!isTeamOne && status == MatchStatus.TEAM_ONE_WIN)) {
-    //                losses++;
-    //            }
-    //        }
-
-    return StatsDTO.builder()
-        .numWins(wins)
-        .numLosses(losses)
-        .numDraws(draws)
-        .matchReason(reason)
-        .build();
+  public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {
+    return gameMatchRepository.countTeamMatchesByLadderAndStatus(
+        team, ladder.getLadder(), Set.of(MatchStatus.waiting, MatchStatus.in_progress));
   }
 }

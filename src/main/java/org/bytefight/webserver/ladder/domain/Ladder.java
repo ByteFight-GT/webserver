@@ -26,14 +26,17 @@ public class Ladder extends BaseEntity {
   @Column(name = "ladder", nullable = false, length = 50)
   private String ladder;
 
+  @Column(name = "max_queued_per_team", nullable = false)
+  private int maxQueuedPerTeam;
+
   @Column(name = "allow_user_matches", nullable = false)
   private boolean allowUserMatches = false;
 
   @Column(name = "scheduled_matchmaking_enabled", nullable = false)
   private boolean scheduledMatchmakingEnabled = false;
 
-  @Column(name = "matchmaking_interval_seconds", nullable = true)
-  private Integer matchmakingIntervalSeconds;
+  @Column(name = "scheduled_matchmaking_cron", nullable = true)
+  private String scheduledMatchmakingCron;
 
   @Column(name = "glicko_default_rating", nullable = false)
   private double glickoDefaultRating;

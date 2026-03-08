@@ -19,4 +19,6 @@ public interface LadderRepository
   Optional<Ladder> findByCompetitionAndLadder(Competition competition, String ladder);
 
   Page<Ladder> findByCompetitionId(Long competitionId, Pageable pageable);
+
+  List<Ladder> findAllByScheduledMatchmakingEnabledTrueAndScheduledMatchmakingCronIsNotNull();
 }

@@ -50,4 +50,20 @@ public class PublicGameMatchController {
 
     return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
   }
+
+  @GetMapping("/queue/{competitionSlug}")
+  public ResponseEntity<Page<GameMatchDto>> getCompetitionGameMatchQueue(
+      @PathVariable String competitionSlug,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    PageRequest pageRequest =
+        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "scheduledAt"));
+    Competition competition =
+        competitionService
+            .getCompetitionBySlug(competitionSlug)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Page<GameMatch> gameMatches = gameMatchService.getFullPaginatedQueue(competition, pageRequest);
+
+    return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
+  }
 }

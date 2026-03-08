@@ -21,3 +21,7 @@ springdoc:
   writer-with-order-by-keys: true
   swagger-ui:
     tags-sorter: alpha
+
+gamematch:
+  requeue-stale: true
+  stale-threshold-minutes: 30
