@@ -3,6 +3,8 @@ package org.bytefight.webserver.competition.domain.dto;
 import jakarta.validation.constraints.Min;
 import lombok.Value;
 
+import java.util.Map;
+
 @Value
 public class AdminUpdateCompetitionDto {
   String name;
@@ -15,7 +17,13 @@ public class AdminUpdateCompetitionDto {
   Boolean allowJoinTeam;
   Boolean allowLeaveTeam;
   Boolean allowEditTeamName;
+  Boolean allowCreateUserMatch;
 
   @Min(1)
   Integer maxPlayersPerTeam;
+
+  @Min(0)
+  Long teamSubmissionStorageSize;
+
+  Map<String, Object> settings;
 }

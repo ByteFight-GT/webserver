@@ -1,5 +1,7 @@
 package org.bytefight.webserver.submission.application;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
 import org.bytefight.webserver.submission.domain.Submission;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 public class AdminSubmissionService {
   private final SubmissionRepository submissionRepository;
@@ -43,6 +46,11 @@ public class AdminSubmissionService {
       submission.setValidity(input.getValidity());
       submission = submissionRepository.save(submission);
     }
+    log.info(
+        "Admin created submission: submissionId={}, teamId={}, validity={}",
+        submission.getUuid(),
+        team.getUuid(),
+        submission.getValidity());
     return submission;
   }
 }

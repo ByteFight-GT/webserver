@@ -2,6 +2,7 @@ package org.bytefight.webserver.submission.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,14 +46,16 @@ public class SubmissionService {
     Long currentUsed = submissionRepository.sumUndeletedSubmissionSizeByTeam(team);
     long currentUsedSize = currentUsed != null ? currentUsed : 0L;
     if (currentUsedSize + file.getSize() > storageLimit) {
-        throw new IllegalArgumentException(
-                String.format(
-                        "Team storage limit exceeded: used=%d, uploading=%d, limit=%d",
-                        currentUsedSize,
-                        file.getSize(),
-                        storageLimit
-                )
-        );
+      log.warn(
+          "Storage limit exceeded: teamId={}, used={}, uploading={}, limit={}",
+          team.getUuid(),
+          currentUsedSize,
+          file.getSize(),
+          storageLimit);
+      throw new IllegalArgumentException(
+          String.format(
+              "Team storage limit exceeded: used=%d, uploading=%d, limit=%d",
+              currentUsedSize, file.getSize(), storageLimit));
     }
     FileRecord storedFile =
         storageService.store(
@@ -69,7 +73,14 @@ public class SubmissionService {
       submission.setValidity(SubmissionValidity.not_evaluated);
     }
 
-    return submissionRepository.save(submission);
+    Submission saved = submissionRepository.save(submission);
+    log.info(
+        "Submission created: submissionId={}, teamId={}, size={}, autoSet={}",
+        saved.getUuid(),
+        team.getUuid(),
+        file.getSize(),
+        isAutoSet);
+    return saved;
   }
 
   public Optional<Submission> getSubmissionByTeamAndUuid(Team team, UUID uuid) {
@@ -79,6 +90,10 @@ public class SubmissionService {
   @Transactional
   public void deleteSubmission(Submission submission) {
     if (submission.equals(submission.getTeam().getCurrentSubmission())) {
+      log.warn(
+          "Attempted to delete active submission: submissionId={}, teamId={}",
+          submission.getUuid(),
+          submission.getTeam().getUuid());
       throw new IllegalArgumentException("You can't delete your active submission");
     }
 
@@ -86,21 +101,35 @@ public class SubmissionService {
     submissionRepository.save(submission);
 
     storageService.delete(submission.getFileRecord().getUuid().toString());
+    log.info(
+        "Submission deleted: submissionId={}, teamId={}",
+        submission.getUuid(),
+        submission.getTeam().getUuid());
   }
 
   @Transactional
   public void onSubmissionValidationComplete(Submission submission, boolean isValid) {
     if (isValid) {
-      if (submission.getValidity() == SubmissionValidity.not_evaluated_autoset) {
+      boolean wasAutoSet = submission.getValidity() == SubmissionValidity.not_evaluated_autoset;
+      if (wasAutoSet) {
         submission.getTeam().setCurrentSubmission(submission);
         teamRepository.save(submission.getTeam());
       }
 
       submission.setValidity(SubmissionValidity.valid);
       submissionRepository.save(submission);
+      log.info(
+          "Submission validated: submissionId={}, teamId={}, valid=true, autoSet={}",
+          submission.getUuid(),
+          submission.getTeam().getUuid(),
+          wasAutoSet);
     } else {
       submission.setValidity(SubmissionValidity.invalid);
       submissionRepository.save(submission);
+      log.warn(
+          "Submission validation failed: submissionId={}, teamId={}",
+          submission.getUuid(),
+          submission.getTeam().getUuid());
     }
   }
 
@@ -134,12 +163,22 @@ public class SubmissionService {
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
       if (!teamService.isMember(submission.getTeam(), player)) {
+        log.warn(
+            "Forbidden download attempt: submissionId={}, userId={}",
+            submission.getUuid(),
+            user.getUuid());
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
       }
     }
 
-    return storageService.getDownloadLink(
-        submission.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
+    DownloadLinkDto downloadLink =
+        storageService.getDownloadLink(
+            submission.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
+    log.info(
+        "Submission download link generated: submissionId={}, userId={}",
+        submission.getUuid(),
+        user.getUuid());
+    return downloadLink;
   }
 
   public void validateFile(MultipartFile file) {

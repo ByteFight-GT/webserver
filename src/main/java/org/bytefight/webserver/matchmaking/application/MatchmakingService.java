@@ -1,6 +1,7 @@
 package org.bytefight.webserver.matchmaking.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.Function;
@@ -14,7 +15,6 @@ import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
-import org.bytefight.webserver.matchmaking.infra.MatchMakingEventRepository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.stereotype.Service;
@@ -24,18 +24,23 @@ import com.nimbusds.jose.util.Pair;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MatchmakingService {
   private final TeamService teamService;
   private final TeamStatsService teamStatsService;
   private final GameMatchService gameMatchService;
   private final TeamStatsRepository teamStatsRepository;
-  private final MatchMakingEventRepository matchMakingEventRepository;
+  private final MatchmakingEventCreator matchmakingEventCreator;
 
   @Transactional
   public MatchmakingEvent createAndScheduleEvent(Competition competition, String ladder) {
     if (!competition.isActive()) {
       throw new IllegalArgumentException("Competition is not active");
     }
+
+    // Create event in a separate transaction (REQUIRES_NEW) so it commits immediately.
+    // This ensures subsequent polls see the event even if match scheduling takes a long time.
+    MatchmakingEvent event = matchmakingEventCreator.create(competition, ladder);
 
     List<Team> playableTeams = teamService.getTeamsWithSubmission(competition);
     List<TeamStats> teamStats =
@@ -44,9 +49,6 @@ public class MatchmakingService {
     Map<Long, TeamStats> statsByTeamId =
         teamStats.stream()
             .collect(Collectors.toMap(ts -> ts.getTeam().getId(), Function.identity()));
-
-    MatchmakingEvent event =
-        MatchmakingEvent.builder().competition(competition).ladder(ladder).build();
 
     List<Pair<Team, TeamStats>> participants =
         playableTeams.stream()
@@ -64,11 +66,16 @@ public class MatchmakingService {
 
     List<GameMatch> matches = generateMatches(event, ladder, participants);
 
-    matchMakingEventRepository.save(event);
-
     for (GameMatch match : matches) {
       gameMatchService.scheduleMatch(match);
     }
+
+    log.info(
+        "{} - {}: found {} teams eligible for matchmaking. Scheduled {} matches.",
+        competition.getSlug(),
+        ladder,
+        participants.size(),
+        matches.size());
 
     return event;
   }

@@ -46,28 +46,4 @@ public class TeamGlickoHistory extends BaseEntity {
 
   @Column(name = "new_glicko", nullable = false)
   private double newGlicko;
-
-  public void setTeam(Team team) {
-    this.team = team;
-  }
-
-  public void setCompetition(Competition competition) {
-    this.competition = competition;
-  }
-
-  public void setLadder(String ladder) {
-    this.ladder = ladder;
-  }
-
-  public void setGameMatch(GameMatch gameMatch) {
-    this.gameMatch = gameMatch;
-  }
-
-  public void setOldGlicko(double oldGlicko) {
-    this.oldGlicko = oldGlicko;
-  }
-
-  public void setNewGlicko(double newGlicko) {
-    this.newGlicko = newGlicko;
-  }
 }
