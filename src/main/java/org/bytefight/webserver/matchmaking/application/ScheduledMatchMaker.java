@@ -15,6 +15,8 @@ import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.matchmaking.infra.MatchMakingEventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
@@ -30,8 +32,11 @@ public class ScheduledMatchMaker {
   private final LadderRepository ladderRepository;
   private final MatchMakingEventRepository matchMakingEventRepository;
 
+  @Lazy
+  @Autowired
+  private ScheduledMatchMaker self;
+
   @Scheduled(fixedRate = 60000)
-  @Transactional
   public void runScheduledMatchmaking() {
     List<Ladder> enabledLadders =
         ladderRepository
@@ -41,7 +46,7 @@ public class ScheduledMatchMaker {
 
     for (Ladder ladder : enabledLadders) {
       try {
-        processLadder(ladder, now);
+        self.processLadder(ladder, now);
       } catch (Exception e) {
         log.error(
             "Error processing scheduled matchmaking for ladder {}: {}",
@@ -52,7 +57,8 @@ public class ScheduledMatchMaker {
     }
   }
 
-  private void processLadder(Ladder ladder, Instant now) {
+  @Transactional
+  public void processLadder(Ladder ladder, Instant now) {
     Competition competition = ladder.getCompetition();
 
     if (!competition.isActive()) {
@@ -70,9 +76,7 @@ public class ScheduledMatchMaker {
       return;
     }
 
-    // Subtract 1 extra second to handle edge case where windowStart lands exactly on a cron time
-    // (cron.next() returns the NEXT match after the input, so it would skip the current match)
-    Instant windowStart = now.minus(POLLING_INTERVAL_SECONDS + 1, ChronoUnit.SECONDS);
+    Instant windowStart = now.minus(POLLING_INTERVAL_SECONDS, ChronoUnit.SECONDS);
     LocalDateTime windowStartLocal = LocalDateTime.ofInstant(windowStart, ZoneOffset.UTC);
     LocalDateTime nextExecution = cronExpression.next(windowStartLocal);
 
