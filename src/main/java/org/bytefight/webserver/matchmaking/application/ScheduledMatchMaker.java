@@ -36,7 +36,7 @@ public class ScheduledMatchMaker {
   @Autowired
   private ScheduledMatchMaker self;
 
-  @Scheduled(fixedRate = 60000)
+  @Scheduled(cron = "0 * * * * *", zone = "UTC")
   public void runScheduledMatchmaking() {
     List<Ladder> enabledLadders =
         ladderRepository
@@ -46,7 +46,7 @@ public class ScheduledMatchMaker {
 
     for (Ladder ladder : enabledLadders) {
       try {
-        self.processLadder(ladder, now);
+        self.processLadder(ladder.getId(), now);
       } catch (Exception e) {
         log.error(
             "Error processing scheduled matchmaking for ladder {}: {}",
@@ -58,7 +58,12 @@ public class ScheduledMatchMaker {
   }
 
   @Transactional
-  public void processLadder(Ladder ladder, Instant now) {
+  public void processLadder(Long ladderId, Instant now) {
+    Ladder ladder = ladderRepository.findById(ladderId).orElse(null);
+    if (ladder == null) {
+      return;
+    }
+
     Competition competition = ladder.getCompetition();
 
     if (!competition.isActive()) {
