@@ -54,6 +54,7 @@ public class GameMatchResultHandler {
             .orElseThrow(() -> new IllegalArgumentException("Game match not found"));
 
     gameMatch.setStatus(result.getStatus());
+    gameMatch.setFinishedAt(Instant.now());
     gameMatchRepository.save(gameMatch);
 
     if (gameMatch.getReason() != MatchReason.validation) {
