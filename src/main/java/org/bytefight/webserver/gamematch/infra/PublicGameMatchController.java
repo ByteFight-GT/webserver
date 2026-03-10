@@ -7,6 +7,8 @@ import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +38,11 @@ public class PublicGameMatchController {
   public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
       @RequestParam String competitionSlug,
       @RequestParam(required = false) String teamUuid,
+      @RequestParam(required = false) String initiatingTeamUuid,
+      @RequestParam(required = false) String submissionUuid,
       @RequestParam(required = false) String ladder,
+      @RequestParam(required = false) MatchReason matchReason,
+      @RequestParam(required = false) MatchStatus matchStatus,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     PageRequest pageRequest =
@@ -46,7 +52,15 @@ public class PublicGameMatchController {
             .getCompetitionBySlug(competitionSlug)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     Page<GameMatch> gameMatches =
-        gameMatchService.getPaginatedMatches(competition, ladder, teamUuid, pageRequest);
+        gameMatchService.getPaginatedMatches(
+            competition,
+            ladder,
+            teamUuid,
+            initiatingTeamUuid,
+            submissionUuid,
+            matchReason,
+            matchStatus,
+            pageRequest);
 
     return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
   }
