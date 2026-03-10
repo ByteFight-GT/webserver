@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
-import org.bytefight.webserver.glicko.domain.dto.AggregateTeamStatsDto;
 import org.bytefight.webserver.glicko.domain.dto.TeamStatsDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
@@ -43,14 +42,11 @@ public class TeamStatsController {
 
   @GetMapping("/{teamUuid}")
   @Operation(summary = "Get a teams stats for all ladders")
-  public ResponseEntity<AggregateTeamStatsDto> getAggregateTeamStatsByUuid(
-      @PathVariable UUID teamUuid) {
+  public ResponseEntity<TeamStatsDto> getAggregateTeamStatsByUuid(@PathVariable UUID teamUuid) {
     Team team =
         teamService
             .getTeamByUuid(teamUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    TeamStats teamStats = teamStatsService.getAggregateWDL(team);
-
-    return ResponseEntity.ok(AggregateTeamStatsDto.from(teamStats));
+    return ResponseEntity.ok(teamStatsService.getAggregateWDL(team));
   }
 }

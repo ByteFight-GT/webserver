@@ -32,9 +32,7 @@ public class ScheduledMatchMaker {
   private final LadderRepository ladderRepository;
   private final MatchMakingEventRepository matchMakingEventRepository;
 
-  @Lazy
-  @Autowired
-  private ScheduledMatchMaker self;
+  @Lazy @Autowired private ScheduledMatchMaker self;
 
   @Scheduled(cron = "0 * * * * *", zone = "UTC")
   public void runScheduledMatchmaking() {
@@ -97,8 +95,7 @@ public class ScheduledMatchMaker {
           matchMakingEventRepository.findFirstByCompetitionAndLadderOrderByCreatedAtDesc(
               competition, ladder.getLadder());
 
-      if (lastEvent.isPresent()
-          && !lastEvent.get().getCreatedAt().isBefore(nextExecutionInstant)) {
+      if (lastEvent.isPresent() && !lastEvent.get().getCreatedAt().isBefore(nextExecutionInstant)) {
         // Already ran matchmaking for this cron trigger, skip to prevent duplicate runs
         return;
       }
