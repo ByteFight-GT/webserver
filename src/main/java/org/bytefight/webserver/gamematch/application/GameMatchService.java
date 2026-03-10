@@ -133,7 +133,14 @@ public class GameMatchService {
   }
 
   public Page<GameMatch> getPaginatedMatches(
-      Competition competition, String ladderSlug, String teamUuid, PageRequest page) {
+      Competition competition,
+      String ladderSlug,
+      String teamUuid,
+      String initiatingTeamUuid,
+      String submissionUuid,
+      MatchReason matchReason,
+      MatchStatus matchStatus,
+      PageRequest page) {
     Specification<GameMatch> spec =
         (root, query, cb) -> {
           List<Predicate> predicates = new ArrayList<>();
@@ -146,11 +153,33 @@ public class GameMatchService {
             predicates.add(cb.equal(root.get("ladder"), ladderSlug));
           }
 
+          if (matchReason != null) {
+            predicates.add(cb.equal(root.get("reason"), matchReason));
+          }
+
+          if (matchStatus != null) {
+            predicates.add(cb.equal(root.get("status"), matchStatus));
+          }
+
           if (teamUuid != null) {
+            UUID teamId = UUID.fromString(teamUuid);
             predicates.add(
                 cb.or(
-                    cb.equal(root.get("teamA").get("uuid"), UUID.fromString(teamUuid)),
-                    cb.equal(root.get("teamB").get("uuid"), UUID.fromString(teamUuid))));
+                    cb.equal(root.get("teamA").get("uuid"), teamId),
+                    cb.equal(root.get("teamB").get("uuid"), teamId)));
+          }
+
+          if (initiatingTeamUuid != null) {
+            predicates.add(
+                cb.equal(root.get("initiatingTeam").get("uuid"), UUID.fromString(initiatingTeamUuid)));
+          }
+
+          if (submissionUuid != null) {
+            UUID submissionId = UUID.fromString(submissionUuid);
+            predicates.add(
+                cb.or(
+                    cb.equal(root.get("submissionA").get("uuid"), submissionId),
+                    cb.equal(root.get("submissionB").get("uuid"), submissionId)));
           }
 
           return predicates.isEmpty()
