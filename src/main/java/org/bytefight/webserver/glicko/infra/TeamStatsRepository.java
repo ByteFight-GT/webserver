@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.glicko.domain.TeamStats;
+import org.bytefight.webserver.glicko.domain.TeamStatsAggregate;
 import org.bytefight.webserver.leaderboard.domain.LeaderboardRow;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,21 @@ public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
 
   List<TeamStats> findAllByCompetitionAndLadderOrderByGlickoRatingDesc(
       Competition competition, String ladder);
+
+  @Query(
+      """
+    SELECT
+        t.team as team,
+        SUM(t.matchesPlayed) as matchesPlayed,
+        SUM(t.wins) as wins,
+        SUM(t.losses) as losses,
+        SUM(t.draws) as draws
+    FROM TeamStats t
+    WHERE t.team = :team AND t.ladder IN :ladders
+    GROUP BY t.team
+""")
+  TeamStatsAggregate getTeamStatsAggregateByTeamAndLadder(
+      @Param("team") Team team, @Param("ladders") Collection<String> ladders);
 
   @Query(
       value =
