@@ -91,7 +91,7 @@ public interface GameMatchRepository
       """
     SELECT gm
     FROM GameMatch gm
-    WHERE gm.status = 'waiting'
+    WHERE gm.status IN ('waiting', 'in_progress')
     AND gm.scheduledAt <= :cutoff
 """)
   List<GameMatch> findStaleWaitingMatches(@Param("cutoff") Instant cutoff);
