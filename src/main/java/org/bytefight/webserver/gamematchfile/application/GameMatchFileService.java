@@ -96,7 +96,10 @@ public class GameMatchFileService {
 
     FileRecord storedFile =
         storageService.store(
-            file, "game_match_files/" + gameMatch.getUuid() + "/", file.getOriginalFilename());
+            file,
+            "game_match_files/" + gameMatch.getUuid() + "/",
+            file.getOriginalFilename(),
+            false);
 
     GameMatchFile gameMatchFile = new GameMatchFile();
     gameMatchFile.setUuid(storedFile.getUuid());

@@ -5,8 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URLConnection;
 import java.nio.file.*;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -28,6 +29,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.github.luben.zstd.ZstdInputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +66,12 @@ public class LocalStorageService {
 
   public FileRecord store(MultipartFile file, String logicalPath, String desiredName)
       throws IOException {
+    return store(file, logicalPath, desiredName, false);
+  }
+
+  public FileRecord store(
+      MultipartFile file, String logicalPath, String desiredName, boolean compress)
+      throws IOException {
     if (file == null || file.isEmpty()) {
       throw new IllegalArgumentException("File is null or empty");
     }
@@ -91,9 +100,10 @@ public class LocalStorageService {
       throw new RuntimeException(e);
     }
     try (InputStream in = file.getInputStream();
-        DigestInputStream dis = new DigestInputStream(in, digest);
-        OutputStream out = Files.newOutputStream(tempTarget, StandardOpenOption.CREATE_NEW); ) {
-      dis.transferTo(out);
+        OutputStream fileOut = Files.newOutputStream(tempTarget, StandardOpenOption.CREATE_NEW);
+        DigestOutputStream digestOut = new DigestOutputStream(fileOut, digest);
+        OutputStream out = wrapCompressionOutput(digestOut, compress)) {
+      in.transferTo(out);
     } catch (IOException | RuntimeException ex) {
       deleteQuietly(tempTarget);
       throw ex;
@@ -112,6 +122,7 @@ public class LocalStorageService {
     rec.setSize(size);
     rec.setSha256(sha256);
     rec.setStoragePath(target.toString());
+    rec.setCompressionCodec(compress ? "zstd" : null);
 
     try {
       rec = fileRecordRepository.save(rec);
@@ -141,6 +152,14 @@ public class LocalStorageService {
     }
 
     return savedRecord;
+  }
+
+  private OutputStream wrapCompressionOutput(OutputStream out, boolean compress)
+      throws IOException {
+    if (!compress) {
+      return out;
+    }
+    return new com.github.luben.zstd.ZstdOutputStream(out);
   }
 
   private void finalizeFile(Path tempTarget, Path target, FileRecord record) {
@@ -181,6 +200,109 @@ public class LocalStorageService {
     Path p = Path.of(rec.getStoragePath());
     if (!Files.exists(p)) throw new FileNotFoundException(uuid);
     return new UrlResource(p.toUri());
+  }
+
+  public DownloadStream openDownloadStream(String uuid) throws IOException {
+    FileRecord rec =
+        fileRecordRepository
+            .findByUuidAndIsDeletedFalse(UUID.fromString(uuid))
+            .orElseThrow(FileNotFoundException::new);
+
+    Path path = Path.of(rec.getStoragePath());
+    if (!Files.exists(path)) throw new FileNotFoundException(uuid);
+
+    InputStream stream = Files.newInputStream(path, StandardOpenOption.READ);
+
+    boolean isZstd = isZstdCodec(rec.getCompressionCodec());
+    if (isZstd) {
+      stream = new ZstdInputStream(stream);
+      stream = applyDecompressionLimit(stream);
+    }
+
+    String filename = resolveDownloadFilename(rec.getFilename(), isZstd);
+    String contentType = resolveDownloadContentType(rec.getContentType(), filename, isZstd);
+
+    return new DownloadStream(stream, filename, contentType, rec.getSha256(), isZstd);
+  }
+
+  private InputStream applyDecompressionLimit(InputStream stream) {
+    Long maxBytes = props.maxDecompressedBytes();
+    if (maxBytes == null || maxBytes <= 0) {
+      return stream;
+    }
+
+    return new FilterInputStream(stream) {
+      private long seen = 0L;
+
+      @Override
+      public int read() throws IOException {
+        int value = super.read();
+        if (value >= 0) {
+          increment(1);
+        }
+        return value;
+      }
+
+      @Override
+      public int read(byte[] b, int off, int len) throws IOException {
+        int count = super.read(b, off, len);
+        if (count > 0) {
+          increment(count);
+        }
+        return count;
+      }
+
+      private void increment(int count) throws DecompressionLimitExceededException {
+        seen += count;
+        if (seen > maxBytes) {
+          throw new DecompressionLimitExceededException(
+              "Decompressed size exceeds limit: " + maxBytes);
+        }
+      }
+    };
+  }
+
+  private static boolean isZstdCodec(String codec) {
+    return codec != null && codec.equalsIgnoreCase("zstd");
+  }
+
+  private static String resolveDownloadFilename(String filename, boolean isZstd) {
+    if (!isZstd || filename == null) {
+      return filename;
+    }
+    return stripZstdExtension(filename);
+  }
+
+  private static String stripZstdExtension(String filename) {
+    String lower = filename.toLowerCase(Locale.ROOT);
+    if (lower.endsWith(".zst")) {
+      return filename.substring(0, filename.length() - 4);
+    }
+    if (lower.endsWith(".zstd")) {
+      return filename.substring(0, filename.length() - 5);
+    }
+    return filename;
+  }
+
+  private static String resolveDownloadContentType(
+      String storedContentType, String filename, boolean isZstd) {
+    if (!isZstd) {
+      return storedContentType;
+    }
+
+    String guessed = filename != null ? URLConnection.guessContentTypeFromName(filename) : null;
+    if (guessed != null) {
+      return guessed;
+    }
+    if (storedContentType != null && !isZstdContentType(storedContentType)) {
+      return storedContentType;
+    }
+    return "application/octet-stream";
+  }
+
+  private static boolean isZstdContentType(String contentType) {
+    String normalized = contentType.toLowerCase(Locale.ROOT);
+    return normalized.equals("application/zstd") || normalized.equals("application/x-zstd");
   }
 
   public DownloadLinkDto getDownloadLink(String uuid, Duration ttl) {
@@ -244,6 +366,15 @@ public class LocalStorageService {
       Files.deleteIfExists(path);
     } catch (IOException ex) {
       log.warn("Failed to delete storage file: uuid={} path={}", uuid, path, ex);
+    }
+  }
+
+  public record DownloadStream(
+      InputStream stream, String filename, String contentType, String sha256, boolean decompressed) {}
+
+  public static class DecompressionLimitExceededException extends IOException {
+    public DecompressionLimitExceededException(String message) {
+      super(message);
     }
   }
 }
