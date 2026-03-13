@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.github.luben.zstd.Zstd;
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.storage.application.HmacService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -134,6 +135,30 @@ class StorageControllerIT extends FullStackIntegrationTestBase {
     String requestPath = uri.getPath() + "?" + tamperedSig;
 
     mockMvc.perform(get(requestPath)).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void downloadSignedFileDecompressesZstd() throws Exception {
+    byte[] originalBytes = "zstd payload".getBytes();
+    byte[] compressedBytes = Zstd.compress(originalBytes);
+    MockMultipartFile file =
+        new MockMultipartFile("file", "payload.txt.zst", "application/zstd", compressedBytes);
+
+    FileRecord record = localStorageService.store(file, "downloads/test/", "payload.txt.zst");
+    record.setCompressionCodec("zstd");
+    fileRecordRepository.save(record);
+
+    DownloadLinkDto link =
+        localStorageService.getDownloadLink(record.getUuid().toString(), Duration.ofMinutes(5));
+    java.net.URI uri = getField(link, "uri");
+
+    String requestPath = uri.getPath() + "?" + uri.getQuery();
+
+    mockMvc
+        .perform(get(requestPath))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("text/plain"))
+        .andExpect(content().bytes(originalBytes));
   }
 
   @Test
