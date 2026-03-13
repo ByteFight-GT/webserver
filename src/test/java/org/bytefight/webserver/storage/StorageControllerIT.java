@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.github.luben.zstd.Zstd;
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.storage.application.HmacService;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -140,9 +139,8 @@ class StorageControllerIT extends FullStackIntegrationTestBase {
   @Test
   void downloadSignedFileDecompressesZstd() throws Exception {
     byte[] originalBytes = "zstd payload".getBytes();
-    byte[] compressedBytes = Zstd.compress(originalBytes);
     MockMultipartFile file =
-        new MockMultipartFile("file", "payload.txt.zst", "application/zstd", compressedBytes);
+        new MockMultipartFile("file", "payload.txt.zst", "application/zstd", originalBytes);
 
     FileRecord record =
         localStorageService.store(file, "downloads/test/", "payload.txt.zst", true);
