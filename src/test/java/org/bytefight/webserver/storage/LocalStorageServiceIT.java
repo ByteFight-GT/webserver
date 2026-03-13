@@ -2,6 +2,7 @@ package org.bytefight.webserver.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,7 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.github.luben.zstd.ZstdInputStream;
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.StoredObject;
@@ -150,6 +152,25 @@ class LocalStorageServiceIT extends FullStackIntegrationTestBase {
     UUID uuid = getField(record, "uuid");
     assertThat(sha256).isEqualTo(sha256Hex(content));
     assertThat(fileRecordRepository.findByUuid(uuid)).isPresent();
+  }
+
+  @Test
+  void storeCompressesWhenEnabled() throws Exception {
+    byte[] content = "compress me".getBytes();
+    MockMultipartFile file = new MockMultipartFile("file", "payload.txt", "text/plain", content);
+
+    localStorageService.store(file, "submissions/test/", "payload.txt", true);
+
+    var record = fileRecordRepository.findAll().get(0);
+    String compressionCodec = getField(record, "compressionCodec");
+    String storagePath = getField(record, "storagePath");
+    assertThat(compressionCodec).isEqualTo("zstd");
+
+    byte[] compressed = Files.readAllBytes(Path.of(storagePath));
+    try (ZstdInputStream zstdIn = new ZstdInputStream(new ByteArrayInputStream(compressed))) {
+      byte[] roundTrip = zstdIn.readAllBytes();
+      assertThat(roundTrip).isEqualTo(content);
+    }
   }
 
   private static String sha256Hex(byte[] content) {

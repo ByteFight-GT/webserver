@@ -7,7 +7,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URLConnection;
 import java.nio.file.*;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -66,6 +66,12 @@ public class LocalStorageService {
 
   public FileRecord store(MultipartFile file, String logicalPath, String desiredName)
       throws IOException {
+    return store(file, logicalPath, desiredName, false);
+  }
+
+  public FileRecord store(
+      MultipartFile file, String logicalPath, String desiredName, boolean compress)
+      throws IOException {
     if (file == null || file.isEmpty()) {
       throw new IllegalArgumentException("File is null or empty");
     }
@@ -94,9 +100,10 @@ public class LocalStorageService {
       throw new RuntimeException(e);
     }
     try (InputStream in = file.getInputStream();
-        DigestInputStream dis = new DigestInputStream(in, digest);
-        OutputStream out = Files.newOutputStream(tempTarget, StandardOpenOption.CREATE_NEW); ) {
-      dis.transferTo(out);
+        OutputStream fileOut = Files.newOutputStream(tempTarget, StandardOpenOption.CREATE_NEW);
+        DigestOutputStream digestOut = new DigestOutputStream(fileOut, digest);
+        OutputStream out = wrapCompressionOutput(digestOut, compress)) {
+      in.transferTo(out);
     } catch (IOException | RuntimeException ex) {
       deleteQuietly(tempTarget);
       throw ex;
@@ -115,6 +122,7 @@ public class LocalStorageService {
     rec.setSize(size);
     rec.setSha256(sha256);
     rec.setStoragePath(target.toString());
+    rec.setCompressionCodec(compress ? "zstd" : null);
 
     try {
       rec = fileRecordRepository.save(rec);
@@ -144,6 +152,14 @@ public class LocalStorageService {
     }
 
     return savedRecord;
+  }
+
+  private OutputStream wrapCompressionOutput(OutputStream out, boolean compress)
+      throws IOException {
+    if (!compress) {
+      return out;
+    }
+    return new com.github.luben.zstd.ZstdOutputStream(out);
   }
 
   private void finalizeFile(Path tempTarget, Path target, FileRecord record) {

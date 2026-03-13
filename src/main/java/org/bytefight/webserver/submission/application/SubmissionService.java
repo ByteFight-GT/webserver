@@ -59,7 +59,7 @@ public class SubmissionService {
     }
     FileRecord storedFile =
         storageService.store(
-            file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename());
+            file, "submissions/" + team.getUuid() + "/", file.getOriginalFilename(), false);
 
     Submission submission = new Submission();
     submission.setUuid(storedFile.getUuid());
