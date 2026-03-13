@@ -32,4 +32,7 @@ public class FileRecord extends SoftDeletableEntity {
 
   @Column(name = "storage_path", nullable = false)
   private String storagePath;
+
+  @Column(name = "compression_codec", nullable = true)
+  private String compressionCodec;
 }

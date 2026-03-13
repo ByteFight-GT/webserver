@@ -37,7 +37,7 @@ public class Competition extends BaseEntity {
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "settings", nullable = false)
-  private Map<String, Object> settings;
+  private Map<String, Object> settings = Map.of();
 
   @Column(name = "max_players_per_team", nullable = false)
   private int maxPlayersPerTeam = 2;

@@ -63,6 +63,8 @@ Table file_records {
   sha256 varchar [not null]
   storage_path varchar [not null]
 
+  compression_codec varchar(32)
+
   ~soft_delete_template
 }
 

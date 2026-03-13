@@ -137,6 +137,28 @@ class StorageControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
+  void downloadSignedFileDecompressesZstd() throws Exception {
+    byte[] originalBytes = "zstd payload".getBytes();
+    MockMultipartFile file =
+        new MockMultipartFile("file", "payload.txt.zst", "application/zstd", originalBytes);
+
+    FileRecord record =
+        localStorageService.store(file, "downloads/test/", "payload.txt.zst", true);
+
+    DownloadLinkDto link =
+        localStorageService.getDownloadLink(record.getUuid().toString(), Duration.ofMinutes(5));
+    java.net.URI uri = getField(link, "uri");
+
+    String requestPath = uri.getPath() + "?" + uri.getQuery();
+
+    mockMvc
+        .perform(get(requestPath))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("text/plain"))
+        .andExpect(content().bytes(originalBytes));
+  }
+
+  @Test
   void downloadSignedFileMissingReturnsNotFound() throws Exception {
     UUID missingUuid = UUID.randomUUID();
     FileRecord record = new FileRecord();
