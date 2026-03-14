@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.github.luben.zstd.ZstdInputStream;
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.StoredObject;
@@ -25,6 +24,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.github.luben.zstd.ZstdInputStream;
 
 class LocalStorageServiceIT extends FullStackIntegrationTestBase {
   private static Path storageRoot;
