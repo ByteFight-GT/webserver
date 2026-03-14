@@ -20,6 +20,10 @@ storage:
   root: ./storage
   hmac-secret: secret
 
+turnstile:
+  enabled: true
+  secret-key: 1x0000000000000000000000000000000AA
+
 logging:
   file:
     name: logs/application.log
