@@ -29,5 +29,4 @@ storage:
 
 turnstile:
   enabled: ${TURNSTILE_ENABLED:true}
-  site-key: ${TURNSTILE_SITE_KEY:}
   secret-key: ${TURNSTILE_SECRET_KEY:}
