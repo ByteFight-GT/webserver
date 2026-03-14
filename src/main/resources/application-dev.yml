@@ -21,9 +21,8 @@ storage:
   hmac-secret: secret
 
 turnstile:
-  enabled: false
-  site-key: 1x00000000000000000000AA
-  secret-key: 2x0000000000000000000000000000000AA
+  enabled: true
+  secret-key: 1x0000000000000000000000000000000AA
 
 logging:
   file:

@@ -19,6 +19,7 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,6 +40,7 @@ public class PrivateGameMatchController {
   private final GameMatchService gameMatchService;
 
   @PostMapping
+  @RequireTurnstile
   public ResponseEntity<GameMatchDto> createGameMatch(
       @AuthenticationPrincipal User user, @RequestBody CreateMatchDto createMatchDto) {
     Player player =
