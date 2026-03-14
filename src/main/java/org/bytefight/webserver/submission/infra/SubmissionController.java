@@ -26,6 +26,7 @@ import org.bytefight.webserver.submission.domain.dto.SubmissionStatusDto;
 import org.bytefight.webserver.submission.domain.dto.UploadSubmissionDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +93,7 @@ public class SubmissionController {
 
   @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(operationId = "uploadSubmission", summary = "Upload a submission for a team")
+  @RequireTurnstile
   @Transactional
   public ResponseEntity<SubmissionDto> uploadSubmission(
       @AuthenticationPrincipal User user,
