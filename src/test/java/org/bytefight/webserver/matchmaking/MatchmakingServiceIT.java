@@ -30,9 +30,7 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 class MatchmakingServiceIT extends FullStackIntegrationTestBase {
   @Autowired private MatchmakingService matchmakingService;
 
