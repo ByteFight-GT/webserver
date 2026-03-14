@@ -137,6 +137,7 @@ public class GameMatchService {
       String ladderSlug,
       String teamUuid,
       String initiatingTeamUuid,
+      String notInitiatingTeamUuid,
       String submissionUuid,
       MatchReason matchReason,
       MatchStatus matchStatus,
@@ -172,6 +173,14 @@ public class GameMatchService {
           if (initiatingTeamUuid != null) {
             predicates.add(
                 cb.equal(root.get("initiatingTeam").get("uuid"), UUID.fromString(initiatingTeamUuid)));
+          }
+
+          if (notInitiatingTeamUuid != null) {
+            UUID notInitiatingTeamId = UUID.fromString(notInitiatingTeamUuid);
+            predicates.add(
+                cb.or(
+                    cb.isNull(root.get("initiatingTeam")),
+                    cb.notEqual(root.get("initiatingTeam").get("uuid"), notInitiatingTeamId)));
           }
 
           if (submissionUuid != null) {
