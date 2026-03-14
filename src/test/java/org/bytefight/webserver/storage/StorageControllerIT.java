@@ -142,8 +142,7 @@ class StorageControllerIT extends FullStackIntegrationTestBase {
     MockMultipartFile file =
         new MockMultipartFile("file", "payload.txt.zst", "application/zstd", originalBytes);
 
-    FileRecord record =
-        localStorageService.store(file, "downloads/test/", "payload.txt.zst", true);
+    FileRecord record = localStorageService.store(file, "downloads/test/", "payload.txt.zst", true);
 
     DownloadLinkDto link =
         localStorageService.getDownloadLink(record.getUuid().toString(), Duration.ofMinutes(5));
