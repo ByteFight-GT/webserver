@@ -370,7 +370,11 @@ public class LocalStorageService {
   }
 
   public record DownloadStream(
-      InputStream stream, String filename, String contentType, String sha256, boolean decompressed) {}
+      InputStream stream,
+      String filename,
+      String contentType,
+      String sha256,
+      boolean decompressed) {}
 
   public static class DecompressionLimitExceededException extends IOException {
     public DecompressionLimitExceededException(String message) {

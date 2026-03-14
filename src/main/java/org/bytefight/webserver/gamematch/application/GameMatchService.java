@@ -172,7 +172,8 @@ public class GameMatchService {
 
           if (initiatingTeamUuid != null) {
             predicates.add(
-                cb.equal(root.get("initiatingTeam").get("uuid"), UUID.fromString(initiatingTeamUuid)));
+                cb.equal(
+                    root.get("initiatingTeam").get("uuid"), UUID.fromString(initiatingTeamUuid)));
           }
 
           if (notInitiatingTeamUuid != null) {

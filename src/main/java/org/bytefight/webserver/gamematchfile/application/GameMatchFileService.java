@@ -99,7 +99,7 @@ public class GameMatchFileService {
             file,
             "game_match_files/" + gameMatch.getUuid() + "/",
             file.getOriginalFilename(),
-            false);
+            true);
 
     GameMatchFile gameMatchFile = new GameMatchFile();
     gameMatchFile.setUuid(storedFile.getUuid());
