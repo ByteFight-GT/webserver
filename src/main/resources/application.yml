@@ -26,3 +26,8 @@ gamematch:
   stale-threshold-minutes: 30
 storage:
   max-decompressed-bytes: 524288000
+
+turnstile:
+  enabled: ${TURNSTILE_ENABLED:true}
+  site-key: ${TURNSTILE_SITE_KEY:}
+  secret-key: ${TURNSTILE_SECRET_KEY:}
