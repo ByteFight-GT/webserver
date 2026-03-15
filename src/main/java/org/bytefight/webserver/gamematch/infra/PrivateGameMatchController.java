@@ -120,6 +120,7 @@ public class PrivateGameMatchController {
     }
 
     int count = createMatchDto.getCount() == null ? 1 : createMatchDto.getCount();
+    count = (int) Math.min(ladder.getMaxQueuedPerTeam() - currentWaitingMatches, count);
 
     List<GameMatch> gameMatches = new ArrayList<>();
 
