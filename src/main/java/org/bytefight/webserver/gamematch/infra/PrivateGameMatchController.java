@@ -3,7 +3,10 @@ package org.bytefight.webserver.gamematch.infra;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
@@ -41,7 +44,7 @@ public class PrivateGameMatchController {
 
   @PostMapping
   @RequireTurnstile
-  public ResponseEntity<GameMatchDto> createGameMatch(
+  public ResponseEntity<List<GameMatchDto>> createGameMatch(
       @AuthenticationPrincipal User user, @RequestBody CreateMatchDto createMatchDto) {
     Player player =
         playerService
@@ -116,21 +119,30 @@ public class PrivateGameMatchController {
           "You already have the maximum number of matches queued. Please wait for some matches to finish before adding more.");
     }
 
-    GameMatch gameMatch =
-        gameMatchService.createMatch(
-            user,
-            initiatingTeam,
-            teamA,
-            teamB,
-            teamA.getCurrentSubmission(),
-            teamB.getCurrentSubmission(),
-            ladder.getLadder(),
-            MatchReason.scrimmage,
-            createMatchDto.getMatchSettings(),
-            null);
+    int count = createMatchDto.getCount() == null ? 1 : createMatchDto.getCount();
+    count = (int) Math.min(ladder.getMaxQueuedPerTeam() - currentWaitingMatches, count);
 
-    gameMatchService.scheduleMatch(gameMatch);
+    List<GameMatch> gameMatches = new ArrayList<>();
 
-    return ResponseEntity.ok(GameMatchDto.fromEntity(gameMatch));
+    for(int i = 0; i < count; ++i) {
+      GameMatch gameMatch =
+              gameMatchService.createMatch(
+                      user,
+                      initiatingTeam,
+                      teamA,
+                      teamB,
+                      teamA.getCurrentSubmission(),
+                      teamB.getCurrentSubmission(),
+                      ladder.getLadder(),
+                      MatchReason.scrimmage,
+                      createMatchDto.getMatchSettings(),
+                      null);
+
+      gameMatchService.scheduleMatch(gameMatch);
+
+      gameMatches.add(gameMatch);
+    }
+
+    return ResponseEntity.ok(gameMatches.stream().map(GameMatchDto::fromEntity).collect(Collectors.toList()));
   }
 }

@@ -12,4 +12,5 @@ public class CreateMatchDto {
   @NotNull String teamBUuid;
   @NotNull String ladder;
   Map<String, Object> matchSettings;
+  Integer count;
 }
