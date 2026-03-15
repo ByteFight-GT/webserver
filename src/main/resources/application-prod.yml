@@ -32,3 +32,9 @@ server:
   forward-headers-strategy: framework
   error:
     include-stacktrace: never
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
