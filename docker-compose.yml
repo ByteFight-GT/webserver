@@ -47,7 +47,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "4000:3000"
+      - "${GRAFANA_HOST_PORT}:3000"
     depends_on:
       - postgres
     volumes:
