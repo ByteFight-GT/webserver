@@ -44,8 +44,20 @@ services:
     env_file:
       - .env
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "4000:3000"
+    depends_on:
+      - postgres
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
 volumes:
   db_data:
     driver: local
   storage:
+    driver: local
+  grafana_data:
     driver: local
