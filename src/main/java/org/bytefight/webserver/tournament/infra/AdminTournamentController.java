@@ -2,10 +2,8 @@ package org.bytefight.webserver.tournament.infra;
 
 import org.bytefight.webserver.tournament.application.TournamentService;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
-import org.bytefight.webserver.tournament.domain.EnrollTeamsRequest;
 import org.bytefight.webserver.tournament.domain.TournamentBracketDto;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
-import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * Admin endpoints for tournament lifecycle management, scoped to a competition.
@@ -33,11 +29,13 @@ public class AdminTournamentController {
     private final TournamentService tournamentService;
 
     /**
-     * Creates a tournament in DRAFT state for the given competition.
+     * Creates a tournament and enrolls teams for the given competition.
      *
      * Path:
      * - request body -> TournamentService.createTournament
      * - persists Tournament in tournament table
+     * - resolves and seeds tournament entries in tournament_entry table
+     * - updates tournament status to OPEN
      * - returns TournamentDto for frontend/admin confirmation
      */
     @PostMapping
@@ -47,25 +45,6 @@ public class AdminTournamentController {
             @Valid @RequestBody CreateTournamentRequest request
     ) {
         return ResponseEntity.ok(tournamentService.createTournament(competitionSlug, request));
-    }
-
-    /**
-     * Enrolls teams in a tournament and assigns seeds within the competition.
-     *
-     * Path:
-     * - request body -> TournamentService.enrollTeams
-     * - resolves teams (explicit list or all teams with submissions)
-     * - creates TournamentEntry rows (tournament_entry)
-     * - returns list of TournamentEntryDto for frontend
-     */
-    @PostMapping("/{uuid}/entries")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<TournamentEntryDto>> enrollTeams(
-            @PathVariable String competitionSlug,
-            @PathVariable String uuid,
-            @RequestBody(required = false) EnrollTeamsRequest request
-    ) {
-        return ResponseEntity.ok(tournamentService.enrollTeams(competitionSlug, uuid, request));
     }
 
     /**

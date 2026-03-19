@@ -1,12 +1,13 @@
 package org.bytefight.webserver.tournament.domain;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
- * Admin input payload for creating a tournament.
+ * Admin input payload for creating and enrolling a tournament.
  */
 @Getter
 @Setter
@@ -14,6 +15,6 @@ public class CreateTournamentRequest {
     @NotBlank
     private String name;
 
-    @NotNull
-    private Integer maxTeams;
+    private List<String> teamUuids;
+    private String seedLadder;
 }
