@@ -298,7 +298,6 @@ Table tournament {
   name varchar [not null]
   status tournament_status [not null, default: 'DRAFT']
 
-  max_teams integer
   bracket_size integer
 
   // Final standings (OneToOne: each entry belongs to one tournament)
