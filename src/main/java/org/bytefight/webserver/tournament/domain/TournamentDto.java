@@ -20,7 +20,6 @@ public class TournamentDto {
     private final String competitionSlug;
     private final String name;
     private final TournamentStatus status;
-    private final Integer maxTeams;
     private final Integer bracketSize;
     private final Instant createdAt;
     private final LocalDateTime startedAt;
@@ -53,7 +52,6 @@ public class TournamentDto {
                 .competitionSlug(tournament.getCompetition().getSlug())
                 .name(tournament.getName())
                 .status(tournament.getStatus())
-                .maxTeams(tournament.getMaxTeams())
                 .bracketSize(tournament.getBracketSize())
                 .createdAt(tournament.getCreatedAt())
                 .startedAt(tournament.getStartedAt())

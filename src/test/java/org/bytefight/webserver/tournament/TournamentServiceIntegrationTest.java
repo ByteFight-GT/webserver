@@ -12,7 +12,6 @@ import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.tournament.application.TournamentBracketBuilder;
 import org.bytefight.webserver.tournament.application.TournamentService;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
-import org.bytefight.webserver.tournament.domain.EnrollTeamsRequest;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
@@ -62,74 +61,55 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     @Test
     void createTournamentIsCompetitionScoped() {
         Competition competition = createCompetition("comp-create", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Winter Cup");
-        request.setMaxTeams(16);
+        createTeam(competition, "Alpha", true);
+        createTeam(competition, "Beta", false);
+        CreateTournamentRequest request = createTournamentRequest("Winter Cup", null);
 
         TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
 
         assertEquals(competition.getId(), tournament.getCompetition().getId());
-        assertEquals(TournamentStatus.DRAFT, tournament.getStatus());
+        assertEquals(TournamentStatus.OPEN, tournament.getStatus());
+        assertEquals(1, tournamentEntryRepository.countByTournament(tournament));
     }
 
     @Test
-    void enrollTeamsRequiresActiveCompetition() {
+    void createTournamentRequiresActiveCompetition() {
         Competition competition = createCompetition("comp-inactive", false);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Inactive Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
+        CreateTournamentRequest request = createTournamentRequest("Inactive Cup", null);
 
         assertThrows(IllegalArgumentException.class, () ->
-                tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), new EnrollTeamsRequest()));
+                tournamentService.createTournament(competition.getSlug(), request));
     }
 
     @Test
-    void enrollTeamsRejectsTeamWithoutSubmission() {
+    void createTournamentRejectsTeamWithoutSubmission() {
         Competition competition = createCompetition("comp-nosub", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("NoSub Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
-
         Team team = createTeam(competition, "Alpha", false);
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(team.getUuid().toString()));
+        CreateTournamentRequest request = createTournamentRequest("NoSub Cup", List.of(team.getUuid().toString()));
 
         assertThrows(IllegalArgumentException.class, () ->
-                tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest));
+                tournamentService.createTournament(competition.getSlug(), request));
     }
 
     @Test
-    void enrollTeamsRespectsMaxTeams() {
+    void createTournamentRejectsDuplicateTeamUuids() {
         Competition competition = createCompetition("comp-max", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Limited Cup");
-        request.setMaxTeams(1);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
+        Team team = createTeam(competition, "Alpha", true);
+        CreateTournamentRequest request = createTournamentRequest(
+                "Duplicate Teams Cup",
+                List.of(team.getUuid().toString(), team.getUuid().toString())
+        );
 
-        Team teamA = createTeam(competition, "Alpha", true);
-        Team teamB = createTeam(competition, "Beta", true);
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(teamA.getUuid().toString(), teamB.getUuid().toString()));
-
-        assertThrows(IllegalArgumentException.class, () ->
-                tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest));
+        assertThrows(IllegalArgumentException.class, () -> tournamentService.createTournament(competition.getSlug(), request));
     }
 
     @Test
     void startTournamentRequiresAtLeastTwoTeams() {
         Competition competition = createCompetition("comp-min", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Solo Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
-
         Team team = createTeam(competition, "Alpha", true);
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(team.getUuid().toString()));
-        tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest);
+        CreateTournamentRequest request = createTournamentRequest("Solo Cup", List.of(team.getUuid().toString()));
+        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
 
         assertThrows(IllegalArgumentException.class, () ->
                 tournamentService.startTournament(competition.getSlug(), dto.getUuid()));
@@ -138,24 +118,17 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     @Test
     void startTournamentBuildsBracketAndQueuesMatches() {
         Competition competition = createCompetition("comp-start", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Bracket Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
-
         Team teamA = createTeam(competition, "Alpha", true);
         Team teamB = createTeam(competition, "Beta", true);
         Team teamC = createTeam(competition, "Gamma", true);
         Team teamD = createTeam(competition, "Delta", true);
-
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(
+        CreateTournamentRequest request = createTournamentRequest("Bracket Cup", List.of(
                 teamA.getUuid().toString(),
                 teamB.getUuid().toString(),
                 teamC.getUuid().toString(),
                 teamD.getUuid().toString()
         ));
-        tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest);
+        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
         tournamentService.startTournament(competition.getSlug(), dto.getUuid());
 
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
@@ -174,22 +147,15 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     @Test
     void startTournamentAutoAdvancesByes() {
         Competition competition = createCompetition("comp-bye", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Bye Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
-
         Team teamA = createTeam(competition, "Alpha", true);
         Team teamB = createTeam(competition, "Beta", true);
         Team teamC = createTeam(competition, "Gamma", true);
-
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(
+        CreateTournamentRequest request = createTournamentRequest("Bye Cup", List.of(
                 teamA.getUuid().toString(),
                 teamB.getUuid().toString(),
                 teamC.getUuid().toString()
         ));
-        tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest);
+        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
         tournamentService.startTournament(competition.getSlug(), dto.getUuid());
 
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
@@ -204,24 +170,17 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     @Test
     void startTournamentAssignsCorrectSeriesLengths() {
         Competition competition = createCompetition("comp-series", true);
-        CreateTournamentRequest request = new CreateTournamentRequest();
-        request.setName("Series Cup");
-        request.setMaxTeams(8);
-        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
-
         Team teamA = createTeam(competition, "Alpha", true);
         Team teamB = createTeam(competition, "Beta", true);
         Team teamC = createTeam(competition, "Gamma", true);
         Team teamD = createTeam(competition, "Delta", true);
-
-        EnrollTeamsRequest enrollTeamsRequest = new EnrollTeamsRequest();
-        enrollTeamsRequest.setTeamUuids(List.of(
+        CreateTournamentRequest request = createTournamentRequest("Series Cup", List.of(
                 teamA.getUuid().toString(),
                 teamB.getUuid().toString(),
                 teamC.getUuid().toString(),
                 teamD.getUuid().toString()
         ));
-        tournamentService.enrollTeams(competition.getSlug(), dto.getUuid(), enrollTeamsRequest);
+        TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
         tournamentService.startTournament(competition.getSlug(), dto.getUuid());
 
         Tournament tournament = tournamentRepository.findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition).orElseThrow();
@@ -254,6 +213,14 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         competition.setWhitelisted(false);
         competition.setMaxPlayersPerTeam(2);
         return competitionRepository.save(competition);
+    }
+
+    private CreateTournamentRequest createTournamentRequest(String name, List<String> teamUuids) {
+        CreateTournamentRequest request = new CreateTournamentRequest();
+        request.setName(name);
+        request.setTeamUuids(teamUuids);
+        request.setSeedLadder("ranked");
+        return request;
     }
 
     private Team createTeam(Competition competition, String name, boolean withSubmission) {

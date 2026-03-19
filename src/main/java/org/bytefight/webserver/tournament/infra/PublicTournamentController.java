@@ -145,7 +145,9 @@ public class PublicTournamentController {
     // ─────────────────────────────────────────────────────────────────────────
     // 5. Rankings (after tournament completes)
     // ─────────────────────────────────────────────────────────────────────────
-
+    
+    // TODO: change this to only return top 8
+    // 
     /**
      * Returns final rankings for all teams after the tournament is complete.
      *
