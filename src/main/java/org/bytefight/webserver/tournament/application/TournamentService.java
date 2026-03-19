@@ -5,14 +5,12 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
-import org.bytefight.webserver.tournament.domain.EnrollTeamsRequest;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketDto;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
-// import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
@@ -30,16 +28,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Orchestrates tournament lifecycle and read APIs.
  *
  * Key responsibilities:
- * - Create tournaments (DRAFT)
- * - Enroll teams and assign seeds (OPEN)
+ * - Create tournaments and enroll teams (OPEN)
  * - Build brackets and queue initial matches (IN_PROGRESS)
  * - Provide DTOs for visualization and frontend consumption
  *
@@ -174,7 +173,7 @@ public class TournamentService {
                 .map(TournamentMatchDto::from)
                 .toList();
     }
-
+    // TODO: change this to only return top 8
     /**
      * Returns final rankings for all teams in a completed tournament.
      *
@@ -244,69 +243,71 @@ public class TournamentService {
     // ── Admin / lifecycle methods ───────────────────────────────────────────
 
     /**
-     * Creates a new tournament in DRAFT state.
-     * No teams or matches are created here.
+     * Creates a new tournament and enrolls teams in a single operation.
      */
     public TournamentDto createTournament(String competitionSlug, CreateTournamentRequest request) {
         Competition competition = getCompetitionBySlug(competitionSlug);
-        // Tournaments are always created within a competition scope.
-        Tournament tournament = Tournament.builder()
-                .competition(competition)
-                .name(request.getName())
-                .maxTeams(request.getMaxTeams())
-                .status(TournamentStatus.DRAFT)
-                .build();
-        tournamentRepository.save(tournament);
-        return TournamentDto.from(tournament);
-    }
-
-    /**
-     * Enrolls teams and assigns deterministic seeds by team rank.
-     *
-     * Path:
-     * - resolve team list (explicit UUIDs or all teams with submissions)
-     * - create TournamentEntry rows (seeded)
-     * - move tournament to OPEN
-     */
-    public List<TournamentEntryDto> enrollTeams(String competitionSlug, String tournamentUuid, EnrollTeamsRequest request) {
-        Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
-        if (tournament.getStatus() != TournamentStatus.DRAFT && tournament.getStatus() != TournamentStatus.OPEN) {
-            throw new IllegalArgumentException("Tournament is not open for enrollment.");
-        }
-        Competition competition = tournament.getCompetition();
         if (!competition.isActive()) {
             throw new IllegalArgumentException("Competition is not active");
         }
-        if (tournamentEntryRepository.existsByTournament(tournament)) {
-            throw new IllegalArgumentException("Tournament already has enrolled teams; clear existing entries before re-running enrollment.");
-        }
 
-        List<Team> teams;
-        if (request == null || request.getTeamUuids() == null || request.getTeamUuids().isEmpty()) {
+        Tournament tournament = Tournament.builder()
+                .competition(competition)
+                .name(request.getName())
+                .status(TournamentStatus.DRAFT)
+                .build();
+        tournamentRepository.save(tournament);
+
+        List<Team> teams = resolveTeamsForEnrollment(competition, request.getTeamUuids());
+        String seedLadder = normalizeSeedLadder(request.getSeedLadder());
+        List<TournamentEntry> entries = buildSeededEntries(tournament, competition, teams, seedLadder);
+        tournamentEntryRepository.saveAll(entries);
+
+        tournament.setStatus(TournamentStatus.OPEN);
+        tournamentRepository.save(tournament);
+
+        return TournamentDto.from(tournament);
+    }
+
+    private List<Team> resolveTeamsForEnrollment(Competition competition, List<String> teamUuids) {
+        if (teamUuids == null || teamUuids.isEmpty()) {
             // Bulk enroll: all teams with submissions in this competition.
-            teams = teamService.getTeamsWithSubmission(competition);
-        } else {
-            teams = new ArrayList<>();
-            for (String teamUuid : request.getTeamUuids()) {
-                // Explicit enroll: enforce competition scope and submission availability.
-                Team team = teamService.getTeamByCompetitionAndUuid(competition, UUID.fromString(teamUuid))
-                        .orElseThrow(() -> new IllegalArgumentException("Team " + teamUuid + " not found in competition " + competition.getSlug()));
-                if (team.getCurrentSubmission() == null) {
-                    throw new IllegalArgumentException("Team " + team.getName() + " has no current submission.");
-                }
-                teams.add(team);
-            }
+            return teamService.getTeamsWithSubmission(competition);
         }
 
-        if (tournament.getMaxTeams() != null && teams.size() > tournament.getMaxTeams()) {
-            throw new IllegalArgumentException("Too many teams for this tournament.");
+        List<Team> teams = new ArrayList<>();
+        Set<UUID> uniqueTeamUuids = new HashSet<>();
+        for (String teamUuidValue : teamUuids) {
+            UUID teamUuid = UUID.fromString(teamUuidValue);
+            if (!uniqueTeamUuids.add(teamUuid)) {
+                throw new IllegalArgumentException("Duplicate team UUID in request: " + teamUuidValue);
+            }
+
+            // Explicit enroll: enforce competition scope and submission availability.
+            Team team = teamService.getTeamByCompetitionAndUuid(competition, teamUuid)
+                    .orElseThrow(() -> new IllegalArgumentException("Team " + teamUuidValue + " not found in competition " + competition.getSlug()));
+            if (team.getCurrentSubmission() == null) {
+                throw new IllegalArgumentException("Team " + team.getName() + " has no current submission.");
+            }
+            teams.add(team);
+        }
+        return teams;
+    }
+
+    private String normalizeSeedLadder(String seedLadder) {
+        if (seedLadder == null || seedLadder.trim().isEmpty()) {
+            return DEFAULT_SEED_LADDER;
+        }
+        return seedLadder.trim().toLowerCase();
+    }
+
+    private List<TournamentEntry> buildSeededEntries(Tournament tournament, Competition competition,
+                                                     List<Team> teams, String seedLadder) {
+        if (teams.isEmpty()) {
+            return List.of();
         }
 
         // Seed by rank using glicko rating on the specified ladder; fall back to name for ties/unranked.
-        String seedLadder = DEFAULT_SEED_LADDER;
-        if (request != null && request.getSeedLadder() != null && !request.getSeedLadder().trim().isEmpty()) {
-            seedLadder = request.getSeedLadder().trim().toLowerCase();
-        }
         Map<Long, Double> ratingByTeamId = new HashMap<>();
         List<TeamStats> stats = teamStatsRepository.findAllByCompetitionAndLadderAndTeamIn(competition, seedLadder, teams);
         for (TeamStats teamStats : stats) {
@@ -330,12 +331,7 @@ public class TournamentService {
                     .build();
             entries.add(entry);
         }
-
-        List<TournamentEntry> saved = tournamentEntryRepository.saveAll(entries);
-        tournament.setStatus(TournamentStatus.OPEN);
-        tournamentRepository.save(tournament);
-
-        return saved.stream().map(TournamentEntryDto::from).toList();
+        return entries;
     }
 
     /**

@@ -17,7 +17,7 @@ import java.util.UUID;
  *
  * Why this table:
  * - Represents a single tournament event
- * - Holds global metadata (status, max teams, bracket size)
+ * - Holds global metadata (status, bracket size)
  * - Acts as the parent for entries and matches
  * - Scoped to a single competition (multi-competition support)
  */
@@ -43,7 +43,6 @@ public class Tournament extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TournamentStatus status;
 
-    private Integer maxTeams;
     private Integer bracketSize;
 
     // ── Final standings (set when tournament completes) ──────────────────────
