@@ -12,6 +12,7 @@ import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -148,6 +149,11 @@ public class TournamentMatchScheduler {
         // Determine the next game number (1-based).
         int nextGameNumber = tournamentGameRepository
                 .findByTournamentMatchOrderByGameNumberAsc(match).size() + 1;
+        
+        MatchmakingEvent matchmakingEvent = MatchmakingEvent.builder()
+                .competition(match.getTournament().getCompetition())
+                .ladder("tournament")
+                .build();
 
         // Create the underlying GameMatch and push it to the queue.
         GameMatch gameMatch = gameMatchService.createMatch(
@@ -158,7 +164,8 @@ public class TournamentMatchScheduler {
                 submissionTwo,
                 "tournament",
                 MatchReason.tournament,
-                null
+                null,
+                matchmakingEvent
         );
         gameMatchService.scheduleMatch(gameMatch);
 

@@ -7,6 +7,7 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
@@ -489,7 +490,11 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
                 teamB.getCurrentSubmission(),
                 "tournament",
                 MatchReason.tournament,
-                null
+                null,
+                MatchmakingEvent.builder()
+                    .competition(teamA.getCompetition())
+                    .ladder("tournament")
+                    .build()
         );
     }
 
