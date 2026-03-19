@@ -1,13 +1,13 @@
 package org.bytefight.webserver.tournament.domain;
 
-import org.bytefight.webserver.common.domain.BaseEntity;
-import org.bytefight.webserver.gamematch.domain.GameMatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.bytefight.webserver.common.domain.BaseEntity;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 
 /**
  * Represents a single game within a best-of series (TournamentMatch).
@@ -20,7 +20,13 @@ import lombok.Setter;
  * - Enables lookup from GameMatch -> TournamentMatch via this join entity.
  */
 @Entity
-@Table(name = "tournament_game")
+@Table(
+        name = "tournament_game",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_tournament_game_match_game_number",
+                        columnNames = {"tournament_match_id", "game_number"})
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,12 +42,10 @@ public class TournamentGame extends BaseEntity {
     @JoinColumn(name = "game_match_id", nullable = false, unique = true)
     private GameMatch gameMatch;
 
-    /**
-     * 1-based game number within the series (e.g., game 1 of 5).
-     */
+    @Column(name = "game_number")
     private Integer gameNumber;
 
-    @Column(nullable = false)
+    @Column(name = "result_processed", nullable = false)
     @Builder.Default
     private boolean resultProcessed = false;
 }

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +26,10 @@ import java.util.UUID;
  * - The series is decided when one side reaches (seriesLength + 1) / 2 wins.
  *
  * State flow:
- *   PENDING  -> QUEUED (first game queued, both teams present)
- *   QUEUED   -> QUEUED (game finishes, series not decided, next game queued)
- *   QUEUED   -> COMPLETE (game finishes, series decided)
- *   PENDING  -> SKIPPED (bye — one or both teams missing)
+ *   PENDING -> QUEUED  (first game queued, both teams present)
+ *   QUEUED  -> QUEUED  (game finishes, series not decided, next game queued)
+ *   QUEUED  -> COMPLETE (game finishes, series decided)
+ *   PENDING -> SKIPPED (bye — one or both teams missing)
  */
 @Entity
 @Table(name = "tournament_match")
@@ -38,17 +40,23 @@ import java.util.UUID;
 @Builder
 public class TournamentMatch extends BaseEntity {
 
-    @Column(nullable = false, unique = true, updatable = false)
-    private UUID uuid;
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    private UUID uuid = UUID.randomUUID();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "bracket_type", columnDefinition = "tournament_bracket_type")
     private TournamentBracketType bracketType;
 
+    @Column(name = "round_number")
     private Integer roundNumber;
+
+    @Column(name = "match_index")
     private Integer matchIndex;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,7 +68,10 @@ public class TournamentMatch extends BaseEntity {
     private TournamentEntry teamTwoEntry;
 
     @Enumerated(EnumType.STRING)
-    private TournamentMatchState state;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "state", nullable = false, columnDefinition = "tournament_match_state")
+    @Builder.Default
+    private TournamentMatchState state = TournamentMatchState.PENDING;
 
     // ── Series tracking fields ──────────────────────────────────────────────
     // These replace the old single-game `gameMatch` FK.
@@ -71,15 +82,11 @@ public class TournamentMatch extends BaseEntity {
      */
     private Integer seriesLength;
 
-    /**
-     * How many individual games teamOne has won in this series so far.
-     */
+    @Column(name = "team_one_series_wins", nullable = false)
     @Builder.Default
     private Integer teamOneSeriesWins = 0;
 
-    /**
-     * How many individual games teamTwo has won in this series so far.
-     */
+    @Column(name = "team_two_series_wins", nullable = false)
     @Builder.Default
     private Integer teamTwoSeriesWins = 0;
 
@@ -102,43 +109,22 @@ public class TournamentMatch extends BaseEntity {
     @JoinColumn(name = "loser_entry_id")
     private TournamentEntry loserEntry;
 
-    // ── Graph edges (bracket advancement wiring) ────────────────────────────
-
+    @Column(name = "next_winner_match_id")
     private Long nextWinnerMatchId;
+
+    @Column(name = "next_winner_slot")
     private Integer nextWinnerSlot;
+
+    @Column(name = "next_loser_match_id")
     private Long nextLoserMatchId;
+
+    @Column(name = "next_loser_slot")
     private Integer nextLoserSlot;
 
-    /**
-     * Initializes state, UUID, and series counters on insert.
-     */
-    @PrePersist
-    public void onCreate() {
-        if (state == null) {
-            state = TournamentMatchState.PENDING;
-        }
-        if (teamOneSeriesWins == null) {
-            teamOneSeriesWins = 0;
-        }
-        if (teamTwoSeriesWins == null) {
-            teamTwoSeriesWins = 0;
-        }
-        uuid = UUID.randomUUID();
-    }
-
-    // ── Helper methods ──────────────────────────────────────────────────────
-
-    /**
-     * Returns the number of individual game wins required to win this series.
-     * For Bo5: 3 wins. For Bo7: 4 wins.
-     */
     public int getWinsRequired() {
         return (seriesLength + 1) / 2;
     }
 
-    /**
-     * Returns true if the series has been decided (one side has enough wins).
-     */
     public boolean isSeriesDecided() {
         int required = getWinsRequired();
         return teamOneSeriesWins >= required || teamTwoSeriesWins >= required;

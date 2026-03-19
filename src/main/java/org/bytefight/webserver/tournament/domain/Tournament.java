@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bytefight.webserver.common.domain.BaseEntity;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,19 +32,24 @@ import java.util.UUID;
 @Builder
 public class Tournament extends BaseEntity {
 
-    @Column(nullable = false, unique = true, updatable = false)
-    private UUID uuid;
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    private UUID uuid = UUID.randomUUID();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "competition_id", nullable = false)
     private Competition competition;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private TournamentStatus status;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false, columnDefinition = "tournament_status")
+    @Builder.Default
+    private TournamentStatus status = TournamentStatus.DRAFT;
 
+    @Column(name = "bracket_size")
     private Integer bracketSize;
 
     // ── Final standings (set when tournament completes) ──────────────────────
@@ -65,19 +72,9 @@ public class Tournament extends BaseEntity {
     @JoinColumn(name = "second_place_entry_id", unique = true)
     private TournamentEntry secondPlaceEntry;
 
+    @Column(name = "started_at")
     private LocalDateTime startedAt;
-    private LocalDateTime finishedAt;
 
-    /**
-     * Initializes default status and UUID on insert.
-     */
-    @PrePersist
-    public void onCreate() {
-        if (status == null) {
-            status = TournamentStatus.DRAFT;
-        }
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
-    }
+    @Column(name = "finished_at")
+    private LocalDateTime finishedAt;
 }
