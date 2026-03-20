@@ -211,6 +211,7 @@ public class GameMatchService {
             MatchStatus.scheduling,
             MatchStatus.waiting,
             MatchStatus.in_progress),
+        TOURNAMENT_LADDER,
         page);
   }
 
