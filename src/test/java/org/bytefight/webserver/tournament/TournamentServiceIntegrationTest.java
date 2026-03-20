@@ -83,6 +83,41 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     }
 
     @Test
+    void getTournamentsIsCompetitionScopedAndNewestFirst() {
+        Competition competition = createCompetition("comp-list", true);
+        Competition otherCompetition = createCompetition("comp-list-other", true);
+
+        Tournament older = tournamentRepository.save(
+                Tournament.builder()
+                        .competition(competition)
+                        .name("Older")
+                        .status(TournamentStatus.OPEN)
+                        .build()
+        );
+
+        Tournament newer = tournamentRepository.save(
+                Tournament.builder()
+                        .competition(competition)
+                        .name("Newer")
+                        .status(TournamentStatus.IN_PROGRESS)
+                        .build()
+        );
+
+        tournamentRepository.save(
+                Tournament.builder()
+                        .competition(otherCompetition)
+                        .name("Other Competition Tournament")
+                        .status(TournamentStatus.OPEN)
+                        .build()
+        );
+
+        List<TournamentDto> tournaments = tournamentService.getTournaments(competition.getSlug());
+        assertEquals(2, tournaments.size(), "Should only return tournaments in the requested competition");
+        assertEquals(newer.getUuid().toString(), tournaments.get(0).getUuid(), "Newest tournament should come first");
+        assertEquals(older.getUuid().toString(), tournaments.get(1).getUuid());
+    }
+
+    @Test
     void createTournamentRequiresActiveCompetition() {
         Competition competition = createCompetition("comp-inactive", false);
         CreateTournamentRequest request = createTournamentRequest("Inactive Cup", null);

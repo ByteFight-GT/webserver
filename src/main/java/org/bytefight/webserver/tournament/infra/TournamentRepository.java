@@ -5,6 +5,7 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,5 @@ import java.util.UUID;
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
     Optional<Tournament> findByUuid(UUID uuid);
     Optional<Tournament> findByUuidAndCompetition(UUID uuid, Competition competition);
+    List<Tournament> findByCompetitionOrderByIdDesc(Competition competition);
 }
