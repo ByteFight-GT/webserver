@@ -7,15 +7,19 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
-import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.ladder.domain.DefaultLadderSettings;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.tournament.application.TournamentBracketBuilder;
+import org.bytefight.webserver.tournament.application.TournamentMatchScheduler;
 import org.bytefight.webserver.tournament.application.TournamentResultHandler;
+import org.bytefight.webserver.tournament.application.TournamentBracketGraph;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
@@ -78,7 +82,16 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
     private SubmissionRepository submissionRepository;
 
     @Autowired
+    private LadderRepository ladderRepository;
+
+    @Autowired
     private GameMatchService gameMatchService;
+
+    @Autowired
+    private TournamentBracketBuilder tournamentBracketBuilder;
+
+    @Autowired
+    private TournamentMatchScheduler tournamentMatchScheduler;
 
     // ── Bo5 series tests ────────────────────────────────────────────────────
 
@@ -101,7 +114,7 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
         TournamentMatch match = createMatch(tournament, entryA, entryB,
                 TournamentBracketType.WINNERS, TournamentBracketBuilder.NORMAL_SERIES_LENGTH);
         GameMatch gameMatch1 = createGameMatch(teamA, teamB);
-        TournamentGame game1 = createTournamentGame(match, gameMatch1, 1);
+        createTournamentGame(match, gameMatch1, 1);
         match.setState(TournamentMatchState.QUEUED);
         tournamentMatchRepository.save(match);
 
@@ -250,19 +263,19 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
     }
 
     /**
-     * Verifies that multiple consecutive draws extend the series indefinitely
-     * without affecting the series score.
+     * If 10 games are reached with equal series wins, the higher-seeded entry wins.
      */
     @Test
-    void multipleDrawsExtendSeriesIndefinitely() {
+    void tenGameCapUsesSeedTiebreakWhenSeriesWinsAreEqual() {
         Competition competition = createCompetition("comp-multi-draw", true);
         Tournament tournament = createTournament(competition);
 
         Team teamA = createTeamWithSubmission(competition, "Alpha");
         Team teamB = createTeamWithSubmission(competition, "Beta");
 
-        TournamentEntry entryA = createEntry(tournament, teamA, 1);
-        TournamentEntry entryB = createEntry(tournament, teamB, 2);
+        // Team B has the higher seed (1 is strongest seed).
+        TournamentEntry entryA = createEntry(tournament, teamA, 2);
+        TournamentEntry entryB = createEntry(tournament, teamB, 1);
 
         TournamentMatch match = createMatch(tournament, entryA, entryB,
                 TournamentBracketType.WINNERS, TournamentBracketBuilder.NORMAL_SERIES_LENGTH);
@@ -271,25 +284,83 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
         match.setState(TournamentMatchState.QUEUED);
         tournamentMatchRepository.save(match);
 
-        // 3 consecutive draws.
-        tournamentResultHandler.handleTournamentResult(gm1, MatchStatus.draw);
+        GameMatch currentGame = gm1;
+        for (int gameNumber = 1; gameNumber <= 10; gameNumber++) {
+            tournamentResultHandler.handleTournamentResult(currentGame, MatchStatus.draw);
+            TournamentMatch refreshed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+            if (gameNumber < 10) {
+                assertEquals(TournamentMatchState.QUEUED, refreshed.getState());
+                currentGame = getLatestAutoQueuedGame(refreshed);
+            }
+        }
 
-        List<TournamentGame> gamesAfter1 = tournamentGameRepository
-                .findByTournamentMatchOrderByGameNumberAsc(match);
-        tournamentResultHandler.handleTournamentResult(gamesAfter1.get(1).getGameMatch(), MatchStatus.draw);
+        TournamentMatch completed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+        assertEquals(0, completed.getTeamOneSeriesWins());
+        assertEquals(0, completed.getTeamTwoSeriesWins());
+        assertEquals(TournamentMatchState.COMPLETE, completed.getState());
+        assertEquals(entryB.getId(), completed.getWinnerEntry().getId(),
+                "Higher seed should win ties when the 10-game cap is reached");
+        assertEquals(entryA.getId(), completed.getLoserEntry().getId());
 
-        List<TournamentGame> gamesAfter2 = tournamentGameRepository
-                .findByTournamentMatchOrderByGameNumberAsc(match);
-        tournamentResultHandler.handleTournamentResult(gamesAfter2.get(2).getGameMatch(), MatchStatus.draw);
+        List<TournamentGame> allGames = tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(completed);
+        assertEquals(10, allGames.size(), "Series should stop at 10 total games");
+    }
 
-        TournamentMatch refreshed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
-        assertEquals(0, refreshed.getTeamOneSeriesWins());
-        assertEquals(0, refreshed.getTeamTwoSeriesWins());
-        assertEquals(TournamentMatchState.QUEUED, refreshed.getState());
+    /**
+     * If 10 games are reached and wins are unequal, more wins beats seed.
+     */
+    @Test
+    void tenGameCapUsesSeriesWinsBeforeSeed() {
+        Competition competition = createCompetition("comp-cap-wins-first", true);
+        Tournament tournament = createTournament(competition);
 
-        List<TournamentGame> allGames = tournamentGameRepository
-                .findByTournamentMatchOrderByGameNumberAsc(refreshed);
-        assertEquals(4, allGames.size(), "Should have 4 games (1 original + 3 draw re-queues)");
+        Team teamA = createTeamWithSubmission(competition, "Alpha");
+        Team teamB = createTeamWithSubmission(competition, "Beta");
+
+        // Team B has the higher seed, but Team A will have more wins at game 10.
+        TournamentEntry entryA = createEntry(tournament, teamA, 2);
+        TournamentEntry entryB = createEntry(tournament, teamB, 1);
+
+        TournamentMatch match = createMatch(tournament, entryA, entryB,
+                TournamentBracketType.WINNERS, TournamentBracketBuilder.NORMAL_SERIES_LENGTH);
+        GameMatch gm1 = createGameMatch(teamA, teamB);
+        createTournamentGame(match, gm1, 1);
+        match.setState(TournamentMatchState.QUEUED);
+        tournamentMatchRepository.save(match);
+
+        MatchStatus[] results = new MatchStatus[]{
+                MatchStatus.team_a_win,
+                MatchStatus.draw,
+                MatchStatus.team_b_win,
+                MatchStatus.draw,
+                MatchStatus.team_a_win,
+                MatchStatus.draw,
+                MatchStatus.draw,
+                MatchStatus.draw,
+                MatchStatus.draw,
+                MatchStatus.draw
+        };
+
+        GameMatch currentGame = gm1;
+        for (int i = 0; i < results.length; i++) {
+            tournamentResultHandler.handleTournamentResult(currentGame, results[i]);
+            TournamentMatch refreshed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+            if (i < results.length - 1) {
+                assertEquals(TournamentMatchState.QUEUED, refreshed.getState());
+                currentGame = getLatestAutoQueuedGame(refreshed);
+            }
+        }
+
+        TournamentMatch completed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+        assertEquals(2, completed.getTeamOneSeriesWins());
+        assertEquals(1, completed.getTeamTwoSeriesWins());
+        assertEquals(TournamentMatchState.COMPLETE, completed.getState());
+        assertEquals(entryA.getId(), completed.getWinnerEntry().getId(),
+                "More series wins should win before seed at the 10-game cap");
+        assertEquals(entryB.getId(), completed.getLoserEntry().getId());
+
+        List<TournamentGame> allGames = tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(completed);
+        assertEquals(10, allGames.size(), "Series should stop at 10 total games");
     }
 
     // ── Bo7 grand final tests ───────────────────────────────────────────────
@@ -398,6 +469,82 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
         assertEquals(5, allGames.size());
     }
 
+    @Test
+    void sixTeamBracketResultsAdvanceCorrectlyFromRoundOne() {
+        Competition competition = createCompetition("comp-six-results", true);
+        Tournament tournament = createTournament(competition);
+
+        Team team1 = createTeamWithSubmission(competition, "Seed 1");
+        Team team2 = createTeamWithSubmission(competition, "Seed 2");
+        Team team3 = createTeamWithSubmission(competition, "Seed 3");
+        Team team4 = createTeamWithSubmission(competition, "Seed 4");
+        Team team5 = createTeamWithSubmission(competition, "Seed 5");
+        Team team6 = createTeamWithSubmission(competition, "Seed 6");
+
+        TournamentEntry seed1 = createEntry(tournament, team1, 1);
+        TournamentEntry seed2 = createEntry(tournament, team2, 2);
+        TournamentEntry seed3 = createEntry(tournament, team3, 3);
+        TournamentEntry seed4 = createEntry(tournament, team4, 4);
+        TournamentEntry seed5 = createEntry(tournament, team5, 5);
+        TournamentEntry seed6 = createEntry(tournament, team6, 6);
+
+        TournamentBracketGraph graph = tournamentBracketBuilder.buildBracket(
+                tournament,
+                List.of(seed1, seed2, seed3, seed4, seed5, seed6)
+        );
+        tournamentMatchRepository.saveAll(graph.getAllMatches());
+        tournamentBracketBuilder.wireWinnersAdvancement(graph.getWinnersRounds());
+        tournamentBracketBuilder.wireLosersAdvancement(graph.getWinnersRounds(), graph.getLosersRounds());
+        tournamentBracketBuilder.wireLosersToGrandFinal(graph.getWinnersRounds(), graph.getLosersRounds(), graph.getGrandFinal());
+        tournamentBracketBuilder.wireGrandFinalReset(graph.getGrandFinal(), graph.getGrandFinalReset());
+        tournamentMatchRepository.saveAll(graph.getAllMatches());
+
+        tournamentMatchScheduler.processTournament(tournament);
+
+        TournamentMatch w1m2 = findMatch(tournament, TournamentBracketType.WINNERS, 1, 2);
+        TournamentMatch w1m4 = findMatch(tournament, TournamentBracketType.WINNERS, 1, 4);
+        assertEquals(TournamentMatchState.QUEUED, w1m2.getState());
+        assertEquals(TournamentMatchState.QUEUED, w1m4.getState());
+        assertEquals(4, seedOf(w1m2.getTeamOneEntry()));
+        assertEquals(5, seedOf(w1m2.getTeamTwoEntry()));
+        assertEquals(3, seedOf(w1m4.getTeamOneEntry()));
+        assertEquals(6, seedOf(w1m4.getTeamTwoEntry()));
+
+        completeSeriesWithStraightWins(w1m2, MatchStatus.team_a_win);
+        completeSeriesWithStraightWins(w1m4, MatchStatus.team_a_win);
+
+        TournamentMatch refreshedW2m1 = findMatch(tournament, TournamentBracketType.WINNERS, 2, 1);
+        TournamentMatch refreshedW2m2 = findMatch(tournament, TournamentBracketType.WINNERS, 2, 2);
+        TournamentMatch refreshedL1m1 = findMatch(tournament, TournamentBracketType.LOSERS, 1, 1);
+        TournamentMatch refreshedL1m2 = findMatch(tournament, TournamentBracketType.LOSERS, 1, 2);
+        TournamentMatch refreshedL2m1 = findMatch(tournament, TournamentBracketType.LOSERS, 2, 1);
+        TournamentMatch refreshedL2m2 = findMatch(tournament, TournamentBracketType.LOSERS, 2, 2);
+
+        assertEquals(TournamentMatchState.QUEUED, refreshedW2m1.getState());
+        assertEquals(1, seedOf(refreshedW2m1.getTeamOneEntry()));
+        assertEquals(4, seedOf(refreshedW2m1.getTeamTwoEntry()));
+
+        assertEquals(TournamentMatchState.QUEUED, refreshedW2m2.getState());
+        assertEquals(2, seedOf(refreshedW2m2.getTeamOneEntry()));
+        assertEquals(3, seedOf(refreshedW2m2.getTeamTwoEntry()));
+
+        assertEquals(TournamentMatchState.SKIPPED, refreshedL1m1.getState());
+        assertEquals(5, seedOf(refreshedL1m1.getWinnerEntry()));
+        assertNull(refreshedL1m1.getLoserEntry());
+
+        assertEquals(TournamentMatchState.SKIPPED, refreshedL1m2.getState());
+        assertEquals(6, seedOf(refreshedL1m2.getWinnerEntry()));
+        assertNull(refreshedL1m2.getLoserEntry());
+
+        assertEquals(TournamentMatchState.PENDING, refreshedL2m1.getState());
+        assertEquals(5, seedOf(refreshedL2m1.getTeamOneEntry()));
+        assertNull(refreshedL2m1.getTeamTwoEntry());
+
+        assertEquals(TournamentMatchState.PENDING, refreshedL2m2.getState());
+        assertEquals(6, seedOf(refreshedL2m2.getTeamOneEntry()));
+        assertNull(refreshedL2m2.getTeamTwoEntry());
+    }
+
     // ── Helper methods ──────────────────────────────────────────────────────
 
     private Competition createCompetition(String slug, boolean active) {
@@ -407,7 +554,19 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
         competition.setActive(active);
         competition.setWhitelisted(false);
         competition.setMaxPlayersPerTeam(2);
-        return competitionRepository.save(competition);
+        Competition saved = competitionRepository.save(competition);
+        ensureTournamentLadder(saved);
+        return saved;
+    }
+
+    private void ensureTournamentLadder(Competition competition) {
+        if (ladderRepository.findByCompetitionAndLadder(competition, "tournament").isPresent()) {
+            return;
+        }
+        Ladder ladder = DefaultLadderSettings.baseline1500NoInflation();
+        ladder.setCompetition(competition);
+        ladder.setLadder("tournament");
+        ladderRepository.save(ladder);
     }
 
     private Tournament createTournament(Competition competition) {
@@ -491,10 +650,7 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
                 "tournament",
                 MatchReason.tournament,
                 null,
-                MatchmakingEvent.builder()
-                    .competition(teamA.getCompetition())
-                    .ladder("tournament")
-                    .build()
+                null
         );
     }
 
@@ -517,6 +673,30 @@ public class TournamentResultHandlerIntegrationTest extends FullStackIntegration
     private GameMatch getLatestAutoQueuedGame(TournamentMatch match) {
         List<TournamentGame> games = tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(match);
         return games.get(games.size() - 1).getGameMatch();
+    }
+
+    private TournamentMatch findMatch(Tournament tournament, TournamentBracketType type, int round, int index) {
+        return tournamentMatchRepository
+                .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament)
+                .stream()
+                .filter(match -> match.getBracketType() == type)
+                .filter(match -> match.getRoundNumber() == round)
+                .filter(match -> match.getMatchIndex() == index)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private int seedOf(TournamentEntry entry) {
+        return tournamentEntryRepository.findById(entry.getId()).orElseThrow().getSeed();
+    }
+
+    private void completeSeriesWithStraightWins(TournamentMatch match, MatchStatus winnerStatus) {
+        int winsRequired = tournamentMatchRepository.findById(match.getId()).orElseThrow().getWinsRequired();
+        for (int i = 0; i < winsRequired; i++) {
+            TournamentMatch refreshed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+            GameMatch game = getLatestAutoQueuedGame(refreshed);
+            tournamentResultHandler.handleTournamentResult(game, winnerStatus);
+        }
     }
 
     /**

@@ -235,6 +235,60 @@ public class TournamentBracketBuilderTest extends FullStackIntegrationTestBase {
         assertEquals(3, match2.getTeamTwoEntry().getSeed());
     }
 
+    @Test
+    void buildBracketForSixTeamsPlacesEverySeedAndWiresExpectedArrows() {
+        Tournament tournament = Tournament.builder().name("SixTeams").build();
+        List<TournamentEntry> entries = buildEntries(6);
+
+        TournamentBracketGraph graph = tournamentBracketBuilder.buildBracket(tournament, entries);
+        assignIds(graph.getAllMatches(), 900L);
+
+        tournamentBracketBuilder.wireWinnersAdvancement(graph.getWinnersRounds());
+        tournamentBracketBuilder.wireLosersAdvancement(graph.getWinnersRounds(), graph.getLosersRounds());
+        tournamentBracketBuilder.wireLosersToGrandFinal(graph.getWinnersRounds(), graph.getLosersRounds(), graph.getGrandFinal());
+        tournamentBracketBuilder.wireGrandFinalReset(graph.getGrandFinal(), graph.getGrandFinalReset());
+
+        TournamentMatch w1m1 = graph.getWinnersRounds().get(0).get(0);
+        TournamentMatch w1m2 = graph.getWinnersRounds().get(0).get(1);
+        TournamentMatch w1m3 = graph.getWinnersRounds().get(0).get(2);
+        TournamentMatch w1m4 = graph.getWinnersRounds().get(0).get(3);
+        TournamentMatch w2m1 = graph.getWinnersRounds().get(1).get(0);
+        TournamentMatch w2m2 = graph.getWinnersRounds().get(1).get(1);
+        TournamentMatch l1m1 = graph.getLosersRounds().get(0).get(0);
+        TournamentMatch l1m2 = graph.getLosersRounds().get(0).get(1);
+
+        assertEquals(8, tournament.getBracketSize());
+
+        assertEquals(1, w1m1.getTeamOneEntry().getSeed());
+        assertNull(w1m1.getTeamTwoEntry());
+        assertEquals(4, w1m2.getTeamOneEntry().getSeed());
+        assertEquals(5, w1m2.getTeamTwoEntry().getSeed());
+        assertEquals(2, w1m3.getTeamOneEntry().getSeed());
+        assertNull(w1m3.getTeamTwoEntry());
+        assertEquals(3, w1m4.getTeamOneEntry().getSeed());
+        assertEquals(6, w1m4.getTeamTwoEntry().getSeed());
+
+        assertEquals(w2m1.getId(), w1m1.getNextWinnerMatchId());
+        assertEquals(1, w1m1.getNextWinnerSlot());
+        assertEquals(l1m1.getId(), w1m1.getNextLoserMatchId());
+        assertEquals(1, w1m1.getNextLoserSlot());
+
+        assertEquals(w2m1.getId(), w1m2.getNextWinnerMatchId());
+        assertEquals(2, w1m2.getNextWinnerSlot());
+        assertEquals(l1m1.getId(), w1m2.getNextLoserMatchId());
+        assertEquals(2, w1m2.getNextLoserSlot());
+
+        assertEquals(w2m2.getId(), w1m3.getNextWinnerMatchId());
+        assertEquals(1, w1m3.getNextWinnerSlot());
+        assertEquals(l1m2.getId(), w1m3.getNextLoserMatchId());
+        assertEquals(1, w1m3.getNextLoserSlot());
+
+        assertEquals(w2m2.getId(), w1m4.getNextWinnerMatchId());
+        assertEquals(2, w1m4.getNextWinnerSlot());
+        assertEquals(l1m2.getId(), w1m4.getNextLoserMatchId());
+        assertEquals(2, w1m4.getNextLoserSlot());
+    }
+
     /**
      * Verifies behavior for a single-team tournament.
      *
