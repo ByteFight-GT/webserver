@@ -146,7 +146,6 @@ public class PublicTournamentController {
     // 5. Rankings (after tournament completes)
     // ─────────────────────────────────────────────────────────────────────────
     
-    // TODO: change this to only return top 8
     // 
     /**
      * Returns final rankings for all teams after the tournament is complete.
@@ -154,14 +153,15 @@ public class PublicTournamentController {
      * Ranking logic:
      *   1st  -> Tournament.firstPlaceEntry (champion)
      *   2nd  -> Tournament.secondPlaceEntry (runner-up from grand final/reset)
-     *   3rd+ -> ordered by elimination time (later = better), then by original seed
+     *   3rd+ -> ordered by losers-bracket elimination round
+     *          (later round = better, same round = tied rank)
      *
      * Returns 400 if the tournament is not yet complete.
      *
      * Path:
      *   controller -> TournamentService.getRankings
      *   -> reads Tournament (for 1st/2nd place), TournamentEntry list
-     *   -> sorts remaining entries by eliminatedAt DESC, seed ASC
+     *   -> groups remaining entries by losers elimination round
      *   -> maps to List<TournamentRankingDto> with 1-based rank
      */
     @GetMapping("/{uuid}/rankings")
