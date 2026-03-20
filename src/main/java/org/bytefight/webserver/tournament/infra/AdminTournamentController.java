@@ -3,7 +3,11 @@ package org.bytefight.webserver.tournament.infra;
 import org.bytefight.webserver.tournament.application.TournamentService;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
 import org.bytefight.webserver.tournament.domain.TournamentBracketDto;
+import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
+import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
+import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
+import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -30,6 +35,72 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/competition/{competitionSlug}/tournament")
 public class AdminTournamentController {
     private final TournamentService tournamentService;
+
+    /**
+     * Returns tournament metadata: status, sizes, timestamps, and 1st/2nd place
+     * (if the tournament is complete).
+     */
+    @GetMapping("/{uuid}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TournamentDto> getTournament(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getTournamentDto(competitionSlug, uuid));
+    }
+
+    /**
+     * Returns all enrolled teams (tournament entries) sorted by seed.
+     */
+    @GetMapping("/{uuid}/teams")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TournamentEntryDto>> getTeams(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getTeams(competitionSlug, uuid));
+    }
+
+    /**
+     * Returns matches (series) with optional filtering by bracket type and round range.
+     */
+    @GetMapping("/{uuid}/rounds")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TournamentMatchDto>> getRounds(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid,
+            @RequestParam(required = false) TournamentBracketType bracketType,
+            @RequestParam(required = false) Integer fromRound,
+            @RequestParam(required = false) Integer toRound
+    ) {
+        return ResponseEntity.ok(
+                tournamentService.getMatchesByRound(competitionSlug, uuid, bracketType, fromRound, toRound)
+        );
+    }
+
+    /**
+     * Returns the full tournament payload: metadata, all enrolled teams, and all matches.
+     */
+    @GetMapping("/{uuid}/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TournamentBracketDto> getAll(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getBracket(competitionSlug, uuid));
+    }
+
+    /**
+     * Returns final rankings for all teams after the tournament is complete.
+     */
+    @GetMapping("/{uuid}/rankings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TournamentRankingDto>> getRankings(
+            @PathVariable String competitionSlug,
+            @PathVariable String uuid
+    ) {
+        return ResponseEntity.ok(tournamentService.getRankings(competitionSlug, uuid));
+    }
 
     /**
      * Returns all tournaments for a competition (newest first).
