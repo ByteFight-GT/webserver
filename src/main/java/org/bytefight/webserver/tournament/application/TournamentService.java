@@ -11,7 +11,9 @@ import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
+import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
+import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
@@ -173,21 +175,16 @@ public class TournamentService {
                 .map(TournamentMatchDto::from)
                 .toList();
     }
-    // TODO: change this to only return top 8
     /**
      * Returns final rankings for all teams in a completed tournament.
      *
      * Ranking logic:
      * - 1st place: Tournament.firstPlaceEntry (champion)
      * - 2nd place: Tournament.secondPlaceEntry (runner-up)
-     * - Remaining teams: sorted by eliminatedAt DESC (later elimination = better placing),
-     *   then by seed ASC as tiebreaker
+     * - Remaining teams: ranked by the losers-bracket round where they were eliminated
+     *   (later round = better placing, same round = tied placement)
      *
      * Only available when the tournament status is COMPLETE.
-     *
-     * In double elimination, all eliminated teams have exactly 2 losses.
-     * The differentiator is *when* they were eliminated — teams eliminated later
-     * survived more rounds and are ranked higher.
      */
     public List<TournamentRankingDto> getRankings(String competitionSlug, String uuid) {
         Tournament tournament = getTournamentByUuid(competitionSlug, uuid);
@@ -199,30 +196,72 @@ public class TournamentService {
         TournamentEntry second = tournament.getSecondPlaceEntry();
         List<TournamentEntry> allEntries = tournamentEntryRepository.findByTournamentOrderBySeed(tournament);
 
-        // Separate the champion and runner-up from the rest.
-        List<TournamentEntry> remaining = allEntries.stream()
-                .filter(e -> !e.getId().equals(first.getId()) && !e.getId().equals(second.getId()))
-                .sorted(
-                        // Fewer losses = went further (should appear first among remaining).
-                        Comparator.<TournamentEntry>comparingInt(TournamentEntry::getLosses)
-                                // Among same loss count, later elimination = better placing.
-                                .thenComparing(
-                                        Comparator.comparing(
-                                                TournamentEntry::getEliminatedAt,
-                                                Comparator.nullsFirst(Comparator.reverseOrder())
-                                        )
-                                )
-                                // Final tiebreaker: original seed (lower seed = stronger).
-                                .thenComparingInt(TournamentEntry::getSeed)
-                )
-                .toList();
-
         List<TournamentRankingDto> rankings = new ArrayList<>();
         rankings.add(buildRanking(1, first));
         rankings.add(buildRanking(2, second));
-        int rank = 3;
+
+        List<TournamentEntry> remaining = allEntries.stream()
+                .filter(e -> !e.getId().equals(first.getId()) && !e.getId().equals(second.getId()))
+                .toList();
+
+        Map<Long, Integer> eliminationRoundByEntryId = new HashMap<>();
+        // TODO:stupid, just get the matches that have bracket type LOSERS from the repo rather than looping over them
+        for (TournamentMatch match : tournamentMatchRepository
+                .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament)) {
+            if (match.getBracketType() != TournamentBracketType.LOSERS
+                    || match.getState() != TournamentMatchState.COMPLETE
+                    || match.getLoserEntry() == null
+                    || match.getRoundNumber() == null) {
+                continue;
+            }
+            Long loserEntryId = match.getLoserEntry().getId();
+            Integer existingRound = eliminationRoundByEntryId.get(loserEntryId);
+            if (existingRound == null || match.getRoundNumber() > existingRound) {
+                eliminationRoundByEntryId.put(loserEntryId, match.getRoundNumber());
+            }
+        }
+
+        Map<Integer, List<TournamentEntry>> entriesByEliminationRound = new HashMap<>();
+        List<TournamentEntry> unknownRound = new ArrayList<>();
         for (TournamentEntry entry : remaining) {
-            rankings.add(buildRanking(rank++, entry));
+            Integer round = eliminationRoundByEntryId.get(entry.getId());
+            if (round == null) {
+                unknownRound.add(entry);
+            } else {
+                entriesByEliminationRound.computeIfAbsent(round, ignored -> new ArrayList<>()).add(entry);
+            }
+        }
+
+        List<Integer> roundsDesc = entriesByEliminationRound.keySet().stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        int betterPlacedTeams = 2; // champion + runner-up
+        for (Integer round : roundsDesc) {
+            int rankForRound = betterPlacedTeams + 1;
+            List<TournamentEntry> roundEntries = entriesByEliminationRound.get(round).stream()
+                    .sorted(Comparator.comparingInt(TournamentEntry::getSeed))
+                    .toList();
+            for (TournamentEntry entry : roundEntries) {
+                rankings.add(buildRanking(rankForRound, entry));
+            }
+            betterPlacedTeams += roundEntries.size();
+        }
+
+        if (!unknownRound.isEmpty()) {
+            int fallbackRank = betterPlacedTeams + 1;
+            List<TournamentEntry> orderedUnknown = unknownRound.stream()
+                    .sorted(
+                            Comparator.comparing(
+                                            TournamentEntry::getEliminatedAt,
+                                            Comparator.nullsLast(Comparator.reverseOrder())
+                                    )
+                                    .thenComparingInt(TournamentEntry::getSeed)
+                    )
+                    .toList();
+            for (TournamentEntry entry : orderedUnknown) {
+                rankings.add(buildRanking(fallbackRank++, entry));
+            }
         }
         return rankings;
     }

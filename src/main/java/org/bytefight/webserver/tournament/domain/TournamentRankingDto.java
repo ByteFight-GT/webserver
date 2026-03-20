@@ -9,7 +9,8 @@ import lombok.Getter;
  * Returned by the rankings endpoint once a tournament is COMPLETE.
  * Teams are ranked by:
  *   1st/2nd place -> stored directly on Tournament
- *   Remaining     -> ordered by eliminatedAt DESC (later = better), then seed ASC
+ *   Remaining     -> losers-bracket elimination round (later round = better;
+ *                    same round = tied rank)
  */
 @Getter
 @Builder
