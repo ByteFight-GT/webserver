@@ -18,6 +18,7 @@ import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.application.SubmissionService;
 import org.bytefight.webserver.team.application.TeamService;
 import org.springframework.stereotype.Service;
+import org.bytefight.webserver.tournament.application.TournamentResultHandler;
 
 @AllArgsConstructor
 @Service
@@ -30,7 +31,7 @@ public class GameMatchResultHandler {
   private final SubmissionService submissionService;
   private final RabbitMQService rabbitMQService;
   private final GlickoService glickoService;
-
+  private final TournamentResultHandler tournamentResultHandler;
   /**
    * This method handles lightweight match status updates emitted by the engine
    *
@@ -56,7 +57,9 @@ public class GameMatchResultHandler {
     gameMatch.setStatus(result.getStatus());
     gameMatch.setFinishedAt(Instant.now());
     gameMatchRepository.save(gameMatch);
-
+    if (gameMatch.getReason() == MatchReason.tournament) {
+      tournamentResultHandler.handleTournamentResult(gameMatch, result.getStatus());
+    }
     if (gameMatch.getReason() != MatchReason.validation) {
       glickoService.processGameMatchResult(gameMatch, false);
     } else {
