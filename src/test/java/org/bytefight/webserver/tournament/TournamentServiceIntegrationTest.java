@@ -9,14 +9,20 @@ import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.ladder.domain.DefaultLadderSettings;
+import org.bytefight.webserver.ladder.domain.Ladder;
+import org.bytefight.webserver.ladder.infra.LadderRepository;
 import org.bytefight.webserver.tournament.application.TournamentBracketBuilder;
 import org.bytefight.webserver.tournament.application.TournamentService;
 import org.bytefight.webserver.tournament.domain.CreateTournamentRequest;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
+import org.bytefight.webserver.tournament.domain.TournamentEntry;
+import org.bytefight.webserver.tournament.domain.TournamentEntryStatus;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
+import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
@@ -48,6 +54,9 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
 
     @Autowired
     private SubmissionRepository submissionRepository;
+
+    @Autowired
+    private LadderRepository ladderRepository;
 
     @Autowired
     private TournamentRepository tournamentRepository;
@@ -203,6 +212,61 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         }
     }
 
+    @Test
+    void getRankingsUsesLosersRoundWithTiedPlacements() {
+        Competition competition = createCompetition("comp-rankings-round", true);
+        Tournament tournament = Tournament.builder()
+                .competition(competition)
+                .name("Rankings Round Cup")
+                .status(TournamentStatus.COMPLETE)
+                .build();
+        tournamentRepository.save(tournament);
+
+        TournamentEntry seed1 = createEntry(tournament, createTeam(competition, "Seed 1", false), 1);
+        TournamentEntry seed2 = createEntry(tournament, createTeam(competition, "Seed 2", false), 2);
+        TournamentEntry seed3 = createEntry(tournament, createTeam(competition, "Seed 3", false), 3);
+        TournamentEntry seed4 = createEntry(tournament, createTeam(competition, "Seed 4", false), 4);
+        TournamentEntry seed5 = createEntry(tournament, createTeam(competition, "Seed 5", false), 5);
+        TournamentEntry seed6 = createEntry(tournament, createTeam(competition, "Seed 6", false), 6);
+        TournamentEntry seed7 = createEntry(tournament, createTeam(competition, "Seed 7", false), 7);
+        TournamentEntry seed8 = createEntry(tournament, createTeam(competition, "Seed 8", false), 8);
+
+        markEliminated(seed3);
+        markEliminated(seed4);
+        markEliminated(seed5);
+        markEliminated(seed6);
+        markEliminated(seed7);
+        markEliminated(seed8);
+
+        tournament.setFirstPlaceEntry(seed1);
+        tournament.setSecondPlaceEntry(seed2);
+        tournamentRepository.save(tournament);
+
+        // 8-team expected placement by losers elimination round:
+        // L4 -> 3rd, L3 -> 4th, L2 -> tied 5th, L1 -> tied 7th
+        createCompletedLosersEliminationMatch(tournament, 4, 1, seed3);
+        createCompletedLosersEliminationMatch(tournament, 3, 1, seed4);
+        createCompletedLosersEliminationMatch(tournament, 2, 1, seed5);
+        createCompletedLosersEliminationMatch(tournament, 2, 2, seed6);
+        createCompletedLosersEliminationMatch(tournament, 1, 1, seed7);
+        createCompletedLosersEliminationMatch(tournament, 1, 2, seed8);
+
+        List<TournamentRankingDto> rankings = tournamentService.getRankings(
+                competition.getSlug(),
+                tournament.getUuid().toString()
+        );
+
+        assertEquals(8, rankings.size());
+        assertSeedRank(rankings, 1, 1);
+        assertSeedRank(rankings, 2, 2);
+        assertSeedRank(rankings, 3, 3);
+        assertSeedRank(rankings, 4, 4);
+        assertSeedRank(rankings, 5, 5);
+        assertSeedRank(rankings, 6, 5);
+        assertSeedRank(rankings, 7, 7);
+        assertSeedRank(rankings, 8, 7);
+    }
+
     // ── Helper methods ──────────────────────────────────────────────────────
 
     private Competition createCompetition(String slug, boolean active) {
@@ -212,7 +276,19 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         competition.setActive(active);
         competition.setWhitelisted(false);
         competition.setMaxPlayersPerTeam(2);
-        return competitionRepository.save(competition);
+        Competition saved = competitionRepository.save(competition);
+        ensureTournamentLadder(saved);
+        return saved;
+    }
+
+    private void ensureTournamentLadder(Competition competition) {
+        if (ladderRepository.findByCompetitionAndLadder(competition, "tournament").isPresent()) {
+            return;
+        }
+        Ladder ladder = DefaultLadderSettings.baseline1500NoInflation();
+        ladder.setCompetition(competition);
+        ladder.setLadder("tournament");
+        ladderRepository.save(ladder);
     }
 
     private CreateTournamentRequest createTournamentRequest(String name, List<String> teamUuids) {
@@ -254,5 +330,44 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
         }
 
         return team;
+    }
+
+    private TournamentEntry createEntry(Tournament tournament, Team team, int seed) {
+        return tournamentEntryRepository.save(
+                TournamentEntry.builder()
+                        .tournament(tournament)
+                        .team(team)
+                        .seed(seed)
+                        .build()
+        );
+    }
+
+    private void markEliminated(TournamentEntry entry) {
+        entry.setLosses(2);
+        entry.setStatus(TournamentEntryStatus.ELIMINATED);
+        tournamentEntryRepository.save(entry);
+    }
+
+    private void createCompletedLosersEliminationMatch(Tournament tournament, int round, int matchIndex, TournamentEntry loser) {
+        TournamentMatch match = TournamentMatch.builder()
+                .tournament(tournament)
+                .bracketType(TournamentBracketType.LOSERS)
+                .roundNumber(round)
+                .matchIndex(matchIndex)
+                .state(TournamentMatchState.COMPLETE)
+                .seriesLength(TournamentBracketBuilder.NORMAL_SERIES_LENGTH)
+                .teamOneSeriesWins(0)
+                .teamTwoSeriesWins(0)
+                .loserEntry(loser)
+                .build();
+        tournamentMatchRepository.save(match);
+    }
+
+    private void assertSeedRank(List<TournamentRankingDto> rankings, int seed, int expectedRank) {
+        TournamentRankingDto ranking = rankings.stream()
+                .filter(row -> row.getSeed() == seed)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(expectedRank, ranking.getRank());
     }
 }
