@@ -50,13 +50,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TournamentMatchScheduler {
     private static final String MAP_SETTING_KEY = "map";
     private static final List<String> TOURNAMENT_SERIES_MAPS = List.of(
-            "the temple",
-            "the complex",
+            "the_temple",
+            "the_complex",
             "matrix",
             "maze",
             "spiral",
             "disjoint",
-            "big spiral"
+            "big_spiral"
     );
 
     private final TournamentMatchRepository tournamentMatchRepository;
