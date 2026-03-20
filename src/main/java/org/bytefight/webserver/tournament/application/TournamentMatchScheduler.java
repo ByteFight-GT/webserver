@@ -12,12 +12,14 @@ import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
-import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Responsible for moving the bracket forward with best-of series support.
@@ -57,11 +59,16 @@ public class TournamentMatchScheduler {
      */
     @Transactional
     public void processTournament(Tournament tournament) {
+        Map<Long, List<Long>> feederIdsBySlotKey = null;
         boolean changed;
         do {
             changed = false;
             List<TournamentMatch> matches = tournamentMatchRepository
                     .findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(tournament);
+            if (feederIdsBySlotKey == null) {
+                feederIdsBySlotKey = buildFeederIndex(matches);
+            }
+            Map<Long, TournamentMatchState> stateByMatchId = buildStateIndex(matches);
             for (TournamentMatch match : matches) {
                 if (match.getState() != TournamentMatchState.PENDING) {
                     // Only process matches that haven't been queued or completed.
@@ -69,12 +76,22 @@ public class TournamentMatchScheduler {
                 }
                 boolean hasTeamOne = match.getTeamOneEntry() != null;
                 boolean hasTeamTwo = match.getTeamTwoEntry() != null;
-                if (!hasTeamOne && !hasTeamTwo) {
-                    // This match is still waiting for both participants (later round), skip it.
-                    continue;
-                }
                 if (hasTeamOne && hasTeamTwo) {
                     // Both teams are present; the match will be queued below.
+                    continue;
+                }
+                boolean slotOneResolved = isSlotResolved(match, 1, feederIdsBySlotKey, stateByMatchId);
+                boolean slotTwoResolved = isSlotResolved(match, 2, feederIdsBySlotKey, stateByMatchId);
+                if (!slotOneResolved || !slotTwoResolved) {
+                    // At least one feeder path is still unresolved; this is not a true bye yet.
+                    continue;
+                }
+                if (!hasTeamOne && !hasTeamTwo) {
+                    // Both feeder paths resolved to empty. Nothing to advance from this node.
+                    match.setState(TournamentMatchState.SKIPPED);
+                    tournamentMatchRepository.save(match);
+                    stateByMatchId.put(match.getId(), TournamentMatchState.SKIPPED);
+                    changed = true;
                     continue;
                 }
                 // Bye scenario: single team auto-advances (no series needed).
@@ -82,6 +99,7 @@ public class TournamentMatchScheduler {
                 match.setWinnerEntry(winner);
                 match.setState(TournamentMatchState.SKIPPED);
                 tournamentMatchRepository.save(match);
+                stateByMatchId.put(match.getId(), TournamentMatchState.SKIPPED);
                 advanceWinner(match, winner);
                 changed = true;
             }
@@ -95,6 +113,63 @@ public class TournamentMatchScheduler {
                 queueSeriesGame(match);
             }
         }
+    }
+
+    private Map<Long, List<Long>> buildFeederIndex(List<TournamentMatch> matches) {
+        Map<Long, List<Long>> feederIdsBySlotKey = new HashMap<>();
+        for (TournamentMatch match : matches) {
+            if (match.getNextWinnerMatchId() != null && match.getNextWinnerSlot() != null) {
+                long key = slotKey(match.getNextWinnerMatchId(), match.getNextWinnerSlot());
+                feederIdsBySlotKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(match.getId());
+            }
+            if (match.getNextLoserMatchId() != null && match.getNextLoserSlot() != null) {
+                long key = slotKey(match.getNextLoserMatchId(), match.getNextLoserSlot());
+                feederIdsBySlotKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(match.getId());
+            }
+        }
+        return feederIdsBySlotKey;
+    }
+
+    private Map<Long, TournamentMatchState> buildStateIndex(List<TournamentMatch> matches) {
+        Map<Long, TournamentMatchState> stateByMatchId = new HashMap<>();
+        for (TournamentMatch match : matches) {
+            stateByMatchId.put(match.getId(), match.getState());
+        }
+        return stateByMatchId;
+    }
+
+    private boolean isSlotResolved(TournamentMatch target, int slot,
+                                   Map<Long, List<Long>> feederIdsBySlotKey,
+                                   Map<Long, TournamentMatchState> stateByMatchId) {
+        if (slot == 1 && target.getTeamOneEntry() != null) {
+            return true;
+        }
+        if (slot == 2 && target.getTeamTwoEntry() != null) {
+            return true;
+        }
+
+        List<Long> feederIds = feederIdsBySlotKey.get(slotKey(target.getId(), slot));
+        if (feederIds == null || feederIds.isEmpty()) {
+            // No feeder edge into this slot: permanently empty (seeded bye).
+            return true;
+        }
+
+        for (Long feederId : feederIds) {
+            TournamentMatchState state = stateByMatchId.get(feederId);
+            if (!isFeederResolved(state)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isFeederResolved(TournamentMatchState feederState) {
+        return feederState == TournamentMatchState.COMPLETE
+                || feederState == TournamentMatchState.SKIPPED;
+    }
+
+    private long slotKey(Long matchId, Integer slot) {
+        return (matchId << 2) | (slot & 0b11);
     }
 
     /**
@@ -149,11 +224,6 @@ public class TournamentMatchScheduler {
         // Determine the next game number (1-based).
         int nextGameNumber = tournamentGameRepository
                 .findByTournamentMatchOrderByGameNumberAsc(match).size() + 1;
-        
-        MatchmakingEvent matchmakingEvent = MatchmakingEvent.builder()
-                .competition(match.getTournament().getCompetition())
-                .ladder("tournament")
-                .build();
 
         // Create the underlying GameMatch and push it to the queue.
         GameMatch gameMatch = gameMatchService.createMatch(
@@ -165,7 +235,7 @@ public class TournamentMatchScheduler {
                 "tournament",
                 MatchReason.tournament,
                 null,
-                matchmakingEvent
+                null
         );
         gameMatchService.scheduleMatch(gameMatch);
 
