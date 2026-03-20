@@ -31,19 +31,23 @@ import java.time.LocalDateTime;
  * 4. Updates series win counters based on the game result
  * 5. Decision point:
  *    a) DRAW           -> Queue another game (draws don't count toward series score)
- *    b) Series NOT decided -> Queue the next game in the series
+ *    b) Series NOT decided -> Queue the next game (unless 10-game cap reached)
  *    c) Series DECIDED -> Mark series complete, update losses/elimination, advance bracket
  *
  * Series rules:
  * - Bo5: first to 3 game wins takes the series
  * - Bo7: first to 4 game wins takes the series (grand finals only)
- * - Draws extend the series indefinitely (a new game is queued without changing scores)
+ * - Draws queue another game without changing scores
+ * - A series is force-resolved after 10 total games:
+ *   most wins wins; if tied, the higher seed advances
  * - A series loss counts as ONE bracket loss for the loser (in double-elimination,
  *   two bracket losses = elimination)
  */
 @Service
 @RequiredArgsConstructor
 public class TournamentResultHandler {
+    private static final int MAX_SERIES_GAMES = 10;
+
     private final TournamentMatchRepository tournamentMatchRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
     private final TournamentGameRepository tournamentGameRepository;
@@ -93,11 +97,17 @@ public class TournamentResultHandler {
             return;
         }
 
+        int gamesPlayed = tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(match).size();
+
         // ── Step 3: Handle draw (no score change, re-queue another game) ────
         if (status == MatchStatus.draw) {
-            // Draws don't increment either side's series wins.
-            // We simply queue a fresh game at the next game number.
-            matchScheduler.queueSeriesGame(match);
+            if (gamesPlayed >= MAX_SERIES_GAMES) {
+                completeSeriesWithCapTiebreak(match, teamOne, teamTwo);
+            } else {
+                // Draws don't increment either side's series wins.
+                // Queue a fresh game at the next game number until the cap.
+                matchScheduler.queueSeriesGame(match);
+            }
             return;
         }
 
@@ -112,23 +122,60 @@ public class TournamentResultHandler {
         tournamentMatchRepository.save(match);
 
         // ── Step 5: Check if the series is decided ──────────────────────────
-        if (!match.isSeriesDecided()) {
-            // Series still in progress — queue the next game.
-            matchScheduler.queueSeriesGame(match);
+        if (match.isSeriesDecided()) {
+            completeSeriesByScore(match, teamOne, teamTwo);
             return;
         }
 
-        // ── Step 6: Series decided — determine winner/loser ─────────────────
-        TournamentEntry winner;
-        TournamentEntry loser;
-        if (match.getTeamOneSeriesWins() >= match.getWinsRequired()) {
-            winner = teamOne;
-            loser = teamTwo;
+        if (gamesPlayed >= MAX_SERIES_GAMES) {
+            completeSeriesWithCapTiebreak(match, teamOne, teamTwo);
         } else {
-            winner = teamTwo;
-            loser = teamOne;
+            // Series still in progress — queue the next game.
+            matchScheduler.queueSeriesGame(match);
         }
+    }
 
+    private void completeSeriesByScore(TournamentMatch match, TournamentEntry teamOne, TournamentEntry teamTwo) {
+        TournamentEntry winner = match.getTeamOneSeriesWins() >= match.getWinsRequired() ? teamOne : teamTwo;
+        TournamentEntry loser = winner.equals(teamOne) ? teamTwo : teamOne;
+        completeSeries(match, winner, loser);
+    }
+
+    private void completeSeriesWithCapTiebreak(TournamentMatch match, TournamentEntry teamOne, TournamentEntry teamTwo) {
+        TournamentEntry winner;
+        if (match.getTeamOneSeriesWins() > match.getTeamTwoSeriesWins()) {
+            winner = teamOne;
+        } else if (match.getTeamTwoSeriesWins() > match.getTeamOneSeriesWins()) {
+            winner = teamTwo;
+        } else {
+            winner = pickHigherSeed(teamOne, teamTwo);
+        }
+        TournamentEntry loser = winner.equals(teamOne) ? teamTwo : teamOne;
+        completeSeries(match, winner, loser);
+    }
+
+    /**
+     * Tournament seeding follows "1 is the top seed", so lower numeric seed wins ties.
+     */
+    private TournamentEntry pickHigherSeed(TournamentEntry teamOne, TournamentEntry teamTwo) {
+        Integer seedOne = teamOne.getSeed();
+        Integer seedTwo = teamTwo.getSeed();
+        if (seedOne == null && seedTwo == null) {
+            return teamOne;
+        }
+        if (seedOne == null) {
+            return teamTwo;
+        }
+        if (seedTwo == null) {
+            return teamOne;
+        }
+        if (!seedOne.equals(seedTwo)) {
+            return seedOne < seedTwo ? teamOne : teamTwo;
+        }
+        return teamOne;
+    }
+
+    private void completeSeries(TournamentMatch match, TournamentEntry winner, TournamentEntry loser) {
         match.setWinnerEntry(winner);
         match.setLoserEntry(loser);
         match.setState(TournamentMatchState.COMPLETE);
