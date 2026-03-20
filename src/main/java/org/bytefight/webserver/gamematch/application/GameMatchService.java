@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class GameMatchService {
+  private static final String TOURNAMENT_LADDER = "tournament";
 
   private final GameMatchRepository gameMatchRepository;
   private final RabbitMQService rabbitMQService;
@@ -146,6 +147,8 @@ public class GameMatchService {
         (root, query, cb) -> {
           List<Predicate> predicates = new ArrayList<>();
 
+          predicates.add(cb.notEqual(root.get("ladder"), TOURNAMENT_LADDER));
+
           if (competition != null) {
             predicates.add(cb.equal(root.get("competition"), competition));
           }
@@ -208,6 +211,7 @@ public class GameMatchService {
             MatchStatus.scheduling,
             MatchStatus.waiting,
             MatchStatus.in_progress),
+        TOURNAMENT_LADDER,
         page);
   }
 
