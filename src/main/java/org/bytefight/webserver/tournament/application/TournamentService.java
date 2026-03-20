@@ -96,6 +96,17 @@ public class TournamentService {
     }
 
     /**
+     * Lists all tournaments for a competition, newest first.
+     */
+    public List<TournamentDto> getTournaments(String competitionSlug) {
+        Competition competition = getCompetitionBySlug(competitionSlug);
+        return tournamentRepository.findByCompetitionOrderByIdDesc(competition)
+                .stream()
+                .map(TournamentDto::from)
+                .toList();
+    }
+
+    /**
      * Full bracket payload for frontend visualization.
      *
      * Path:
