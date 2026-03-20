@@ -81,10 +81,11 @@ public interface GameMatchRepository
       @Param("status") Collection<MatchStatus> status);
 
   @Query(
-      "SELECT gm FROM GameMatch gm WHERE gm.competition = :competition AND gm.status IN :status ORDER BY gm.createdAt DESC")
+      "SELECT gm FROM GameMatch gm WHERE gm.competition = :competition AND gm.status IN :status AND gm.ladder <> :excludedLadder ORDER BY gm.createdAt DESC")
   Page<GameMatch> findByCompetitionAndStatus(
       @Param("competition") Competition competition,
       @Param("status") Collection<MatchStatus> status,
+      @Param("excludedLadder") String excludedLadder,
       Pageable pageable);
 
   @Query(
