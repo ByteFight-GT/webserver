@@ -17,9 +17,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Responsible for moving the bracket forward with best-of series support.
@@ -45,6 +48,17 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class TournamentMatchScheduler {
+    private static final String MAP_SETTING_KEY = "map";
+    private static final List<String> TOURNAMENT_SERIES_MAPS = List.of(
+            "the temple",
+            "the complex",
+            "matrix",
+            "maze",
+            "spiral",
+            "disjoint",
+            "big spiral"
+    );
+
     private final TournamentMatchRepository tournamentMatchRepository;
     private final TournamentGameRepository tournamentGameRepository;
     private final GameMatchService gameMatchService;
@@ -221,9 +235,12 @@ public class TournamentMatchScheduler {
             throw new IllegalArgumentException("Tournament match cannot be queued without current submissions.");
         }
 
+        List<TournamentGame> existingGames = tournamentGameRepository
+                .findByTournamentMatchOrderByGameNumberAsc(match);
+
         // Determine the next game number (1-based).
-        int nextGameNumber = tournamentGameRepository
-                .findByTournamentMatchOrderByGameNumberAsc(match).size() + 1;
+        int nextGameNumber = existingGames.size() + 1;
+        Map<String, Object> matchSettings = buildSeriesMatchSettings(existingGames);
 
         // Create the underlying GameMatch and push it to the queue.
         GameMatch gameMatch = gameMatchService.createMatch(
@@ -234,7 +251,7 @@ public class TournamentMatchScheduler {
                 submissionTwo,
                 "tournament",
                 MatchReason.tournament,
-                null,
+                matchSettings,
                 null
         );
         gameMatchService.scheduleMatch(gameMatch);
@@ -250,6 +267,39 @@ public class TournamentMatchScheduler {
         // Mark the match (series) as actively being played.
         match.setState(TournamentMatchState.QUEUED);
         tournamentMatchRepository.save(match);
+    }
+
+    /**
+     * Ensures map uniqueness inside a single best-of series.
+     * Chooses randomly from the remaining unused maps.
+     * Once all known maps have been used, returns null so the engine can auto-select.
+     */
+    private Map<String, Object> buildSeriesMatchSettings(List<TournamentGame> existingGames) {
+        Set<String> usedMaps = new HashSet<>();
+        for (TournamentGame game : existingGames) {
+            Map<String, Object> settings = game.getGameMatch().getMatchSettings();
+            if (settings == null) {
+                continue;
+            }
+            Object value = settings.get(MAP_SETTING_KEY);
+            if (value instanceof String mapName) {
+                usedMaps.add(mapName);
+            }
+        }
+
+        List<String> availableMaps = new ArrayList<>();
+        for (String mapName : TOURNAMENT_SERIES_MAPS) {
+            if (!usedMaps.contains(mapName)) {
+                availableMaps.add(mapName);
+            }
+        }
+
+        if (!availableMaps.isEmpty()) {
+            String selectedMap = availableMaps.get(ThreadLocalRandom.current().nextInt(availableMaps.size()));
+            return Map.of(MAP_SETTING_KEY, selectedMap);
+        }
+
+        return null;
     }
 
     // ── Internal helpers ────────────────────────────────────────────────────
