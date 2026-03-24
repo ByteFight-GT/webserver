@@ -24,6 +24,7 @@ import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.team.infra.TeamRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class GameMatchService {
   private static final String TOURNAMENT_LADDER = "tournament";
 
   private final GameMatchRepository gameMatchRepository;
+  private final TeamRepository teamRepository;
   private final RabbitMQService rabbitMQService;
   private final GameMatchProperties gameMatchProperties;
   private final Clock clock;
@@ -137,7 +139,7 @@ public class GameMatchService {
       Competition competition,
       String ladderSlug,
       String teamUuid,
-      String opponentTeamUuid,
+      String opponentTeamName,
       String teamWin,
       String initiatingTeamUuid,
       String notInitiatingTeamUuid,
@@ -147,13 +149,17 @@ public class GameMatchService {
       PageRequest page) {
     TeamWinFilter teamWinFilter = TeamWinFilter.from(teamWin);
     UUID teamId = parseOptionalUuid(teamUuid, "teamUuid");
-    UUID opponentTeamId = parseOptionalUuid(opponentTeamUuid, "opponentTeamUUID");
+    boolean hasOpponentTeamName = opponentTeamName != null && !opponentTeamName.isBlank();
+    UUID opponentTeamId = resolveOpponentTeamUuid(competition, opponentTeamName).orElse(null);
     UUID initiatingTeamId = parseOptionalUuid(initiatingTeamUuid, "initiatingTeamUuid");
     UUID notInitiatingTeamId = parseOptionalUuid(notInitiatingTeamUuid, "notInitiatingTeamUuid");
     UUID submissionId = parseOptionalUuid(submissionUuid, "submissionUuid");
 
     if (teamId == null && teamWinFilter != TeamWinFilter.ANY) {
       throw new IllegalArgumentException("teamUuid is required when teamWin is Win or Lose");
+    }
+    if (hasOpponentTeamName && opponentTeamId == null) {
+      return Page.empty(page);
     }
 
     Specification<GameMatch> spec =
@@ -236,6 +242,21 @@ public class GameMatchService {
         };
 
     return gameMatchRepository.findAll(spec, page);
+  }
+
+  private Optional<UUID> resolveOpponentTeamUuid(Competition competition, String opponentTeamName) {
+    if (opponentTeamName == null || opponentTeamName.isBlank()) {
+      return Optional.empty();
+    }
+    if (competition == null) {
+      throw new IllegalArgumentException(
+          "competition is required when filtering by opponentTeamName");
+    }
+
+    String normalizedName = opponentTeamName.trim().toLowerCase(Locale.ROOT);
+    return teamRepository
+        .findByCompetitionAndNameNormalizedAndIsDeletedFalse(competition, normalizedName)
+        .map(Team::getUuid);
   }
 
   private UUID parseOptionalUuid(String value, String fieldName) {

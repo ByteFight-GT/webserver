@@ -3,6 +3,7 @@ package org.bytefight.webserver.gamematch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -128,7 +129,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             competition,
             ladder,
             teamA.getUuid().toString(),
-            teamB.getUuid().toString(),
+            teamB.getName().toUpperCase(Locale.ROOT),
             "Any",
             null,
             null,
@@ -145,7 +146,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             competition,
             ladder,
             teamA.getUuid().toString(),
-            teamB.getUuid().toString(),
+            teamB.getName().toUpperCase(Locale.ROOT),
             "Win",
             null,
             null,
@@ -162,7 +163,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             competition,
             ladder,
             teamA.getUuid().toString(),
-            teamB.getUuid().toString(),
+            teamB.getName().toUpperCase(Locale.ROOT),
             "Lose",
             null,
             null,
@@ -179,7 +180,7 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             competition,
             ladder,
             teamA.getUuid().toString(),
-            teamB.getUuid().toString(),
+            teamB.getName(),
             null,
             null,
             null,
@@ -190,6 +191,21 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
     assertThat(nullTeamWinAgainstB.getContent())
         .extracting(GameMatch::getUuid)
         .containsExactlyInAnyOrder(teamABWin.getUuid(), teamABLose.getUuid());
+
+    var unknownOpponentTeam =
+        gameMatchService.getPaginatedMatches(
+            competition,
+            ladder,
+            teamA.getUuid().toString(),
+            "not-a-real-team-name",
+            "Any",
+            null,
+            null,
+            null,
+            null,
+            null,
+            page);
+    assertThat(unknownOpponentTeam.getContent()).isEmpty();
   }
 
   @Test
