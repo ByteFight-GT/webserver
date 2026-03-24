@@ -38,6 +38,8 @@ public class PublicGameMatchController {
   public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
       @RequestParam String competitionSlug,
       @RequestParam(required = false) String teamUuid,
+      @RequestParam(required = false) String opponentTeamName,
+      @RequestParam(defaultValue = "Any") String teamWin,
       @RequestParam(required = false) String initiatingTeamUuid,
       @RequestParam(required = false) String notInitiatingTeamUuid,
       @RequestParam(required = false) String submissionUuid,
@@ -57,6 +59,8 @@ public class PublicGameMatchController {
             competition,
             ladder,
             teamUuid,
+            opponentTeamName,
+            teamWin,
             initiatingTeamUuid,
             notInitiatingTeamUuid,
             submissionUuid,

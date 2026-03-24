@@ -24,6 +24,7 @@ import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.team.infra.TeamRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class GameMatchService {
   private static final String TOURNAMENT_LADDER = "tournament";
 
   private final GameMatchRepository gameMatchRepository;
+  private final TeamRepository teamRepository;
   private final RabbitMQService rabbitMQService;
   private final GameMatchProperties gameMatchProperties;
   private final Clock clock;
@@ -137,12 +139,29 @@ public class GameMatchService {
       Competition competition,
       String ladderSlug,
       String teamUuid,
+      String opponentTeamName,
+      String teamWin,
       String initiatingTeamUuid,
       String notInitiatingTeamUuid,
       String submissionUuid,
       MatchReason matchReason,
       MatchStatus matchStatus,
       PageRequest page) {
+    TeamWinFilter teamWinFilter = TeamWinFilter.from(teamWin);
+    UUID teamId = parseOptionalUuid(teamUuid, "teamUuid");
+    boolean hasOpponentTeamName = opponentTeamName != null && !opponentTeamName.isBlank();
+    UUID opponentTeamId = resolveOpponentTeamUuid(competition, opponentTeamName).orElse(null);
+    UUID initiatingTeamId = parseOptionalUuid(initiatingTeamUuid, "initiatingTeamUuid");
+    UUID notInitiatingTeamId = parseOptionalUuid(notInitiatingTeamUuid, "notInitiatingTeamUuid");
+    UUID submissionId = parseOptionalUuid(submissionUuid, "submissionUuid");
+
+    if (teamId == null && teamWinFilter != TeamWinFilter.ANY) {
+      throw new IllegalArgumentException("teamUuid is required when teamWin is Win or Lose");
+    }
+    if (hasOpponentTeamName && opponentTeamId == null) {
+      return Page.empty(page);
+    }
+
     Specification<GameMatch> spec =
         (root, query, cb) -> {
           List<Predicate> predicates = new ArrayList<>();
@@ -165,30 +184,52 @@ public class GameMatchService {
             predicates.add(cb.equal(root.get("status"), matchStatus));
           }
 
-          if (teamUuid != null) {
-            UUID teamId = UUID.fromString(teamUuid);
+          if (teamId != null) {
             predicates.add(
                 cb.or(
                     cb.equal(root.get("teamA").get("uuid"), teamId),
                     cb.equal(root.get("teamB").get("uuid"), teamId)));
           }
 
-          if (initiatingTeamUuid != null) {
+          if (opponentTeamId != null) {
             predicates.add(
-                cb.equal(
-                    root.get("initiatingTeam").get("uuid"), UUID.fromString(initiatingTeamUuid)));
+                cb.or(
+                    cb.equal(root.get("teamA").get("uuid"), opponentTeamId),
+                    cb.equal(root.get("teamB").get("uuid"), opponentTeamId)));
           }
 
-          if (notInitiatingTeamUuid != null) {
-            UUID notInitiatingTeamId = UUID.fromString(notInitiatingTeamUuid);
+          if (teamWinFilter == TeamWinFilter.WIN) {
+            predicates.add(
+                cb.or(
+                    cb.and(
+                        cb.equal(root.get("teamA").get("uuid"), teamId),
+                        cb.equal(root.get("status"), MatchStatus.team_a_win)),
+                    cb.and(
+                        cb.equal(root.get("teamB").get("uuid"), teamId),
+                        cb.equal(root.get("status"), MatchStatus.team_b_win))));
+          } else if (teamWinFilter == TeamWinFilter.LOSE) {
+            predicates.add(
+                cb.or(
+                    cb.and(
+                        cb.equal(root.get("teamA").get("uuid"), teamId),
+                        cb.equal(root.get("status"), MatchStatus.team_b_win)),
+                    cb.and(
+                        cb.equal(root.get("teamB").get("uuid"), teamId),
+                        cb.equal(root.get("status"), MatchStatus.team_a_win))));
+          }
+
+          if (initiatingTeamId != null) {
+            predicates.add(cb.equal(root.get("initiatingTeam").get("uuid"), initiatingTeamId));
+          }
+
+          if (notInitiatingTeamId != null) {
             predicates.add(
                 cb.or(
                     cb.isNull(root.get("initiatingTeam")),
                     cb.notEqual(root.get("initiatingTeam").get("uuid"), notInitiatingTeamId)));
           }
 
-          if (submissionUuid != null) {
-            UUID submissionId = UUID.fromString(submissionUuid);
+          if (submissionId != null) {
             predicates.add(
                 cb.or(
                     cb.equal(root.get("submissionA").get("uuid"), submissionId),
@@ -201,6 +242,52 @@ public class GameMatchService {
         };
 
     return gameMatchRepository.findAll(spec, page);
+  }
+
+  private Optional<UUID> resolveOpponentTeamUuid(Competition competition, String opponentTeamName) {
+    if (opponentTeamName == null || opponentTeamName.isBlank()) {
+      return Optional.empty();
+    }
+    if (competition == null) {
+      throw new IllegalArgumentException(
+          "competition is required when filtering by opponentTeamName");
+    }
+
+    String normalizedName = opponentTeamName.trim().toLowerCase(Locale.ROOT);
+    return teamRepository
+        .findByCompetitionAndNameNormalizedAndIsDeletedFalse(competition, normalizedName)
+        .map(Team::getUuid);
+  }
+
+  private UUID parseOptionalUuid(String value, String fieldName) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+
+    try {
+      return UUID.fromString(value);
+    } catch (IllegalArgumentException ex) {
+      throw new IllegalArgumentException(fieldName + " must be a valid UUID", ex);
+    }
+  }
+
+  private enum TeamWinFilter {
+    ANY,
+    WIN,
+    LOSE;
+
+    private static TeamWinFilter from(String teamWin) {
+      if (teamWin == null || teamWin.isBlank()) {
+        return ANY;
+      }
+
+      return switch (teamWin.trim().toLowerCase(Locale.ROOT)) {
+        case "any" -> ANY;
+        case "win" -> WIN;
+        case "lose" -> LOSE;
+        default -> throw new IllegalArgumentException("teamWin must be one of Any, Win, Lose");
+      };
+    }
   }
 
   public Page<GameMatch> getFullPaginatedQueue(Competition competition, Pageable page) {
