@@ -47,4 +47,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
   //    Optional<Integer> findRankByUuid(UUID uuid);
 
   Optional<Team> findByCompetitionAndUuid(Competition competition, UUID uuid);
+
+  Optional<Team> findByCompetitionAndNameNormalizedAndIsDeletedFalse(
+      Competition competition, String nameNormalized);
 }
