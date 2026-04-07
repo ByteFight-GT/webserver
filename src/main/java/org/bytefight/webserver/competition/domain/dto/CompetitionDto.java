@@ -1,5 +1,7 @@
 package org.bytefight.webserver.competition.domain.dto;
 
+import java.util.Map;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
@@ -22,6 +24,7 @@ public class CompetitionDto {
   @NotNull boolean allowLeaveTeam;
   @NotNull boolean allowEditTeamName;
   @NotNull boolean allowCreateUserMatch;
+  @NotNull Map<String, Object> settings;
   @NotNull TimestampsDto timestamps;
 
   public static CompetitionDto from(Competition competition) {
@@ -38,6 +41,7 @@ public class CompetitionDto {
         .allowLeaveTeam(competition.isAllowLeaveTeam())
         .allowEditTeamName(competition.isAllowEditTeamName())
         .allowCreateUserMatch(competition.isAllowCreateUserMatch())
+        .settings(competition.getSettings())
         .timestamps(TimestampsDto.from(competition))
         .build();
   }
