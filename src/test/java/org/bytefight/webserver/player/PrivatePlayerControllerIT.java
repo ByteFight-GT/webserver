@@ -8,9 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.player.domain.UpdatePlayerProfileDto;
 import org.bytefight.webserver.player.infra.PlayerRepository;
+import org.bytefight.webserver.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

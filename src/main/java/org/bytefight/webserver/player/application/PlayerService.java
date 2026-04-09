@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.DefaultLadders;
@@ -27,6 +26,7 @@ import org.bytefight.webserver.submission.domain.dto.UploadSubmissionDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

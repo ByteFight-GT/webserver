@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import java.time.Clock;
 import java.util.*;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.config.ClockConfig;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
@@ -19,6 +18,7 @@ import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.SelfTeamDto;
 import org.bytefight.webserver.team.domain.dto.SetSubmissionDto;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
