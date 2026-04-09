@@ -69,8 +69,7 @@ public class LocalStorageService {
     return store(file, logicalPath, desiredName, false);
   }
 
-  public FileRecord store(
-      MultipartFile file, String logicalPath, String desiredName, long maxBytes)
+  public FileRecord store(MultipartFile file, String logicalPath, String desiredName, long maxBytes)
       throws IOException {
     return store(file, logicalPath, desiredName, false, maxBytes);
   }
@@ -82,11 +81,7 @@ public class LocalStorageService {
   }
 
   public FileRecord store(
-      MultipartFile file,
-      String logicalPath,
-      String desiredName,
-      boolean compress,
-      long maxBytes)
+      MultipartFile file, String logicalPath, String desiredName, boolean compress, long maxBytes)
       throws IOException {
     if (file == null || file.isEmpty()) {
       throw new IllegalArgumentException("File is null or empty");

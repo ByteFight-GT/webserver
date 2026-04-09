@@ -4,10 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Duration;
+import java.util.*;
 
 import org.bytefight.webserver.auth.application.AuthService;
 import org.bytefight.webserver.auth.domain.EmailAlreadyRegisteredException;
@@ -17,9 +15,11 @@ import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.storage.application.LocalStorageService;
+import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.user.domain.dto.RegisterUserDto;
+import org.bytefight.webserver.user.domain.dto.ResumeDto;
 import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -33,6 +33,7 @@ public class UserService {
   private final PlayerService playerService;
   private final AuthService authService;
   private final LocalStorageService storageService;
+  private final LocalStorageService localStorageService;
 
   static String normalize(String raw) {
     return raw == null ? null : raw.trim().toLowerCase();
@@ -95,8 +96,9 @@ public class UserService {
   }
 
   @Transactional
-  public FileRecord uploadResume(MultipartFile file, User requestingUser) throws IOException {
-    FileRecord oldResume = requestingUser.getResume();
+  public FileRecord uploadResume(MultipartFile file, UUID userUuid) throws IOException {
+    User user = userRepository.findByUuid(userUuid).orElseThrow();
+    FileRecord oldResume = user.getResume();
 
     if (file == null || file.isEmpty()) {
       throw new IOException("No resume is uploaded");
@@ -118,13 +120,29 @@ public class UserService {
       throw new IllegalArgumentException("Please submit your resume in PDF, DOC, or DOCX format");
     }
 
-    FileRecord newResume = storageService.store(
-        file, "resumes/" + requestingUser.getUuid(), fileName, true, 2_097_152);
+    FileRecord newResume =
+        storageService.store(file, "resumes/" + user.getUuid(), fileName, true, 2_097_152);
 
-    if(oldResume != null) {
+    if (oldResume != null) {
       storageService.delete(oldResume.getUuid().toString());
     }
 
+    user.setResume(newResume);
+    userRepository.save(user);
+
     return newResume;
+  }
+
+  public ResumeDto getResume(UUID userUuid) {
+    User user = userRepository.findByUuid(userUuid).orElseThrow();
+    FileRecord resume = user.getResume();
+
+    if (resume == null) {
+      throw new NoSuchElementException("No resume found");
+    }
+
+    DownloadLinkDto link =
+        localStorageService.getDownloadLink(resume.getUuid().toString(), Duration.ofMinutes(5));
+    return ResumeDto.from(link, user);
   }
 }

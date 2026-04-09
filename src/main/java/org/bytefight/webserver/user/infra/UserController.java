@@ -2,13 +2,12 @@ package org.bytefight.webserver.user.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import org.bytefight.webserver.storage.application.LocalStorageService;
-import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.user.application.UserService;
 import org.bytefight.webserver.user.domain.User;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-@Tag(name = "ResumeFile", description = "Endpoints for uploading and retrieving resumes")
+@Tag(name = "User (Private)", description = "Endpoints for managing user information")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
@@ -33,14 +32,11 @@ public class UserController {
   @Operation(
       operationId = "uploadResume",
       summary = "Upload or replace the authenticated user's resume (Max 2 MiB limit)")
-  public ResponseEntity<ResumeDto> uploadResume(
+  public ResponseEntity<Void> uploadResume(
       @AuthenticationPrincipal User user, @RequestPart("file") MultipartFile file) {
     try {
-      FileRecord saved = userService.uploadResume(file, user);
-
-      DownloadLinkDto link =
-          localStorageService.getDownloadLink(user.getUuid().toString(), Duration.ofMinutes(5));
-      return ResponseEntity.ok(ResumeDto.from(link, user));
+      FileRecord saved = userService.uploadResume(file, user.getUuid());
+      return ResponseEntity.ok().build();
     } catch (IOException e) {
       // invalid type / empty file / storage failure
       throw new ResponseStatusException(
@@ -52,14 +48,8 @@ public class UserController {
   @Operation(
       operationId = "getResume",
       summary = "Get the authenticated user's resume + a short-lived download link")
+  @Transactional
   public ResponseEntity<ResumeDto> getResume(@AuthenticationPrincipal User user) {
-    FileRecord resume = user.getResume();
-    if (resume == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No resume uploaded");
-    }
-
-    DownloadLinkDto link =
-        localStorageService.getDownloadLink(user.getUuid().toString(), Duration.ofMinutes(5));
-    return ResponseEntity.ok(ResumeDto.from(link, user));
+    return ResponseEntity.ok(userService.getResume(user.getUuid()));
   }
 }
