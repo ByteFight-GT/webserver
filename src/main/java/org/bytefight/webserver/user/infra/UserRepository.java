@@ -1,11 +1,11 @@
-package org.bytefight.webserver.auth.infra;
+package org.bytefight.webserver.user.infra;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto;
+import org.bytefight.webserver.user.domain.User;
+import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,23 +1,29 @@
-package org.bytefight.webserver.auth.application;
+package org.bytefight.webserver.user.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import org.bytefight.webserver.auth.application.AuthService;
 import org.bytefight.webserver.auth.domain.EmailAlreadyRegisteredException;
 import org.bytefight.webserver.auth.domain.RegistrationException;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
-import org.bytefight.webserver.auth.domain.dto.RegisterUserDto;
 import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
-import org.bytefight.webserver.auth.infra.UserRepository;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
+import org.bytefight.webserver.storage.application.LocalStorageService;
+import org.bytefight.webserver.storage.domain.FileRecord;
+import org.bytefight.webserver.user.domain.User;
+import org.bytefight.webserver.user.domain.dto.RegisterUserDto;
+import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class UserService {
   private final PlayerRepository playerRepository;
   private final PlayerService playerService;
   private final AuthService authService;
+  private final LocalStorageService storageService;
 
   static String normalize(String raw) {
     return raw == null ? null : raw.trim().toLowerCase();
@@ -85,5 +92,31 @@ public class UserService {
     } catch (AuthService.AuthServiceException e) {
       throw new RegistrationException(e.getMessage());
     }
+  }
+
+  @Transactional
+  public FileRecord uploadResume(MultipartFile file, User requestingUser) throws IOException {
+    if (file == null || file.isEmpty()) {
+      throw new IOException("No resume is uploaded");
+    }
+
+    String fileName = file.getOriginalFilename();
+
+    if (fileName == null) {
+      throw new IOException("File name is null");
+    }
+
+    String lower = fileName.toLowerCase();
+
+    Set<String> allowed_type = Set.of(".pdf", ".doc", ".docx");
+
+    boolean valid = allowed_type.stream().anyMatch(lower::endsWith);
+
+    if (!valid) {
+      throw new IllegalArgumentException("Please submit your resume in PDF, DOC, or DOCX format");
+    }
+
+    return storageService.store(
+        file, "resumes/" + requestingUser.getUuid(), requestingUser.getUsername() + "_resume");
   }
 }

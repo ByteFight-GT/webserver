@@ -1,10 +1,10 @@
 package org.bytefight.webserver.competition.domain.dto;
 
-import java.util.Map;
-
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
+
+import java.util.Map;
 
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.Competition;

@@ -114,7 +114,8 @@
 //             @RequestParam(required = false) Integer toRound
 //     ) {
 //         return ResponseEntity.ok(
-//                 tournamentService.getMatchesByRound(competitionSlug, uuid, bracketType, fromRound, toRound)
+//                 tournamentService.getMatchesByRound(competitionSlug, uuid, bracketType,
+// fromRound, toRound)
 //         );
 //     }
 
@@ -145,8 +146,8 @@
 //     // ─────────────────────────────────────────────────────────────────────────
 //     // 5. Rankings (after tournament completes)
 //     // ─────────────────────────────────────────────────────────────────────────
-    
-//     // 
+
+//     //
 //     /**
 //      * Returns final rankings for all teams after the tournament is complete.
 //      *

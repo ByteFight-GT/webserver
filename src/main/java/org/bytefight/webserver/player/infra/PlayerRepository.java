@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.domain.TeamMemberDetails;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

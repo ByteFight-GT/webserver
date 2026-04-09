@@ -1,6 +1,5 @@
 package org.bytefight.webserver.turnstile.infra;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -86,8 +87,7 @@ public class TurnstileInterceptor implements HandlerInterceptor {
     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-    Map<String, Object> body =
-        Map.of("error", "turnstile_failed", "codes", result.errorCodes());
+    Map<String, Object> body = Map.of("error", "turnstile_failed", "codes", result.errorCodes());
 
     objectMapper.writeValue(response.getWriter(), body);
   }

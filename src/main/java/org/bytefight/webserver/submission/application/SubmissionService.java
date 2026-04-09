@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -22,6 +21,7 @@ import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

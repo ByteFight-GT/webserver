@@ -1,4 +1,4 @@
-package org.bytefight.webserver.auth.domain;
+package org.bytefight.webserver.user.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
@@ -20,6 +19,7 @@ import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

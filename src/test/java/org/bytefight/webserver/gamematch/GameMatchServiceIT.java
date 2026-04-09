@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
@@ -23,6 +22,7 @@ import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.SubmissionValidity;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
