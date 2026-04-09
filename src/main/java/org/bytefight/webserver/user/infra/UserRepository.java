@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
   @Query(
       """
-        SELECT new org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto(
+        SELECT new org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto(
             u.id,
             u.uuid,
             u.email,
@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   @Query(
       """
-        SELECT new org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto(
+        SELECT new org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto(
             u.id,
             u.uuid,
             u.email,
