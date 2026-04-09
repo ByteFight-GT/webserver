@@ -4,10 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.bytefight.webserver.auth.application.AuthService;
-import org.bytefight.webserver.auth.application.UserService;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.auth.domain.dto.ImpersonateUserDto;
 import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
+import org.bytefight.webserver.user.application.UserService;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

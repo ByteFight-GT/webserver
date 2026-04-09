@@ -1,9 +1,9 @@
-package org.bytefight.webserver.auth.application;
+package org.bytefight.webserver.user.application;
 
 import java.util.List;
 
-import org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto;
-import org.bytefight.webserver.auth.infra.UserRepository;
+import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto;
+import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

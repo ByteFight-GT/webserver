@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematchfile.application.GameMatchFileService;
@@ -17,6 +16,7 @@ import org.bytefight.webserver.gamematchfile.domain.dto.GameMatchFileUploadDto;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

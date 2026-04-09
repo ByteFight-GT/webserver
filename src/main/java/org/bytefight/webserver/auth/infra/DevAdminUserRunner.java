@@ -1,8 +1,9 @@
 package org.bytefight.webserver.auth.infra;
 
-import org.bytefight.webserver.auth.application.UserService;
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.auth.domain.dto.RegisterUserDto;
+import org.bytefight.webserver.user.application.UserService;
+import org.bytefight.webserver.user.domain.User;
+import org.bytefight.webserver.user.domain.dto.RegisterUserDto;
+import org.bytefight.webserver.user.infra.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;

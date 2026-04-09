@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
@@ -23,6 +22,7 @@ import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -124,25 +124,26 @@ public class PrivateGameMatchController {
 
     List<GameMatch> gameMatches = new ArrayList<>();
 
-    for(int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
       GameMatch gameMatch =
-              gameMatchService.createMatch(
-                      user,
-                      initiatingTeam,
-                      teamA,
-                      teamB,
-                      teamA.getCurrentSubmission(),
-                      teamB.getCurrentSubmission(),
-                      ladder.getLadder(),
-                      MatchReason.scrimmage,
-                      createMatchDto.getMatchSettings(),
-                      null);
+          gameMatchService.createMatch(
+              user,
+              initiatingTeam,
+              teamA,
+              teamB,
+              teamA.getCurrentSubmission(),
+              teamB.getCurrentSubmission(),
+              ladder.getLadder(),
+              MatchReason.scrimmage,
+              createMatchDto.getMatchSettings(),
+              null);
 
       gameMatchService.scheduleMatch(gameMatch);
 
       gameMatches.add(gameMatch);
     }
 
-    return ResponseEntity.ok(gameMatches.stream().map(GameMatchDto::fromEntity).collect(Collectors.toList()));
+    return ResponseEntity.ok(
+        gameMatches.stream().map(GameMatchDto::fromEntity).collect(Collectors.toList()));
   }
 }

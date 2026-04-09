@@ -2,8 +2,6 @@ package org.bytefight.webserver;
 
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.auth.infra.UserRepository;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.ladder.domain.Ladder;
@@ -12,6 +10,8 @@ import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.user.domain.User;
+import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component

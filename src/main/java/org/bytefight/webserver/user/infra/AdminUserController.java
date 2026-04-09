@@ -1,4 +1,4 @@
-package org.bytefight.webserver.auth.infra;
+package org.bytefight.webserver.user.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bytefight.webserver.auth.application.AdminUserService;
-import org.bytefight.webserver.auth.domain.dto.AdminUserWithPlayerDto;
 import org.bytefight.webserver.common.web.RestPageRequest;
+import org.bytefight.webserver.user.application.AdminUserService;
+import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.JoinTeamDto;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
@@ -20,6 +19,7 @@ import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.SelfTeamDto;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
+import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.whitelist.domain.WhitelistEntry;
 import org.bytefight.webserver.whitelist.infra.WhitelistEntryRepository;
 import org.junit.jupiter.api.Test;

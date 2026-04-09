@@ -1,4 +1,4 @@
-package org.bytefight.webserver.auth.domain.dto;
+package org.bytefight.webserver.user.domain.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

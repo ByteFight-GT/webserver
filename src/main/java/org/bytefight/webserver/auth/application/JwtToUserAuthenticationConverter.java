@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.auth.infra.UserRepository;
+import org.bytefight.webserver.user.application.UserService;
+import org.bytefight.webserver.user.domain.User;
+import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

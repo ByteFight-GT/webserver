@@ -6,15 +6,12 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * Admin input payload for creating and enrolling a tournament.
- */
+/** Admin input payload for creating and enrolling a tournament. */
 @Getter
 @Setter
 public class CreateTournamentRequest {
-    @NotBlank
-    private String name;
+  @NotBlank private String name;
 
-    private List<String> teamUuids;
-    private String seedLadder;
+  private List<String> teamUuids;
+  private String seedLadder;
 }
