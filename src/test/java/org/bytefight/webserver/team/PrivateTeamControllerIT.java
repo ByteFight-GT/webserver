@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.domain.FileRecord;
@@ -24,6 +23,7 @@ import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.SetSubmissionDto;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
 import org.bytefight.webserver.team.infra.TeamRepository;
+import org.bytefight.webserver.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

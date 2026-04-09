@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.user.domain.User;
 
 @Getter
 @Setter

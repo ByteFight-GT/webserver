@@ -6,18 +6,18 @@ import lombok.Value;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.user.domain.User;
 
 @Value
 @Builder
-public class SelfUserDto {
+public class SelfAuthUserDto {
   UUID uuid;
   String email;
   Instant createdAt;
   boolean isAdmin;
 
-  public static SelfUserDto from(User user) {
-    return SelfUserDto.builder()
+  public static SelfAuthUserDto from(User user) {
+    return SelfAuthUserDto.builder()
         .uuid(user.getUuid())
         .email(user.getEmail())
         .createdAt(user.getCreatedAt())

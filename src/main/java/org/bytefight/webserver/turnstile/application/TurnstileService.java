@@ -1,6 +1,5 @@
 package org.bytefight.webserver.turnstile.application;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -16,7 +15,8 @@ import org.springframework.web.client.RestClient;
 @Service
 @Slf4j
 public class TurnstileService {
-  private static final String VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+  private static final String VERIFY_URL =
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
   private final TurnstileProperties props;
   private final RestClient restClient;
@@ -72,9 +72,7 @@ public class TurnstileService {
     }
   }
 
-  /**
-   * Validates a Turnstile token without providing client IP.
-   */
+  /** Validates a Turnstile token without providing client IP. */
   public TurnstileValidationResult validate(String token) {
     return validate(token, null);
   }

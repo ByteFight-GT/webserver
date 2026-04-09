@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.bytefight.webserver.user.domain.User;
 
 @Getter
 @Setter

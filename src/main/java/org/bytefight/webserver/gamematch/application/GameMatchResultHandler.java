@@ -17,8 +17,8 @@ import org.bytefight.webserver.glicko.application.GlickoService;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
 import org.bytefight.webserver.submission.application.SubmissionService;
 import org.bytefight.webserver.team.application.TeamService;
-import org.springframework.stereotype.Service;
 import org.bytefight.webserver.tournament.application.TournamentResultHandler;
+import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Service
@@ -32,6 +32,7 @@ public class GameMatchResultHandler {
   private final RabbitMQService rabbitMQService;
   private final GlickoService glickoService;
   private final TournamentResultHandler tournamentResultHandler;
+
   /**
    * This method handles lightweight match status updates emitted by the engine
    *

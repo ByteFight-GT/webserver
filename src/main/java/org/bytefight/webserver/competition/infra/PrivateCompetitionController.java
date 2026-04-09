@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import org.bytefight.webserver.auth.domain.User;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
@@ -17,6 +16,7 @@ import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.SelfTeamDto;
 import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
