@@ -94,6 +94,14 @@ public class GameMatchFileService {
       throw new IllegalArgumentException("You must specify a team when using visibility 'team'");
     }
 
+    // Duplication check
+    if(team == null && gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeamIsNull(gameMatch.getUuid(), slug).isPresent()) {
+      throw new IllegalStateException("A game match file already exists for this game match, slug, and null team");
+    }
+    if(team != null && gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeam(gameMatch.getUuid(), slug, team).isPresent()) {
+      throw new IllegalStateException("A game match file already exists for this game match, slug, and team");
+    }
+
     FileRecord storedFile =
         storageService.store(
             file,
