@@ -12,4 +12,4 @@ The application interacts with a few external services such as Supabase for auth
 ## Default Admin User
 A default admin user is created when running the application in dev mode.   
 Email: `admin@example.com`   
-Pass: `password`   
+Pass: `password`
