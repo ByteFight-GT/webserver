@@ -24,7 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "ResumeFile", description = "Endpoints for uploading and retrieving resumes")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/")
+@RequestMapping("/api/v1/user")
 public class UserController {
   private final LocalStorageService localStorageService;
   private final UserService userService;
