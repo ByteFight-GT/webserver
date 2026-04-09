@@ -48,11 +48,11 @@ public class UserController {
     }
   }
 
-  @GetMapping
+  @GetMapping(value = "/resume")
   @Operation(
-      operationId = "getMyResume",
+      operationId = "getResume",
       summary = "Get the authenticated user's resume + a short-lived download link")
-  public ResponseEntity<ResumeDto> getMyResume(@AuthenticationPrincipal User user) {
+  public ResponseEntity<ResumeDto> getResume(@AuthenticationPrincipal User user) {
     FileRecord resume = user.getResume();
     if (resume == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No resume uploaded");
