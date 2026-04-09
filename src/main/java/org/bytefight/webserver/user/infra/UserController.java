@@ -32,7 +32,7 @@ public class UserController {
   @PostMapping(value = "/resume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(
       operationId = "uploadResume",
-      summary = "Upload or replace the authenticated user's resume")
+      summary = "Upload or replace the authenticated user's resume (Max 2 MiB limit)")
   public ResponseEntity<ResumeDto> uploadResume(
       @AuthenticationPrincipal User user, @RequestPart("file") MultipartFile file) {
     try {

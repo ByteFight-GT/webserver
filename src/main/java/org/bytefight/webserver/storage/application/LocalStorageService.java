@@ -70,7 +70,23 @@ public class LocalStorageService {
   }
 
   public FileRecord store(
+      MultipartFile file, String logicalPath, String desiredName, long maxBytes)
+      throws IOException {
+    return store(file, logicalPath, desiredName, false, maxBytes);
+  }
+
+  public FileRecord store(
       MultipartFile file, String logicalPath, String desiredName, boolean compress)
+      throws IOException {
+    return store(file, logicalPath, desiredName, compress, 0L);
+  }
+
+  public FileRecord store(
+      MultipartFile file,
+      String logicalPath,
+      String desiredName,
+      boolean compress,
+      long maxBytes)
       throws IOException {
     if (file == null || file.isEmpty()) {
       throw new IllegalArgumentException("File is null or empty");
@@ -78,6 +94,11 @@ public class LocalStorageService {
 
     if (logicalPath == null || logicalPath.isEmpty()) {
       throw new IllegalArgumentException("File path is missing");
+    }
+
+    if (maxBytes > 0 && file.getSize() > maxBytes) {
+      throw new IllegalArgumentException(
+          "File size exceeds limit: size=" + file.getSize() + ", limit=" + maxBytes);
     }
 
     String safeName = sanitize(desiredName != null ? desiredName : file.getOriginalFilename());
@@ -111,6 +132,12 @@ public class LocalStorageService {
 
     byte[] hash = digest.digest();
     long size = Files.size(tempTarget);
+
+    if (maxBytes > 0 && size > maxBytes) {
+      deleteQuietly(tempTarget);
+      throw new IllegalArgumentException(
+          "File size exceeds limit: size=" + size + ", limit=" + maxBytes);
+    }
 
     String sha256 = bytesToHex(hash);
     String ctype = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");

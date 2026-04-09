@@ -96,6 +96,8 @@ public class UserService {
 
   @Transactional
   public FileRecord uploadResume(MultipartFile file, User requestingUser) throws IOException {
+    FileRecord oldResume = requestingUser.getResume();
+
     if (file == null || file.isEmpty()) {
       throw new IOException("No resume is uploaded");
     }
@@ -116,7 +118,13 @@ public class UserService {
       throw new IllegalArgumentException("Please submit your resume in PDF, DOC, or DOCX format");
     }
 
-    return storageService.store(
-        file, "resumes/" + requestingUser.getUuid(), requestingUser.getUsername() + "_resume");
+    FileRecord newResume = storageService.store(
+        file, "resumes/" + requestingUser.getUuid(), fileName, true, 2_097_152);
+
+    if(oldResume != null) {
+      storageService.delete(oldResume.getUuid().toString());
+    }
+
+    return newResume;
   }
 }
