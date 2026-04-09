@@ -28,7 +28,7 @@ public class User extends BaseEntity implements UserDetails {
   private boolean isAdmin = false;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "resumeFile", nullable = true, unique = true)
+  @JoinColumn(name = "resume_file", unique = true)
   private FileRecord resume;
 
   @Override
