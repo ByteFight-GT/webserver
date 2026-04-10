@@ -1,6 +1,7 @@
 package org.bytefight.webserver.gamematchfile;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -171,6 +172,60 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
                 .param("visibility", GameMatchFileVisibility.everyone.name())
                 .with(user("user").roles("USER")))
         .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void uploadGameMatchFileRejectsDuplicateSlugForMatch() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, "ladder");
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+
+    GameMatch match =
+        gameMatchService.createMatch(
+            user,
+            teamA,
+            teamB,
+            submissionA,
+            submissionB,
+            "ladder",
+            MatchReason.matchmaking,
+            null,
+            null);
+    UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(file)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
+
+    assertThatThrownBy(
+            () ->
+                mockMvc
+                    .perform(
+                        multipart("/api/v1/game-match-file")
+                            .file(file)
+                            .param("gameMatchUuid", matchUuid.toString())
+                            .param("slug", "match-log")
+                            .param("visibility", GameMatchFileVisibility.everyone.name())
+                            .with(user("admin").roles("ADMIN")))
+                    .andReturn())
+        .hasCauseInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("A game match file already exists");
+
+    assertThat(gameMatchFileRepository.count()).isEqualTo(1);
   }
 
   private Submission createSubmission(Team team) {

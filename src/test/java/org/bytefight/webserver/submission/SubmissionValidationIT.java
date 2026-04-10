@@ -34,6 +34,8 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
 
   @Autowired private GameMatchService gameMatchService;
 
+  @Autowired private org.bytefight.webserver.gamematch.infra.GameMatchRepository gameMatchRepository;
+
   @Autowired private SubmissionRepository submissionRepository;
 
   @Autowired private FileRecordRepository fileRecordRepository;
@@ -94,16 +96,19 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
   }
 
   private GameMatch createValidationMatch(Team team, Submission submission) {
-    return gameMatchService.createMatch(
-        null,
-        team,
-        team,
-        submission,
-        submission,
-        DefaultLadders.VALIDATION,
-        MatchReason.validation,
-        null,
-        null);
+    GameMatch match =
+        gameMatchService.createMatch(
+            null,
+            team,
+            team,
+            submission,
+            submission,
+            DefaultLadders.VALIDATION,
+            MatchReason.validation,
+            null,
+            null);
+    ReflectionTestUtils.setField(match, "status", MatchStatus.waiting);
+    return gameMatchRepository.save(match);
   }
 
   private boolean waitForSubmissionValidity(UUID submissionUuid, SubmissionValidity expected)
