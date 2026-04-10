@@ -96,4 +96,19 @@ public interface GameMatchRepository
     AND gm.scheduledAt <= :cutoff
 """)
   List<GameMatch> findStaleWaitingMatches(@Param("cutoff") Instant cutoff);
+
+  @Modifying
+  @Query(
+      """
+          UPDATE GameMatch gm
+          SET gm.status = :status,
+              gm.finishedAt = :finishedAt
+          WHERE gm.uuid = :uuid
+            AND gm.status IN :allowedStatuses
+          """)
+  int finalizeMatchResult(
+      @Param("uuid") UUID uuid,
+      @Param("status") MatchStatus status,
+      @Param("finishedAt") Instant finishedAt,
+      @Param("allowedStatuses") Collection<MatchStatus> allowedStatuses);
 }

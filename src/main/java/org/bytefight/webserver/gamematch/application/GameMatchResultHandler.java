@@ -3,6 +3,7 @@ package org.bytefight.webserver.gamematch.application;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -49,15 +50,24 @@ public class GameMatchResultHandler {
     }
   }
 
+  @Transactional
   public void handleGameMatchResult(GameMatchResult result) {
-    GameMatch gameMatch =
-        gameMatchService
-            .getGameMatch(UUID.fromString(result.getUuid()))
-            .orElseThrow(() -> new IllegalArgumentException("Game match not found"));
+    UUID matchUuid = UUID.fromString(result.getUuid());
+    Instant finishedAt = Instant.now();
+    List<MatchStatus> allowedStatuses = List.of(MatchStatus.waiting, MatchStatus.in_progress);
+    int updated =
+        gameMatchRepository.finalizeMatchResult(
+            matchUuid, result.getStatus(), finishedAt, allowedStatuses);
+    if (updated == 0) {
+      if (!gameMatchRepository.existsByUuid(matchUuid)) {
+        throw new IllegalArgumentException("Game match not found");
+      }
+      throw new IllegalStateException(
+          "Received an update for a match, but the match was not in a status which allows updates.");
+    }
 
-    gameMatch.setStatus(result.getStatus());
-    gameMatch.setFinishedAt(Instant.now());
-    gameMatchRepository.save(gameMatch);
+    GameMatch gameMatch =
+        gameMatchService.getGameMatch(matchUuid).orElseThrow(() -> new IllegalStateException());
     if (gameMatch.getReason() == MatchReason.tournament) {
       tournamentResultHandler.handleTournamentResult(gameMatch, result.getStatus());
     }
