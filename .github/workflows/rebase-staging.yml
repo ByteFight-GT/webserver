@@ -1,0 +1,39 @@
+name: Merge production into staging
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [production]
+  workflow_dispatch:
+
+jobs:
+  merge-production-into-staging:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch branches
+        run: |
+          git fetch origin production staging
+
+      - name: Merge production into staging
+        run: |
+          git checkout -B staging origin/staging
+          git merge --no-ff origin/production -m "Merge production into staging"
+
+      - name: Push staging
+        run: |
+          git push origin HEAD:staging
