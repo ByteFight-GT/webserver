@@ -6,6 +6,8 @@ import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
   private ProblemDetail problem(HttpStatus status, String title, String detail) {
@@ -26,6 +29,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+    log.warn("Validation failed: {}", ex.getMessage());
     ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
     pd.setTitle("Validation Failed");
     pd.setDetail("One or more fields are invalid.");
@@ -42,6 +46,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
+    log.warn("Constraint violation: {}", ex.getMessage());
     ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
     pd.setTitle("Validation failed");
 
@@ -56,18 +61,21 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(RegistrationException.class)
   ProblemDetail handleRegistration(RegistrationException ex) {
+    log.warn("Registration error: {}", ex.getMessage());
     return problem(HttpStatus.CONFLICT, "Registration Error", ex.getMessage());
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+    log.warn("Illegal argument: {}", ex.getMessage());
     return problem(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
   }
 
   @ExceptionHandler(PermissionDeniedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   ProblemDetail handlePermissionDenied(PermissionDeniedException ex) {
+    log.warn("Permission denied: {}", ex.getMessage());
     return problem(HttpStatus.CONFLICT, "Permission Denied", ex.getMessage());
   }
 }
