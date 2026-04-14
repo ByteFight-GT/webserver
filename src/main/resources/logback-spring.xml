@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProfile name="!prod">
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
-            </encoder>
-        </appender>
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-    </springProfile>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
 
     <springProfile name="prod">
-        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <fieldNames>
-                    <timestamp>@timestamp</timestamp>
-                    <message>message</message>
-                    <logger>logger</logger>
-                    <thread>thread</thread>
-                    <level>level</level>
-                    <stackTrace>stack_trace</stackTrace>
-                </fieldNames>
-                <customFields>{"service":"bytefight-webserver"}</customFields>
-            </encoder>
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>http://loki:3100/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>app=${name},host=${HOSTNAME},level=%level</pattern>
+                    <readMarkers>true</readMarkers>
+                </label>
+                <message>
+                    <pattern>
+                        {
+                        "level":"%level",
+                        "class":"%logger{36}",
+                        "thread":"%thread",
+                        "message": "%message",
+                        "requestId": "%X{requestId}",
+                        "httpMethod": "%X{httpMethod}",
+                        "httpPath": "%X{httpPath}",
+                        "userId": "%X{userId}"
+                        }
+                    </pattern>
+                </message>
+            </format>
         </appender>
+
         <root level="INFO">
-            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="LOKI" />
         </root>
     </springProfile>
 </configuration>
