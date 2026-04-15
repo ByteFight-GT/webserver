@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Value
-public class AdminUserWithPlayerDto {
+public class AdminUserWithPlayerAndResumeDto {
   Long id;
   UUID uuid;
   String email;
@@ -14,4 +14,5 @@ public class AdminUserWithPlayerDto {
   boolean isAdmin;
   Long playerId;
   String playerUsername;
+  UUID resumeUuid;
 }

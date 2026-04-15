@@ -7,16 +7,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.user.application.AdminUserService;
-import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerDto;
+import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerAndResumeDto;
+import org.bytefight.webserver.user.domain.dto.ResumeDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +36,9 @@ public class AdminUserController {
   private static final int MAX_PAGE_SIZE = 100;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
-      Set.of("createdAt", "email", "isAdmin", "uuid");
+      Set.of("createdAt", "email", "isAdmin", "uuid", "resumeUuid");
+  private static final Map<String, String> SORT_FIELD_MAPPING =
+      Map.of("resumeUuid", "resume.uuid");
 
   private final AdminUserService adminUserService;
 
@@ -39,12 +48,42 @@ public class AdminUserController {
 
   @GetMapping
   @Operation(operationId = "adminListAllUsers", summary = "REST endpoint to list all users")
-  public Page<AdminUserWithPlayerDto> listAll(@ModelAttribute RestPageRequest pageRequest) {
+  public Page<AdminUserWithPlayerAndResumeDto> listAll(@ModelAttribute RestPageRequest pageRequest) {
     Pageable pageable =
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
+    pageable = remapSort(pageable);
     List<Long> userIds = parseUserIds(pageRequest.getFilter());
     return adminUserService.listUsers(pageable, userIds);
+  }
+
+  private static Pageable remapSort(Pageable pageable) {
+    Sort original = pageable.getSort();
+    if (original.isUnsorted()) {
+      return pageable;
+    }
+    Sort remapped =
+        Sort.by(
+            original.stream()
+                .map(
+                    o ->
+                        new Sort.Order(
+                            o.getDirection(),
+                            SORT_FIELD_MAPPING.getOrDefault(o.getProperty(), o.getProperty())))
+                .toList());
+    return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), remapped);
+  }
+
+  @GetMapping("/{userUuid}/resume")
+  @Operation(
+      operationId = "adminGetUserResume",
+      summary = "Get a user's resume + a short-lived download link")
+  public ResponseEntity<ResumeDto> getResume(@PathVariable UUID userUuid) {
+    try {
+      return ResponseEntity.ok(adminUserService.getResume(userUuid));
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   private static List<Long> parseUserIds(Map<String, Object> filter) {
