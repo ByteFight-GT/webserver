@@ -112,7 +112,7 @@ public class UserService {
 
     String lower = fileName.toLowerCase();
 
-    Set<String> allowed_type = Set.of(".pdf", ".doc", ".docx");
+    Set<String> allowed_type = Set.of(".pdf");
 
     boolean valid = allowed_type.stream().anyMatch(lower::endsWith);
 
@@ -131,6 +131,20 @@ public class UserService {
     userRepository.save(user);
 
     return newResume;
+  }
+
+  @Transactional
+  public void deleteResume(UUID userUuid) {
+    User user = userRepository.findByUuid(userUuid).orElseThrow();
+    FileRecord resume = user.getResume();
+
+    if (resume == null) {
+      throw new NoSuchElementException("No resume found");
+    }
+
+    user.setResume(null);
+    userRepository.save(user);
+    storageService.delete(resume.getUuid().toString());
   }
 
   public ResumeDto getResume(UUID userUuid) {

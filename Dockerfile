@@ -1,7 +1,7 @@
 FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /app
 
-COPY gradlew settings.gradle.kts build.gradle.kts ./
+COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
 RUN chmod +x ./gradlew && ./gradlew --no-daemon help
 
