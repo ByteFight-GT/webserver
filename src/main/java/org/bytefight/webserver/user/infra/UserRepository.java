@@ -24,10 +24,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.isAdmin,
             p.id,
             p.username,
-            u.resume.uuid
+            r.uuid
         )
         FROM User u
         LEFT JOIN Player p ON p.user = u
+        LEFT JOIN u.resume r
     """)
   Page<AdminUserWithPlayerAndResumeDto> findAllWithPlayers(Pageable pageable);
 
@@ -41,10 +42,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.isAdmin,
             p.id,
             p.username,
-            u.resume.uuid
+            r.uuid
         )
         FROM User u
         LEFT JOIN Player p ON p.user = u
+        LEFT JOIN u.resume r
         WHERE u.id IN :ids
     """)
   Page<AdminUserWithPlayerAndResumeDto> findAllWithPlayersByIdIn(List<Long> ids, Pageable pageable);

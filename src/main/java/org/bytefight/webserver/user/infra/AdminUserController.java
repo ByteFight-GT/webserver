@@ -38,7 +38,7 @@ public class AdminUserController {
   private static final Set<String> ALLOWED_SORT_FIELDS =
       Set.of("createdAt", "email", "isAdmin", "uuid", "resumeUuid");
   private static final Map<String, String> SORT_FIELD_MAPPING =
-      Map.of("resumeUuid", "resume.uuid");
+      Map.of("resumeUuid", "r.uuid");
 
   private final AdminUserService adminUserService;
 
