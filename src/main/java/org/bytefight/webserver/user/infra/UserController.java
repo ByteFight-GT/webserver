@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.FileRecord;
@@ -44,12 +45,25 @@ public class UserController {
     }
   }
 
+  @DeleteMapping(value = "/resume")
+  @Operation(
+      operationId = "deleteResume",
+      summary = "Delete the authenticated user's resume")
+  public ResponseEntity<Void> deleteResume(@AuthenticationPrincipal User user) {
+    userService.deleteResume(user.getUuid());
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping(value = "/resume")
   @Operation(
       operationId = "getResume",
       summary = "Get the authenticated user's resume + a short-lived download link")
   @Transactional
   public ResponseEntity<ResumeDto> getResume(@AuthenticationPrincipal User user) {
-    return ResponseEntity.ok(userService.getResume(user.getUuid()));
+    try {
+      return ResponseEntity.ok(userService.getResume(user.getUuid()));
+    } catch(NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 }
