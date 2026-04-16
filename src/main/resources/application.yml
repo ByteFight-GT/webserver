@@ -23,7 +23,7 @@ springdoc:
     tags-sorter: alpha
 gamematch:
   requeue-stale: true
-  stale-threshold-minutes: 30
+  stale-threshold-minutes: 120
 storage:
   max-decompressed-bytes: 524288000
 
