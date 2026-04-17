@@ -80,4 +80,7 @@ public class GameMatch extends AuditableEntity {
 
   @Column(name = "finished_at")
   private Instant finishedAt;
+
+  @Column(name = "times_scheduled", nullable = false)
+  private Integer timesScheduled = 0;
 }

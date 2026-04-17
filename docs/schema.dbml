@@ -255,6 +255,8 @@ Table game_matches {
   started_at timestamp
   finished_at timestamp
 
+  times_scheduled integer [not null, default: 0]
+
   ~user_audit_template
 }
 

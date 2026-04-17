@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.gamematch.application.AdminGameMatchService;
@@ -40,18 +41,14 @@ public class AdminGameMatchController {
     this.gameMatchService = gameMatchService;
   }
 
-  @PostMapping("/reschedule-stale")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Void> reschduleStaleMatches() {
-    gameMatchService.rescheduleStaleMatches(false);
+  @PostMapping("/schedule")
+  public ResponseEntity<Void> adminScheduleMatches(@RequestBody List<String> matchUuids) {
+    for(String uuid : matchUuids) {
+      GameMatch gameMatch = gameMatchService.getGameMatch(UUID.fromString(uuid)).orElse(null);
+      if(gameMatch == null) continue;
 
-    return ResponseEntity.ok().build();
-  }
-
-  @PostMapping("/reschedule")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Void> adminRescheduleMatches(@RequestBody List<Long> matchIds) {
-    gameMatchService.adminRescheduleMatches(matchIds);
+      gameMatchService.scheduleMatch(gameMatch);
+    }
 
     return ResponseEntity.ok().build();
   }
