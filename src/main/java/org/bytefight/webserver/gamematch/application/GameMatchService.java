@@ -131,6 +131,7 @@ public class GameMatchService {
 
     match.setStatus(MatchStatus.waiting);
     match.setScheduledAt(Instant.now());
+    match.setTimesScheduled(match.getTimesScheduled() + 1);
 
     return gameMatchRepository.save(match);
   }
