@@ -302,90 +302,12 @@ public class GameMatchService {
         page);
   }
 
-  public GameMatchDto getDTOById(Long id) {
-    return GameMatchDto.fromEntity(gameMatchRepository.getReferenceById(id));
-  }
-
   public Optional<GameMatchDto> getDTOByUuid(String uuid) {
     Optional<GameMatch> dto = gameMatchRepository.findByUuid(UUID.fromString(uuid));
     if (dto.isEmpty()) return Optional.empty();
 
     return Optional.of(GameMatchDto.fromEntity(dto.get()));
   }
-
-  public GameMatch getReferenceById(Long id) {
-    return gameMatchRepository.getReferenceById(id);
-  }
-
-  public Optional<GameMatch> getReferenceByUuid(String uuid) {
-    return gameMatchRepository.findByUuid(UUID.fromString(uuid));
-  }
-
-  public boolean isGameMatchIdExist(Long id) {
-    return gameMatchRepository.existsById(id);
-  }
-
-  public boolean isGameMatchUuidExist(String uuid) {
-    return gameMatchRepository.existsByUuid(UUID.fromString(uuid));
-  }
-
-  public boolean isGameMatchWaiting(String uuid) {
-    return false;
-    //        return gameMatchRepository.findByUuid(UUID.fromString(uuid)).orElseThrow().getStatus()
-    // == MatchStatus.WAITING;
-  }
-
-  public List<GameMatch> getFailedMatches() {
-    return null;
-    //        return gameMatchRepository
-    //                .findByStatus(MatchStatus.FAILED)
-    //                .stream()
-    //                .toList();
-  }
-
-  @Transactional
-  public void rescheduleStaleMatches(boolean isIgnoreLimit) {
-    LocalDateTime thresholdTime =
-        LocalDateTime.now(clock).minusMinutes(gameMatchProperties.getStaleThresholdMinutes());
-
-    // This atomically marks all stale matches as RESCHEDULING and returns their ids
-    List<Long> matchesToReschedule = gameMatchRepository.claimAndMarkStaleMatches(thresholdTime);
-    log.info("Found {} matches to reschedule", matchesToReschedule.size());
-    matchesToReschedule.forEach(id -> rescheduleMatch(id, isIgnoreLimit));
-    log.info("Rescheduling completed");
-  }
-
-  @Transactional
-  public void adminRescheduleMatches(List<Long> matchIds) {
-    log.info("Admin {} matches to reschedule", matchIds.size());
-    matchIds.forEach(id -> rescheduleMatch(id, true));
-    log.info("Rescheduling completed");
-  }
-
-  @Transactional
-  public GameMatchJob rescheduleMatch(Long gameMatchId, boolean isIgnoreLimit) {
-    GameMatch gameMatch = gameMatchRepository.getReferenceById(gameMatchId);
-    //        Integer timesQueued = gameMatch.getTimesQueued();
-    //        if (!isIgnoreLimit && timesQueued == 3) {
-    //            throw new IllegalStateException("Match " + gameMatch.getId() + " has exceeded
-    // maximum retry attempts (3)");
-    //        }
-    //
-    //        if(gameMatch.getStatus() != MatchStatus.WAITING) {
-    //            throw new IllegalArgumentException("Match " + gameMatch.getId() + " cannot be
-    // rescheduled.");
-    //        }
-    //
-    //        gameMatch.setQueuedAt(LocalDateTime.now(clock));
-    //        gameMatch.incrementTimesQueued();
-    //        gameMatch.setStatus(MatchStatus.WAITING);
-    GameMatchJob job = GameMatchJob.from(gameMatch);
-    gameMatchRepository.save(gameMatch);
-    rabbitMQService.enqueueGameMatchJob(job);
-    log.info("rescheduled match {}", job);
-    return job;
-  }
-
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {
     return gameMatchRepository.countTeamMatchesByLadderAndStatus(
         team, ladder.getLadder(), Set.of(MatchStatus.waiting, MatchStatus.in_progress));
