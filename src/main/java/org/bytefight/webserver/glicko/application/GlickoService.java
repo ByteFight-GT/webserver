@@ -214,6 +214,21 @@ public class GlickoService {
       Ladder ladder,
       double score,
       double baseRating) {
+    if (ladder.getGlickoRdMax() > 0) {
+      rd = Math.min(rd, ladder.getGlickoRdMax());
+      opponentRd = Math.min(opponentRd, ladder.getGlickoRdMax());
+    }
+    if (ladder.getGlickoRdMin() != null) {
+      rd = Math.max(rd, ladder.getGlickoRdMin());
+      opponentRd = Math.max(opponentRd, ladder.getGlickoRdMin());
+    }
+    if (ladder.getGlickoSigmaMin() != null) {
+      volatility = Math.max(volatility, ladder.getGlickoSigmaMin());
+    }
+    if (ladder.getGlickoSigmaMax() != null) {
+      volatility = Math.min(volatility, ladder.getGlickoSigmaMax());
+    }
+
     double mu = (rating - baseRating) / SCALE;
     double phi = rd / SCALE;
     double muOpp = (opponentRating - baseRating) / SCALE;
