@@ -55,6 +55,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
+    environment:
+      GF_SERVER_ROOT_URL: "${GF_SERVER_ROOT_URL}"
 
   loki:
     image: grafana/loki:latest
