@@ -20,9 +20,9 @@ repositories {
 }
 
 def springCloudGcpVersion = '5.0.0'
-def springCloudVersion = '2023.0.0'
-def jjwtVersion = '0.11.5'
-def testcontainersVersion = '1.18.3'
+def springCloudVersion = '2024.0.0'
+def jjwtVersion = '0.12.6'
+def testcontainersVersion = '1.20.3'
 
 configurations {
     compileOnly {
@@ -32,13 +32,13 @@ configurations {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
-    implementation 'com.github.loki4j:loki-logback-appender:1.4.1'
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
+    implementation 'com.github.loki4j:loki-logback-appender:1.4.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
-    implementation 'com.github.luben:zstd-jni:1.5.6-9'
+    implementation 'com.github.luben:zstd-jni:1.5.6-10'
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -48,7 +48,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
 
-    implementation platform('com.google.cloud:libraries-bom:26.29.0')
+    implementation platform('com.google.cloud:libraries-bom:26.40.0')
     implementation 'com.google.cloud:google-cloud-storage'
 
     implementation platform('org.hibernate.search:hibernate-search-bom:7.0.1.Final')
@@ -61,7 +61,7 @@ dependencies {
 
     implementation 'me.paulschwarz:spring-dotenv:3.0.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -72,7 +72,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.3.5'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.5.5'
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
     testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
     testImplementation "org.testcontainers:rabbitmq:${testcontainersVersion}"

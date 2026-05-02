@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import org.bytefight.webserver.competition.domain.Competition;
@@ -309,6 +308,7 @@ public class GameMatchService {
 
     return Optional.of(GameMatchDto.fromEntity(dto.get()));
   }
+
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {
     return gameMatchRepository.countTeamMatchesByLadderAndStatus(
         team, ladder.getLadder(), Set.of(MatchStatus.waiting, MatchStatus.in_progress));

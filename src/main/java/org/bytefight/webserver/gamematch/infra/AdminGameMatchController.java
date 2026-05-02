@@ -43,9 +43,9 @@ public class AdminGameMatchController {
 
   @PostMapping("/schedule")
   public ResponseEntity<Void> adminScheduleMatches(@RequestBody List<String> matchUuids) {
-    for(String uuid : matchUuids) {
+    for (String uuid : matchUuids) {
       GameMatch gameMatch = gameMatchService.getGameMatch(UUID.fromString(uuid)).orElse(null);
-      if(gameMatch == null) continue;
+      if (gameMatch == null) continue;
 
       gameMatchService.scheduleMatch(gameMatch);
     }

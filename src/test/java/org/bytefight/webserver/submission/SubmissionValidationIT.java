@@ -34,7 +34,8 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
 
   @Autowired private GameMatchService gameMatchService;
 
-  @Autowired private org.bytefight.webserver.gamematch.infra.GameMatchRepository gameMatchRepository;
+  @Autowired
+  private org.bytefight.webserver.gamematch.infra.GameMatchRepository gameMatchRepository;
 
   @Autowired private SubmissionRepository submissionRepository;
 
