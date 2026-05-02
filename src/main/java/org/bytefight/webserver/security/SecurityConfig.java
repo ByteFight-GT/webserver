@@ -66,9 +66,26 @@ public class SecurityConfig {
   }
 
   @Bean
+  @Profile("!prod")
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("*"));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setExposedHeaders(List.of("Authorization", "Content-Range"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  @Bean
+  @Profile("prod")
+  public CorsConfigurationSource corsConfigurationSourceProd() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of(
+        "https://server.staging.bytefight.org",
+        "https://server.bytefight.org"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setExposedHeaders(List.of("Authorization", "Content-Range"));
