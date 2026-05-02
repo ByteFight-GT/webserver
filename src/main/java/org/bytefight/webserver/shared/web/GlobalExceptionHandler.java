@@ -1,12 +1,11 @@
 package org.bytefight.webserver.shared.web;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;

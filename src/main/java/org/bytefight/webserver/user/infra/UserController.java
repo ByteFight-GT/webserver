@@ -46,9 +46,7 @@ public class UserController {
   }
 
   @DeleteMapping(value = "/resume")
-  @Operation(
-      operationId = "deleteResume",
-      summary = "Delete the authenticated user's resume")
+  @Operation(operationId = "deleteResume", summary = "Delete the authenticated user's resume")
   public ResponseEntity<Void> deleteResume(@AuthenticationPrincipal User user) {
     userService.deleteResume(user.getUuid());
     return ResponseEntity.noContent().build();
@@ -62,7 +60,7 @@ public class UserController {
   public ResponseEntity<ResumeDto> getResume(@AuthenticationPrincipal User user) {
     try {
       return ResponseEntity.ok(userService.getResume(user.getUuid()));
-    } catch(NoSuchElementException e) {
+    } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
   }

@@ -25,7 +25,7 @@ public class TeamGlickoHistoryDto {
     List<Long> timestamps = new ArrayList<>(histories.size());
     List<Double> glickos = new ArrayList<>(histories.size());
 
-    if(!histories.isEmpty()) {
+    if (!histories.isEmpty()) {
       TeamGlickoHistory initial = histories.get(0);
       timestamps.add(team.getCreatedAt().getEpochSecond());
       glickos.add(initial.getOldGlicko());

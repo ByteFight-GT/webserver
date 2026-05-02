@@ -37,8 +37,7 @@ public class AdminUserController {
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
       Set.of("createdAt", "email", "isAdmin", "uuid", "resumeUuid");
-  private static final Map<String, String> SORT_FIELD_MAPPING =
-      Map.of("resumeUuid", "r.uuid");
+  private static final Map<String, String> SORT_FIELD_MAPPING = Map.of("resumeUuid", "r.uuid");
 
   private final AdminUserService adminUserService;
 
@@ -48,7 +47,8 @@ public class AdminUserController {
 
   @GetMapping
   @Operation(operationId = "adminListAllUsers", summary = "REST endpoint to list all users")
-  public Page<AdminUserWithPlayerAndResumeDto> listAll(@ModelAttribute RestPageRequest pageRequest) {
+  public Page<AdminUserWithPlayerAndResumeDto> listAll(
+      @ModelAttribute RestPageRequest pageRequest) {
     Pageable pageable =
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);

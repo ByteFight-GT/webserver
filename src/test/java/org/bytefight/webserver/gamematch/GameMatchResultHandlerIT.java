@@ -67,8 +67,7 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
 
     UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
     String uuid = matchUuid.toString();
-    gameMatchResultHandler.handleGameMatchResult(
-        createResult(uuid, MatchStatus.team_a_win));
+    gameMatchResultHandler.handleGameMatchResult(createResult(uuid, MatchStatus.team_a_win));
 
     GameMatch afterFirst = gameMatchRepository.findByUuid(matchUuid).orElseThrow();
     MatchStatus firstStatus = (MatchStatus) ReflectionTestUtils.getField(afterFirst, "status");
@@ -88,7 +87,8 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
 
   private GameMatchResult createResult(String uuid, MatchStatus status) {
     try {
-      var constructor = GameMatchResult.class.getDeclaredConstructor(String.class, MatchStatus.class);
+      var constructor =
+          GameMatchResult.class.getDeclaredConstructor(String.class, MatchStatus.class);
       constructor.setAccessible(true);
       return constructor.newInstance(uuid, status);
     } catch (ReflectiveOperationException ex) {
