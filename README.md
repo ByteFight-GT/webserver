@@ -31,3 +31,5 @@ The current primary maintainer of this repository is:
 Please address all concerns related to security or competition integrity directly to the ByteFight developers or to the maintainer. Do NOT create a public issue on this repository.
 
 ## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. The MIT License is a permissive open source license that allows you to use, modify, and distribute this software with minimal restrictions.
