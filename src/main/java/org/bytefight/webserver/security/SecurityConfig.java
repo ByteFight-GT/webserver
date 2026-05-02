@@ -34,9 +34,10 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http,
       JwtDecoder jwtDecoder,
-      Converter<Jwt, ? extends AbstractAuthenticationToken> jwtToUser)
+      Converter<Jwt, ? extends AbstractAuthenticationToken> jwtToUser,
+      CorsConfigurationSource corsConfigurationSource)
       throws Exception {
-    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    http.cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,9 +66,9 @@ public class SecurityConfig {
     return http.build();
   }
 
-  @Bean
+  @Bean(name = "corsConfigurationSource")
   @Profile("!prod")
-  public CorsConfigurationSource corsConfigurationSource() {
+  public CorsConfigurationSource corsConfigurationSourceDev() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("*"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -79,12 +80,12 @@ public class SecurityConfig {
     return source;
   }
 
-  @Bean
+  @Bean(name = "corsConfigurationSource")
   @Profile("prod")
   public CorsConfigurationSource corsConfigurationSourceProd() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(
-        List.of("https://server.staging.bytefight.org", "https://server.bytefight.org"));
+        List.of("https://staging.bytefight.org", "https://bytefight.org"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setExposedHeaders(List.of("Authorization", "Content-Range"));
