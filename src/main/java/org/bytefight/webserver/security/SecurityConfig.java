@@ -85,7 +85,7 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSourceProd() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(
-        List.of("https://staging.bytefight.org", "https://bytefight.org"));
+        List.of("https://staging.bytefight.org", "https://bytefight.org", "https://admin.bytefight.org", "https://admin.staging.bytefight.org"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setExposedHeaders(List.of("Authorization", "Content-Range"));
