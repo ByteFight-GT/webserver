@@ -74,4 +74,14 @@ public class ProfileService {
         profile.softDelete();
         profileRepository.save(profile);
     }
+
+
+    @Transactional(readOnly = true)
+    public PublicProfileDto getProfile(
+        Player player
+    ) {
+        return profileRepository.findByPlayerAndIsDeletedFalse(player)
+                .map(PublicProfileDto::from)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+    }
 }

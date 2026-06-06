@@ -3,7 +3,7 @@ package org.bytefight.webserver.social.infra;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.bytefight.webserver.auth.domain.User;
+import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.social.application.ProfileService;
@@ -67,5 +67,18 @@ public class PrivateProfileController {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         profileService.deleteProfile(player);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    @Operation(
+            operationId = "getUserProfile",
+            summary = "Get the authenticated user's profile"
+    )
+    public ResponseEntity<PublicProfileDto> getUserProfile(
+             @AuthenticationPrincipal User user
+    ) {
+        Player player = playerService.getPlayer(user)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+        return ResponseEntity.ok(profileService.getProfile(player));
     }
 }

@@ -25,4 +25,5 @@ public class PublicProfileDto {
                 .year(profile.getYear())
                 .build();
     }
+    
 }

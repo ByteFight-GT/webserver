@@ -1,7 +1,6 @@
 package org.bytefight.webserver.social.domain;
 
-import org.bytefight.webserver.auth.domain.User;
-import org.bytefight.webserver.common.domain.AuditableSoftDeletableEntity;
+import org.bytefight.webserver.common.domain.SoftDeletableEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ import org.bytefight.webserver.player.domain.Player;
 @NoArgsConstructor
 @Entity
 @Table(name = "Profile")
-public class Profile extends AuditableSoftDeletableEntity {
+public class Profile extends SoftDeletableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", nullable = false)
