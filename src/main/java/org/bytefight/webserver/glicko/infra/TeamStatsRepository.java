@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.glicko.domain.TeamRankRow;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.domain.TeamStatsAggregate;
 import org.bytefight.webserver.leaderboard.domain.LeaderboardRow;
@@ -38,6 +39,30 @@ public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
 """)
   TeamStatsAggregate getTeamStatsAggregateByTeamAndLadder(
       @Param("team") Team team, @Param("ladders") Collection<String> ladders);
+
+  @Query(
+      value =
+          """
+        SELECT ladder, rank FROM (
+          SELECT
+            ts.ladder AS ladder,
+            ts.team_id AS team_id,
+            CASE
+              WHEN ts.matches_played = 0 THEN NULL
+              ELSE DENSE_RANK() OVER (
+                PARTITION BY ts.ladder
+                ORDER BY (CASE WHEN ts.matches_played = 0 THEN NULL ELSE ts.glicko_rating END) DESC NULLS LAST
+              )
+            END AS rank
+          FROM team_stats ts
+          JOIN teams t ON t.id = ts.team_id AND t.is_deleted = false
+          WHERE ts.competition_id = :competitionId
+        ) AS subquery
+        WHERE team_id = :teamId
+        """,
+      nativeQuery = true)
+  List<TeamRankRow> findTeamRanksByCompetition(
+      @Param("competitionId") Long competitionId, @Param("teamId") Long teamId);
 
   @Query(
       value =
