@@ -10,10 +10,9 @@ import lombok.Value;
 
 @Value
 @Builder
-public class SelfPlayerDto {
+public class PlayerProfileDto {
   @NotNull String uuid;
   @NotNull String username;
-  @NotNull TimestampsDto timestampsDto;
 
   String fullName;
   String description;
@@ -22,25 +21,21 @@ public class SelfPlayerDto {
   String school;
   String avatarUrl;
 
-  @NotNull ProfileVisibility profileVisibility;
+  @NotNull TimestampsDto timestampsDto;
   @NotNull List<SocialLinkDto> socialLinks;
 
-  public static SelfPlayerDto from(Player player) {
-    return SelfPlayerDto.builder()
+  public static PlayerProfileDto from(Player player) {
+    return PlayerProfileDto.builder()
       .uuid(player.getUser().getUuid().toString())
       .username(player.getUsername())
-      .timestampsDto(TimestampsDto.from(player))
       .fullName(player.getFullName())
       .description(player.getDescription())
       .major(player.getMajor())
       .graduationYear(player.getGraduationYear())
       .school(player.getSchool())
-      .profileVisibility(player.getProfileVisibility())
-      .socialLinks(
-        player.getSocialLinks().stream()
-          .map(SocialLinkDto::from)
-          .toList()
-      )
+      .avatarUrl(null)
+      .timestampsDto(TimestampsDto.from(player))
+      .socialLinks(player.getSocialLinks().stream().map(SocialLinkDto::from).toList())
       .build();
   }
 }

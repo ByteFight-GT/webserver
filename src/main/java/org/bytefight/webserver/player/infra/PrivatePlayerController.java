@@ -44,17 +44,16 @@ public class PrivatePlayerController {
   @Operation(operationId = "updateCurrentPlayer", summary = "Update current player profile")
   @PatchMapping("/me")
   public ResponseEntity<SelfPlayerDto> updateCurrentPlayer(
-      @AuthenticationPrincipal User user, @Valid @RequestBody UpdatePlayerProfileDto input) {
-    //        permissionsService.validateAllowUpdateProfile();
+    @AuthenticationPrincipal User user,
+    @Valid @RequestBody UpdatePlayerProfileDto input) {
+
     Player player =
         playerService
             .getPlayer(user)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    if (input.getUsername() != null) {
-      playerService.setUsername(player, input.getUsername());
-    }
+    Player updated = playerService.updateProfile(player, input);
 
-    return ResponseEntity.ok(SelfPlayerDto.from(player));
+    return ResponseEntity.ok(SelfPlayerDto.from(updated));
   }
 }

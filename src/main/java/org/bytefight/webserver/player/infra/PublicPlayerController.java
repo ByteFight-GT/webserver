@@ -10,7 +10,12 @@ import java.util.UUID;
 
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
+import org.bytefight.webserver.player.domain.PlayerProfileDto;
 import org.bytefight.webserver.player.domain.PublicPlayerDto;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -43,5 +48,22 @@ public class PublicPlayerController {
       @PathVariable String username) {
     boolean isAvailable = !playerService.isUsernameExist(username);
     return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
+  }
+
+  @Operation(operationId = "listPlayerProfiles", summary = "Search public player profiles")
+  @GetMapping("/profiles")
+  public Page<PlayerProfileDto> listProfiles(
+    @RequestParam(required = false) String username,
+    @RequestParam(required = false) String major,
+    @RequestParam(required = false) Integer graduationYear,
+    @ParameterObject Pageable pageable) {
+
+    Specification<Player> spec =
+      PlayerProfileSpecification.isPublicProfile()
+        .and(PlayerProfileSpecification.usernameContains(username))
+        .and(PlayerProfileSpecification.majorContains(major))
+        .and(PlayerProfileSpecification.graduationYearEquals(graduationYear));
+
+    return playerService.searchProfiles(spec, pageable);
   }
 }
