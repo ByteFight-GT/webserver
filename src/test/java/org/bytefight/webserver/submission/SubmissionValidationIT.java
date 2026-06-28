@@ -117,7 +117,7 @@ class SubmissionValidationIT extends FullStackIntegrationTestBase {
     Instant deadline = Instant.now().plus(Duration.ofSeconds(5));
     while (Instant.now().isBefore(deadline)) {
       Submission refreshed =
-          submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(submissionUuid).orElse(null);
+          submissionRepository.findSubmissionByUuidAndDeletedAtNull(submissionUuid).orElse(null);
       if (refreshed != null) {
         SubmissionValidity validity =
             (SubmissionValidity) ReflectionTestUtils.getField(refreshed, "validity");

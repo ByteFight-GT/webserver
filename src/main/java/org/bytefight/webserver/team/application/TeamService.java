@@ -62,7 +62,7 @@ public class TeamService {
 
   public Optional<Team> findTeamByCompetitionAndPlayer(Competition competition, Player player) {
     return teamMemberRepository
-        .findByCompetitionAndPlayerAndTeamIsDeletedFalse(competition, player)
+        .findByCompetitionAndPlayerAndTeamDeletedAtNull(competition, player)
         .map(TeamMember::getTeam);
   }
 
@@ -132,7 +132,7 @@ public class TeamService {
           "You must be whitelisted to participate in this competition");
     }
 
-    if (teamMemberRepository.existsByCompetitionAndPlayerAndTeamIsDeletedFalse(
+    if (teamMemberRepository.existsByCompetitionAndPlayerAndTeamDeletedAtNull(
         competition, player)) {
       throw new IllegalArgumentException("Player is already in a team for this competition");
     }
@@ -159,7 +159,7 @@ public class TeamService {
 
     TeamMember member =
         teamMemberRepository
-            .findByCompetitionAndPlayerAndTeamIsDeletedFalse(competition, player)
+            .findByCompetitionAndPlayerAndTeamDeletedAtNull(competition, player)
             .orElseThrow(
                 () -> new IllegalArgumentException("Player is not in a team for this competition"));
 
@@ -176,14 +176,14 @@ public class TeamService {
   public TeamMember joinTeamByJoinCode(Competition competition, Player player, String joinCode) {
     Team team =
         teamRepository
-            .findByCompetitionAndJoinCodeAndIsDeletedIsFalse(competition, joinCode)
+            .findByCompetitionAndJoinCodeAndDeletedAtNull(competition, joinCode)
             .orElseThrow(
                 () -> new IllegalArgumentException("A team with that join code was no found"));
     return joinTeam(player, team);
   }
 
   public Optional<Team> getTeamByUuid(UUID uuid) {
-    return teamRepository.findByUuidAndIsDeletedFalse(uuid);
+    return teamRepository.findByUuidAndDeletedAtNull(uuid);
   }
 
   public List<Player> getPlayersForTeam(Team team) {
@@ -199,7 +199,7 @@ public class TeamService {
       throw new IllegalArgumentException("Team and player are required");
     }
 
-    return teamMemberRepository.existsByTeamAndPlayerAndTeamIsDeletedFalse(team, player);
+    return teamMemberRepository.existsByTeamAndPlayerAndTeamDeletedAtNull(team, player);
   }
 
   public long countPlayersForTeam(Team team) {
@@ -215,7 +215,7 @@ public class TeamService {
   }
 
   public List<Team> getTeamsWithSubmission(Competition competition) {
-    return teamRepository.findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(
+    return teamRepository.findAllByDeletedAtNullAndCurrentSubmissionIsNotNullAndCompetition(
         competition);
   }
 

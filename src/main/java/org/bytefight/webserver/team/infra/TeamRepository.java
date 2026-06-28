@@ -9,6 +9,8 @@ import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,9 +21,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
   List<Team> findAllByCompetition(Competition competition);
 
-  Optional<Team> findByUuidAndIsDeletedFalse(UUID uuid);
+  Optional<Team> findByUuidAndDeletedAtNull(UUID uuid);
 
-  Optional<Team> findByCompetitionAndJoinCodeAndIsDeletedIsFalse(
+  Optional<Team> findByCompetitionAndJoinCodeAndDeletedAtNull(
       Competition competition, String joinCode);
 
   int countByCurrentSubmissionNotNull();
@@ -32,13 +34,28 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
   boolean existsByUuid(UUID uuid);
 
-  List<Team> findAllByIsDeletedFalseAndCurrentSubmissionIsNotNullAndCompetition(
+  List<Team> findAllByDeletedAtNullAndCurrentSubmissionIsNotNullAndCompetition(
       Competition competition);
 
-  Page<Team> findByIsDeleted(boolean isDeleted, Pageable pageable);
+  @Query(
+      """
+        SELECT t FROM Team t
+        WHERE (:isDeleted = true AND t.deletedAt IS NOT NULL)
+           OR (:isDeleted = false AND t.deletedAt IS NULL)
+    """)
+  Page<Team> findByIsDeleted(@Param("isDeleted") boolean isDeleted, Pageable pageable);
 
+  @Query(
+      """
+        SELECT t FROM Team t
+        WHERE t.competition.id = :competitionId
+          AND ((:isDeleted = true AND t.deletedAt IS NOT NULL)
+            OR (:isDeleted = false AND t.deletedAt IS NULL))
+    """)
   Page<Team> findByCompetitionIdAndIsDeleted(
-      Long competitionId, boolean isDeleted, Pageable pageable);
+      @Param("competitionId") Long competitionId,
+      @Param("isDeleted") boolean isDeleted,
+      Pageable pageable);
 
   Page<Team> findByIdIn(List<Long> ids, Pageable pageable);
 
@@ -48,6 +65,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
   Optional<Team> findByCompetitionAndUuid(Competition competition, UUID uuid);
 
-  Optional<Team> findByCompetitionAndNameNormalizedAndIsDeletedFalse(
+  Optional<Team> findByCompetitionAndNameNormalizedAndDeletedAtNull(
       Competition competition, String nameNormalized);
 }

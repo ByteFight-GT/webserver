@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FileRecordRepository extends JpaRepository<FileRecord, Long> {
   Optional<FileRecord> findByUuid(UUID uuid);
 
-  Optional<FileRecord> findByUuidAndIsDeletedFalse(UUID uuid);
+  Optional<FileRecord> findByUuidAndDeletedAtNull(UUID uuid);
 }

@@ -210,7 +210,7 @@ class SubmissionControllerIT extends FullStackIntegrationTestBase {
         .andExpect(status().isOk());
 
     return submissionRepository
-        .findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team)
+        .findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(team)
         .get(0);
   }
 

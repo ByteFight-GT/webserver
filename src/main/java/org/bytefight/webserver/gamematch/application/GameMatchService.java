@@ -255,7 +255,7 @@ public class GameMatchService {
 
     String normalizedName = opponentTeamName.trim().toLowerCase(Locale.ROOT);
     return teamRepository
-        .findByCompetitionAndNameNormalizedAndIsDeletedFalse(competition, normalizedName)
+        .findByCompetitionAndNameNormalizedAndDeletedAtNull(competition, normalizedName)
         .map(Team::getUuid);
   }
 
