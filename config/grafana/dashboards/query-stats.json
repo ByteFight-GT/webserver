@@ -1,7 +1,7 @@
 {
   "__requires": [
     { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
-    { "type": "datasource", "id": "grafana-postgresql-datasource", "name": "PostgreSQL", "version": "1.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
     { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
     { "type": "panel", "id": "table", "name": "Table", "version": "" },
     { "type": "panel", "id": "text", "name": "Text", "version": "" }
@@ -14,16 +14,15 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "p50 Query Latency (mean across query shapes)",
+      "title": "p50 Query Latency",
       "gridPos": { "x": 0, "y": 0, "w": 8, "h": 4 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT round(percentile_cont(0.50) WITHIN GROUP (ORDER BY mean_exec_time)::numeric, 2) AS \"p50 (ms)\" FROM pg_stat_statements WHERE calls > 1",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "quantile(0.50, pg_stat_top_queries_mean_exec_time_seconds) * 1000",
+          "instant": true
         }
       ],
       "options": {
@@ -53,16 +52,15 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "p95 Query Latency (mean across query shapes)",
+      "title": "p95 Query Latency",
       "gridPos": { "x": 8, "y": 0, "w": 8, "h": 4 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT round(percentile_cont(0.95) WITHIN GROUP (ORDER BY mean_exec_time)::numeric, 2) AS \"p95 (ms)\" FROM pg_stat_statements WHERE calls > 1",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "quantile(0.95, pg_stat_top_queries_mean_exec_time_seconds) * 1000",
+          "instant": true
         }
       ],
       "options": {
@@ -92,16 +90,15 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "p99 Query Latency (mean across query shapes)",
+      "title": "p99 Query Latency",
       "gridPos": { "x": 16, "y": 0, "w": 8, "h": 4 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT round(percentile_cont(0.99) WITHIN GROUP (ORDER BY mean_exec_time)::numeric, 2) AS \"p99 (ms)\" FROM pg_stat_statements WHERE calls > 1",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "quantile(0.99, pg_stat_top_queries_mean_exec_time_seconds) * 1000",
+          "instant": true
         }
       ],
       "options": {
@@ -133,64 +130,43 @@
       "type": "table",
       "title": "Slowest Queries by Mean Execution Time",
       "gridPos": { "x": 0, "y": 4, "w": 24, "h": 10 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT\n  LEFT(query, 120) AS query,\n  calls,\n  round(mean_exec_time::numeric, 2) AS mean_ms,\n  round(stddev_exec_time::numeric, 2) AS stddev_ms,\n  round(min_exec_time::numeric, 2) AS min_ms,\n  round(max_exec_time::numeric, 2) AS max_ms,\n  round(total_exec_time::numeric, 2) AS total_ms,\n  rows\nFROM pg_stat_statements\nWHERE calls > 5\nORDER BY mean_exec_time DESC\nLIMIT 20",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "topk(20, pg_stat_top_queries_mean_exec_time_seconds * 1000)",
+          "instant": true,
+          "format": "table"
         }
       ],
-      "options": {
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "displayName": "mean_ms", "desc": true }]
-      },
+      "transformations": [
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["queryid", "query", "Value"] } } },
+        { "id": "organize", "options": { "renameByName": { "Value": "mean_ms" } } },
+        { "id": "sortBy", "options": { "fields": [{ "displayName": "mean_ms", "desc": true }] } }
+      ],
+      "options": { "footer": { "show": false }, "showHeader": true },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true
-          }
+          "custom": { "align": "left", "displayMode": "auto", "filterable": true }
         },
         "overrides": [
           {
             "matcher": { "id": "byName", "options": "query" },
-            "properties": [
-              { "id": "custom.width", "value": 550 },
-              { "id": "custom.displayMode", "value": "color-text" }
-            ]
-          },
-          {
-            "matcher": { "id": "byRegexp", "options": ".*_ms$" },
-            "properties": [
-              { "id": "unit", "value": "ms" },
-              { "id": "custom.width", "value": 90 }
-            ]
+            "properties": [{ "id": "custom.width", "value": 600 }]
           },
           {
             "matcher": { "id": "byName", "options": "mean_ms" },
             "properties": [
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              },
-              {
-                "id": "color",
-                "value": { "mode": "continuous-GrYlRd" }
-              }
+              { "id": "unit", "value": "ms" },
+              { "id": "custom.width", "value": 100 },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "color", "value": { "mode": "continuous-GrYlRd" } }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "calls" },
-            "properties": [{ "id": "custom.width", "value": 80 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "rows" },
-            "properties": [{ "id": "custom.width", "value": 80 }]
+            "matcher": { "id": "byName", "options": "queryid" },
+            "properties": [{ "id": "custom.width", "value": 120 }]
           }
         ]
       }
@@ -200,62 +176,43 @@
       "type": "table",
       "title": "Highest Total Execution Time (where your DB spends most wall-clock time)",
       "gridPos": { "x": 0, "y": 14, "w": 24, "h": 10 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT\n  LEFT(query, 120) AS query,\n  calls,\n  round(total_exec_time::numeric, 2) AS total_ms,\n  round(mean_exec_time::numeric, 2) AS mean_ms,\n  round((total_exec_time / NULLIF(SUM(total_exec_time) OVER (), 0) * 100)::numeric, 1) AS pct_total,\n  round(total_plan_time::numeric, 2) AS total_plan_ms,\n  rows\nFROM pg_stat_statements\nORDER BY total_exec_time DESC\nLIMIT 20",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "topk(20, pg_stat_top_queries_total_exec_time_seconds * 1000)",
+          "instant": true,
+          "format": "table"
         }
       ],
-      "options": {
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "displayName": "total_ms", "desc": true }]
-      },
+      "transformations": [
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["queryid", "query", "Value"] } } },
+        { "id": "organize", "options": { "renameByName": { "Value": "total_ms" } } },
+        { "id": "sortBy", "options": { "fields": [{ "displayName": "total_ms", "desc": true }] } }
+      ],
+      "options": { "footer": { "show": false }, "showHeader": true },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true
-          }
+          "custom": { "align": "left", "displayMode": "auto", "filterable": true }
         },
         "overrides": [
           {
             "matcher": { "id": "byName", "options": "query" },
-            "properties": [{ "id": "custom.width", "value": 550 }]
-          },
-          {
-            "matcher": { "id": "byRegexp", "options": ".*_ms$" },
-            "properties": [
-              { "id": "unit", "value": "ms" },
-              { "id": "custom.width", "value": 100 }
-            ]
+            "properties": [{ "id": "custom.width", "value": 600 }]
           },
           {
             "matcher": { "id": "byName", "options": "total_ms" },
             "properties": [
+              { "id": "unit", "value": "ms" },
+              { "id": "custom.width", "value": 110 },
               { "id": "custom.displayMode", "value": "color-background" },
               { "id": "color", "value": { "mode": "continuous-GrYlRd" } }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "pct_total" },
-            "properties": [
-              { "id": "unit", "value": "percent" },
-              { "id": "custom.width", "value": 90 }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "calls" },
-            "properties": [{ "id": "custom.width", "value": 80 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "rows" },
-            "properties": [{ "id": "custom.width", "value": 80 }]
+            "matcher": { "id": "byName", "options": "queryid" },
+            "properties": [{ "id": "custom.width", "value": 120 }]
           }
         ]
       }
@@ -265,48 +222,42 @@
       "type": "table",
       "title": "Most Frequently Called Queries",
       "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
-      "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "grafana-postgresql-datasource", "uid": "efg8z7fol3klcb" },
-          "format": "table",
-          "rawSql": "SELECT\n  LEFT(query, 120) AS query,\n  calls,\n  round(mean_exec_time::numeric, 2) AS mean_ms,\n  round(total_exec_time::numeric, 2) AS total_ms,\n  round(rows::numeric / NULLIF(calls, 0), 1) AS avg_rows_per_call\nFROM pg_stat_statements\nORDER BY calls DESC\nLIMIT 20",
-          "editorMode": "code"
+          "datasource": { "type": "prometheus", "uid": "prometheus-bytefight" },
+          "expr": "topk(20, pg_stat_top_queries_calls)",
+          "instant": true,
+          "format": "table"
         }
       ],
-      "options": {
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "displayName": "calls", "desc": true }]
-      },
+      "transformations": [
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["queryid", "query", "Value"] } } },
+        { "id": "organize", "options": { "renameByName": { "Value": "calls" } } },
+        { "id": "sortBy", "options": { "fields": [{ "displayName": "calls", "desc": true }] } }
+      ],
+      "options": { "footer": { "show": false }, "showHeader": true },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true
-          }
+          "custom": { "align": "left", "displayMode": "auto", "filterable": true }
         },
         "overrides": [
           {
             "matcher": { "id": "byName", "options": "query" },
-            "properties": [{ "id": "custom.width", "value": 550 }]
-          },
-          {
-            "matcher": { "id": "byRegexp", "options": ".*_ms$" },
-            "properties": [
-              { "id": "unit", "value": "ms" },
-              { "id": "custom.width", "value": 100 }
-            ]
+            "properties": [{ "id": "custom.width", "value": 600 }]
           },
           {
             "matcher": { "id": "byName", "options": "calls" },
             "properties": [
+              { "id": "custom.width", "value": 100 },
               { "id": "custom.displayMode", "value": "color-background" },
-              { "id": "color", "value": { "mode": "continuous-BlPu" } },
-              { "id": "custom.width", "value": 100 }
+              { "id": "color", "value": { "mode": "continuous-BlPu" } }
             ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "queryid" },
+            "properties": [{ "id": "custom.width", "value": 120 }]
           }
         ]
       }
@@ -318,7 +269,7 @@
       "gridPos": { "x": 0, "y": 32, "w": 24, "h": 4 },
       "options": {
         "mode": "markdown",
-        "content": "**p50/p95/p99** — These are percentiles of *mean execution time across distinct query shapes*, not per-invocation latency. A query that runs 10,000 times and averages 5ms counts as one data point at 5ms. For true per-invocation percentiles, wire up Prometheus + postgres_exporter (Phase 2).\n\n**Total time** — This shows where the database is spending the most cumulative wall-clock time. A fast query called 1M times can dominate here — that's where caching or batching pays off.\n\n**Reset stats** — `SELECT pg_stat_statements_reset();` clears all counters. Do this after a deploy or schema change to get a clean baseline."
+        "content": "**Data source:** Prometheus scrapes `pg_stat_statements` via `postgres_exporter` every 60s. Grafana reads from Prometheus — no direct query load on the primary database.\n\n**p50/p95/p99** — Percentiles of *mean execution time across the top 100 query shapes by total time*. Not per-invocation percentiles — those require application-level histogram instrumentation (e.g. Micrometer).\n\n**Reset stats** — `SELECT pg_stat_statements_reset();` clears all counters. Prometheus will reflect the reset on the next 60s scrape."
       }
     }
   ],
