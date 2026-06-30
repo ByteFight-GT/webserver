@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
@@ -339,6 +340,10 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
     competition.setActive(active);
     competition.setWhitelisted(false);
     competition.setMaxPlayersPerTeam(2);
+    competition.setSettings(
+        Map.of(
+            "tournamentMaps",
+            List.of("butterfly", "pumpkin", "ghost", "catzilla", "pickaxe", "shuriken", "squid")));
     Competition saved = competitionRepository.save(competition);
     ensureTournamentLadder(saved);
     return saved;
