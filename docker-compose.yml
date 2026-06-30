@@ -14,7 +14,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./postgres-initdb.d:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -70,6 +69,31 @@ services:
       DB_USER: "${DB_USER}"
       DB_PASSWORD: "${DB_PASSWORD}"
 
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    command:
+      - '--extend.query-path=/etc/postgres_exporter/queries.yaml'
+      - '--log.level=warn'
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable"
+    volumes:
+      - ./config/postgres_exporter/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - postgres_exporter
+
   loki:
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
@@ -80,4 +104,6 @@ volumes:
   storage:
     driver: local
   grafana_data:
+    driver: local
+  prometheus_data:
     driver: local
