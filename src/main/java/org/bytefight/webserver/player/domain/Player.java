@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.bytefight.webserver.common.domain.BaseEntity;
+import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.user.domain.User;
 
 @Getter
@@ -25,4 +26,8 @@ public class Player extends BaseEntity {
 
   @Column(name = "username_normalized", nullable = false, unique = true, length = 50)
   private String usernameNormalized;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "avatar_file", unique = true)
+  private FileRecord avatar;
 }
