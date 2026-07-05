@@ -60,8 +60,6 @@ services:
       - postgres
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
     restart: unless-stopped
     environment:
       GF_SERVER_ROOT_URL: "${GF_SERVER_ROOT_URL}"
