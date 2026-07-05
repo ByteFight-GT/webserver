@@ -72,12 +72,9 @@ services:
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
     command:
-      - '--extend.query-path=/etc/postgres_exporter/queries.yaml'
       - '--log.level=warn'
     environment:
       DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable"
-    volumes:
-      - ./config/postgres_exporter/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     depends_on:
       postgres:
         condition: service_healthy
