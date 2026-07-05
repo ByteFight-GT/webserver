@@ -65,9 +65,6 @@ services:
     restart: unless-stopped
     environment:
       GF_SERVER_ROOT_URL: "${GF_SERVER_ROOT_URL}"
-      DB_NAME: "${DB_NAME}"
-      DB_USER: "${DB_USER}"
-      DB_PASSWORD: "${DB_PASSWORD}"
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
