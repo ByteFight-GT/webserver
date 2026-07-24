@@ -43,7 +43,6 @@ public class PrivateGameMatchController {
   private final GameMatchService gameMatchService;
 
   @PostMapping
-  @RequireTurnstile
   public ResponseEntity<List<GameMatchDto>> createGameMatch(
       @AuthenticationPrincipal User user, @RequestBody CreateMatchDto createMatchDto) {
     Player player =
