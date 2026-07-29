@@ -78,11 +78,10 @@ services:
     image: prom/prometheus:latest
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus_data'
       - '--storage.tsdb.retention.time=30d'
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus_data
+      - prometheus_data:/prometheus
     depends_on:
       - postgres_exporter
 
