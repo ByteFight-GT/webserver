@@ -5,9 +5,6 @@ services:
     command: >
       postgres
       -c shared_preload_libraries=pg_stat_statements
-      -c pg_stat_statements.track=all
-      -c pg_stat_statements.max=10000
-      -c pg_stat_statements.track_planning=on
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -65,19 +62,24 @@ services:
       GF_SERVER_ROOT_URL: "${GF_SERVER_ROOT_URL}"
 
   postgres_exporter:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    restart: unless-stopped
     command:
       - '--log.level=warn'
     environment:
-      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable"
+      DATA_SOURCE_URI: "postgres:5432/${DB_NAME}?sslmode=disable"
+      DATA_SOURCE_USER: "${DB_USER}"
+      DATA_SOURCE_PASS: "${DB_PASSWORD}"
     depends_on:
       postgres:
         condition: service_healthy
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.13.1
+    restart: unless-stopped
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
