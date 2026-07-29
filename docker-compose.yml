@@ -2,6 +2,9 @@ name: bytefight-server
 services:
   postgres:
     image: postgres:16.4
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -58,6 +61,32 @@ services:
     environment:
       GF_SERVER_ROOT_URL: "${GF_SERVER_ROOT_URL}"
 
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    restart: unless-stopped
+    command:
+      - '--log.level=warn'
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/${DB_NAME}?sslmode=disable"
+      DATA_SOURCE_USER: "${DB_USER}"
+      DATA_SOURCE_PASS: "${DB_PASSWORD}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v3.13.1
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - postgres_exporter
+
   loki:
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
@@ -68,4 +97,6 @@ volumes:
   storage:
     driver: local
   grafana_data:
+    driver: local
+  prometheus_data:
     driver: local
