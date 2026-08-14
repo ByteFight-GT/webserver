@@ -47,18 +47,28 @@ public class AdminLadderService {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Competition not found"));
 
-    return ladderService.createLadder(
-        competition,
-        input.getLadder(),
-        valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING),
-        valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD),
-        valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX),
-        valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN),
-        valueOrDefault(input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY),
-        valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU),
-        valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT),
-        valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN),
-        valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
+    Ladder ladder =
+        ladderService.createLadder(
+            competition,
+            input.getLadder(),
+            valueOrDefault(input.getGlickoDefaultRating(), DEFAULT_GLICKO_DEFAULT_RATING),
+            valueOrDefault(input.getGlickoDefaultRd(), DEFAULT_GLICKO_DEFAULT_RD),
+            valueOrDefault(input.getGlickoRdMax(), DEFAULT_GLICKO_RD_MAX),
+            valueOrDefault(input.getGlickoRdMin(), DEFAULT_GLICKO_RD_MIN),
+            valueOrDefault(
+                input.getGlickoPhiInflationPerDay(), DEFAULT_GLICKO_PHI_INFLATION_PER_DAY),
+            valueOrDefault(input.getGlickoTau(), DEFAULT_GLICKO_TAU),
+            valueOrDefault(input.getGlickoSigmaDefault(), DEFAULT_GLICKO_SIGMA_DEFAULT),
+            valueOrDefault(input.getGlickoSigmaMin(), DEFAULT_GLICKO_SIGMA_MIN),
+            valueOrDefault(input.getGlickoSigmaMax(), DEFAULT_GLICKO_SIGMA_MAX));
+
+    // Ladder defaults maxQueuedPerTeam; only overwrite it when the caller asked for a value.
+    if (input.getMaxQueuedPerTeam() != null) {
+      ladder.setMaxQueuedPerTeam(input.getMaxQueuedPerTeam());
+      ladder = ladderRepository.save(ladder);
+    }
+
+    return ladder;
   }
 
   public Ladder updateLadder(Long id, AdminUpdateLadderDto input) {
@@ -94,6 +104,9 @@ public class AdminLadderService {
     }
     if (input.getGlickoSigmaMax() != null) {
       ladder.setGlickoSigmaMax(input.getGlickoSigmaMax());
+    }
+    if (input.getMaxQueuedPerTeam() != null) {
+      ladder.setMaxQueuedPerTeam(input.getMaxQueuedPerTeam());
     }
     if (input.getAllowUserMatches() != null) {
       ladder.setAllowUserMatches(input.getAllowUserMatches());

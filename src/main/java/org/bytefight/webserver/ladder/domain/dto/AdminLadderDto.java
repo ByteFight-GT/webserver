@@ -10,6 +10,7 @@ public class AdminLadderDto {
   String ladder;
   Long competitionId;
   boolean allowUserMatches;
+  int maxQueuedPerTeam;
   double glickoDefaultRating;
   double glickoDefaultRd;
   double glickoRdMax;
@@ -28,6 +29,7 @@ public class AdminLadderDto {
         ladder.getLadder(),
         ladder.getCompetition().getId(),
         ladder.isAllowUserMatches(),
+        ladder.getMaxQueuedPerTeam(),
         ladder.getGlickoDefaultRating(),
         ladder.getGlickoDefaultRd(),
         ladder.getGlickoRdMax(),

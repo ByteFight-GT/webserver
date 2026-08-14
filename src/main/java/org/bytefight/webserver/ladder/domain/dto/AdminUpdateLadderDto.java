@@ -17,6 +17,7 @@ public class AdminUpdateLadderDto {
   @Positive Double glickoSigmaDefault;
   @Positive Double glickoSigmaMin;
   @Positive Double glickoSigmaMax;
+  @Positive Integer maxQueuedPerTeam;
   Boolean allowUserMatches;
   Boolean scheduledMatchmakingEnabled;
   @ValidCron String scheduledMatchmakingCron;
