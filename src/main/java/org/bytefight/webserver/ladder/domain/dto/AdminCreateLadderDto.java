@@ -10,6 +10,7 @@ import lombok.Value;
 public class AdminCreateLadderDto {
   @NotNull Long competitionId;
   @NotBlank String ladder;
+  @Positive Integer maxQueuedPerTeam;
   @Positive Double glickoDefaultRating;
   @Positive Double glickoDefaultRd;
   @Positive Double glickoRdMax;

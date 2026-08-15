@@ -39,6 +39,7 @@ public class AdminLadderController {
   private static final Set<String> ALLOWED_SORT_FIELDS =
       Set.of(
           "ladder",
+          "maxQueuedPerTeam",
           "glickoDefaultRating",
           "glickoDefaultRd",
           "glickoRdMax",
