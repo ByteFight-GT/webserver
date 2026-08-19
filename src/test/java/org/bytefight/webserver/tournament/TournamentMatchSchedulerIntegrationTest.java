@@ -2,8 +2,14 @@ package org.bytefight.webserver.tournament;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import jakarta.transaction.Transactional;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
@@ -24,6 +30,7 @@ import org.bytefight.webserver.tournament.application.TournamentMatchScheduler;
 import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
+import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
@@ -147,72 +154,62 @@ public class TournamentMatchSchedulerIntegrationTest extends FullStackIntegratio
     assertEquals(2, queued.size());
   }
 
-  // the test has incorrect map data which is why I commented it out for now
-  // @Test
-  // @Transactional
-  // void queueSeriesGameUsesUniqueMapsThenFallsBackToEngineChoice() {
-  //     Competition competition = createCompetition("comp-scheduler-maps", true);
-  //     Tournament tournament = createTournament(competition);
-  //     Team teamOne = createTeamWithSubmission(competition, "Team One");
-  //     Team teamTwo = createTeamWithSubmission(competition, "Team Two");
+  @Test
+  @Transactional
+  void queueSeriesGameUsesUniqueMapsThenFallsBackToEngineChoice() {
+    Competition competition = createCompetition("comp-scheduler-maps", true);
+    Tournament tournament = createTournament(competition);
+    Team teamOne = createTeamWithSubmission(competition, "Team One");
+    Team teamTwo = createTeamWithSubmission(competition, "Team Two");
 
-  //     TournamentEntry entryOne = tournamentEntryRepository.save(createEntry(tournament, teamOne,
-  // 1));
-  //     TournamentEntry entryTwo = tournamentEntryRepository.save(createEntry(tournament, teamTwo,
-  // 2));
+    TournamentEntry entryOne = tournamentEntryRepository.save(createEntry(tournament, teamOne, 1));
+    TournamentEntry entryTwo = tournamentEntryRepository.save(createEntry(tournament, teamTwo, 2));
 
-  //     TournamentMatch match = TournamentMatch.builder()
-  //             .tournament(tournament)
-  //             .bracketType(TournamentBracketType.GRAND_FINAL)
-  //             .roundNumber(1)
-  //             .matchIndex(1)
-  //             .teamOneEntry(entryOne)
-  //             .teamTwoEntry(entryTwo)
-  //             .state(TournamentMatchState.PENDING)
-  //             .seriesLength(TournamentBracketBuilder.GRAND_FINAL_SERIES_LENGTH)
-  //             .teamOneSeriesWins(0)
-  //             .teamTwoSeriesWins(0)
-  //             .build();
-  //     match = tournamentMatchRepository.save(match);
+    TournamentMatch match =
+        TournamentMatch.builder()
+            .tournament(tournament)
+            .bracketType(TournamentBracketType.GRAND_FINAL)
+            .roundNumber(1)
+            .matchIndex(1)
+            .teamOneEntry(entryOne)
+            .teamTwoEntry(entryTwo)
+            .state(TournamentMatchState.PENDING)
+            .seriesLength(TournamentBracketBuilder.GRAND_FINAL_SERIES_LENGTH)
+            .teamOneSeriesWins(0)
+            .teamTwoSeriesWins(0)
+            .build();
+    match = tournamentMatchRepository.save(match);
 
-  //     for (int i = 0; i < 8; i++) {
-  //         tournamentMatchScheduler.queueSeriesGame(match);
-  //     }
+    for (int i = 0; i < 8; i++) {
+      tournamentMatchScheduler.queueSeriesGame(match);
+    }
 
-  //     TournamentMatch refreshed =
-  // tournamentMatchRepository.findById(match.getId()).orElseThrow();
-  //     List<TournamentGame> games =
-  // tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(refreshed);
-  //     assertEquals(8, games.size());
+    TournamentMatch refreshed = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+    List<TournamentGame> games =
+        tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(refreshed);
+    assertEquals(8, games.size());
 
-  //     List<String> expectedMaps = List.of(
-  //             "the temple",
-  //             "the complex",
-  //             "matrix",
-  //             "maze",
-  //             "spiral",
-  //             "disjoint",
-  //             "big spiral"
-  //     );
+    // These must match the tournamentMaps set on the competition in createCompetition().
+    List<String> expectedMaps =
+        List.of("butterfly", "pumpkin", "ghost", "catzilla", "pickaxe", "shuriken", "squid");
 
-  //     Set<String> expectedMapSet = Set.copyOf(expectedMaps);
-  //     Set<String> usedMapsInSeries = new HashSet<>();
-  //     for (int i = 0; i < expectedMaps.size(); i++) {
-  //         Object mapNameValue = games.get(i).getGameMatch().getMatchSettings().get("map");
-  //         assertTrue(mapNameValue instanceof String, "Map should be present for the first seven
-  // games.");
-  //         String mapName = (String) mapNameValue;
-  //         assertTrue(expectedMapSet.contains(mapName), "Map should come from the tournament map
-  // pool.");
-  //         assertTrue(usedMapsInSeries.add(mapName), "Map should be unique within the series.");
-  //     }
-  //     assertEquals(expectedMaps.size(), usedMapsInSeries.size(), "All unique maps should be
-  // consumed first.");
+    Set<String> expectedMapSet = Set.copyOf(expectedMaps);
+    Set<String> usedMapsInSeries = new HashSet<>();
+    for (int i = 0; i < expectedMaps.size(); i++) {
+      Object mapNameValue = games.get(i).getGameMatch().getMatchSettings().get("map");
+      assertTrue(mapNameValue instanceof String, "Map should be present for the first seven games.");
+      String mapName = (String) mapNameValue;
+      assertTrue(
+          expectedMapSet.contains(mapName), "Map should come from the tournament map pool.");
+      assertTrue(usedMapsInSeries.add(mapName), "Map should be unique within the series.");
+    }
+    assertEquals(
+        expectedMaps.size(), usedMapsInSeries.size(), "All unique maps should be consumed first.");
 
-  //     assertTrue(games.get(7).getGameMatch().getMatchSettings().isEmpty(),
-  //             "After all unique maps are used, match settings should be empty so engine can
-  // choose.");
-  // }
+    assertTrue(
+        games.get(7).getGameMatch().getMatchSettings().isEmpty(),
+        "After all unique maps are used, match settings should be empty so engine can choose.");
+  }
 
   private void createSixSeededEntries(Tournament tournament, Competition competition) {
     Team team1 = createTeamWithSubmission(competition, "Seed 1");
@@ -269,6 +266,10 @@ public class TournamentMatchSchedulerIntegrationTest extends FullStackIntegratio
     competition.setActive(active);
     competition.setWhitelisted(false);
     competition.setMaxPlayersPerTeam(2);
+    competition.setSettings(
+        Map.of(
+            "tournamentMaps",
+            List.of("butterfly", "pumpkin", "ghost", "catzilla", "pickaxe", "shuriken", "squid")));
     Competition saved = competitionRepository.save(competition);
     ensureTournamentLadder(saved);
     return saved;

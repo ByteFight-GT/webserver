@@ -210,14 +210,14 @@ public class LocalStorageService {
 
   public Optional<StoredObject> stat(String uuid) {
     return fileRecordRepository
-        .findByUuidAndIsDeletedFalse(UUID.fromString(uuid))
+        .findByUuidAndDeletedAtNull(UUID.fromString(uuid))
         .map(StoredObject::from);
   }
 
   public Resource loadAsResource(String uuid) throws IOException {
     FileRecord rec =
         fileRecordRepository
-            .findByUuidAndIsDeletedFalse(UUID.fromString(uuid))
+            .findByUuidAndDeletedAtNull(UUID.fromString(uuid))
             .orElseThrow(FileNotFoundException::new);
     Path p = Path.of(rec.getStoragePath());
     if (!Files.exists(p)) throw new FileNotFoundException(uuid);
@@ -227,7 +227,7 @@ public class LocalStorageService {
   public DownloadStream openDownloadStream(String uuid) throws IOException {
     FileRecord rec =
         fileRecordRepository
-            .findByUuidAndIsDeletedFalse(UUID.fromString(uuid))
+            .findByUuidAndDeletedAtNull(UUID.fromString(uuid))
             .orElseThrow(FileNotFoundException::new);
 
     Path path = Path.of(rec.getStoragePath());

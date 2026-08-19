@@ -15,12 +15,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
-  boolean existsByCompetitionAndPlayerAndTeamIsDeletedFalse(Competition competition, Player player);
+  boolean existsByCompetitionAndPlayerAndTeamDeletedAtNull(Competition competition, Player player);
 
-  Optional<TeamMember> findByCompetitionAndPlayerAndTeamIsDeletedFalse(
+  Optional<TeamMember> findByCompetitionAndPlayerAndTeamDeletedAtNull(
       Competition competition, Player player);
 
-  boolean existsByTeamAndPlayerAndTeamIsDeletedFalse(Team team, Player player);
+  boolean existsByTeamAndPlayerAndTeamDeletedAtNull(Team team, Player player);
 
   List<TeamMember> findByTeam(Team team);
 
@@ -32,7 +32,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
         FROM TeamMember tm
         JOIN tm.team t
         WHERE t.competition.id = :competitionId
-          AND t.isDeleted = false
+          AND t.deletedAt IS NULL
     """)
   long countPlayersByCompetitionId(@Param("competitionId") Long competitionId);
 

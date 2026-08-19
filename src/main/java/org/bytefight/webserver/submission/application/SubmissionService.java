@@ -84,7 +84,7 @@ public class SubmissionService {
   }
 
   public Optional<Submission> getSubmissionByTeamAndUuid(Team team, UUID uuid) {
-    return submissionRepository.findSubmissionByTeamAndUuidAndIsDeletedIsFalse(team, uuid);
+    return submissionRepository.findSubmissionByTeamAndUuidAndDeletedAtNull(team, uuid);
   }
 
   @Transactional
@@ -134,11 +134,11 @@ public class SubmissionService {
   }
 
   public Optional<Submission> getSubmission(UUID uuid) {
-    return submissionRepository.findSubmissionByUuidAndIsDeletedIsFalse(uuid);
+    return submissionRepository.findSubmissionByUuidAndDeletedAtNull(uuid);
   }
 
   public List<Submission> listSubmissionsByTeam(Team team) {
-    return submissionRepository.findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(team);
+    return submissionRepository.findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(team);
   }
 
   public long getTeamSubmissionStorageSize(Team team) {
@@ -152,7 +152,7 @@ public class SubmissionService {
   public DownloadLinkDto getSubmissionDownloadUri(UUID uuid, User user) {
     Submission submission =
         submissionRepository
-            .findSubmissionByUuidAndIsDeletedIsFalse(uuid)
+            .findSubmissionByUuidAndDeletedAtNull(uuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     // if user is NOT an admin, we check that they own the submission

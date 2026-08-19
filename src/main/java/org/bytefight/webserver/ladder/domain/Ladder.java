@@ -19,6 +19,12 @@ import org.bytefight.webserver.competition.domain.Competition;
 @Entity
 @Table(name = "ladders")
 public class Ladder extends BaseEntity {
+  /**
+   * Applied when a ladder is created without an explicit value. The column carries a matching
+   * DEFAULT, but Hibernate always writes the field explicitly, so the default has to live here too.
+   */
+  public static final int DEFAULT_MAX_QUEUED_PER_TEAM = 10;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "competition_id", nullable = false)
   private Competition competition;
@@ -27,7 +33,8 @@ public class Ladder extends BaseEntity {
   private String ladder;
 
   @Column(name = "max_queued_per_team", nullable = false)
-  private int maxQueuedPerTeam;
+  @Builder.Default
+  private int maxQueuedPerTeam = DEFAULT_MAX_QUEUED_PER_TEAM;
 
   @Column(name = "allow_user_matches", nullable = false)
   private boolean allowUserMatches = false;

@@ -15,15 +15,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-  List<Submission> findSubmissionsByTeamAndIsDeletedIsFalseOrderByCreatedAtDesc(Team team);
+  List<Submission> findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(Team team);
 
-  Optional<Submission> findSubmissionByTeamAndUuidAndIsDeletedIsFalse(Team team, UUID uuid);
+  Optional<Submission> findSubmissionByTeamAndUuidAndDeletedAtNull(Team team, UUID uuid);
 
-  Optional<Submission> findSubmissionByUuidAndIsDeletedIsFalse(UUID uuid);
+  Optional<Submission> findSubmissionByUuidAndDeletedAtNull(UUID uuid);
 
   boolean existsByUuid(UUID uuid);
 
-  Page<Submission> findByIsDeleted(boolean isDeleted, Pageable pageable);
+  @Query(
+      """
+        SELECT s FROM Submission s
+        WHERE (:isDeleted = true AND s.deletedAt IS NOT NULL)
+           OR (:isDeleted = false AND s.deletedAt IS NULL)
+    """)
+  Page<Submission> findByIsDeleted(@Param("isDeleted") boolean isDeleted, Pageable pageable);
 
   @Query(
       """
@@ -31,7 +37,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
         FROM Submission s
         JOIN s.fileRecord fr
         WHERE s.team = :team
-          AND s.isDeleted = false
+          AND s.deletedAt IS NULL
     """)
   Long sumUndeletedSubmissionSizeByTeam(@Param("team") Team team);
 }

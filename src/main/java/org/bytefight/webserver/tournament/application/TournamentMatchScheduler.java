@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
@@ -47,8 +48,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TournamentMatchScheduler {
   private static final String MAP_SETTING_KEY = "map";
-  private static final List<String> TOURNAMENT_SERIES_MAPS =
-      List.of("butterfly", "pumpkin", "ghost", "catzilla", "pickaxe", "shuriken", "squid");
+  private static final String TOURNAMENT_MAPS_SETTING_KEY = "tournamentMaps";
 
   private final TournamentMatchRepository tournamentMatchRepository;
   private final TournamentGameRepository tournamentGameRepository;
@@ -233,7 +233,8 @@ public class TournamentMatchScheduler {
 
     // Determine the next game number (1-based).
     int nextGameNumber = existingGames.size() + 1;
-    Map<String, Object> matchSettings = buildSeriesMatchSettings(existingGames);
+    List<String> tournamentMaps = getTournamentMaps(match.getTournament().getCompetition());
+    Map<String, Object> matchSettings = buildSeriesMatchSettings(existingGames, tournamentMaps);
 
     // Create the underlying GameMatch and push it to the queue.
     GameMatch gameMatch =
@@ -264,10 +265,30 @@ public class TournamentMatchScheduler {
   }
 
   /**
+   * Reads {@code tournamentMaps} from the competition's settings. Throws if the key is absent or
+   * not a List, since map selection cannot proceed without it.
+   */
+  @SuppressWarnings("unchecked")
+  private List<String> getTournamentMaps(Competition competition) {
+    Map<String, Object> settings = competition.getSettings();
+    Object value = settings == null ? null : settings.get(TOURNAMENT_MAPS_SETTING_KEY);
+    if (!(value instanceof List)) {
+      throw new IllegalStateException(
+          "Competition '"
+              + competition.getSlug()
+              + "' is missing the required '"
+              + TOURNAMENT_MAPS_SETTING_KEY
+              + "' setting.");
+    }
+    return (List<String>) value;
+  }
+
+  /**
    * Ensures map uniqueness inside a single best-of series. Chooses randomly from the remaining
    * unused maps. Once all known maps have been used, returns null so the engine can auto-select.
    */
-  private Map<String, Object> buildSeriesMatchSettings(List<TournamentGame> existingGames) {
+  private Map<String, Object> buildSeriesMatchSettings(
+      List<TournamentGame> existingGames, List<String> tournamentMaps) {
     Set<String> usedMaps = new HashSet<>();
     for (TournamentGame game : existingGames) {
       Map<String, Object> settings = game.getGameMatch().getMatchSettings();
@@ -281,7 +302,7 @@ public class TournamentMatchScheduler {
     }
 
     List<String> availableMaps = new ArrayList<>();
-    for (String mapName : TOURNAMENT_SERIES_MAPS) {
+    for (String mapName : tournamentMaps) {
       if (!usedMaps.contains(mapName)) {
         availableMaps.add(mapName);
       }

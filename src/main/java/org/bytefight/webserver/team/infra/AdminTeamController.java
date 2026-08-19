@@ -46,7 +46,7 @@ public class AdminTeamController {
   private static final int MAX_PAGE_SIZE = 100;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
-      Set.of("createdAt", "id", "name", "uuid", "isDeleted", "type");
+      Set.of("createdAt", "id", "name", "uuid", "deletedAt", "type");
 
   private final AdminTeamService adminTeamService;
   private final PlayerRepository playerRepository;

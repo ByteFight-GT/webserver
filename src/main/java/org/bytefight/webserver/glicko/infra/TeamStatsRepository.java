@@ -59,7 +59,7 @@ public interface TeamStatsRepository extends JpaRepository<TeamStats, Long> {
         JOIN teams t ON t.id = ts.team_id
         WHERE ts.competition_id = :#{#competition.id}
           AND ts.ladder = :ladder
-          AND t.is_deleted = false
+          AND t.deleted_at IS NULL
         ORDER BY (ts.matches_played = 0) ASC, ts.glicko_rating DESC, t.id ASC
         """,
       nativeQuery = true)
