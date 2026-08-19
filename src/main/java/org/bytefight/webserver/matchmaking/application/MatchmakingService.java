@@ -15,6 +15,7 @@ import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
+import org.bytefight.webserver.matchmaking.infra.MatchMakingProperties;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class MatchmakingService {
   private final GameMatchService gameMatchService;
   private final TeamStatsRepository teamStatsRepository;
   private final MatchmakingEventCreator matchmakingEventCreator;
+  private final MatchMakingProperties matchMakingProperties;
 
   @Transactional
   public MatchmakingEvent createAndScheduleEvent(Competition competition, String ladder) {
@@ -109,6 +111,20 @@ public class MatchmakingService {
     }
 
     Collections.shuffle(edges, random);
+
+    // Bound the fan-out so one tick cannot enqueue more than the fleet can clear before the next.
+    // edges is already shuffled, so truncating keeps a fair random sample across teams. Unset /
+    // non-positive cap preserves the historical full fan-out.
+    Integer cap = matchMakingProperties.getMaxMatchesPerEvent();
+    if (cap != null && cap > 0 && edges.size() > cap) {
+      log.warn(
+          "Matchmaking fan-out for ladder '{}' capped at {} matches; dropped {} this tick",
+          ladder,
+          cap,
+          edges.size() - cap);
+      edges = edges.subList(0, cap);
+    }
+
     return edges.stream()
         .map(
             (edge) -> {
@@ -146,7 +162,6 @@ public class MatchmakingService {
         m = Character.getNumericValue(partitionBaseCases.charAt(remaining));
       } else {
         m = random.nextInt(2) + 5;
-        System.out.println(m);
       }
       partitionSizes.add(m);
       remaining -= m;
