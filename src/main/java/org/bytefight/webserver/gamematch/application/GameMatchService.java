@@ -11,6 +11,7 @@ import java.util.*;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
@@ -312,5 +313,25 @@ public class GameMatchService {
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {
     return gameMatchRepository.countTeamMatchesByLadderAndStatus(
         team, ladder.getLadder(), Set.of(MatchStatus.waiting, MatchStatus.in_progress));
+  }
+
+  /**
+   * Count a team's validation matches that are still in flight. Includes {@code created} and {@code
+   * scheduling}, not just {@code waiting}/{@code in_progress}, so a match that has been created but
+   * not yet enqueued still counts against the cap (a submission rush would otherwise slip through
+   * that window).
+   */
+  public long countTeamInFlightValidationMatches(Team team) {
+    // Validation matches are created with teamA == teamB == the submitting team and no initiating
+    // team, so count by teamA (the shared countTeamMatchesByLadderAndStatus keys on initiatingTeam,
+    // which is null here).
+    return gameMatchRepository.countTeamAMatchesByLadderAndStatus(
+        team,
+        DefaultLadders.VALIDATION,
+        Set.of(
+            MatchStatus.created,
+            MatchStatus.scheduling,
+            MatchStatus.waiting,
+            MatchStatus.in_progress));
   }
 }

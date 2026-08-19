@@ -196,6 +196,43 @@ class SubmissionControllerIT extends FullStackIntegrationTestBase {
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  void secondUploadWhileValidationInFlightIsRejected() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("comp-cap", "Competition", true, 2);
+    testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
+    Team team = testDataFactory.createTeam(competition);
+    User user = testDataFactory.createUser();
+    var player = testDataFactory.createPlayer(user);
+    teamService.joinTeam(player, team);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "bot.zip", "application/zip", "payload".getBytes());
+
+    // First upload succeeds and leaves a validation match in flight (no engine consumes it here).
+    mockMvc
+        .perform(
+            multipart("/api/v1/submission/team/{teamUuid}", getUuid(team))
+                .file(file)
+                .param("description", "first")
+                .param("isAutoSet", "false")
+                .with(user(user)))
+        .andExpect(status().isOk());
+
+    // Second upload while that validation is still pending is rejected, before anything is stored.
+    mockMvc
+        .perform(
+            multipart("/api/v1/submission/team/{teamUuid}", getUuid(team))
+                .file(file)
+                .param("description", "second")
+                .param("isAutoSet", "false")
+                .with(user(user)))
+        .andExpect(status().isTooManyRequests());
+
+    // No second submission row, and no second validation job on the queue.
+    assertThat(submissionRepository.count()).isEqualTo(1);
+  }
+
   private Submission uploadSubmission(Team team, User user) throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "bot.zip", "application/zip", "payload".getBytes());
