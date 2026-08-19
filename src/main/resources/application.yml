@@ -25,6 +25,12 @@ springdoc:
 gamematch:
   requeue-stale: true
   stale-threshold-minutes: 120
+scrim:
+  # Server-side scrim volume budget (#160). Starting values; tune from the scrim_usage table.
+  daily-cap: 20
+  weekly-cap: 60
+  burst: 2
+  burst-retry-after-seconds: 30
 storage:
   max-decompressed-bytes: 524288000
 

@@ -26,6 +26,7 @@ import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,7 @@ public class PrivateGameMatchController {
   private final GameMatchService gameMatchService;
 
   @PostMapping
+  @Transactional
   public ResponseEntity<List<GameMatchDto>> createGameMatch(
       @AuthenticationPrincipal User user, @RequestBody CreateMatchDto createMatchDto) {
     Player player =
@@ -108,7 +110,9 @@ public class PrivateGameMatchController {
           HttpStatus.BAD_REQUEST, "Ladder does not allow user created matches.");
     }
 
-    // rate limiting
+    // rate limiting — lock the initiating team first so the count-then-create below is atomic
+    // against concurrent requests for the same team (fixes the check-then-act race in #112).
+    teamService.lockTeamForUpdate(initiatingTeam.getId());
     long currentWaitingMatches =
         gameMatchService.countTeamQueuedMatchesByLadder(initiatingTeam, ladder);
 

@@ -11,6 +11,7 @@ import java.util.*;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
@@ -312,5 +313,21 @@ public class GameMatchService {
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {
     return gameMatchRepository.countTeamMatchesByLadderAndStatus(
         team, ladder.getLadder(), Set.of(MatchStatus.waiting, MatchStatus.in_progress));
+  }
+
+  /**
+   * Count a team's in-flight scrim matches (as the initiating team on the scrim ladder). Includes
+   * {@code created}/{@code scheduling} as well as {@code waiting}/{@code in_progress} so a match in
+   * the create→enqueue window still counts against the burst cap.
+   */
+  public long countTeamInFlightScrimMatches(Team team) {
+    return gameMatchRepository.countTeamMatchesByLadderAndStatus(
+        team,
+        DefaultLadders.SCRIM,
+        Set.of(
+            MatchStatus.created,
+            MatchStatus.scheduling,
+            MatchStatus.waiting,
+            MatchStatus.in_progress));
   }
 }

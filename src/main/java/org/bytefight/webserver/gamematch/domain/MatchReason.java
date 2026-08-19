@@ -5,5 +5,6 @@ public enum MatchReason {
   scrimmage,
   matchmaking,
   tournament,
+  scrim,
   other
 }
