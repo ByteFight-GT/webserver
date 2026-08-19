@@ -25,6 +25,7 @@ springdoc:
 gamematch:
   requeue-stale: true
   stale-threshold-minutes: 120
+  max-reschedules: 5
 storage:
   max-decompressed-bytes: 524288000
 
