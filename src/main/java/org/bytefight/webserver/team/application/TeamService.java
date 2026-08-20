@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
+import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.glicko.application.TeamStatsService;
 import org.bytefight.webserver.ladder.domain.Ladder;
@@ -38,6 +39,7 @@ public class TeamService {
   private final TeamRepository teamRepository;
   private final TeamMemberRepository teamMemberRepository;
   private final WhitelistService whitelistService;
+  private final CompetitionAccessGuard accessGuard;
 
   public String generateJoinCode() {
     for (int attempt = 0; attempt < JOIN_CODE_MAX_ATTEMPTS; attempt++) {
@@ -183,7 +185,9 @@ public class TeamService {
   }
 
   public Optional<Team> getTeamByUuid(UUID uuid) {
-    return teamRepository.findByUuidAndDeletedAtNull(uuid);
+    return teamRepository
+        .findByUuidAndDeletedAtNull(uuid)
+        .filter(team -> accessGuard.canAccess(team.getCompetition()));
   }
 
   public List<Player> getPlayersForTeam(Team team) {

@@ -14,16 +14,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CompetitionService {
   private final CompetitionRepository competitionRepository;
+  private final CompetitionAccessGuard accessGuard;
 
-  public List<Competition> getAllCompetitions(boolean includeInternal) {
+  public List<Competition> getAllCompetitions() {
     Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-    return includeInternal
+    return accessGuard.isAdmin()
         ? competitionRepository.findAll(sort)
         : competitionRepository.findAllByInternalFalse(sort);
   }
 
   public Optional<Competition> getCompetitionBySlug(String slug) {
     String normalizedSlug = slug.trim().toLowerCase();
-    return competitionRepository.findBySlug(normalizedSlug);
+    return competitionRepository.findBySlug(normalizedSlug).filter(accessGuard::canAccess);
   }
 }

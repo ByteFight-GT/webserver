@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
 
+import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
@@ -42,6 +43,7 @@ public class GameMatchService {
   private final RabbitMQService rabbitMQService;
   private final GameMatchProperties gameMatchProperties;
   private final Clock clock;
+  private final CompetitionAccessGuard accessGuard;
 
   public Optional<GameMatch> getGameMatch(UUID id) {
     return gameMatchRepository.findByUuid(id);
@@ -303,10 +305,10 @@ public class GameMatchService {
   }
 
   public Optional<GameMatchDto> getDTOByUuid(String uuid) {
-    Optional<GameMatch> dto = gameMatchRepository.findByUuid(UUID.fromString(uuid));
-    if (dto.isEmpty()) return Optional.empty();
-
-    return Optional.of(GameMatchDto.fromEntity(dto.get()));
+    return gameMatchRepository
+        .findByUuid(UUID.fromString(uuid))
+        .filter(gameMatch -> accessGuard.canAccess(gameMatch.getCompetition()))
+        .map(GameMatchDto::fromEntity);
   }
 
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {

@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
@@ -31,9 +32,12 @@ public class GameMatchFileService {
   private final TeamService teamService;
   private final GameMatchFileRepository gameMatchFileRepository;
   private final LocalStorageService storageService;
+  private final CompetitionAccessGuard accessGuard;
 
   public Optional<GameMatchFile> getByGameMatchAndSlugNoTeam(UUID gameMatchId, String slug) {
-    return gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeamIsNull(gameMatchId, slug);
+    return gameMatchFileRepository
+        .findByGameMatch_UuidAndSlugAndTeamIsNull(gameMatchId, slug)
+        .filter(file -> accessGuard.canAccess(file.getGameMatch().getCompetition()));
   }
 
   public Optional<GameMatchFile> getByGameMatchAndSlugAndTeam(

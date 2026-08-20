@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
@@ -30,6 +31,7 @@ public class SearchEngineService {
   private final GameMatchService gameMatchService;
   private final ConversionService conversionService;
   private final TeamService teamService;
+  private final CompetitionAccessGuard accessGuard;
   private SearchSession searchSession;
 
   @PostConstruct
@@ -46,14 +48,17 @@ public class SearchEngineService {
             .where(f -> f.match().field("name").matching(searchTerm).fuzzy(2))
             .fetch((int) pageable.getOffset(), pageable.getPageSize());
 
-    List<PublicTeamDto> dtos =
+    List<Team> visibleHits =
         result.hits().stream()
-            .map(
-                team -> {
-                  return PublicTeamDto.from(team, List.of());
-                })
+            .filter(team -> accessGuard.canAccess(team.getCompetition()))
+            .toList();
+
+    List<PublicTeamDto> dtos =
+        visibleHits.stream()
+            .map(team -> PublicTeamDto.from(team, List.of()))
             .collect(Collectors.toList());
 
-    return new PageImpl<>(dtos, pageable, result.total().hitCount());
+    return new PageImpl<>(
+        dtos, pageable, result.total().hitCount() - (result.hits().size() - visibleHits.size()));
   }
 }
