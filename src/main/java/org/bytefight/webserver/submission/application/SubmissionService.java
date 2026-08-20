@@ -155,8 +155,8 @@ public class SubmissionService {
             .findSubmissionByUuidAndDeletedAtNull(uuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    // if user is NOT an admin, we check that they own the submission
-    if (!user.isAdmin()) {
+    // if user is NOT an admin or service account, we check that they own the submission
+    if (!user.isAdminOrServiceAccount()) {
       Player player =
           playerService
               .getPlayer(user)

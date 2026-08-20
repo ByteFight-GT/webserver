@@ -96,11 +96,24 @@ public class TestDataFactory {
   }
 
   public User createUser(String email, boolean isAdmin) {
+    return createUser(email, isAdmin, false);
+  }
+
+  public User createUser(String email, boolean isAdmin, boolean isServiceAccount) {
     User user = new User();
     user.setUuid(UUID.randomUUID());
     user.setEmail(email != null ? email : "user-" + UUID.randomUUID() + "@example.com");
     user.setAdmin(isAdmin);
+    user.setServiceAccount(isServiceAccount);
     return userRepository.save(user);
+  }
+
+  public User createServiceAccount() {
+    return createServiceAccount(null);
+  }
+
+  public User createServiceAccount(String email) {
+    return createUser(email, false, true);
   }
 
   public Player createPlayer(User user) {
