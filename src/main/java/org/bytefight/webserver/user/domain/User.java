@@ -40,6 +40,10 @@ public class User extends BaseEntity implements UserDetails {
   @JoinColumn(name = "resume_file", unique = true)
   private FileRecord resume;
 
+  public boolean isAdminOrServiceAccount() {
+    return isAdmin || isServiceAccount;
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of();
