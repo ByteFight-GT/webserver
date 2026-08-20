@@ -11,8 +11,10 @@ import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.CompetitionDto;
 import org.bytefight.webserver.team.application.TeamService;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,10 +49,15 @@ public class PublicCompetitionController {
   }
 
   @GetMapping("/")
-  @Operation(operationId = "getAllCompetitions", summary = "Return all competitions")
-  public ResponseEntity<List<CompetitionDto>> getAllCompetitions() {
+  @Operation(
+      operationId = "getAllCompetitions",
+      summary = "Return all competitions",
+      description = "Internal competitions are only included for admin callers.")
+  public ResponseEntity<List<CompetitionDto>> getAllCompetitions(
+      @AuthenticationPrincipal User user) {
+    boolean includeInternal = user != null && user.isAdmin();
     return ResponseEntity.ok(
-        competitionService.getAllCompetitions().stream()
+        competitionService.getAllCompetitions(includeInternal).stream()
             .map(CompetitionDto::from)
             .collect(Collectors.toList()));
   }

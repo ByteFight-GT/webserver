@@ -17,6 +17,7 @@ public class CompetitionDto {
   String description;
   @NotNull boolean isActive;
   @NotNull boolean isWhitelisted;
+  @NotNull boolean internal;
   @NotNull boolean allowNewSubmission;
   @NotNull boolean allowSetSubmission;
   @NotNull boolean allowCreateTeam;
@@ -34,6 +35,7 @@ public class CompetitionDto {
         .description(competition.getDescription())
         .isActive(competition.isActive())
         .isWhitelisted(competition.isWhitelisted())
+        .internal(competition.isInternal())
         .allowNewSubmission(competition.isAllowNewSubmission())
         .allowSetSubmission(competition.isAllowSetSubmission())
         .allowCreateTeam(competition.isAllowCreateTeam())

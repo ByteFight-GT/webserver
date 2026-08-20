@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,8 +15,11 @@ import org.springframework.stereotype.Service;
 public class CompetitionService {
   private final CompetitionRepository competitionRepository;
 
-  public List<Competition> getAllCompetitions() {
-    return competitionRepository.findAll();
+  public List<Competition> getAllCompetitions(boolean includeInternal) {
+    Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+    return includeInternal
+        ? competitionRepository.findAll(sort)
+        : competitionRepository.findAllByInternalFalse(sort);
   }
 
   public Optional<Competition> getCompetitionBySlug(String slug) {

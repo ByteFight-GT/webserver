@@ -197,10 +197,10 @@ public class TournamentMatchSchedulerIntegrationTest extends FullStackIntegratio
     Set<String> usedMapsInSeries = new HashSet<>();
     for (int i = 0; i < expectedMaps.size(); i++) {
       Object mapNameValue = games.get(i).getGameMatch().getMatchSettings().get("map");
-      assertTrue(mapNameValue instanceof String, "Map should be present for the first seven games.");
-      String mapName = (String) mapNameValue;
       assertTrue(
-          expectedMapSet.contains(mapName), "Map should come from the tournament map pool.");
+          mapNameValue instanceof String, "Map should be present for the first seven games.");
+      String mapName = (String) mapNameValue;
+      assertTrue(expectedMapSet.contains(mapName), "Map should come from the tournament map pool.");
       assertTrue(usedMapsInSeries.add(mapName), "Map should be unique within the series.");
     }
     assertEquals(
