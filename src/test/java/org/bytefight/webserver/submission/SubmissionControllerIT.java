@@ -172,6 +172,52 @@ class SubmissionControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
+  void downloadSubmissionAllowedForServiceAccountNotOnTeam() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
+    Team team = testDataFactory.createTeam(competition);
+    User member = testDataFactory.createUser();
+    var memberPlayer = testDataFactory.createPlayer(member);
+    teamService.joinTeam(memberPlayer, team);
+
+    // a service account has no player and belongs to no team, but may read any submission
+    User serviceAccount = testDataFactory.createServiceAccount("engine@example.com");
+
+    var submission = uploadSubmission(team, member);
+
+    mockMvc
+        .perform(
+            get("/api/v1/submission/download/{uuid}", getUuid(submission))
+                .with(user(serviceAccount)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uri").exists())
+        .andExpect(jsonPath("$.exp").isNumber());
+  }
+
+  @Test
+  void downloadSubmissionForbiddenForMemberOfAnotherTeamInSameCompetition() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);
+    Team team = testDataFactory.createTeam(competition);
+    User member = testDataFactory.createUser();
+    var memberPlayer = testDataFactory.createPlayer(member);
+    teamService.joinTeam(memberPlayer, team);
+
+    Team rivalTeam = testDataFactory.createTeam(competition);
+    User rival = testDataFactory.createUser("rival@example.com", false);
+    var rivalPlayer = testDataFactory.createPlayer(rival);
+    teamService.joinTeam(rivalPlayer, rivalTeam);
+
+    var submission = uploadSubmission(team, member);
+
+    assertThat(rival.isAdminOrServiceAccount()).isFalse();
+
+    mockMvc
+        .perform(get("/api/v1/submission/download/{uuid}", getUuid(submission)).with(user(rival)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   void downloadSubmissionNotFoundAfterDeletion() throws Exception {
     Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
     testDataFactory.createLadder(competition, DefaultLadders.VALIDATION);

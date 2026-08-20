@@ -137,6 +137,166 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
+  void uploadGameMatchFileCreatesRecordForServiceAccount() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, "ladder");
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+
+    GameMatch match =
+        gameMatchService.createMatch(
+            user,
+            teamA,
+            teamB,
+            submissionA,
+            submissionB,
+            "ladder",
+            MatchReason.matchmaking,
+            null,
+            null);
+    UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+    UUID teamAUuid = (UUID) ReflectionTestUtils.getField(teamA, "uuid");
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(file)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("teamUuid", teamAUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("service").roles("SERVICE_ACCOUNT")))
+        .andExpect(status().isOk());
+
+    assertThat(gameMatchFileRepository.count()).isEqualTo(1);
+    var stored = gameMatchFileRepository.findAll().get(0);
+    String storedSlug = (String) ReflectionTestUtils.getField(stored, "slug");
+    Object storedMatch = ReflectionTestUtils.getField(stored, "gameMatch");
+    Object storedTeam = ReflectionTestUtils.getField(stored, "team");
+    assertThat(storedSlug).isEqualTo("match-log");
+    assertThat(storedMatch).isNotNull();
+    assertThat(storedTeam).isNotNull();
+  }
+
+  @Test
+  void uploadGameMatchFileForServiceAccountUsesDistinctSlugPerTeam() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, "ladder");
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+
+    GameMatch match =
+        gameMatchService.createMatch(
+            user,
+            teamA,
+            teamB,
+            submissionA,
+            submissionB,
+            "ladder",
+            MatchReason.matchmaking,
+            null,
+            null);
+    UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+    UUID teamAUuid = (UUID) ReflectionTestUtils.getField(teamA, "uuid");
+    UUID teamBUuid = (UUID) ReflectionTestUtils.getField(teamB, "uuid");
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+
+    // the engine uploads one per-team log and one shared log for the same match
+    for (UUID teamUuid : new UUID[] {teamAUuid, teamBUuid}) {
+      mockMvc
+          .perform(
+              multipart("/api/v1/game-match-file")
+                  .file(file)
+                  .param("gameMatchUuid", matchUuid.toString())
+                  .param("teamUuid", teamUuid.toString())
+                  .param("slug", "match-log")
+                  .param("visibility", GameMatchFileVisibility.team.name())
+                  .with(user("service").roles("SERVICE_ACCOUNT")))
+          .andExpect(status().isOk());
+    }
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(file)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("service").roles("SERVICE_ACCOUNT")))
+        .andExpect(status().isOk());
+
+    assertThat(gameMatchFileRepository.count()).isEqualTo(3);
+  }
+
+  @Test
+  void uploadGameMatchFileRejectsDuplicateSlugForServiceAccount() throws Exception {
+    Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
+    testDataFactory.createLadder(competition, "ladder");
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+
+    GameMatch match =
+        gameMatchService.createMatch(
+            user,
+            teamA,
+            teamB,
+            submissionA,
+            submissionB,
+            "ladder",
+            MatchReason.matchmaking,
+            null,
+            null);
+    UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(file)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("service").roles("SERVICE_ACCOUNT")))
+        .andExpect(status().isOk());
+
+    // re-uploading the same match/slug is still rejected, service account or not
+    assertThatThrownBy(
+            () ->
+                mockMvc
+                    .perform(
+                        multipart("/api/v1/game-match-file")
+                            .file(file)
+                            .param("gameMatchUuid", matchUuid.toString())
+                            .param("slug", "match-log")
+                            .param("visibility", GameMatchFileVisibility.everyone.name())
+                            .with(user("service").roles("SERVICE_ACCOUNT")))
+                    .andReturn())
+        .hasCauseInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("A game match file already exists");
+
+    assertThat(gameMatchFileRepository.count()).isEqualTo(1);
+  }
+
+  @Test
   void uploadGameMatchFileForbiddenForNonAdmin() throws Exception {
     Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
     testDataFactory.createLadder(competition, "ladder");

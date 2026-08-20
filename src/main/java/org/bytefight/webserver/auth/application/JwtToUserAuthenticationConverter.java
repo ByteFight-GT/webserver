@@ -41,6 +41,7 @@ public class JwtToUserAuthenticationConverter
     List<GrantedAuthority> auths = new ArrayList<>();
     auths.add(new SimpleGrantedAuthority("ROLE_USER"));
     if (user.isAdmin()) auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    if (user.isServiceAccount()) auths.add(new SimpleGrantedAuthority("ROLE_SERVICE_ACCOUNT"));
 
     var auth = new UsernamePasswordAuthenticationToken(user, jwt, auths);
     return auth;

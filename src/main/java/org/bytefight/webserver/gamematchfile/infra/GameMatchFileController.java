@@ -37,7 +37,7 @@ public class GameMatchFileController {
   private final GameMatchFileService gameMatchFileService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SERVICE_ACCOUNT')")
   public ResponseEntity<GameMatchFileDto> uploadGameMatchFile(
       @AuthenticationPrincipal User user, GameMatchFileUploadDto uploadDto) {
     GameMatch gameMatch =
