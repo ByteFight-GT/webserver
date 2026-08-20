@@ -18,7 +18,7 @@ public class CompetitionService {
 
   public List<Competition> getAllCompetitions() {
     Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-    return accessGuard.isAdmin()
+    return accessGuard.canSeeInternal()
         ? competitionRepository.findAll(sort)
         : competitionRepository.findAllByInternalFalse(sort);
   }

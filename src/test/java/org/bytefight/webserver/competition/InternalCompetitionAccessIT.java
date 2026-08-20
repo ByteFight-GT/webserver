@@ -3,6 +3,7 @@ package org.bytefight.webserver.competition;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Map;
@@ -38,6 +39,7 @@ class InternalCompetitionAccessIT extends FullStackIntegrationTestBase {
   private Team internalTeam;
   private User admin;
   private User nonAdmin;
+  private User serviceAccount;
 
   @BeforeEach
   void setUp() {
@@ -46,6 +48,7 @@ class InternalCompetitionAccessIT extends FullStackIntegrationTestBase {
     testDataFactory.createLadder(internal, "main");
     admin = testDataFactory.createUser(null, true);
     nonAdmin = testDataFactory.createUser(null, false);
+    serviceAccount = testDataFactory.createServiceAccount();
   }
 
   @Test
@@ -127,6 +130,31 @@ class InternalCompetitionAccessIT extends FullStackIntegrationTestBase {
                     objectMapper.writeValueAsString(
                         Map.of("name", "Sneaky Team", "displayMembers", false))))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void serviceAccountsReachInternalCompetitionsLikeAdmins() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/public/competition/{slug}", internal.getSlug()).with(user(serviceAccount)))
+        .andExpect(status().isOk());
+    mockMvc
+        .perform(
+            get("/api/v1/public/team/{uuid}", internalTeam.getUuid()).with(user(serviceAccount)))
+        .andExpect(status().isOk());
+    mockMvc
+        .perform(get("/api/v1/public/ladder/{slug}", internal.getSlug()).with(user(serviceAccount)))
+        .andExpect(status().isOk());
+    mockMvc
+        .perform(
+            get("/api/v1/public/game-match")
+                .param("competitionSlug", internal.getSlug())
+                .with(user(serviceAccount)))
+        .andExpect(status().isOk());
+    mockMvc
+        .perform(get("/api/v1/public/competition/").with(user(serviceAccount)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[*].slug").value(org.hamcrest.Matchers.hasItem(internal.getSlug())));
   }
 
   @Test
