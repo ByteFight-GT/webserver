@@ -57,6 +57,12 @@ public class TestDataFactory {
     return competitionRepository.save(competition);
   }
 
+  public Competition createInternalCompetition(String slug) {
+    Competition competition = createCompetition(slug, null, true, 2);
+    competition.setInternal(true);
+    return competitionRepository.save(competition);
+  }
+
   public Team createTeam(Competition competition) {
     return createTeam(competition, UUID.randomUUID(), false);
   }

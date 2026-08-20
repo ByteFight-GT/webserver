@@ -35,6 +35,9 @@ public class Competition extends BaseEntity {
   @Column(name = "is_whitelisted", nullable = false)
   private boolean isWhitelisted = false;
 
+  @Column(name = "internal", nullable = false)
+  private boolean internal = false;
+
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "settings", nullable = false)
   private Map<String, Object> settings = Map.of();

@@ -47,7 +47,10 @@ public class PublicCompetitionController {
   }
 
   @GetMapping("/")
-  @Operation(operationId = "getAllCompetitions", summary = "Return all competitions")
+  @Operation(
+      operationId = "getAllCompetitions",
+      summary = "Return all competitions",
+      description = "Internal competitions are only included for admin callers.")
   public ResponseEntity<List<CompetitionDto>> getAllCompetitions() {
     return ResponseEntity.ok(
         competitionService.getAllCompetitions().stream()

@@ -70,6 +70,9 @@ public class AdminCompetitionService {
     if (input.getIsWhitelisted() != null) {
       competition.setWhitelisted(input.getIsWhitelisted());
     }
+    if (input.getInternal() != null) {
+      competition.setInternal(input.getInternal());
+    }
     if (input.getAllowNewSubmission() != null) {
       competition.setAllowNewSubmission(input.getAllowNewSubmission());
     }

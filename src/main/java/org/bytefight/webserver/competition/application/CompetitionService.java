@@ -7,19 +7,24 @@ import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class CompetitionService {
   private final CompetitionRepository competitionRepository;
+  private final CompetitionAccessGuard accessGuard;
 
   public List<Competition> getAllCompetitions() {
-    return competitionRepository.findAll();
+    Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+    return accessGuard.canSeeInternal()
+        ? competitionRepository.findAll(sort)
+        : competitionRepository.findAllByInternalFalse(sort);
   }
 
   public Optional<Competition> getCompetitionBySlug(String slug) {
     String normalizedSlug = slug.trim().toLowerCase();
-    return competitionRepository.findBySlug(normalizedSlug);
+    return competitionRepository.findBySlug(normalizedSlug).filter(accessGuard::canAccess);
   }
 }

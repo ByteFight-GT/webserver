@@ -21,7 +21,6 @@ import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
-import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
 import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

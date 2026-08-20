@@ -11,6 +11,7 @@ public class AdminUpdateCompetitionDto {
   String description;
   Boolean isActive;
   Boolean isWhitelisted;
+  Boolean internal;
   Boolean allowNewSubmission;
   Boolean allowSetSubmission;
   Boolean allowCreateTeam;
