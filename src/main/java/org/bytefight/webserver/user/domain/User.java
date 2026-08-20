@@ -24,8 +24,17 @@ public class User extends BaseEntity implements UserDetails {
   @Column(name = "email", nullable = false, unique = true)
   private String email;
 
+  /**
+   * Is this user an admin?
+   */
   @Column(name = "is_admin", nullable = false)
   private boolean isAdmin = false;
+
+  /**
+   * Is this user a service account? (less powerful than admin)
+   */
+  @Column(name = "is_service_account", nullable = false)
+  private boolean isServiceAccount = false;
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "resume_file", unique = true)
