@@ -88,6 +88,13 @@ Table players {
   user_id bigint [not null, unique, ref: - users.id]
   username varchar(50) [not null, unique]
   username_normalized varchar(50) [not null, unique]
+  full_name varchar(100)
+  description varchar(512)
+  school varchar(150)
+  major varchar(256)
+  github_link varchar(500)
+  linkedin_link varchar(500)
+  website_link varchar(500)
 }
 
 // A specific competition. Each competition has its own teams,
