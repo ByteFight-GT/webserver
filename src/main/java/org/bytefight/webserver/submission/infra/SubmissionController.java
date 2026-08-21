@@ -93,7 +93,6 @@ public class SubmissionController {
 
   @PostMapping(path = "/team/{teamUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(operationId = "uploadSubmission", summary = "Upload a submission for a team")
-  @RequireTurnstile
   @Transactional
   public ResponseEntity<SubmissionDto> uploadSubmission(
       @AuthenticationPrincipal User user,
