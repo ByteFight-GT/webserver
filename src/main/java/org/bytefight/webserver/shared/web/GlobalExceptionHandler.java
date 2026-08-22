@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
+import org.bytefight.webserver.turnstile.domain.TurnstileValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,6 +63,16 @@ public class GlobalExceptionHandler {
   ProblemDetail handleRegistration(RegistrationException ex) {
     log.warn("Registration error: {}", ex.getMessage());
     return problem(HttpStatus.CONFLICT, "Registration Error", ex.getMessage());
+  }
+
+  @ExceptionHandler(TurnstileValidationException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  ProblemDetail handleTurnstileValidation(TurnstileValidationException ex) {
+    log.warn("Turnstile validation failed: {}", ex.getErrorCodes());
+    ProblemDetail pd =
+        problem(HttpStatus.FORBIDDEN, "Turnstile Verification Failed", ex.getMessage());
+    pd.setProperty("codes", ex.getErrorCodes());
+    return pd;
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

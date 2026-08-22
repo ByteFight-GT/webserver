@@ -5,17 +5,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.bytefight.webserver.turnstile.application.TurnstileService;
 import org.bytefight.webserver.turnstile.application.TurnstileValidationResult;
-import org.springframework.http.MediaType;
+import org.bytefight.webserver.turnstile.domain.TurnstileValidationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +21,6 @@ public class TurnstileInterceptor implements HandlerInterceptor {
 
   private final TurnstileProperties props;
   private final TurnstileService turnstileService;
-  private final ObjectMapper objectMapper;
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -55,8 +49,7 @@ public class TurnstileInterceptor implements HandlerInterceptor {
           request.getMethod(),
           request.getRequestURI(),
           result.errorCodes());
-      writeErrorResponse(response, result);
-      return false;
+      throw new TurnstileValidationException(result.errorCodes());
     }
 
     return true;
@@ -80,15 +73,5 @@ public class TurnstileInterceptor implements HandlerInterceptor {
       return comma > 0 ? xff.substring(0, comma).trim() : xff.trim();
     }
     return request.getRemoteAddr();
-  }
-
-  private void writeErrorResponse(HttpServletResponse response, TurnstileValidationResult result)
-      throws IOException {
-    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-    Map<String, Object> body = Map.of("error", "turnstile_failed", "codes", result.errorCodes());
-
-    objectMapper.writeValue(response.getWriter(), body);
   }
 }
