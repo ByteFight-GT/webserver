@@ -15,6 +15,10 @@ app:
       email: admin@example.com
       password: password
       username: admin
+  signup:
+    allowed-domains:
+      - gatech.edu
+      - example.com
 
 storage:
   root: ./storage

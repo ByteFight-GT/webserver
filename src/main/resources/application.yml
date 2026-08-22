@@ -18,6 +18,9 @@ app:
     base-url: http://localhost:9999
     read-timeout-ms: 5000
     connect-timeout-ms: 3000
+  signup:
+    allowed-domains:
+      - gatech.edu
 springdoc:
   writer-with-order-by-keys: true
   swagger-ui:
