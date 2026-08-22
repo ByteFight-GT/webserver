@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.bytefight.webserver.auth.domain.dto.SelfAuthUserDto;
+import org.bytefight.webserver.turnstile.infra.RequireTurnstile;
 import org.bytefight.webserver.user.application.UserService;
 import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.user.domain.dto.RegisterUserDto;
@@ -34,6 +35,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/signup")
+  @RequireTurnstile
   public ResponseEntity<Void> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
     userService.signup(registerUserDto);
 
