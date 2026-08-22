@@ -12,6 +12,7 @@ import org.bytefight.webserver.auth.domain.EmailAlreadyRegisteredException;
 import org.bytefight.webserver.auth.domain.RegistrationException;
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
 import org.bytefight.webserver.auth.domain.dto.SupabaseDtos;
+import org.bytefight.webserver.auth.infra.SignupProperties;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -34,6 +35,8 @@ public class UserService {
   private final AuthService authService;
   private final LocalStorageService storageService;
   private final LocalStorageService localStorageService;
+
+  private final SignupProperties signupProperties;
 
   static String normalize(String raw) {
     return raw == null ? null : raw.trim().toLowerCase();
@@ -70,6 +73,10 @@ public class UserService {
 
     if (playerRepository.existsByUsernameNormalized(normalizedUsername)) {
       throw new UsernameAlreadyExistsException(input.getName());
+    }
+
+    if (!signupProperties.isEmailAllowed(normalizedEmail)) {
+      throw new RegistrationException("Sorry, ByteFight isn't available for your institution yet.");
     }
 
     try {
