@@ -49,6 +49,9 @@ public interface GameMatchRepository
 
   boolean existsByUuid(UUID uuid);
 
+  @Query("SELECT gm.competition.id FROM GameMatch gm WHERE gm.uuid = :uuid")
+  Optional<Long> findCompetitionIdByUuid(@Param("uuid") UUID uuid);
+
   @Query(
       "SELECT gm FROM GameMatch gm WHERE (gm.teamA.uuid = :teamUuid OR gm.teamB.uuid = :teamUuid) AND gm.status NOT IN :statusList ORDER BY gm.finishedAt DESC")
   List<GameMatch> findTeamMatches(

@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class GameMatchResultHandler {
   private final GameMatchService gameMatchService;
   private final GameMatchRepository gameMatchRepository;
+  private final GameOutcomeReasonService gameOutcomeReasonService;
 
   private final TeamService teamService;
   private final SubmissionService submissionService;
@@ -53,6 +54,13 @@ public class GameMatchResultHandler {
   @Transactional
   public void handleGameMatchResult(GameMatchResult result) {
     UUID matchUuid = UUID.fromString(result.getUuid());
+    if (result.getOutcomeReasonCode() != null) {
+      Long competitionId =
+          gameMatchRepository
+              .findCompetitionIdByUuid(matchUuid)
+              .orElseThrow(() -> new IllegalArgumentException("Game match not found"));
+      gameOutcomeReasonService.requireRegistered(competitionId, result.getOutcomeReasonCode());
+    }
     Instant finishedAt = Instant.now();
     List<MatchStatus> allowedStatuses = List.of(MatchStatus.waiting, MatchStatus.in_progress);
     int updated =

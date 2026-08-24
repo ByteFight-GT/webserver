@@ -11,10 +11,12 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchResultHandler;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameOutcomeReason;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.infra.GameOutcomeReasonRepository;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
@@ -31,6 +33,8 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
   @Autowired private GameMatchService gameMatchService;
 
   @Autowired private GameMatchRepository gameMatchRepository;
+
+  @Autowired private GameOutcomeReasonRepository gameOutcomeReasonRepository;
 
   @Autowired private TestDataFactory testDataFactory;
 
@@ -91,6 +95,7 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
   void handleGameMatchResultStoresFinalMapAndOutcomeReason() {
     Competition competition =
         testDataFactory.createCompetition("comp-result-metadata", "Competition", true, 2);
+    registerOutcomeReason(competition, "timeout", "Timeout");
     String ladder = "ladder1";
     testDataFactory.createLadder(competition, ladder);
     Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
@@ -125,6 +130,15 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
 
   private GameMatchResult createResult(String uuid, MatchStatus status) {
     return new GameMatchResult(uuid, status);
+  }
+
+  private void registerOutcomeReason(Competition competition, String code, String displayLabel) {
+    GameOutcomeReason reason = new GameOutcomeReason();
+    reason.setCompetition(competition);
+    reason.setCode(code);
+    reason.setDisplayLabel(displayLabel);
+    reason.setVisible(true);
+    gameOutcomeReasonRepository.save(reason);
   }
 
   private GameMatchResult createResult(
