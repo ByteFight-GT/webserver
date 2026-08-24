@@ -57,7 +57,12 @@ public class GameMatchResultHandler {
     List<MatchStatus> allowedStatuses = List.of(MatchStatus.waiting, MatchStatus.in_progress);
     int updated =
         gameMatchRepository.finalizeMatchResult(
-            matchUuid, result.getStatus(), finishedAt, allowedStatuses);
+            matchUuid,
+            result.getStatus(),
+            finishedAt,
+            result.getMapCode(),
+            result.getOutcomeReasonCode(),
+            allowedStatuses);
     if (updated == 0) {
       if (!gameMatchRepository.existsByUuid(matchUuid)) {
         throw new IllegalArgumentException("Game match not found");
