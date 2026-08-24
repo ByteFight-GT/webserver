@@ -30,6 +30,8 @@ public class GameMatchDto {
   @NotNull private Map<String, Object> matchSettings;
   private MatchStatus status;
   private MatchReason reason;
+  private String mapCode;
+  private String outcomeReasonCode;
   @NotNull private Instant scheduledAt;
   @NotNull private Instant startedAt;
   @NotNull private Instant finishedAt;
@@ -49,6 +51,8 @@ public class GameMatchDto {
         .matchSettings(gameMatch.getMatchSettings())
         .status(gameMatch.getStatus())
         .reason(gameMatch.getReason())
+        .mapCode(gameMatch.getMapCode())
+        .outcomeReasonCode(gameMatch.getOutcomeReasonCode())
         .scheduledAt(gameMatch.getScheduledAt())
         .startedAt(gameMatch.getStartedAt())
         .finishedAt(gameMatch.getFinishedAt())

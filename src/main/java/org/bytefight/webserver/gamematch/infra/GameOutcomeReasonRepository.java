@@ -1,5 +1,6 @@
 package org.bytefight.webserver.gamematch.infra;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
@@ -12,4 +13,9 @@ public interface GameOutcomeReasonRepository extends JpaRepository<GameOutcomeRe
   Optional<GameOutcomeReason> findByCompetitionAndCode(Competition competition, String code);
 
   boolean existsByCompetitionAndCode(Competition competition, String code);
+
+  List<GameOutcomeReason> findByCompetitionAndVisibleTrueOrderByDisplayLabelAsc(
+      Competition competition);
+
+  List<GameOutcomeReason> findByCompetitionIdOrderByCodeAsc(Long competitionId);
 }

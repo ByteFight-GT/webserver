@@ -12,10 +12,12 @@ import org.bytefight.webserver.TestDataFactory;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameOutcomeReason;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematch.infra.GameOutcomeReasonRepository;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
@@ -38,6 +40,8 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
   @Autowired private GameMatchService gameMatchService;
 
   @Autowired private GameMatchRepository gameMatchRepository;
+
+  @Autowired private GameOutcomeReasonRepository gameOutcomeReasonRepository;
 
   @Autowired private TestDataFactory testDataFactory;
 
@@ -136,6 +140,9 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             null,
             null,
             null,
+            null,
+            null,
+            null,
             page);
     assertThat(anyAgainstB.getContent())
         .extracting(GameMatch::getUuid)
@@ -148,6 +155,9 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             teamA.getUuid().toString(),
             teamB.getName().toUpperCase(Locale.ROOT),
             "Win",
+            null,
+            null,
+            null,
             null,
             null,
             null,
@@ -170,6 +180,9 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             null,
             null,
             null,
+            null,
+            null,
+            null,
             page);
     assertThat(lossesAgainstB.getContent())
         .extracting(GameMatch::getUuid)
@@ -181,6 +194,9 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             ladder,
             teamA.getUuid().toString(),
             teamB.getName(),
+            null,
+            null,
+            null,
             null,
             null,
             null,
@@ -199,6 +215,9 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
             teamA.getUuid().toString(),
             "not-a-real-team-name",
             "Any",
+            null,
+            null,
+            null,
             null,
             null,
             null,
@@ -228,9 +247,94 @@ class GameMatchServiceIT extends FullStackIntegrationTestBase {
                     null,
                     null,
                     null,
+                    null,
+                    null,
+                    null,
                     PageRequest.of(0, 10)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("teamUuid is required when teamWin is Win or Lose");
+  }
+
+  @Test
+  void getPaginatedMatchesFiltersByMapKnownReasonAndOtherReason() {
+    Competition competition =
+        testDataFactory.createCompetition("comp-outcome-filters", "Competition", true, 2);
+    String ladder = "ranked";
+    testDataFactory.createLadder(competition, ladder);
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+
+    GameOutcomeReason timeout = new GameOutcomeReason();
+    timeout.setCompetition(competition);
+    timeout.setCode("timeout");
+    timeout.setDisplayLabel("Timeout");
+    timeout.setVisible(true);
+    gameOutcomeReasonRepository.save(timeout);
+
+    GameMatch timeoutMatch =
+        createCompletedMatch(
+            user, teamA, teamB, submissionA, submissionB, ladder, MatchStatus.team_a_win);
+    timeoutMatch.setMapCode("arena_01");
+    timeoutMatch.setOutcomeReasonCode("timeout");
+    gameMatchRepository.save(timeoutMatch);
+
+    GameMatch unregisteredMatch =
+        createCompletedMatch(
+            user, teamA, teamB, submissionA, submissionB, ladder, MatchStatus.team_b_win);
+    unregisteredMatch.setMapCode("arena_01");
+    unregisteredMatch.setOutcomeReasonCode("engine_specific_code");
+    gameMatchRepository.save(unregisteredMatch);
+
+    GameMatch differentMapMatch =
+        createCompletedMatch(
+            user, teamA, teamB, submissionA, submissionB, ladder, MatchStatus.team_a_win);
+    differentMapMatch.setMapCode("arena_02");
+    differentMapMatch.setOutcomeReasonCode("timeout");
+    gameMatchRepository.save(differentMapMatch);
+
+    PageRequest page = PageRequest.of(0, 10);
+    var timeoutOnArenaOne =
+        gameMatchService.getPaginatedMatches(
+            competition,
+            ladder,
+            null,
+            null,
+            "Any",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "arena_01",
+            "timeout",
+            null,
+            page);
+    assertThat(timeoutOnArenaOne.getContent())
+        .extracting(GameMatch::getUuid)
+        .containsExactly(timeoutMatch.getUuid());
+
+    var otherReasons =
+        gameMatchService.getPaginatedMatches(
+            competition,
+            ladder,
+            null,
+            null,
+            "Any",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            page);
+    assertThat(otherReasons.getContent())
+        .extracting(GameMatch::getUuid)
+        .containsExactly(unregisteredMatch.getUuid());
   }
 
   private GameMatch createCompletedMatch(

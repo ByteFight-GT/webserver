@@ -76,4 +76,22 @@ class GameOutcomeReasonServiceTest {
     assertThat(timeout.getDisplayLabel()).isEqualTo("Custom timeout label");
     assertThat(timeout.isVisible()).isFalse();
   }
+
+  @Test
+  void updateReasonConfigurationChangesOnlyTheAdminManagedFields() {
+    GameOutcomeReason reason = new GameOutcomeReason();
+    reason.setCode("capture_flag");
+    reason.setDisplayLabel("Captured flag");
+    reason.setVisible(true);
+    when(gameOutcomeReasonRepository.findById(42L)).thenReturn(Optional.of(reason));
+    when(gameOutcomeReasonRepository.save(reason)).thenReturn(reason);
+
+    GameOutcomeReason updated =
+        gameOutcomeReasonService.updateReasonConfiguration(42L, "Flag captured", false);
+
+    assertThat(updated.getCode()).isEqualTo("capture_flag");
+    assertThat(updated.getDisplayLabel()).isEqualTo("Flag captured");
+    assertThat(updated.isVisible()).isFalse();
+    verify(gameOutcomeReasonRepository).save(reason);
+  }
 }

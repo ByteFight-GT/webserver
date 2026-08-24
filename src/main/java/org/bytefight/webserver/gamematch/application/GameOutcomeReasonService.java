@@ -11,7 +11,9 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameOutcomeReason;
 import org.bytefight.webserver.gamematch.domain.dto.GameOutcomeReasonManifestEntry;
 import org.bytefight.webserver.gamematch.infra.GameOutcomeReasonRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @Service
@@ -31,6 +33,27 @@ public class GameOutcomeReasonService {
                     competition, defaultReason.code()))
         .map(defaultReason -> newReason(competition, defaultReason))
         .forEach(gameOutcomeReasonRepository::save);
+  }
+
+  public List<GameOutcomeReason> listReasons(Long competitionId) {
+    return gameOutcomeReasonRepository.findByCompetitionIdOrderByCodeAsc(competitionId);
+  }
+
+  public GameOutcomeReason updateReasonConfiguration(
+      Long id, String displayLabel, Boolean visible) {
+    GameOutcomeReason reason =
+        gameOutcomeReasonRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Outcome reason not found"));
+    if (displayLabel != null) {
+      reason.setDisplayLabel(displayLabel);
+    }
+    if (visible != null) {
+      reason.setVisible(visible);
+    }
+    return gameOutcomeReasonRepository.save(reason);
   }
 
   @Transactional
