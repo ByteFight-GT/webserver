@@ -12,6 +12,4 @@ public interface GameOutcomeReasonRepository extends JpaRepository<GameOutcomeRe
   Optional<GameOutcomeReason> findByCompetitionAndCode(Competition competition, String code);
 
   boolean existsByCompetitionAndCode(Competition competition, String code);
-
-  boolean existsByCompetitionIdAndCode(Long competitionId, String code);
 }

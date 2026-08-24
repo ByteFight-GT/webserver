@@ -57,14 +57,6 @@ public class GameOutcomeReasonService {
                         gameOutcomeReasonRepository.save(newReason(competition, manifestReason))));
   }
 
-  public void requireRegistered(Long competitionId, String outcomeReasonCode) {
-    if (!gameOutcomeReasonRepository.existsByCompetitionIdAndCode(
-        competitionId, outcomeReasonCode)) {
-      throw new IllegalArgumentException(
-          "Outcome reason code is not registered for this competition");
-    }
-  }
-
   private GameOutcomeReason newReason(
       Competition competition, GameOutcomeReasonManifestEntry manifestReason) {
     GameOutcomeReason reason = new GameOutcomeReason();
