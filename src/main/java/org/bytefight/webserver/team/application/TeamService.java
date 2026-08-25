@@ -218,6 +218,19 @@ public class TeamService {
     return teamRepository.findByCompetitionAndUuid(competition, uuid);
   }
 
+  public Optional<Team> getTeamByCompetitionAndName(Competition competition, String name) {
+    return teamRepository.findByCompetitionAndNameNormalizedAndDeletedAtNull(
+        competition, name.trim().toLowerCase());
+  }
+
+  /**
+   * Acquire a row lock on the team for the current transaction, serializing a check-then-act (e.g.
+   * the user-match rate limiter, #112) against concurrent requests for the same team.
+   */
+  public void lockTeamForUpdate(Long teamId) {
+    teamRepository.findByIdForUpdate(teamId);
+  }
+
   public List<Team> getTeamsWithSubmission(Competition competition) {
     return teamRepository.findAllByDeletedAtNullAndCurrentSubmissionIsNotNullAndCompetition(
         competition);

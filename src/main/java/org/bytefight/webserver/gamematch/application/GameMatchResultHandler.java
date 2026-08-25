@@ -71,11 +71,13 @@ public class GameMatchResultHandler {
     if (gameMatch.getReason() == MatchReason.tournament) {
       tournamentResultHandler.handleTournamentResult(gameMatch, result.getStatus());
     }
-    if (gameMatch.getReason() != MatchReason.validation) {
-      glickoService.processGameMatchResult(gameMatch, false);
-    } else {
+    if (gameMatch.getReason() == MatchReason.validation) {
       submissionService.onSubmissionValidationComplete(
           gameMatch.getSubmissionA(), result.getStatus() == MatchStatus.submission_valid);
+    } else if (gameMatch.getReason() != MatchReason.scrim) {
+      // scrim matches are unrated practice against TA bots: record the win/loss on the match
+      // (finalizeMatchResult above already did) but keep them off Glicko so they can't be farmed.
+      glickoService.processGameMatchResult(gameMatch, false);
     }
   }
 

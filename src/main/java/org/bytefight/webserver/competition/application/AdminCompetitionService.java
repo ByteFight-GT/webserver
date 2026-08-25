@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.AdminCreateCompetitionDto;
+import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.competition.domain.dto.AdminUpdateCompetitionDto;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.ladder.application.LadderService;
@@ -47,6 +48,10 @@ public class AdminCompetitionService {
 
     ladderService.createLadder(
         competition, "validation", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    // Scrim matches are unrated practice against TA bots, but game_matches has a composite FK on
+    // (competition_id, ladder), so the scrim ladder must exist as a row. Glicko config is unused.
+    ladderService.createLadder(
+        competition, DefaultLadders.SCRIM, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     return competition;
   }
