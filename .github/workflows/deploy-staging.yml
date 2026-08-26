@@ -5,12 +5,18 @@ on:
   push:
     branches: [ staging ]
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: self-hosted
+    environment: staging
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Copy env file
         run: cp /srv/staging/backend/.env .env
@@ -22,3 +28,7 @@ jobs:
           set -euo pipefail
           docker compose pull
           docker compose up -d --build --remove-orphans
+
+      - name: Remove env file from workspace
+        if: always()
+        run: rm -f .env
