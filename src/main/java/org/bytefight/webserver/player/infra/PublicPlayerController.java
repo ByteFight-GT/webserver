@@ -35,6 +35,16 @@ public class PublicPlayerController {
     return ResponseEntity.ok(PublicPlayerDto.from(player));
   }
 
+  @Operation(operationId = "getPublicPlayerProfileByUsername", summary = "Get public player profile contents")
+  @GetMapping("/username/{username}")
+  public ResponseEntity<PublicPlayerDto> getPlayerProfile(@PathVariable String username) {
+    Player player =
+        playerService
+            .getPlayerByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return ResponseEntity.ok(PublicPlayerDto.from(player));
+  }
+
   @Operation(
       operationId = "checkPublicUsernameAvailability",
       summary = "Check if a username is available")
