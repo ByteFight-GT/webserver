@@ -60,7 +60,7 @@ public class Team extends AuditableSoftDeletableEntity {
   private TeamType type = TeamType.regular;
 
   @Column(name = "cached_leaderboard_rank")
-  private double cachedLeaderboardRank;
+  private Integer cachedLeaderboardRank;
 
   public void setName(String name) {
     this.name = name;
