@@ -263,9 +263,22 @@ Table game_matches {
   started_at timestamp
   finished_at timestamp
 
+  // Optional metadata reported by a game when it reaches a final result.
+  map_code varchar(100)
+  outcome_reason_code varchar(100)
+
   times_scheduled integer [not null, default: 0]
 
   ~user_audit_template
+
+  Note: '''
+  PostgreSQL partial indexes are defined in V19__add_game_match_outcome_metadata.sql:
+  - game_matches_competition_map_code_idx ON (competition_id, map_code) WHERE map_code IS NOT NULL
+  - game_matches_competition_outcome_reason_code_idx ON (competition_id, outcome_reason_code) WHERE outcome_reason_code IS NOT NULL
+
+  DBML does not support partial-index predicates, so these indexes are documented here rather than
+  represented as ordinary DBML indexes.
+  '''
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

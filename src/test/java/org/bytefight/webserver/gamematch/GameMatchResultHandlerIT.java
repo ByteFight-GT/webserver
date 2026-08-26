@@ -72,6 +72,8 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
     GameMatch afterFirst = gameMatchRepository.findByUuid(matchUuid).orElseThrow();
     MatchStatus firstStatus = (MatchStatus) ReflectionTestUtils.getField(afterFirst, "status");
     assertThat(firstStatus).isEqualTo(MatchStatus.team_a_win);
+    assertThat(afterFirst.getMapCode()).isNull();
+    assertThat(afterFirst.getOutcomeReasonCode()).isNull();
 
     assertThatThrownBy(
             () ->
@@ -85,15 +87,49 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
     assertThat(secondStatus).isEqualTo(MatchStatus.team_a_win);
   }
 
+  @Test
+  void handleGameMatchResultStoresFinalMapAndOutcomeReason() {
+    Competition competition =
+        testDataFactory.createCompetition("comp-result-metadata", "Competition", true, 2);
+    String ladder = "ladder1";
+    testDataFactory.createLadder(competition, ladder);
+    Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    Team teamB = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
+    User user = testDataFactory.createUser();
+
+    Submission submissionA = createSubmission(teamA);
+    Submission submissionB = createSubmission(teamB);
+    GameMatch match =
+        gameMatchService.createMatch(
+            user,
+            teamA,
+            teamB,
+            submissionA,
+            submissionB,
+            ladder,
+            MatchReason.matchmaking,
+            null,
+            null);
+    ReflectionTestUtils.setField(match, "status", MatchStatus.waiting);
+    gameMatchRepository.save(match);
+
+    UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
+    gameMatchResultHandler.handleGameMatchResult(
+        createResult(matchUuid.toString(), MatchStatus.team_b_win, "arena_02", "timeout"));
+
+    GameMatch finishedMatch = gameMatchRepository.findByUuid(matchUuid).orElseThrow();
+    assertThat(finishedMatch.getStatus()).isEqualTo(MatchStatus.team_b_win);
+    assertThat(finishedMatch.getMapCode()).isEqualTo("arena_02");
+    assertThat(finishedMatch.getOutcomeReasonCode()).isEqualTo("timeout");
+  }
+
   private GameMatchResult createResult(String uuid, MatchStatus status) {
-    try {
-      var constructor =
-          GameMatchResult.class.getDeclaredConstructor(String.class, MatchStatus.class);
-      constructor.setAccessible(true);
-      return constructor.newInstance(uuid, status);
-    } catch (ReflectiveOperationException ex) {
-      throw new IllegalStateException("Failed to create GameMatchResult", ex);
-    }
+    return new GameMatchResult(uuid, status);
+  }
+
+  private GameMatchResult createResult(
+      String uuid, MatchStatus status, String mapCode, String outcomeReasonCode) {
+    return new GameMatchResult(uuid, status, mapCode, outcomeReasonCode);
   }
 
   private Submission createSubmission(Team team) {
