@@ -35,7 +35,9 @@ public class PublicPlayerController {
     return ResponseEntity.ok(PublicPlayerDto.from(player));
   }
 
-  @Operation(operationId = "getPublicPlayerProfileByUsername", summary = "Get public player profile contents")
+  @Operation(
+      operationId = "getPublicPlayerProfileByUsername",
+      summary = "Get public player profile contents")
   @GetMapping("/username/{username}")
   public ResponseEntity<PublicPlayerDto> getPlayerProfile(@PathVariable String username) {
     Player player =

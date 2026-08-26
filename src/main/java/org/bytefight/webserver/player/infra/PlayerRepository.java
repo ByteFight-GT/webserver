@@ -81,5 +81,5 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     """)
   List<TeamMemberDetails> findMemberDetailsByTeamIds(@Param("teamIds") List<Long> teamIds);
 
-    Optional<Player> findByUsernameNormalized(String usernameNormalized);
+  Optional<Player> findByUsernameNormalized(String usernameNormalized);
 }
