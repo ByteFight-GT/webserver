@@ -293,7 +293,6 @@ Table game_match_outcome_reasons {
 
   Indexes {
     (competition_id, code) [unique, name: 'game_match_outcome_reasons_competition_code_key']
-    (competition_id, visible) [name: 'game_match_outcome_reasons_competition_visible_idx']
   }
 }
 

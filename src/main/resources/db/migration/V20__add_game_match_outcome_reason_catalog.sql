@@ -11,9 +11,6 @@ CREATE TABLE game_match_outcome_reasons (
     CONSTRAINT game_match_outcome_reasons_competition_code_key UNIQUE (competition_id, code)
 );
 
-CREATE INDEX game_match_outcome_reasons_competition_visible_idx
-    ON game_match_outcome_reasons (competition_id, visible);
-
 INSERT INTO game_match_outcome_reasons
     (created_at, updated_at, competition_id, code, display_label, visible)
 SELECT CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, id, 'timeout', 'Timeout', true
