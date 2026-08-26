@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
 import org.bytefight.webserver.player.domain.Player;
+import org.bytefight.webserver.player.domain.UpdatePlayerProfileDto;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.user.domain.User;
@@ -28,6 +29,14 @@ public class PlayerService {
     return playerRepository
         .findById(playerId)
         .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+  }
+
+  public Optional<Player> getPlayerByUsername(String username) {
+    if (username == null) {
+      throw new IllegalArgumentException();
+    }
+    String normalized = normalizeUsername(username);
+    return playerRepository.findByUsernameNormalized(normalized);
   }
 
   public Optional<Player> getPlayer(UUID authId) {
@@ -50,7 +59,7 @@ public class PlayerService {
     return normalized != null && playerRepository.existsByUsernameNormalized(normalized);
   }
 
-  public void setUsername(Player player, String username) {
+  private void applyUsername(Player player, String username) {
     if (player == null) {
       throw new IllegalArgumentException("Player cannot be null");
     }
@@ -65,7 +74,48 @@ public class PlayerService {
     }
     player.setUsername(username.trim());
     player.setUsernameNormalized(normalized);
+  }
+
+  public void setUsername(Player player, String username) {
+    applyUsername(player, username);
     playerRepository.save(player);
+  }
+
+  @Transactional
+  public Player updateProfile(Player player, UpdatePlayerProfileDto input) {
+    if (player == null) {
+      throw new IllegalArgumentException("Player cannot be null");
+    }
+    if (input == null) {
+      throw new IllegalArgumentException("Profile input cannot be null");
+    }
+
+    if (input.getUsername() != null) {
+      applyUsername(player, input.getUsername());
+    }
+    if (input.getFullName() != null) {
+      player.setFullName(input.getFullName());
+    }
+    if (input.getDescription() != null) {
+      player.setDescription(input.getDescription());
+    }
+    if (input.getSchool() != null) {
+      player.setSchool(input.getSchool());
+    }
+    if (input.getMajor() != null) {
+      player.setMajor(input.getMajor());
+    }
+    if (input.getGithubLink() != null) {
+      player.setGithubLink(input.getGithubLink());
+    }
+    if (input.getLinkedinLink() != null) {
+      player.setLinkedinLink(input.getLinkedinLink());
+    }
+    if (input.getWebsiteLink() != null) {
+      player.setWebsiteLink(input.getWebsiteLink());
+    }
+
+    return playerRepository.save(player);
   }
 
   @Transactional

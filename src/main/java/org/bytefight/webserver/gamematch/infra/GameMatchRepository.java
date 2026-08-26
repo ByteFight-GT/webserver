@@ -102,7 +102,9 @@ public interface GameMatchRepository
       """
           UPDATE GameMatch gm
           SET gm.status = :status,
-              gm.finishedAt = :finishedAt
+              gm.finishedAt = :finishedAt,
+              gm.mapCode = :mapCode,
+              gm.outcomeReasonCode = :outcomeReasonCode
           WHERE gm.uuid = :uuid
             AND gm.status IN :allowedStatuses
           """)
@@ -110,5 +112,7 @@ public interface GameMatchRepository
       @Param("uuid") UUID uuid,
       @Param("status") MatchStatus status,
       @Param("finishedAt") Instant finishedAt,
+      @Param("mapCode") String mapCode,
+      @Param("outcomeReasonCode") String outcomeReasonCode,
       @Param("allowedStatuses") Collection<MatchStatus> allowedStatuses);
 }

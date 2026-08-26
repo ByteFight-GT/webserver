@@ -41,6 +41,37 @@ class PublicPlayerControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
+  void getPublicPlayerByUsernameReturnsPlayer() throws Exception {
+    Player player = testDataFactory.createUserWithPlayer(null, "TakenName");
+    User user = player.getUser();
+
+    mockMvc
+        .perform(get("/api/v1/public/player/username/{username}", "TakenName"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value(user.getUuid().toString()))
+        .andExpect(jsonPath("$.username").value("TakenName"));
+  }
+
+  @Test
+  void getPublicPlayerByUsernameIsCaseInsensitive() throws Exception {
+    Player player = testDataFactory.createUserWithPlayer(null, "TakenName");
+    User user = player.getUser();
+
+    mockMvc
+        .perform(get("/api/v1/public/player/username/{username}", "takenname"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value(user.getUuid().toString()))
+        .andExpect(jsonPath("$.username").value("TakenName"));
+  }
+
+  @Test
+  void getPublicPlayerByUsernameNotFound() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/public/player/username/{username}", "no_such_player"))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   void checkUsernameAvailabilityReturnsUnavailableWhenTaken() throws Exception {
     testDataFactory.createUserWithPlayer(null, "TakenName");
 

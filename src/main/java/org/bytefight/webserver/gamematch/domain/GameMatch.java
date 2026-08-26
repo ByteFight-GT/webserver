@@ -81,6 +81,12 @@ public class GameMatch extends AuditableEntity {
   @Column(name = "finished_at")
   private Instant finishedAt;
 
+  @Column(name = "map_code", length = 100)
+  private String mapCode;
+
+  @Column(name = "outcome_reason_code", length = 100)
+  private String outcomeReasonCode;
+
   @Column(name = "times_scheduled", nullable = false)
   private Integer timesScheduled = 0;
 }

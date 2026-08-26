@@ -80,4 +80,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
         ORDER BY tm.team.id ASC, p.id ASC
     """)
   List<TeamMemberDetails> findMemberDetailsByTeamIds(@Param("teamIds") List<Long> teamIds);
+
+  Optional<Player> findByUsernameNormalized(String usernameNormalized);
 }

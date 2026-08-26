@@ -51,10 +51,6 @@ public class PrivatePlayerController {
             .getPlayer(user)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    if (input.getUsername() != null) {
-      playerService.setUsername(player, input.getUsername());
-    }
-
-    return ResponseEntity.ok(SelfPlayerDto.from(player));
+    return ResponseEntity.ok(SelfPlayerDto.from(playerService.updateProfile(player, input)));
   }
 }
