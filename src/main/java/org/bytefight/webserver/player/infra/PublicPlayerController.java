@@ -35,12 +35,12 @@ public class PublicPlayerController {
     return ResponseEntity.ok(PublicPlayerDto.from(player));
   }
 
-  @Operation(operationId = "getPublicPlayerProfile", summary = "Get public player profile contents")
-  @GetMapping("/{uuid}/profile")
-  public ResponseEntity<PublicPlayerDto> getPlayerProfile(@PathVariable UUID uuid) {
+  @Operation(operationId = "getPublicPlayerProfileByUsername", summary = "Get public player profile contents")
+  @GetMapping("/username/{username}")
+  public ResponseEntity<PublicPlayerDto> getPlayerProfile(@PathVariable String username) {
     Player player =
         playerService
-            .getPlayer(uuid)
+            .getPlayerByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     return ResponseEntity.ok(PublicPlayerDto.from(player));
   }

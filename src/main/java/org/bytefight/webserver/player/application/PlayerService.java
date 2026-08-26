@@ -30,6 +30,14 @@ public class PlayerService {
         .orElseThrow(() -> new IllegalArgumentException("Player not found"));
   }
 
+  public Optional<Player> getPlayerByUsername(String username) {
+    if (username == null) {
+      throw new IllegalArgumentException();
+    }
+    String normalized = normalizeUsername(username);
+    return playerRepository.findByUsernameNormalized(normalized);
+  }
+
   public Optional<Player> getPlayer(UUID authId) {
     if (authId == null) {
       throw new IllegalArgumentException("Auth id cannot be null");
