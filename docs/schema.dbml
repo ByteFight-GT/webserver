@@ -167,6 +167,7 @@ Table teams {
   display_members boolean [not null]
   active_submission_id bigint [ref: > submissions.id]
   type team_type [not null, default: 'regular']
+  cached_leaderboard_rank integer
 
   ~soft_delete_template
   ~user_audit_template

@@ -59,6 +59,9 @@ public class Team extends AuditableSoftDeletableEntity {
   @Column(name = "type", nullable = false, columnDefinition = "team_type")
   private TeamType type = TeamType.regular;
 
+  @Column(name = "cached_leaderboard_rank")
+  private double cachedLeaderboardRank;
+
   public void setName(String name) {
     this.name = name;
     if (name != null) {
