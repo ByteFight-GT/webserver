@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import org.bytefight.webserver.auth.application.AuthService;
@@ -85,6 +86,7 @@ public class UserService {
           UUID.randomUUID()); // Set this to a random UUID first, then overwrite with UUID from
       // Supabase
       user.setEmail(normalizedEmail);
+      user.setLastAcceptedTos(Instant.now());
       user = userRepository.save(user);
 
       playerService.createPlayer(user, input.getName());
@@ -165,5 +167,11 @@ public class UserService {
     DownloadLinkDto link =
         localStorageService.getDownloadLink(resume.getUuid().toString(), Duration.ofMinutes(5));
     return ResumeDto.from(link, user);
+  }
+
+  public void acceptTos(UUID userUuid) {
+    User user = userRepository.findByUuid(userUuid).orElseThrow();
+    user.setLastAcceptedTos(Instant.now());
+    userRepository.save(user);
   }
 }
