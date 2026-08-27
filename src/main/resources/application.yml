@@ -28,6 +28,11 @@ springdoc:
 gamematch:
   requeue-stale: true
   stale-threshold-minutes: 120
+matchmaking:
+  # max-matches-per-event bounds a single matchmaking tick. Unset = unlimited (historical
+  # behaviour). Set it to what the runner fleet can clear before the next tick to keep the queue
+  # from growing monotonically under automatic load.
+  max-matches-per-event:
 storage:
   max-decompressed-bytes: 524288000
 

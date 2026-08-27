@@ -14,6 +14,7 @@ import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.matchmaking.application.MatchmakingService;
+import org.bytefight.webserver.matchmaking.infra.MatchMakingProperties;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.storage.infra.FileRecordRepository;
 import org.bytefight.webserver.submission.domain.Submission;
@@ -49,6 +50,8 @@ class MatchmakingServiceIT extends FullStackIntegrationTestBase {
   @Autowired private TopicExchange gameMatchExchange;
 
   @Autowired private org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory;
+
+  @Autowired private MatchMakingProperties matchMakingProperties;
 
   @Test
   void createAndScheduleEventQueuesMatches() {
@@ -145,6 +148,53 @@ class MatchmakingServiceIT extends FullStackIntegrationTestBase {
               assertThat(ReflectionTestUtils.getField(match, "status"))
                   .isEqualTo(MatchStatus.waiting);
             });
+  }
+
+  @Test
+  void createAndScheduleEventRespectsMaxMatchesPerEventCap() {
+    Integer original = matchMakingProperties.getMaxMatchesPerEvent();
+    matchMakingProperties.setMaxMatchesPerEvent(5);
+    try {
+      String competitionSlug = "comp-mm-capped";
+      Competition competition =
+          testDataFactory.createCompetition(competitionSlug, "Competition", true, 2);
+      String ladder = "main";
+      testDataFactory.createLadder(competition, ladder);
+
+      for (int i = 0; i < 6; i++) {
+        createTeamWithSubmission(competition);
+      }
+
+      String routingKey = "competition." + competitionSlug + "." + ladder;
+      Queue scheduleQueue = QueueBuilder.nonDurable("test.matchmaking.queue.capped").build();
+      RabbitAdmin admin = new RabbitAdmin(connectionFactory);
+      admin.declareExchange(gameMatchExchange);
+      admin.declareQueue(scheduleQueue);
+      Binding binding = BindingBuilder.bind(scheduleQueue).to(gameMatchExchange).with(routingKey);
+      admin.declareBinding(binding);
+
+      matchmakingService.createAndScheduleEvent(competition, ladder);
+
+      int queued = 0;
+      Object message;
+      while ((message = rabbitTemplate.receiveAndConvert(scheduleQueue.getName(), 1000)) != null) {
+        assertThat(message).isInstanceOf(GameMatchJob.class);
+        queued++;
+      }
+
+      // Six teams would produce 12 matches uncapped; the cap truncates to exactly 5.
+      assertThat(queued).isEqualTo(5);
+
+      List<GameMatch> matches =
+          gameMatchRepository.findAll().stream()
+              .filter(
+                  match -> competition.equals(ReflectionTestUtils.getField(match, "competition")))
+              .filter(match -> ladder.equals(ReflectionTestUtils.getField(match, "ladder")))
+              .toList();
+      assertThat(matches).hasSize(5);
+    } finally {
+      matchMakingProperties.setMaxMatchesPerEvent(original);
+    }
   }
 
   private Team createTeamWithSubmission(Competition competition) {
