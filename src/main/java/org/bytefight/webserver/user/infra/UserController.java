@@ -64,4 +64,11 @@ public class UserController {
       return ResponseEntity.notFound().build();
     }
   }
+
+  @PostMapping(value = "/accept-tos")
+  @Operation(operationId = "acceptTos", summary = "Accept the terms of service for ByteFight")
+  public ResponseEntity<Void> uploadResume(@AuthenticationPrincipal User user) {
+    userService.acceptTos(user.getUuid());
+    return ResponseEntity.noContent().build();
+  }
 }

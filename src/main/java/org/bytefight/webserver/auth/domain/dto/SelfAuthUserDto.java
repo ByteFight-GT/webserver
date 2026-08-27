@@ -1,5 +1,6 @@
 package org.bytefight.webserver.auth.domain.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
@@ -15,6 +16,7 @@ public class SelfAuthUserDto {
   String email;
   Instant createdAt;
   boolean isAdmin;
+  @NotNull Instant lastAcceptedTos;
 
   public static SelfAuthUserDto from(User user) {
     return SelfAuthUserDto.builder()
@@ -22,6 +24,7 @@ public class SelfAuthUserDto {
         .email(user.getEmail())
         .createdAt(user.getCreatedAt())
         .isAdmin(user.isAdmin())
+        .lastAcceptedTos(user.getLastAcceptedTos())
         .build();
   }
 }
