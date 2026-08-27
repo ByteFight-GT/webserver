@@ -66,9 +66,7 @@ public class UserController {
   }
 
   @PostMapping(value = "/accept-tos")
-  @Operation(
-          operationId = "acceptTos",
-          summary = "Accept the terms of service for ByteFight")
+  @Operation(operationId = "acceptTos", summary = "Accept the terms of service for ByteFight")
   public ResponseEntity<Void> uploadResume(@AuthenticationPrincipal User user) {
     userService.acceptTos(user.getUuid());
     return ResponseEntity.noContent().build();
