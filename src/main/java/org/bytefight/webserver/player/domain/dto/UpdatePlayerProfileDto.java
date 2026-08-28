@@ -1,4 +1,4 @@
-package org.bytefight.webserver.player.domain;
+package org.bytefight.webserver.player.domain.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

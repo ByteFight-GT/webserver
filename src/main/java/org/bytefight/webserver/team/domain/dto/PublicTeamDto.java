@@ -10,7 +10,7 @@ import org.bytefight.webserver.common.domain.dto.DeletionDto;
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.competition.domain.dto.CompetitionDto;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.player.domain.PublicPlayerDto;
+import org.bytefight.webserver.player.domain.dto.PublicPlayerDto;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamType;
 
