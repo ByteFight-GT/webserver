@@ -197,6 +197,14 @@ Table team_stats {
   }
 }
 
+// Stores platform-wide cached statistics (e.g. total matches
+// played, total teams). Each row is a single named metric.
+Table global_stats {
+  ~base_template
+  metric varchar [not null, unique, note: 'all-lowercase slug identifying the metric']
+  value  bigint  [not null]
+}
+
 // Join table storing player team membership for a specific
 // competition
 Table team_members {
