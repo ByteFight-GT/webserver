@@ -72,6 +72,16 @@ public class TournamentResultHandler {
                     new IllegalStateException(
                         "No TournamentGame found for GameMatch " + gameMatch.getUuid()));
     TournamentMatch match = tournamentGame.getTournamentMatch();
+    Tournament tournament =
+        tournamentRepository
+            .findByIdForUpdate(match.getTournament().getId())
+            .orElseThrow(
+                () -> new IllegalStateException("Tournament not found for match " + match.getId()));
+
+    if (tournament.getStatus() == TournamentStatus.COMPLETE
+        || match.getState() == TournamentMatchState.SKIPPED) {
+      return;
+    }
 
     if (tournamentGame.isResultProcessed()) {
       return;
