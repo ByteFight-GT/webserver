@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.bytefight.webserver.team.infra.TeamMemberRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class CompetitionService {
   private final CompetitionRepository competitionRepository;
   private final CompetitionAccessGuard accessGuard;
+  private final TeamMemberRepository teamMemberRepository;
 
   public List<Competition> getAllCompetitions() {
     Sort sort = Sort.by(Sort.Order.desc("createdAt"));
