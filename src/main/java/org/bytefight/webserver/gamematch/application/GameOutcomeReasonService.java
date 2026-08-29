@@ -41,6 +41,27 @@ public class GameOutcomeReasonService {
     return gameOutcomeReasonRepository.save(newReason(competition, code, displayLabel));
   }
 
+  public List<GameOutcomeReason> listReasons(Long competitionId) {
+    return gameOutcomeReasonRepository.findByCompetitionIdOrderByCodeAsc(competitionId);
+  }
+
+  public GameOutcomeReason updateReasonConfiguration(
+      Long id, String displayLabel, Boolean visible) {
+    GameOutcomeReason reason =
+        gameOutcomeReasonRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Outcome reason not found"));
+    if (displayLabel != null) {
+      reason.setDisplayLabel(displayLabel);
+    }
+    if (visible != null) {
+      reason.setVisible(visible);
+    }
+    return gameOutcomeReasonRepository.save(reason);
+  }
+
   private GameOutcomeReason newReason(Competition competition, String code, String displayLabel) {
     GameOutcomeReason reason = new GameOutcomeReason();
     reason.setCompetition(competition);
