@@ -52,4 +52,6 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
         """,
       nativeQuery = true)
   List<MemberSummary> findMemberSummariesByTeamUuids(@Param("teamUuids") List<String> teamUuids);
+
+  List<TeamMember> findByPlayerAndTeamDeletedAtNull(Player player);
 }
