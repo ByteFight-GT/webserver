@@ -65,9 +65,9 @@ public class RabbitMQConfiguration {
     Matches in this queue rest for 30 seconds and then get sent to the game match exchange
      */
     return QueueBuilder.durable(RETRY_QUEUE)
-            .ttl(30_000)
-            .deadLetterExchange(GAME_MATCH_EXCHANGE)
-            .build();
+        .ttl(30_000)
+        .deadLetterExchange(GAME_MATCH_EXCHANGE)
+        .build();
   }
 
   @Bean

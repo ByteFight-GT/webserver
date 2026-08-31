@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,9 @@ public class User extends BaseEntity implements UserDetails {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "resume_file", unique = true)
   private FileRecord resume;
+
+  @Column(name = "last_accepted_tos", nullable = false)
+  private Instant lastAcceptedTos;
 
   public boolean isAdminOrServiceAccount() {
     return isAdmin || isServiceAccount;

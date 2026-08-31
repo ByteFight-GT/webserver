@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.player.domain.PublicPlayerDto;
+import org.bytefight.webserver.player.domain.dto.PublicPlayerDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

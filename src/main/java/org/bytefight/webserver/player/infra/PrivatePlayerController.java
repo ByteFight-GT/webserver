@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.player.domain.SelfPlayerDto;
-import org.bytefight.webserver.player.domain.UpdatePlayerProfileDto;
+import org.bytefight.webserver.player.domain.dto.SelfPlayerDto;
+import org.bytefight.webserver.player.domain.dto.UpdatePlayerProfileDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.user.domain.User;
 import org.springframework.http.HttpStatus;

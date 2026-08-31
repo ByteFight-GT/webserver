@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.auth.domain.UsernameAlreadyExistsException;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.player.domain.UpdatePlayerProfileDto;
+import org.bytefight.webserver.player.domain.dto.UpdatePlayerProfileDto;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.user.domain.User;
