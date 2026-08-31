@@ -14,6 +14,13 @@ public class AdminPlayerDto {
   @NotNull Long userId;
   @NotNull String uuid;
   @NotNull String username;
+  String fullName;
+  String description;
+  String school;
+  String major;
+  String githubLink;
+  String linkedinLink;
+  String websiteLink;
   @NotNull TimestampsDto timestampsDto;
 
   public static AdminPlayerDto from(Player player) {
@@ -22,6 +29,13 @@ public class AdminPlayerDto {
         .userId(player.getUser().getId())
         .uuid(player.getUser().getUuid().toString())
         .username(player.getUsername())
+        .fullName(player.getFullName())
+        .description(player.getDescription())
+        .school(player.getSchool())
+        .major(player.getMajor())
+        .githubLink(player.getGithubLink())
+        .linkedinLink(player.getLinkedinLink())
+        .websiteLink(player.getWebsiteLink())
         .timestampsDto(TimestampsDto.from(player))
         .build();
   }
