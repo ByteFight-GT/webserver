@@ -11,7 +11,7 @@ import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.TestDataFactory;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.player.domain.Player;
-import org.bytefight.webserver.player.domain.PublicPlayerDto;
+import org.bytefight.webserver.player.domain.dto.PublicPlayerDto;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.dto.PublicTeamDto;

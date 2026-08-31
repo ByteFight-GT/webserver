@@ -1,10 +1,11 @@
-package org.bytefight.webserver.player.domain;
+package org.bytefight.webserver.player.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
+import org.bytefight.webserver.player.domain.Player;
 
 @Value
 @Builder
