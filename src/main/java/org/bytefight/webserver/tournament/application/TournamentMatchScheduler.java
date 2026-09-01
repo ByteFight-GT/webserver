@@ -22,6 +22,7 @@ import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
+import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,9 @@ public class TournamentMatchScheduler {
    */
   @Transactional
   public void processTournament(Tournament tournament) {
+    if (tournament.getStatus() == TournamentStatus.COMPLETE) {
+      return;
+    }
     Map<Long, List<Long>> feederIdsBySlotKey = null;
     boolean changed;
     do {
@@ -206,6 +210,10 @@ public class TournamentMatchScheduler {
    */
   @Transactional
   public void queueSeriesGame(TournamentMatch match) {
+    if (match.getTournament().getStatus() == TournamentStatus.COMPLETE
+        || match.getState() == TournamentMatchState.SKIPPED) {
+      return;
+    }
     // Guard: don't queue if the series is already decided.
     if (match.isSeriesDecided()) {
       return;

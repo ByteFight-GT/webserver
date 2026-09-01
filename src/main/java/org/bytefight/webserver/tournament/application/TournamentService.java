@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +17,8 @@ import java.util.UUID;
 
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.team.application.TeamService;
@@ -27,12 +30,14 @@ import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
+import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
+import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
 import org.bytefight.webserver.tournament.infra.TournamentRepository;
 import org.springframework.stereotype.Service;
@@ -59,6 +64,8 @@ public class TournamentService {
   private final TournamentRepository tournamentRepository;
   private final TournamentEntryRepository tournamentEntryRepository;
   private final TournamentMatchRepository tournamentMatchRepository;
+  private final TournamentGameRepository tournamentGameRepository;
+  private final GameMatchRepository gameMatchRepository;
   private final TournamentBracketBuilder bracketBuilder;
   private final TournamentMatchScheduler matchScheduler;
   private final TeamService teamService;
@@ -422,5 +429,39 @@ public class TournamentService {
 
     matchScheduler.processTournament(tournament);
     return getBracket(competitionSlug, tournamentUuid);
+  }
+
+  /** Terminates a tournament synchronously without deleting any tournament data. */
+  public void terminateTournament(String competitionSlug, String tournamentUuid) {
+    Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
+    tournament =
+        tournamentRepository
+            .findByIdForUpdate(tournament.getId())
+            .orElseThrow(
+                () -> new IllegalArgumentException("Tournament not found: " + tournamentUuid));
+
+    if (tournament.getStatus() == TournamentStatus.COMPLETE) {
+      return;
+    }
+
+    Instant finishedAt = Instant.now(clock);
+    for (TournamentMatch match :
+        tournamentMatchRepository.findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(
+            tournament)) {
+      match.setState(TournamentMatchState.SKIPPED);
+      tournamentMatchRepository.save(match);
+      for (TournamentGame game :
+          tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(match)) {
+        game.getGameMatch().setStatus(MatchStatus.failed);
+        game.getGameMatch().setFinishedAt(finishedAt);
+        game.setResultProcessed(true);
+        gameMatchRepository.save(game.getGameMatch());
+        tournamentGameRepository.save(game);
+      }
+    }
+
+    tournament.setStatus(TournamentStatus.COMPLETE);
+    tournament.setFinishedAt(LocalDateTime.now(clock));
+    tournamentRepository.save(tournament);
   }
 }

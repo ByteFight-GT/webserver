@@ -15,6 +15,7 @@ import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -118,5 +119,14 @@ public class AdminTournamentController {
   public ResponseEntity<TournamentBracketDto> startTournament(
       @PathVariable String competitionSlug, @PathVariable String uuid) {
     return ResponseEntity.ok(tournamentService.startTournament(competitionSlug, uuid));
+  }
+
+  /** Terminates the tournament and fails all of its games. */
+  @DeleteMapping("/{uuid}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> terminateTournament(
+      @PathVariable String competitionSlug, @PathVariable String uuid) {
+    tournamentService.terminateTournament(competitionSlug, uuid);
+    return ResponseEntity.noContent().build();
   }
 }
