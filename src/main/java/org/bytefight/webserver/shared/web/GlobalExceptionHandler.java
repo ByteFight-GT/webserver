@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @RestControllerAdvice
@@ -87,5 +88,16 @@ public class GlobalExceptionHandler {
   ProblemDetail handlePermissionDenied(PermissionDeniedException ex) {
     log.warn("Permission denied: {}", ex.getMessage());
     return problem(HttpStatus.CONFLICT, "Permission Denied", ex.getMessage());
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  ProblemDetail handleResponseStatus(ResponseStatusException ex) {
+    log.warn("Request failed: {} {}", ex.getStatusCode(), ex.getReason());
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+    ProblemDetail pd = ProblemDetail.forStatus(ex.getStatusCode());
+    pd.setTitle(status != null ? status.getReasonPhrase() : "Request Failed");
+    pd.setDetail(ex.getReason());
+    pd.setProperty("timestamp", OffsetDateTime.now().toString());
+    return pd;
   }
 }
