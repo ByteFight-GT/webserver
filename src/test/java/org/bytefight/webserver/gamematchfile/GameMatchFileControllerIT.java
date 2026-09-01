@@ -1,7 +1,6 @@
 package org.bytefight.webserver.gamematchfile;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,6 +20,7 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
 import org.bytefight.webserver.gamematchfile.infra.GameMatchFileRepository;
 import org.bytefight.webserver.storage.domain.FileRecord;
@@ -242,7 +242,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
-  void uploadGameMatchFileRejectsDuplicateSlugForServiceAccount() throws Exception {
+  void uploadGameMatchFileReplacesExistingFileForServiceAccount() throws Exception {
     Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
     testDataFactory.createLadder(competition, "ladder");
     Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
@@ -265,35 +265,40 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
             null);
     UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
 
-    MockMultipartFile file =
+    MockMultipartFile first =
         new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+    MockMultipartFile second =
+        new MockMultipartFile(
+            "file", "results.json", "application/json", "{\"replaced\":true}".getBytes());
 
     mockMvc
         .perform(
             multipart("/api/v1/game-match-file")
-                .file(file)
+                .file(first)
                 .param("gameMatchUuid", matchUuid.toString())
                 .param("slug", "match-log")
                 .param("visibility", GameMatchFileVisibility.everyone.name())
                 .with(user("service").roles("SERVICE_ACCOUNT")))
         .andExpect(status().isOk());
 
-    // re-uploading the same match/slug is still rejected, service account or not
-    assertThatThrownBy(
-            () ->
-                mockMvc
-                    .perform(
-                        multipart("/api/v1/game-match-file")
-                            .file(file)
-                            .param("gameMatchUuid", matchUuid.toString())
-                            .param("slug", "match-log")
-                            .param("visibility", GameMatchFileVisibility.everyone.name())
-                            .with(user("service").roles("SERVICE_ACCOUNT")))
-                    .andReturn())
-        .hasCauseInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("A game match file already exists");
+    UUID replacedFileUuid = gameMatchFileRepository.findAll().get(0).getFileRecord().getUuid();
+
+    // re-uploading the same match/slug replaces the file rather than failing
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(second)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("service").roles("SERVICE_ACCOUNT")))
+        .andExpect(status().isOk());
 
     assertThat(gameMatchFileRepository.count()).isEqualTo(1);
+    GameMatchFile stored = gameMatchFileRepository.findAll().get(0);
+    assertThat(stored.getFileRecord().getUuid()).isNotEqualTo(replacedFileUuid);
+    assertThat(stored.getUuid()).isEqualTo(stored.getFileRecord().getUuid());
+    assertThat(fileRecordRepository.findByUuidAndDeletedAtNull(replacedFileUuid)).isEmpty();
   }
 
   @Test
@@ -335,7 +340,7 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
-  void uploadGameMatchFileRejectsDuplicateSlugForMatch() throws Exception {
+  void uploadGameMatchFileReplacesExistingFileForMatch() throws Exception {
     Competition competition = testDataFactory.createCompetition("comp", "Competition", true, 2);
     testDataFactory.createLadder(competition, "ladder");
     Team teamA = testDataFactory.createTeam(competition, UUID.randomUUID(), false);
@@ -358,34 +363,38 @@ class GameMatchFileControllerIT extends FullStackIntegrationTestBase {
             null);
     UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
 
-    MockMultipartFile file =
+    MockMultipartFile first =
         new MockMultipartFile("file", "results.json", "application/json", "{}".getBytes());
+    MockMultipartFile second =
+        new MockMultipartFile(
+            "file", "results.json", "application/json", "{\"replaced\":true}".getBytes());
 
     mockMvc
         .perform(
             multipart("/api/v1/game-match-file")
-                .file(file)
+                .file(first)
                 .param("gameMatchUuid", matchUuid.toString())
                 .param("slug", "match-log")
                 .param("visibility", GameMatchFileVisibility.everyone.name())
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isOk());
 
-    assertThatThrownBy(
-            () ->
-                mockMvc
-                    .perform(
-                        multipart("/api/v1/game-match-file")
-                            .file(file)
-                            .param("gameMatchUuid", matchUuid.toString())
-                            .param("slug", "match-log")
-                            .param("visibility", GameMatchFileVisibility.everyone.name())
-                            .with(user("admin").roles("ADMIN")))
-                    .andReturn())
-        .hasCauseInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("A game match file already exists");
+    UUID replacedFileUuid = gameMatchFileRepository.findAll().get(0).getFileRecord().getUuid();
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/game-match-file")
+                .file(second)
+                .param("gameMatchUuid", matchUuid.toString())
+                .param("slug", "match-log")
+                .param("visibility", GameMatchFileVisibility.everyone.name())
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
 
     assertThat(gameMatchFileRepository.count()).isEqualTo(1);
+    GameMatchFile stored = gameMatchFileRepository.findAll().get(0);
+    assertThat(stored.getFileRecord().getUuid()).isNotEqualTo(replacedFileUuid);
+    assertThat(fileRecordRepository.findByUuidAndDeletedAtNull(replacedFileUuid)).isEmpty();
   }
 
   private Submission createSubmission(Team team) {
