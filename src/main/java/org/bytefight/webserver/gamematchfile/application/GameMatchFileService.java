@@ -98,21 +98,14 @@ public class GameMatchFileService {
       throw new IllegalArgumentException("You must specify a team when using visibility 'team'");
     }
 
-    // Duplication check
-    if (team == null
-        && gameMatchFileRepository
-            .findByGameMatch_UuidAndSlugAndTeamIsNull(gameMatch.getUuid(), slug)
-            .isPresent()) {
-      throw new IllegalStateException(
-          "A game match file already exists for this game match, slug, and null team");
-    }
-    if (team != null
-        && gameMatchFileRepository
-            .findByGameMatch_UuidAndSlugAndTeam(gameMatch.getUuid(), slug, team)
-            .isPresent()) {
-      throw new IllegalStateException(
-          "A game match file already exists for this game match, slug, and team");
-    }
+    GameMatchFile existing =
+        (team == null
+                ? gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeamIsNull(
+                    gameMatch.getUuid(), slug)
+                : gameMatchFileRepository.findByGameMatch_UuidAndSlugAndTeam(
+                    gameMatch.getUuid(), slug, team))
+            .orElse(null);
+    FileRecord replacedFile = existing != null ? existing.getFileRecord() : null;
 
     FileRecord storedFile =
         storageService.store(
@@ -121,7 +114,11 @@ public class GameMatchFileService {
             file.getOriginalFilename(),
             true);
 
-    GameMatchFile gameMatchFile = new GameMatchFile();
+    if (replacedFile != null) {
+      storageService.delete(replacedFile.getUuid().toString());
+    }
+
+    GameMatchFile gameMatchFile = existing != null ? existing : new GameMatchFile();
     gameMatchFile.setUuid(storedFile.getUuid());
     gameMatchFile.setGameMatch(gameMatch);
     gameMatchFile.setSlug(slug);

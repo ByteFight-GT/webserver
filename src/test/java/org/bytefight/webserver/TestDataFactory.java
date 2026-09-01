@@ -1,5 +1,6 @@
 package org.bytefight.webserver;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.bytefight.webserver.competition.domain.Competition;
@@ -111,6 +112,7 @@ public class TestDataFactory {
     user.setEmail(email != null ? email : "user-" + UUID.randomUUID() + "@example.com");
     user.setAdmin(isAdmin);
     user.setServiceAccount(isServiceAccount);
+    user.setLastAcceptedTos(Instant.now());
     return userRepository.save(user);
   }
 
