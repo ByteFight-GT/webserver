@@ -6,4 +6,6 @@ public interface MemberSummary {
   String getUuid();
 
   String getUsername();
+
+  boolean getIsDev();
 }

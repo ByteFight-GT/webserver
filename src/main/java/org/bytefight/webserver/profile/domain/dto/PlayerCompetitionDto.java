@@ -2,6 +2,7 @@ package org.bytefight.webserver.profile.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Value;
+import org.bytefight.webserver.leaderboard.domain.MemberSummaryDto;
 
 import java.util.List;
 
@@ -11,12 +12,6 @@ public class PlayerCompetitionDto {
   @NotNull String competitionName;
   @NotNull String teamName;
   @NotNull String teamUuid;
-  List<PlayerCompetitionMemberDto> teamMembers;
+  List<MemberSummaryDto> teamMembers;
   Integer leaderboardRank;
-
-  @Value
-  public static class PlayerCompetitionMemberDto {
-    @NotNull String uuid;
-    @NotNull String username;
-  }
 }
