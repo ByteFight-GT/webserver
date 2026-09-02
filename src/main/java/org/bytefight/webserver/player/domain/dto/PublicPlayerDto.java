@@ -20,6 +20,7 @@ public class PublicPlayerDto {
   String linkedinLink;
   String websiteLink;
   @NotNull TimestampsDto timestampsDto;
+  @NotNull boolean isDev;
 
   public static PublicPlayerDto from(Player player) {
     return PublicPlayerDto.builder()
@@ -33,6 +34,7 @@ public class PublicPlayerDto {
         .linkedinLink(player.getLinkedinLink())
         .websiteLink(player.getWebsiteLink())
         .timestampsDto(TimestampsDto.from(player))
+        .isDev(player.isDev())
         .build();
   }
 }
