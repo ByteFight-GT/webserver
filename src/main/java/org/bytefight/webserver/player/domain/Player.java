@@ -46,4 +46,7 @@ public class Player extends BaseEntity {
 
   @Column(name = "website_link", length = 500)
   private String websiteLink;
+
+  @Column(name = "is_dev", nullable = false)
+  private boolean is_dev = false; // for the dev badge
 }
