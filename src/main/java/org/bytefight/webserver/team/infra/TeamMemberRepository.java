@@ -42,7 +42,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
         SELECT
             t.uuid::text AS teamUuid,
             u.uuid::text AS uuid,
-            p.username AS username
+            p.username AS username,
+            p.is_dev AS isDev
         FROM team_members tm
         JOIN teams t ON t.id = tm.team_id
         JOIN players p ON p.id = tm.player_id

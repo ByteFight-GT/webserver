@@ -43,7 +43,7 @@ public class LeaderboardService {
                 Collectors.groupingBy(
                     MemberSummary::getTeamUuid,
                     Collectors.mapping(
-                        summary -> new MemberSummaryDto(summary.getUuid(), summary.getUsername()),
+                        summary -> new MemberSummaryDto(summary.getUuid(), summary.getUsername(), summary.getIsDev()),
                         Collectors.toList())));
 
     return rows.stream()

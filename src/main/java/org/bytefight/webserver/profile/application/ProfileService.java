@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
+import org.bytefight.webserver.leaderboard.domain.MemberSummaryDto;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.profile.domain.dto.PlayerCompetitionDto;
 import org.bytefight.webserver.team.domain.Team;
@@ -32,13 +33,13 @@ public class ProfileService {
                 return null;
               }
 
-              List<PlayerCompetitionDto.PlayerCompetitionMemberDto> memberDtos =
+              List<MemberSummaryDto> memberDtos =
                   teamMemberRepository.findByTeam(team).stream()
                       .map(TeamMember::getPlayer)
                       .map(
                           p ->
-                              new PlayerCompetitionDto.PlayerCompetitionMemberDto(
-                                  p.getUser().getUuid().toString(), p.getUsername()))
+                              new MemberSummaryDto(
+                                  p.getUser().getUuid().toString(), p.getUsername(), p.isDev()))
                       .toList();
 
               return new PlayerCompetitionDto(
