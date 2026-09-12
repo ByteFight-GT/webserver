@@ -16,18 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/search")
 public class SearchEngineController {
+  private static final int DEFAULT_PAGE_SIZE = 24;
+  private static final int MAX_PAGE_SIZE = 100;
 
   private final SearchEngineService searchEngineService;
 
   @GetMapping("/team")
   public ResponseEntity<Page<PublicTeamDto>> searchTeam(
       @RequestParam String searchParam,
+      @RequestParam String competitionSlug,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
-    Pageable pageable = PageRequest.of(page, size);
-    System.out.println("searchTeam");
+      @RequestParam(defaultValue = "" + DEFAULT_PAGE_SIZE) int size) {
+    int pageIndex = Math.max(page, 0);
+    int pageSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+    Pageable pageable = PageRequest.of(pageIndex, pageSize);
     Page<PublicTeamDto> teamSearchResult =
-        searchEngineService.searchTeamByNameFuzzy(searchParam, pageable);
+        searchEngineService.searchRecruitingTeams(searchParam, competitionSlug, pageable);
     return ResponseEntity.ok(teamSearchResult);
   }
 }

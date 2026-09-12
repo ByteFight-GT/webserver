@@ -67,4 +67,66 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
   Optional<Team> findByCompetitionAndNameNormalizedAndDeletedAtNull(
       Competition competition, String nameNormalized);
+
+  @Query(
+      value =
+          """
+        SELECT t
+        FROM Team t
+        WHERE t.deletedAt IS NULL
+          AND t.competition = :competition
+          AND t.lookingForPlayers = true
+          AND (
+            SELECT COUNT(tm)
+            FROM TeamMember tm
+            WHERE tm.team = t
+          ) < :maxPlayers
+          AND (
+            LOWER(t.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            OR LOWER(t.quote) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            OR EXISTS (
+              SELECT 1
+              FROM TeamMember tm
+              JOIN tm.player p
+              WHERE tm.team = t
+                AND (
+                  LOWER(p.username) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                  OR LOWER(p.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                )
+            )
+          )
+        ORDER BY LOWER(t.name), t.id
+    """,
+      countQuery =
+          """
+        SELECT COUNT(t)
+        FROM Team t
+        WHERE t.deletedAt IS NULL
+          AND t.competition = :competition
+          AND t.lookingForPlayers = true
+          AND (
+            SELECT COUNT(tm)
+            FROM TeamMember tm
+            WHERE tm.team = t
+          ) < :maxPlayers
+          AND (
+            LOWER(t.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            OR LOWER(t.quote) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            OR EXISTS (
+              SELECT 1
+              FROM TeamMember tm
+              JOIN tm.player p
+              WHERE tm.team = t
+                AND (
+                  LOWER(p.username) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                  OR LOWER(p.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                )
+            )
+          )
+    """)
+  Page<Team> searchRecruitingTeams(
+      @Param("competition") Competition competition,
+      @Param("searchTerm") String searchTerm,
+      @Param("maxPlayers") int maxPlayers,
+      Pageable pageable);
 }

@@ -22,6 +22,7 @@ public class PublicTeamDto {
   @NotNull String name;
   @NotNull String quote;
   @NotNull Boolean displayMembers;
+  @NotNull Boolean lookingForPlayers;
   @NotNull TeamType type;
   @NotNull TimestampsDto timestampsDto;
   @NotNull DeletionDto deletionDto;
@@ -32,18 +33,30 @@ public class PublicTeamDto {
   Integer numMembers;
 
   public static PublicTeamDto from(Team team, List<Player> members) {
+    List<PublicPlayerDto> visibleMembers =
+        members != null && team.isDisplayMembers()
+            ? members.stream().map(PublicPlayerDto::from).toList()
+            : null;
+    return from(team, visibleMembers, members != null ? members.size() : 0);
+  }
+
+  public static PublicTeamDto fromRecruitingTeam(Team team, List<Player> members) {
+    List<PublicPlayerDto> recruitingMembers =
+        members.stream().map(PublicPlayerDto::fromRecruitingMember).toList();
+    return from(team, recruitingMembers, members.size());
+  }
+
+  private static PublicTeamDto from(Team team, List<PublicPlayerDto> members, int numberOfMembers) {
     return PublicTeamDto.builder()
         .competition(CompetitionDto.from(team.getCompetition()))
         .uuid(team.getUuid().toString())
         .name(team.getName())
         .quote(team.getQuote())
         .displayMembers(team.isDisplayMembers())
+        .lookingForPlayers(team.isLookingForPlayers())
         .type(team.getType())
-        .members(
-            (members != null && team.isDisplayMembers())
-                ? members.stream().map(PublicPlayerDto::from).toList()
-                : null)
-        .numMembers(members != null ? members.size() : 0)
+        .members(members)
+        .numMembers(numberOfMembers)
         .timestampsDto(TimestampsDto.from(team))
         .deletionDto(DeletionDto.from(team))
         .build();

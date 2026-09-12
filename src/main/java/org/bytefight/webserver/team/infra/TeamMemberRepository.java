@@ -8,6 +8,7 @@ import org.bytefight.webserver.leaderboard.domain.MemberSummary;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.team.domain.Team;
 import org.bytefight.webserver.team.domain.TeamMember;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,9 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
   boolean existsByTeamAndPlayerAndTeamDeletedAtNull(Team team, Player player);
 
   List<TeamMember> findByTeam(Team team);
+
+  @EntityGraph(attributePaths = {"player", "player.user"})
+  List<TeamMember> findByTeamIn(List<Team> teams);
 
   long countByTeam(Team team);
 
