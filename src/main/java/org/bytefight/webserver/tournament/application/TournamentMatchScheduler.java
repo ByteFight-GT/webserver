@@ -64,7 +64,8 @@ public class TournamentMatchScheduler {
    */
   @Transactional
   public void processTournament(Tournament tournament) {
-    if (tournament.getStatus() == TournamentStatus.COMPLETE) {
+    if (tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED) {
       return;
     }
     Map<Long, List<Long>> feederIdsBySlotKey = null;
@@ -211,6 +212,7 @@ public class TournamentMatchScheduler {
   @Transactional
   public void queueSeriesGame(TournamentMatch match) {
     if (match.getTournament().getStatus() == TournamentStatus.COMPLETE
+        || match.getTournament().getStatus() == TournamentStatus.TERMINATED
         || match.getState() == TournamentMatchState.SKIPPED) {
       return;
     }

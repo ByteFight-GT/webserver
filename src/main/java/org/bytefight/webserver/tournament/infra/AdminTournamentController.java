@@ -121,8 +121,8 @@ public class AdminTournamentController {
     return ResponseEntity.ok(tournamentService.startTournament(competitionSlug, uuid));
   }
 
-  /** Terminates the tournament and fails all of its games. */
-  @DeleteMapping("/{uuid}")
+  /** Terminates the tournament without deleting any tournament data. */
+  @PostMapping("/{uuid}/stop")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> terminateTournament(
       @PathVariable String competitionSlug, @PathVariable String uuid) {

@@ -79,6 +79,7 @@ public class TournamentResultHandler {
                 () -> new IllegalStateException("Tournament not found for match " + match.getId()));
 
     if (tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED
         || match.getState() == TournamentMatchState.SKIPPED) {
       return;
     }

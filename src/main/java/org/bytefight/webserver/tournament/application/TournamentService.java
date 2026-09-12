@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.domain.TeamStats;
@@ -400,8 +401,9 @@ public class TournamentService {
   public TournamentBracketDto startTournament(String competitionSlug, String tournamentUuid) {
     Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
     if (tournament.getStatus() == TournamentStatus.IN_PROGRESS
-        || tournament.getStatus() == TournamentStatus.COMPLETE) {
-      throw new IllegalArgumentException("Tournament already started or completed.");
+        || tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED) {
+      throw new IllegalArgumentException("Tournament already started, completed, or terminated.");
     }
     if (!tournament.getCompetition().isActive()) {
       throw new IllegalArgumentException("Competition is not active");
@@ -440,27 +442,43 @@ public class TournamentService {
             .orElseThrow(
                 () -> new IllegalArgumentException("Tournament not found: " + tournamentUuid));
 
-    if (tournament.getStatus() == TournamentStatus.COMPLETE) {
+    if (tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED) {
       return;
     }
 
     Instant finishedAt = Instant.now(clock);
-    for (TournamentMatch match :
+    List<TournamentMatch> matches =
         tournamentMatchRepository.findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(
-            tournament)) {
+            tournament);
+    for (TournamentMatch match : matches) {
+      if (match.getState() == TournamentMatchState.COMPLETE) {
+        continue;
+      }
       match.setState(TournamentMatchState.SKIPPED);
       tournamentMatchRepository.save(match);
-      for (TournamentGame game :
-          tournamentGameRepository.findByTournamentMatchOrderByGameNumberAsc(match)) {
-        game.getGameMatch().setStatus(MatchStatus.failed);
-        game.getGameMatch().setFinishedAt(finishedAt);
-        game.setResultProcessed(true);
-        gameMatchRepository.save(game.getGameMatch());
-        tournamentGameRepository.save(game);
-      }
     }
 
-    tournament.setStatus(TournamentStatus.COMPLETE);
+    List<TournamentGame> games =
+        tournamentGameRepository.findByTournamentMatchTournamentOrderByTournamentMatchIdAscGameNumberAsc(
+            tournament);
+    for (TournamentGame game : games) {
+      GameMatch gameMatch = game.getGameMatch();
+      MatchStatus status = gameMatch.getStatus();
+      if (status == MatchStatus.team_a_win
+          || status == MatchStatus.team_b_win
+          || status == MatchStatus.draw
+          || status == MatchStatus.failed
+          || status == MatchStatus.submission_valid
+          || status == MatchStatus.submission_invalid) {
+        continue;
+      }
+      gameMatch.setStatus(MatchStatus.skipped);
+      gameMatch.setFinishedAt(finishedAt);
+      gameMatchRepository.save(gameMatch);
+    }
+
+    tournament.setStatus(TournamentStatus.TERMINATED);
     tournament.setFinishedAt(LocalDateTime.now(clock));
     tournamentRepository.save(tournament);
   }
