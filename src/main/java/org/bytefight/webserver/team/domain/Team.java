@@ -50,6 +50,9 @@ public class Team extends AuditableSoftDeletableEntity {
   @Column(name = "display_members", nullable = false)
   private boolean displayMembers;
 
+  @Column(name = "looking_for_players", nullable = false)
+  private boolean lookingForPlayers;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "active_submission_id")
   private Submission currentSubmission;

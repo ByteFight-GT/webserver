@@ -24,6 +24,7 @@ public class SelfTeamDto {
   @NotNull String quote;
   String joinCode;
   @NotNull Boolean displayMembers;
+  @NotNull Boolean lookingForPlayers;
   SubmissionDto currentSubmissionDTO;
   @NotNull TeamType type;
   @NotNull List<PublicPlayerDto> members;
@@ -43,6 +44,7 @@ public class SelfTeamDto {
         .quote(team.getQuote())
         .joinCode(team.getJoinCode())
         .displayMembers(team.isDisplayMembers())
+        .lookingForPlayers(team.isLookingForPlayers())
         .currentSubmissionDTO(
             team.getCurrentSubmission() != null
                 ? SubmissionDto.from(team.getCurrentSubmission())

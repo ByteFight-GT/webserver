@@ -165,6 +165,7 @@ Table teams {
   quote varchar
   join_code varchar(50) [unique]
   display_members boolean [not null]
+  looking_for_players boolean [not null, default: false]
   active_submission_id bigint [ref: > submissions.id]
   type team_type [not null, default: 'regular']
   cached_leaderboard_rank integer

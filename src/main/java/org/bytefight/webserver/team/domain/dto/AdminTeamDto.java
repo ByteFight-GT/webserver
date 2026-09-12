@@ -16,6 +16,7 @@ public class AdminTeamDto {
   String quote;
   String joinCode;
   boolean displayMembers;
+  boolean lookingForPlayers;
   TeamType type;
   boolean isDeleted;
   TimestampsDto timestamps;
@@ -30,6 +31,7 @@ public class AdminTeamDto {
         team.getQuote(),
         team.getJoinCode(),
         team.isDisplayMembers(),
+        team.isLookingForPlayers(),
         team.getType(),
         team.isDeleted(),
         TimestampsDto.from(team),

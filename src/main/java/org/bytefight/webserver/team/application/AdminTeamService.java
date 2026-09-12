@@ -53,7 +53,12 @@ public class AdminTeamService {
     Boolean displayMembers =
         input.getDisplayMembers() != null ? input.getDisplayMembers() : Boolean.FALSE;
     TeamSettingsDto settings =
-        new TeamSettingsDto(input.getName(), input.getQuote(), displayMembers);
+        TeamSettingsDto.builder()
+            .name(input.getName())
+            .quote(input.getQuote())
+            .displayMembers(displayMembers)
+            .lookingForPlayers(input.getLookingForPlayers())
+            .build();
     return teamService.createTeam(competition, settings);
   }
 
@@ -64,7 +69,12 @@ public class AdminTeamService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found"));
 
     TeamSettingsDto settings =
-        new TeamSettingsDto(input.name(), input.quote(), input.displayMembers());
+        TeamSettingsDto.builder()
+            .name(input.name())
+            .quote(input.quote())
+            .displayMembers(input.displayMembers())
+            .lookingForPlayers(input.lookingForPlayers())
+            .build();
 
     teamService.editTeam(team, settings);
 

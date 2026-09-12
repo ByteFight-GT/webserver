@@ -10,4 +10,5 @@ public class AdminCreateTeamDto {
   @NotBlank String name;
   String quote;
   Boolean displayMembers;
+  Boolean lookingForPlayers;
 }

@@ -13,4 +13,6 @@ public class TeamSettingsDto {
   String quote;
 
   @Builder.Default Boolean displayMembers = false;
+
+  @Builder.Default Boolean lookingForPlayers = false;
 }

@@ -98,6 +98,7 @@ public class TeamService {
     team.setCompetition(competition);
     team.setName(name);
     team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
+    team.setLookingForPlayers(Boolean.TRUE.equals(teamSettingsDto.getLookingForPlayers()));
     team.setJoinCode(joinCode);
 
     if (teamSettingsDto.getQuote() != null) {
@@ -275,6 +276,8 @@ public class TeamService {
     if (teamSettingsDto.getQuote() != null) team.setQuote(teamSettingsDto.getQuote());
     if (teamSettingsDto.getDisplayMembers() != null)
       team.setDisplayMembers(teamSettingsDto.getDisplayMembers());
+    if (teamSettingsDto.getLookingForPlayers() != null)
+      team.setLookingForPlayers(teamSettingsDto.getLookingForPlayers());
 
     teamRepository.save(team);
   }
