@@ -30,6 +30,8 @@ gamematch:
   stale-threshold-minutes: 120
 profile-stats:
   recompute-rate-ms: 600000
+global-stats:
+  refresh-rate-ms: 600000
 storage:
   max-decompressed-bytes: 524288000
 
