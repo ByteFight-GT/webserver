@@ -120,6 +120,16 @@ public class SubmissionController {
           "You are not allowed to create a new submission at this time");
     }
 
+    // Rate-cap validation matches: one per team in flight. Every upload schedules a validation
+    // match on the shared queue, so a submission rush would otherwise flood it. Checked before the
+    // file is stored so a rejected upload consumes no storage.
+    if (gameMatchService.countTeamInFlightValidationMatches(team) >= 1) {
+      log.debug("Upload denied - validation already in flight: teamId={}", teamUuid);
+      throw new ResponseStatusException(
+          HttpStatus.TOO_MANY_REQUESTS,
+          "A validation match for your team is already in progress. Please wait for it to finish before submitting again.");
+    }
+
     Submission submission = null;
 
     try {
