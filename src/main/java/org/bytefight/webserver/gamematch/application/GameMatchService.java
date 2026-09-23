@@ -12,6 +12,7 @@ import java.util.*;
 import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.GameOutcomeReason;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
@@ -148,6 +149,9 @@ public class GameMatchService {
       String submissionUuid,
       MatchReason matchReason,
       MatchStatus matchStatus,
+      String mapCode,
+      String outcomeReasonCode,
+      Boolean unregisteredOutcomeReason,
       PageRequest page) {
     TeamWinFilter teamWinFilter = TeamWinFilter.from(teamWin);
     UUID teamId = parseOptionalUuid(teamUuid, "teamUuid");
@@ -156,12 +160,18 @@ public class GameMatchService {
     UUID initiatingTeamId = parseOptionalUuid(initiatingTeamUuid, "initiatingTeamUuid");
     UUID notInitiatingTeamId = parseOptionalUuid(notInitiatingTeamUuid, "notInitiatingTeamUuid");
     UUID submissionId = parseOptionalUuid(submissionUuid, "submissionUuid");
+    String normalizedMapCode = normalizeOptionalFilter(mapCode);
+    String normalizedOutcomeReasonCode = normalizeOptionalFilter(outcomeReasonCode);
 
     if (teamId == null && teamWinFilter != TeamWinFilter.ANY) {
       throw new IllegalArgumentException("teamUuid is required when teamWin is Win or Lose");
     }
     if (hasOpponentTeamName && opponentTeamId == null) {
       return Page.empty(page);
+    }
+    if (Boolean.TRUE.equals(unregisteredOutcomeReason) && normalizedOutcomeReasonCode != null) {
+      throw new IllegalArgumentException(
+          "outcomeReasonCode cannot be combined with unregisteredOutcomeReason");
     }
 
     Specification<GameMatch> spec =
@@ -184,6 +194,26 @@ public class GameMatchService {
 
           if (matchStatus != null) {
             predicates.add(cb.equal(root.get("status"), matchStatus));
+          }
+
+          if (normalizedMapCode != null) {
+            predicates.add(cb.equal(root.get("mapCode"), normalizedMapCode));
+          }
+
+          if (normalizedOutcomeReasonCode != null) {
+            predicates.add(cb.equal(root.get("outcomeReasonCode"), normalizedOutcomeReasonCode));
+          }
+
+          if (Boolean.TRUE.equals(unregisteredOutcomeReason)) {
+            var registeredOutcomeReason = query.subquery(Integer.class);
+            var outcomeReason = registeredOutcomeReason.from(GameOutcomeReason.class);
+            registeredOutcomeReason
+                .select(cb.literal(1))
+                .where(
+                    cb.equal(outcomeReason.get("competition"), root.get("competition")),
+                    cb.equal(outcomeReason.get("code"), root.get("outcomeReasonCode")));
+            predicates.add(cb.isNotNull(root.get("outcomeReasonCode")));
+            predicates.add(cb.not(cb.exists(registeredOutcomeReason)));
           }
 
           if (teamId != null) {
@@ -271,6 +301,13 @@ public class GameMatchService {
     } catch (IllegalArgumentException ex) {
       throw new IllegalArgumentException(fieldName + " must be a valid UUID", ex);
     }
+  }
+
+  private String normalizeOptionalFilter(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    return value.trim();
   }
 
   private enum TeamWinFilter {

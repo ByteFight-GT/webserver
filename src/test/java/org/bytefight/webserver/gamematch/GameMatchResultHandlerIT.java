@@ -115,12 +115,16 @@ class GameMatchResultHandlerIT extends FullStackIntegrationTestBase {
 
     UUID matchUuid = (UUID) ReflectionTestUtils.getField(match, "uuid");
     gameMatchResultHandler.handleGameMatchResult(
-        createResult(matchUuid.toString(), MatchStatus.team_b_win, "arena_02", "timeout"));
+        createResult(
+            matchUuid.toString(),
+            MatchStatus.team_b_win,
+            "arena_02",
+            "engine_code_not_yet_registered"));
 
     GameMatch finishedMatch = gameMatchRepository.findByUuid(matchUuid).orElseThrow();
     assertThat(finishedMatch.getStatus()).isEqualTo(MatchStatus.team_b_win);
     assertThat(finishedMatch.getMapCode()).isEqualTo("arena_02");
-    assertThat(finishedMatch.getOutcomeReasonCode()).isEqualTo("timeout");
+    assertThat(finishedMatch.getOutcomeReasonCode()).isEqualTo("engine_code_not_yet_registered");
   }
 
   private GameMatchResult createResult(String uuid, MatchStatus status) {
