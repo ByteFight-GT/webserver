@@ -6,6 +6,7 @@ public enum MatchStatus {
   waiting,
   in_progress,
   failed,
+  skipped,
   team_a_win,
   team_b_win,
   draw,

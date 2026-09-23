@@ -1,0 +1,2 @@
+ALTER TYPE tournament_status ADD VALUE IF NOT EXISTS 'TERMINATED';
+ALTER TYPE match_status ADD VALUE IF NOT EXISTS 'skipped';

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +17,9 @@ import java.util.UUID;
 
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
 import org.bytefight.webserver.glicko.domain.TeamStats;
 import org.bytefight.webserver.glicko.infra.TeamStatsRepository;
 import org.bytefight.webserver.team.application.TeamService;
@@ -27,12 +31,14 @@ import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryDto;
+import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchDto;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
+import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
 import org.bytefight.webserver.tournament.infra.TournamentRepository;
 import org.springframework.stereotype.Service;
@@ -59,6 +65,8 @@ public class TournamentService {
   private final TournamentRepository tournamentRepository;
   private final TournamentEntryRepository tournamentEntryRepository;
   private final TournamentMatchRepository tournamentMatchRepository;
+  private final TournamentGameRepository tournamentGameRepository;
+  private final GameMatchRepository gameMatchRepository;
   private final TournamentBracketBuilder bracketBuilder;
   private final TournamentMatchScheduler matchScheduler;
   private final TeamService teamService;
@@ -393,8 +401,9 @@ public class TournamentService {
   public TournamentBracketDto startTournament(String competitionSlug, String tournamentUuid) {
     Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
     if (tournament.getStatus() == TournamentStatus.IN_PROGRESS
-        || tournament.getStatus() == TournamentStatus.COMPLETE) {
-      throw new IllegalArgumentException("Tournament already started or completed.");
+        || tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED) {
+      throw new IllegalArgumentException("Tournament already started, completed, or terminated.");
     }
     if (!tournament.getCompetition().isActive()) {
       throw new IllegalArgumentException("Competition is not active");
@@ -422,5 +431,55 @@ public class TournamentService {
 
     matchScheduler.processTournament(tournament);
     return getBracket(competitionSlug, tournamentUuid);
+  }
+
+  /** Terminates a tournament synchronously without deleting any tournament data. */
+  public void terminateTournament(String competitionSlug, String tournamentUuid) {
+    Tournament tournament = getTournamentByUuid(competitionSlug, tournamentUuid);
+    tournament =
+        tournamentRepository
+            .findByIdForUpdate(tournament.getId())
+            .orElseThrow(
+                () -> new IllegalArgumentException("Tournament not found: " + tournamentUuid));
+
+    if (tournament.getStatus() == TournamentStatus.COMPLETE
+        || tournament.getStatus() == TournamentStatus.TERMINATED) {
+      return;
+    }
+
+    Instant finishedAt = Instant.now(clock);
+    List<TournamentMatch> matches =
+        tournamentMatchRepository.findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(
+            tournament);
+    for (TournamentMatch match : matches) {
+      if (match.getState() == TournamentMatchState.COMPLETE) {
+        continue;
+      }
+      match.setState(TournamentMatchState.SKIPPED);
+      tournamentMatchRepository.save(match);
+    }
+
+    List<TournamentGame> games =
+        tournamentGameRepository.findByTournamentMatchTournamentOrderByTournamentMatchIdAscGameNumberAsc(
+            tournament);
+    for (TournamentGame game : games) {
+      GameMatch gameMatch = game.getGameMatch();
+      MatchStatus status = gameMatch.getStatus();
+      if (status == MatchStatus.team_a_win
+          || status == MatchStatus.team_b_win
+          || status == MatchStatus.draw
+          || status == MatchStatus.failed
+          || status == MatchStatus.submission_valid
+          || status == MatchStatus.submission_invalid) {
+        continue;
+      }
+      gameMatch.setStatus(MatchStatus.skipped);
+      gameMatch.setFinishedAt(finishedAt);
+      gameMatchRepository.save(gameMatch);
+    }
+
+    tournament.setStatus(TournamentStatus.TERMINATED);
+    tournament.setFinishedAt(LocalDateTime.now(clock));
+    tournamentRepository.save(tournament);
   }
 }

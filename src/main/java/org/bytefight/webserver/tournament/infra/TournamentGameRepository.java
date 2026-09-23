@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.tournament.domain.Tournament;
 import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,4 +31,15 @@ public interface TournamentGameRepository extends JpaRepository<TournamentGame, 
    * progress.
    */
   List<TournamentGame> findByTournamentMatchOrderByGameNumberAsc(TournamentMatch tournamentMatch);
+
+  @Query(
+      """
+          SELECT tg
+          FROM TournamentGame tg
+          JOIN tg.tournamentMatch tm
+          WHERE tm.tournament = :tournament
+          ORDER BY tm.id ASC, tg.gameNumber ASC
+      """)
+  List<TournamentGame> findByTournamentMatchTournamentOrderByTournamentMatchIdAscGameNumberAsc(
+      @Param("tournament") Tournament tournament);
 }

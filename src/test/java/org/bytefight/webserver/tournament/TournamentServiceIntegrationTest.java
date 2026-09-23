@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.FullStackIntegrationTestBase;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.ladder.domain.DefaultLadderSettings;
 import org.bytefight.webserver.ladder.domain.Ladder;
@@ -29,15 +30,18 @@ import org.bytefight.webserver.tournament.domain.TournamentBracketType;
 import org.bytefight.webserver.tournament.domain.TournamentDto;
 import org.bytefight.webserver.tournament.domain.TournamentEntry;
 import org.bytefight.webserver.tournament.domain.TournamentEntryStatus;
+import org.bytefight.webserver.tournament.domain.TournamentGame;
 import org.bytefight.webserver.tournament.domain.TournamentMatch;
 import org.bytefight.webserver.tournament.domain.TournamentMatchState;
 import org.bytefight.webserver.tournament.domain.TournamentRankingDto;
 import org.bytefight.webserver.tournament.domain.TournamentStatus;
 import org.bytefight.webserver.tournament.infra.TournamentEntryRepository;
+import org.bytefight.webserver.tournament.infra.TournamentGameRepository;
 import org.bytefight.webserver.tournament.infra.TournamentMatchRepository;
 import org.bytefight.webserver.tournament.infra.TournamentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBase {
 
@@ -56,6 +60,8 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
   @Autowired private TournamentRepository tournamentRepository;
 
   @Autowired private TournamentEntryRepository tournamentEntryRepository;
+
+  @Autowired private TournamentGameRepository tournamentGameRepository;
 
   @Autowired private TournamentMatchRepository tournamentMatchRepository;
 
@@ -223,6 +229,56 @@ public class TournamentServiceIntegrationTest extends FullStackIntegrationTestBa
                 .findByTournamentAndState(tournament, TournamentMatchState.SKIPPED)
                 .size()
             > 0);
+  }
+
+  @Test
+  @Transactional
+  void terminateTournamentMarksRemainingMatchesSkippedAndTournamentAsTerminated() {
+    Competition competition = createCompetition("comp-stop", true);
+    Team teamA = createTeam(competition, "Alpha", true);
+    Team teamB = createTeam(competition, "Beta", true);
+    Team teamC = createTeam(competition, "Gamma", true);
+    Team teamD = createTeam(competition, "Delta", true);
+    CreateTournamentRequest request =
+        createTournamentRequest(
+            "Stop Cup",
+            List.of(
+                teamA.getUuid().toString(),
+                teamB.getUuid().toString(),
+                teamC.getUuid().toString(),
+                teamD.getUuid().toString()));
+    TournamentDto dto = tournamentService.createTournament(competition.getSlug(), request);
+    tournamentService.startTournament(competition.getSlug(), dto.getUuid());
+
+    tournamentService.terminateTournament(competition.getSlug(), dto.getUuid());
+
+    Tournament tournament =
+        tournamentRepository
+            .findByUuidAndCompetition(UUID.fromString(dto.getUuid()), competition)
+            .orElseThrow();
+    assertEquals(TournamentStatus.TERMINATED, tournament.getStatus());
+
+    List<TournamentMatch> matches =
+        tournamentMatchRepository.findByTournamentOrderByBracketTypeAscRoundNumberAscMatchIndexAsc(
+            tournament);
+    assertTrue(
+        matches.stream().allMatch(match -> match.getState() != TournamentMatchState.QUEUED),
+        "Queued series should be skipped when the tournament is terminated");
+    assertTrue(
+        matches.stream()
+            .filter(match -> match.getState() != TournamentMatchState.COMPLETE)
+            .allMatch(match -> match.getState() == TournamentMatchState.SKIPPED));
+
+    List<TournamentGame> games =
+        tournamentGameRepository.findByTournamentMatchTournamentOrderByTournamentMatchIdAscGameNumberAsc(
+            tournament);
+    assertTrue(
+        games.stream()
+            .filter(game -> game.getGameMatch().getStatus() != MatchStatus.team_a_win)
+            .filter(game -> game.getGameMatch().getStatus() != MatchStatus.team_b_win)
+            .filter(game -> game.getGameMatch().getStatus() != MatchStatus.draw)
+            .filter(game -> game.getGameMatch().getStatus() != MatchStatus.failed)
+            .allMatch(game -> game.getGameMatch().getStatus() == MatchStatus.skipped));
   }
 
   /**
