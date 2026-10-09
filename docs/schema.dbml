@@ -79,6 +79,7 @@ Table users {
   is_service_account boolean [not null, default: false]
 
   resume_file bigint [unique, ref: - file_records.id]
+  last_notifications_checked timestamp [not null, default: `now()`, note: 'notifications created after this are unread']
 }
 
 // Stores platform-wide player related information (username,
@@ -425,6 +426,29 @@ Table game_match_files {
 
   Indexes {
     (game_match_id, slug, team_id) [unique]
+  }
+}
+
+enum notification_priority {
+  NORMAL
+  URGENT // also shown as a site banner
+}
+
+// Admin-authored announcements. A null competition_id means site-wide;
+// otherwise only players on a team in that competition see it.
+Table notifications {
+  ~base_template
+  ~user_audit_template
+
+  priority notification_priority [not null, default: 'NORMAL']
+  with_email boolean [not null, default: false, note: 'email delivery is not implemented yet']
+  title varchar(200) [not null]
+  body text [not null, note: 'markdown']
+  competition_id bigint [ref: > competitions.id, note: 'ON DELETE CASCADE; null = site-wide']
+  expire_at timestamp [note: 'null = never expires; expired rows are hidden from users only']
+
+  Indexes {
+    (competition_id, created_at)
   }
 }
 

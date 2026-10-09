@@ -40,6 +40,10 @@ public class User extends BaseEntity implements UserDetails {
   @Column(name = "last_accepted_tos", nullable = false)
   private Instant lastAcceptedTos;
 
+  /** Notifications created after this instant count as unread. */
+  @Column(name = "last_notifications_checked", nullable = false)
+  private Instant lastNotificationsChecked = Instant.now();
+
   public boolean isAdminOrServiceAccount() {
     return isAdmin || isServiceAccount;
   }
