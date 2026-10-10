@@ -1,7 +1,5 @@
 package org.bytefight.webserver.team.application;
 
-import java.util.List;
-
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.team.domain.Team;
@@ -11,6 +9,7 @@ import org.bytefight.webserver.team.domain.dto.TeamSettingsDto;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,18 +29,8 @@ public class AdminTeamService {
     this.teamService = teamService;
   }
 
-  public Page<Team> listTeams(
-      Long competitionId, List<Long> teamIds, boolean isDeleted, Pageable pageable) {
-    if (teamIds != null && !teamIds.isEmpty()) {
-      if (competitionId != null) {
-        return teamRepository.findByCompetitionIdAndIdIn(competitionId, teamIds, pageable);
-      }
-      return teamRepository.findByIdIn(teamIds, pageable);
-    }
-    if (competitionId != null) {
-      return teamRepository.findByCompetitionIdAndIsDeleted(competitionId, isDeleted, pageable);
-    }
-    return teamRepository.findByIsDeleted(isDeleted, pageable);
+  public Page<Team> listTeams(Specification<Team> specification, Pageable pageable) {
+    return teamRepository.findAll(specification, pageable);
   }
 
   public Team createTeam(AdminCreateTeamDto input) {

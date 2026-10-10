@@ -2,6 +2,9 @@ package org.bytefight.webserver.team.infra;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -9,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +20,9 @@ import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.application.AdminTeamService;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.team.domain.TeamMember;
 import org.bytefight.webserver.team.domain.TeamMemberDetails;
+import org.bytefight.webserver.team.domain.TeamType;
 import org.bytefight.webserver.team.domain.dto.AdminCreateTeamDto;
 import org.bytefight.webserver.team.domain.dto.AdminTeamDto;
 import org.bytefight.webserver.team.domain.dto.AdminTeamWithMemberDto;
@@ -24,6 +30,7 @@ import org.bytefight.webserver.team.domain.dto.AdminUpdateTeamDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,14 +65,8 @@ public class AdminTeamController {
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
 
-    Map<String, Object> filter = pageRequest.getFilter();
-    Long competitionId = parseCompetitionId(filter);
-    List<Long> teamIds = parseTeamIds(filter);
-    Boolean isDeleted = parseIsDeleted(filter);
-    boolean resolvedIsDeleted = isDeleted != null ? isDeleted : false;
-
     Page<Team> teams =
-        adminTeamService.listTeams(competitionId, teamIds, resolvedIsDeleted, pageable);
+        adminTeamService.listTeams(buildTeamSpecification(pageRequest.getFilter()), pageable);
     List<Team> teamList = teams.getContent();
     List<Long> pagedTeamIds = teamList.stream().map(Team::getId).toList();
 
@@ -112,29 +113,77 @@ public class AdminTeamController {
     return AdminTeamDto.from(team);
   }
 
-  private static Long parseCompetitionId(Map<String, Object> filter) {
-    if (filter == null || filter.isEmpty()) {
-      return null;
+  private static Specification<Team> buildTeamSpecification(Map<String, Object> filter) {
+    return (root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
+      Map<String, Object> safeFilter = filter != null ? filter : Map.of();
+
+      List<Long> ids = parseLongList(safeFilter.get("id"));
+      if (!ids.isEmpty()) {
+        // Lookups by id (e.g. reference fields) return teams regardless of deletion state.
+        predicates.add(root.get("id").in(ids));
+      } else {
+        Boolean isDeleted = parseBoolean(safeFilter.get("isDeleted"));
+        predicates.add(cb.equal(root.get("isDeleted"), isDeleted != null ? isDeleted : false));
+      }
+
+      Long competitionId = parseLong(safeFilter.get("competitionId"));
+      if (competitionId != null) {
+        predicates.add(cb.equal(root.get("competition").get("id"), competitionId));
+      }
+
+      TeamType type = parseType(safeFilter.get("type"));
+      if (type != null) {
+        predicates.add(cb.equal(root.get("type"), type));
+      }
+
+      String name = normalize(safeFilter.get("name"));
+      if (name != null) {
+        predicates.add(cb.like(root.get("nameNormalized"), containsPattern(name), '\\'));
+      }
+
+      String playerUsername = normalize(safeFilter.get("playerUsername"));
+      if (playerUsername != null) {
+        Subquery<Long> members = query.subquery(Long.class);
+        Root<TeamMember> member = members.from(TeamMember.class);
+        members
+            .select(member.get("team").get("id"))
+            .where(
+                cb.like(
+                    member.get("player").get("usernameNormalized"),
+                    containsPattern(playerUsername),
+                    '\\'));
+        predicates.add(root.get("id").in(members));
+      }
+
+      return cb.and(predicates.toArray(Predicate[]::new));
+    };
+  }
+
+  private static String containsPattern(String text) {
+    String escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    return "%" + escaped + "%";
+  }
+
+  private static String normalize(Object value) {
+    if (value instanceof String text && !text.isBlank()) {
+      return text.trim().toLowerCase(Locale.ROOT);
     }
-    Object value = filter.get("competitionId");
-    if (value instanceof Number number) {
-      return number.longValue();
-    }
+    return null;
+  }
+
+  private static TeamType parseType(Object value) {
     if (value instanceof String text && !text.isBlank()) {
       try {
-        return Long.parseLong(text);
-      } catch (NumberFormatException ex) {
+        return TeamType.valueOf(text.trim());
+      } catch (IllegalArgumentException ex) {
         return null;
       }
     }
     return null;
   }
 
-  private static Boolean parseIsDeleted(Map<String, Object> filter) {
-    if (filter == null || filter.isEmpty()) {
-      return null;
-    }
-    Object value = filter.get("isDeleted");
+  private static Boolean parseBoolean(Object value) {
     if (value instanceof Boolean bool) {
       return bool;
     }
@@ -144,16 +193,12 @@ public class AdminTeamController {
     return null;
   }
 
-  private static List<Long> parseTeamIds(Map<String, Object> filter) {
-    if (filter == null || filter.isEmpty()) {
-      return List.of();
-    }
-    Object value = filter.get("id");
+  private static List<Long> parseLongList(Object value) {
     if (value == null) {
       return List.of();
     }
+    List<Long> ids = new ArrayList<>();
     if (value instanceof Collection<?> values) {
-      List<Long> ids = new ArrayList<>();
       for (Object item : values) {
         Long parsed = parseLong(item);
         if (parsed != null) {
@@ -162,10 +207,8 @@ public class AdminTeamController {
       }
       return ids;
     }
-    if (value instanceof String text && !text.isBlank()) {
-      String[] parts = text.split(",");
-      List<Long> ids = new ArrayList<>();
-      for (String part : parts) {
+    if (value instanceof String text) {
+      for (String part : text.split(",")) {
         Long parsed = parseLong(part);
         if (parsed != null) {
           ids.add(parsed);
