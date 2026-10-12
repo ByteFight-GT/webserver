@@ -81,6 +81,19 @@ public interface GameMatchRepository
       @Param("status") Collection<MatchStatus> status);
 
   @Query(
+      """
+                SELECT COUNT(gm)
+                FROM GameMatch gm
+                WHERE gm.teamA = :team
+                  AND gm.ladder = :ladder
+                  AND gm.status IN :status
+            """)
+  long countTeamAMatchesByLadderAndStatus(
+      @Param("team") Team team,
+      @Param("ladder") String ladder,
+      @Param("status") Collection<MatchStatus> status);
+
+  @Query(
       "SELECT gm FROM GameMatch gm WHERE gm.competition = :competition AND gm.status IN :status AND gm.ladder <> :excludedLadder ORDER BY gm.createdAt DESC")
   Page<GameMatch> findByCompetitionAndStatus(
       @Param("competition") Competition competition,
