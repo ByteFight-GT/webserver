@@ -2,6 +2,7 @@ package org.bytefight.webserver.leaderboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -100,6 +101,210 @@ class PublicLeaderboardControllerIT extends FullStackIntegrationTestBase {
         .isEqualTo(((java.util.UUID) ReflectionTestUtils.getField(teamC, "uuid")).toString());
     assertThat(third.get("rank").isNull()).isTrue();
     assertThat(memberUsernames(third.get("members"))).isEmpty();
+  }
+
+  @Test
+  void searchPagesKeepGlobalRanksAndUseTheCompetitionPageSize() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("paged-comp", "Paged Competition", true, 3);
+    competition.setLeaderboardPagination(true);
+    competition.setLeaderboardPageSize(1);
+    String ladder = "ranked";
+    testDataFactory.createLadder(competition, ladder);
+
+    Team alpha = namedTeam(competition, "Alpha Wolves");
+    Team alphabet = namedTeam(competition, "Alphabet Soup");
+    Team beta = namedTeam(competition, "Beta Bears");
+    teamStatsRepository.save(teamStats(competition, alpha, ladder, 1800.0, 4));
+    teamStatsRepository.save(teamStats(competition, alphabet, ladder, 1600.0, 4));
+    teamStatsRepository.save(teamStats(competition, beta, ladder, 1400.0, 4));
+
+    mockMvc
+        .perform(
+            get("/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}", "paged-comp", ladder))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(3));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "paged-comp",
+                    ladder)
+                .param("page", "0"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].teamName").value("Alpha Wolves"))
+        .andExpect(jsonPath("$.content[0].rank").value(1))
+        .andExpect(jsonPath("$.page.size").value(1))
+        .andExpect(jsonPath("$.page.number").value(0))
+        .andExpect(jsonPath("$.page.totalElements").value(3))
+        .andExpect(jsonPath("$.page.totalPages").value(3));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "paged-comp",
+                    ladder)
+                .param("page", "1")
+                .param("search", "  ALPHA "))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].teamName").value("Alphabet Soup"))
+        .andExpect(jsonPath("$.content[0].rank").value(2))
+        .andExpect(jsonPath("$.page.totalElements").value(2))
+        .andExpect(jsonPath("$.page.totalPages").value(2));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "paged-comp",
+                    ladder)
+                .param("search", "nope"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(0))
+        .andExpect(jsonPath("$.page.totalElements").value(0))
+        .andExpect(jsonPath("$.page.totalPages").value(0));
+  }
+
+  @Test
+  void disabledPaginationIgnoresPageIndexAndClientPageSize() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("single-comp", "Single Competition", true, 3);
+    competition.setLeaderboardPagination(false);
+    competition.setLeaderboardPageSize(1);
+    String ladder = "ranked";
+    testDataFactory.createLadder(competition, ladder);
+    Team alpha = namedTeam(competition, "Alpha Wolves");
+    Team beta = namedTeam(competition, "Beta Bears");
+    teamStatsRepository.save(teamStats(competition, alpha, ladder, 1800.0, 4));
+    teamStatsRepository.save(teamStats(competition, beta, ladder, 1400.0, 4));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "single-comp",
+                    ladder)
+                .param("page", "5")
+                .param("size", "1")
+                .param("search", "wolves"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].teamName").value("Alpha Wolves"))
+        .andExpect(jsonPath("$.page.number").value(0))
+        .andExpect(jsonPath("$.page.totalPages").value(1))
+        .andExpect(jsonPath("$.page.totalElements").value(1));
+  }
+
+  @Test
+  void pageKeepsMembersRanksAndIgnoresOtherLaddersQuotesAndDeletedTeams() throws Exception {
+    Competition competition =
+        testDataFactory.createCompetition("scoped-comp", "Scoped Competition", true, 3);
+    competition.setLeaderboardPagination(true);
+    competition.setLeaderboardPageSize(1);
+    String ladder = "ranked";
+    testDataFactory.createLadder(competition, ladder);
+    testDataFactory.createLadder(competition, "scrimmage");
+
+    Competition other =
+        testDataFactory.createCompetition("other-comp", "Other Competition", true, 3);
+    testDataFactory.createLadder(other, ladder);
+
+    Team visible = namedTeam(competition, "Visible Vipers");
+    visible.setDisplayMembers(true);
+    visible.setQuote("nothing to see");
+    Team hidden = namedTeam(competition, "Hidden Hawks");
+    hidden.setDisplayMembers(false);
+    hidden.setQuote("visible is only in the quote");
+    Team unranked = namedTeam(competition, "Unranked Umbrellas");
+    Team deleted = namedTeam(competition, "Deleted Dynamos");
+    deleted.softDelete();
+    Team otherLadder = namedTeam(competition, "Scrim Sharks");
+    Team foreign = namedTeam(other, "Foreign Foxes");
+
+    Player member = testDataFactory.createUserWithPlayer("visible@example.com", "viper");
+    Player hiddenMember = testDataFactory.createUserWithPlayer("hidden@example.com", "hawk");
+    teamMemberRepository.save(member(competition, visible, member));
+    teamMemberRepository.save(member(competition, hidden, hiddenMember));
+
+    teamStatsRepository.save(teamStats(competition, visible, ladder, 1800.0, 3));
+    teamStatsRepository.save(teamStats(competition, hidden, ladder, 1500.0, 3));
+    teamStatsRepository.save(teamStats(competition, unranked, ladder, 2000.0, 0));
+    teamStatsRepository.save(teamStats(competition, deleted, ladder, 1900.0, 9));
+    teamStatsRepository.save(teamStats(competition, otherLadder, "scrimmage", 1700.0, 9));
+    teamStatsRepository.save(teamStats(other, foreign, ladder, 1700.0, 9));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "scoped-comp",
+                    ladder)
+                .param("page", "0"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].teamName").value("Visible Vipers"))
+        .andExpect(jsonPath("$.content[0].rank").value(1))
+        .andExpect(jsonPath("$.content[0].members[0].username").value("viper"))
+        .andExpect(jsonPath("$.page.totalElements").value(3));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "scoped-comp",
+                    ladder)
+                .param("page", "1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].teamName").value("Hidden Hawks"))
+        .andExpect(jsonPath("$.content[0].rank").value(2))
+        .andExpect(jsonPath("$.content[0].members").value(org.hamcrest.Matchers.nullValue()));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "scoped-comp",
+                    ladder)
+                .param("page", "2"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].teamName").value("Unranked Umbrellas"))
+        .andExpect(jsonPath("$.content[0].rank").value(org.hamcrest.Matchers.nullValue()));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                    "scoped-comp",
+                    ladder)
+                .param("search", "visible"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.page.totalElements").value(1))
+        .andExpect(jsonPath("$.content[0].teamName").value("Visible Vipers"));
+  }
+
+  @Test
+  void missingCompetitionIsNotFound() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}", "missing", "ranked"))
+        .andExpect(status().isNotFound());
+    mockMvc
+        .perform(
+            get(
+                "/api/v1/public/leaderboard/{competitionSlug}/{ladderSlug}/page",
+                "missing",
+                "ranked"))
+        .andExpect(status().isNotFound());
+  }
+
+  private Team namedTeam(Competition competition, String name) {
+    Team team = testDataFactory.createTeam(competition);
+    team.setName(name);
+    return team;
   }
 
   private static TeamStats teamStats(
