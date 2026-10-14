@@ -40,19 +40,20 @@ class GameMatchResultHandlerTest {
   @InjectMocks private GameMatchResultHandler gameMatchResultHandler;
 
   @Test
-  void handleGameMatchResultFinalizesWithEngineMetadata() {
+  void handleGameMatchResultFinalizesWithRawEngineMetadata() {
     UUID matchUuid = UUID.randomUUID();
     GameMatch gameMatch = new GameMatch();
     gameMatch.setReason(MatchReason.matchmaking);
     GameMatchResult result =
-        new GameMatchResult(matchUuid.toString(), MatchStatus.team_a_win, "arena_02", "timeout");
+        new GameMatchResult(
+            matchUuid.toString(), MatchStatus.team_a_win, "arena_02", "unregistered_reason");
 
     when(gameMatchRepository.finalizeMatchResult(
             eq(matchUuid),
             eq(MatchStatus.team_a_win),
             any(),
             eq("arena_02"),
-            eq("timeout"),
+            eq("unregistered_reason"),
             eq(List.of(MatchStatus.waiting, MatchStatus.in_progress))))
         .thenReturn(1);
     when(gameMatchService.getGameMatch(matchUuid)).thenReturn(Optional.of(gameMatch));
@@ -65,7 +66,7 @@ class GameMatchResultHandlerTest {
             eq(MatchStatus.team_a_win),
             any(),
             eq("arena_02"),
-            eq("timeout"),
+            eq("unregistered_reason"),
             eq(List.of(MatchStatus.waiting, MatchStatus.in_progress)));
     verify(glickoService).processGameMatchResult(gameMatch, false);
   }

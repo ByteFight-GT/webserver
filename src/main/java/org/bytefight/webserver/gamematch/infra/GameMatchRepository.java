@@ -50,6 +50,26 @@ public interface GameMatchRepository
   boolean existsByUuid(UUID uuid);
 
   @Query(
+      "SELECT DISTINCT gm.mapCode FROM GameMatch gm WHERE gm.competition = :competition AND gm.mapCode IS NOT NULL AND gm.mapCode <> '' ORDER BY gm.mapCode")
+  List<String> findDistinctMapCodesByCompetition(@Param("competition") Competition competition);
+
+  @Query(
+      """
+          SELECT (COUNT(gm) > 0)
+          FROM GameMatch gm
+          WHERE gm.competition = :competition
+            AND gm.outcomeReasonCode IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1
+              FROM GameOutcomeReason outcomeReason
+              WHERE outcomeReason.competition = gm.competition
+                AND outcomeReason.code = gm.outcomeReasonCode
+            )
+          """)
+  boolean existsUnregisteredOutcomeReasonByCompetition(
+      @Param("competition") Competition competition);
+
+  @Query(
       "SELECT gm FROM GameMatch gm WHERE (gm.teamA.uuid = :teamUuid OR gm.teamB.uuid = :teamUuid) AND gm.status NOT IN :statusList ORDER BY gm.finishedAt DESC")
   List<GameMatch> findTeamMatches(
       @Param("teamUuid") UUID teamUuid, @Param("statusList") List<MatchStatus> statusList);
