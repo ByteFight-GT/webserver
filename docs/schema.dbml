@@ -278,6 +278,7 @@ Table game_matches {
   outcome_reason_code varchar(100)
 
   times_scheduled integer [not null, default: 0]
+  retries integer [not null, default: 0]
 
   ~user_audit_template
 
