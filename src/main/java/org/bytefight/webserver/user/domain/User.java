@@ -33,6 +33,9 @@ public class User extends BaseEntity implements UserDetails {
   @Column(name = "is_service_account", nullable = false)
   private boolean isServiceAccount = false;
 
+  @Column(name = "internal_comp_eligible", nullable = false)
+  private boolean isInternalCompEligible = false;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "resume_file", unique = true)
   private FileRecord resume;
@@ -42,6 +45,10 @@ public class User extends BaseEntity implements UserDetails {
 
   public boolean isAdminOrServiceAccount() {
     return isAdmin || isServiceAccount;
+  }
+
+  public boolean internalCompEligible() {
+    return isAdmin || isServiceAccount || isInternalCompEligible;
   }
 
   @Override
