@@ -77,6 +77,7 @@ Table users {
   email varchar(255) [not null, unique]
   is_admin boolean [not null, default: false]
   is_service_account boolean [not null, default: false]
+  internal_comp_eligible boolean [not null, default: false]
 
   resume_file bigint [unique, ref: - file_records.id]
 }
@@ -197,6 +198,14 @@ Table team_stats {
   }
 }
 
+// Stores platform-wide cached statistics (e.g. total matches
+// played, total teams). Each row is a single named metric.
+Table global_stats {
+  ~base_template
+  metric varchar [not null, unique, note: 'all-lowercase slug identifying the metric']
+  value  bigint  [not null]
+}
+
 // Join table storing player team membership for a specific
 // competition
 Table team_members {
@@ -269,6 +278,7 @@ Table game_matches {
   outcome_reason_code varchar(100)
 
   times_scheduled integer [not null, default: 0]
+  retries integer [not null, default: 0]
 
   ~user_audit_template
 

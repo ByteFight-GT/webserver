@@ -89,4 +89,7 @@ public class GameMatch extends AuditableEntity {
 
   @Column(name = "times_scheduled", nullable = false)
   private Integer timesScheduled = 0;
+
+  @Column(name = "retries", nullable = false)
+  private Integer retries = 0;
 }

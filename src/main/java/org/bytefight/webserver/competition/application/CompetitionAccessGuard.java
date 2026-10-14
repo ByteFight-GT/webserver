@@ -23,7 +23,7 @@ public class CompetitionAccessGuard {
         .anyMatch(authority -> PRIVILEGED_ROLES.contains(authority.getAuthority()))) {
       return true;
     }
-    return authentication.getPrincipal() instanceof User user && user.isAdminOrServiceAccount();
+    return authentication.getPrincipal() instanceof User user && user.internalCompEligible();
   }
 
   public boolean canAccess(Competition competition) {
