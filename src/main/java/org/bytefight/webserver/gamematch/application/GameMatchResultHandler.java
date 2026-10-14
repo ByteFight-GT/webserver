@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
@@ -47,6 +48,14 @@ public class GameMatchResultHandler {
       gameMatch.setStatus(MatchStatus.in_progress);
       gameMatch.setStartedAt(Instant.now());
       gameMatchRepository.save(gameMatch);
+    }
+  }
+
+  @Transactional
+  public void handleGameMatchRetry(GameMatchJob gameMatchJob) {
+    UUID matchUuid = UUID.fromString(gameMatchJob.getUuid());
+    if (gameMatchRepository.incrementRetries(matchUuid) == 0) {
+      log.warn("Received retry for unknown game match {}", matchUuid);
     }
   }
 

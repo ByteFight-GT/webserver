@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.bytefight.webserver.gamematch.application.GameMatchResultHandler;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchResult;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchUpdate;
 import org.bytefight.webserver.rabbitmq.infra.RabbitMQConfiguration;
@@ -30,5 +31,13 @@ public class RabbitMQListener {
       errorHandler = "gameMatchListenerErrorHandler")
   public void receiveGameMatchUpdates(GameMatchUpdate gameMatchUpdate) {
     gameMatchResultHandler.handleGameMatchUpdate(gameMatchUpdate);
+  }
+
+  @Transactional
+  @RabbitListener(
+      queues = RabbitMQConfiguration.RETRY_EVENTS_QUEUE,
+      errorHandler = "gameMatchListenerErrorHandler")
+  public void receiveGameMatchRetries(GameMatchJob gameMatchJob) {
+    gameMatchResultHandler.handleGameMatchRetry(gameMatchJob);
   }
 }

@@ -115,4 +115,8 @@ public interface GameMatchRepository
       @Param("mapCode") String mapCode,
       @Param("outcomeReasonCode") String outcomeReasonCode,
       @Param("allowedStatuses") Collection<MatchStatus> allowedStatuses);
+
+  @Modifying
+  @Query("UPDATE GameMatch gm SET gm.retries = gm.retries + 1 WHERE gm.uuid = :uuid")
+  int incrementRetries(@Param("uuid") UUID uuid);
 }

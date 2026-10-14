@@ -22,6 +22,8 @@ public class RabbitMQConfiguration {
 
   public static final String RETRY_EXCHANGE = "match.retry"; // a dlx where failed matches go
   public static final String RETRY_QUEUE = "match.retry.30s";
+  // receives a copy of every retried match so the webserver can track retry counts
+  public static final String RETRY_EVENTS_QUEUE = "match.retry.events";
 
   @Bean
   public ConnectionFactory connectionFactory() {
@@ -73,6 +75,16 @@ public class RabbitMQConfiguration {
   @Bean
   public Binding matchRetryBinding() {
     return BindingBuilder.bind(matchRetryQueue()).to(matchRetryExchange());
+  }
+
+  @Bean
+  public Queue matchRetryEventsQueue() {
+    return new Queue(RETRY_EVENTS_QUEUE, true);
+  }
+
+  @Bean
+  public Binding matchRetryEventsBinding() {
+    return BindingBuilder.bind(matchRetryEventsQueue()).to(matchRetryExchange());
   }
 
   @Bean
