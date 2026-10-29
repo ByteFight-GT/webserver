@@ -80,7 +80,9 @@ class GlobalStatsServiceTest extends FullStackIntegrationTestBase {
   }
 
   @Test
-  void serviceBeanStartsWithNoCollectorsRegistered(@Autowired GlobalStatsService service) {
+  void refreshAllWithNoCollectorsStoresNothing() {
+    GlobalStatsService service = new GlobalStatsService(globalStatRepository, List.of());
+
     service.refreshAll();
 
     assertThat(service.getAllStats()).isEmpty();

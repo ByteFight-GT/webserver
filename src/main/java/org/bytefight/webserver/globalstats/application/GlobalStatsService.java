@@ -33,7 +33,9 @@ public class GlobalStatsService {
    * Recomputes every registered stat and upserts it into the global_stats table. A collector that
    * throws is logged and skipped so it can't block the others; its previous value is kept.
    */
-  @Scheduled(fixedRateString = "${global-stats.refresh-rate-ms:600000}")
+  @Scheduled(
+      fixedRateString = "${global-stats.refresh-rate-ms:600000}",
+      initialDelayString = "${global-stats.initial-delay-ms:0}")
   public void refreshAll() {
     int refreshed = 0;
     for (StatCollector collector : statCollectors) {
