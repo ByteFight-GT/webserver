@@ -2,9 +2,10 @@ package org.bytefight.webserver.profile.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Value;
-import org.bytefight.webserver.leaderboard.domain.MemberSummaryDto;
 
 import java.util.List;
+
+import org.bytefight.webserver.leaderboard.domain.MemberSummaryDto;
 
 @Value
 public class PlayerCompetitionDto {
