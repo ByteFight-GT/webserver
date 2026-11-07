@@ -19,8 +19,7 @@ app:
     read-timeout-ms: 5000
     connect-timeout-ms: 3000
   signup:
-    allowed-domains:
-      - gatech.edu
+    allowed-domains: []
 springdoc:
   writer-with-order-by-keys: true
   swagger-ui:
