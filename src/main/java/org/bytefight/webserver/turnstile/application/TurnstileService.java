@@ -1,9 +1,10 @@
 package org.bytefight.webserver.turnstile.application;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Map;
 
 import org.bytefight.webserver.turnstile.infra.TurnstileProperties;
 import org.springframework.http.MediaType;
@@ -79,21 +80,9 @@ public class TurnstileService {
 
   private record TurnstileResponse(
       boolean success,
-      String challenge_ts,
+      @JsonProperty("challenge_ts") String challengeTs,
       String hostname,
-      List<String> errorCodes,
+      @JsonProperty("error-codes") List<String> errorCodes,
       String action,
-      String cdata) {
-
-    @SuppressWarnings("unchecked")
-    public static TurnstileResponse fromMap(Map<String, Object> map) {
-      return new TurnstileResponse(
-          Boolean.TRUE.equals(map.get("success")),
-          (String) map.get("challenge_ts"),
-          (String) map.get("hostname"),
-          (List<String>) map.get("error-codes"),
-          (String) map.get("action"),
-          (String) map.get("cdata"));
-    }
-  }
+      String cdata) {}
 }
