@@ -58,9 +58,7 @@ public class NotificationService {
 
   @Transactional
   public void markRead(User user) {
-    User managed = userRepository.findById(user.getId()).orElseThrow();
-    managed.setLastNotificationsChecked(clock.instant());
-    userRepository.save(managed);
+    userRepository.updateLastNotificationsChecked(user.getId(), clock.instant());
   }
 
   @Transactional(readOnly = true)
