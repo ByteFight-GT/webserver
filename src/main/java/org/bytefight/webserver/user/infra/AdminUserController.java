@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.user.application.AdminUserService;
+import org.bytefight.webserver.user.domain.dto.AdminUserDetailDto;
 import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerAndResumeDto;
 import org.bytefight.webserver.user.domain.dto.EmailDomainCountDto;
 import org.bytefight.webserver.user.domain.dto.ResumeDto;
@@ -104,6 +105,16 @@ public class AdminUserController {
       summary = "List distinct user email domains with user counts")
   public List<EmailDomainCountDto> listEmailDomains() {
     return adminUserService.listEmailDomains();
+  }
+
+  @GetMapping("/{id:\\d+}")
+  @Operation(operationId = "adminGetUser", summary = "Get full detail for one user")
+  public ResponseEntity<AdminUserDetailDto> getOne(@PathVariable long id) {
+    try {
+      return ResponseEntity.ok(adminUserService.getUserDetail(id));
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping("/{userUuid}/resume")
