@@ -2,6 +2,7 @@ package org.bytefight.webserver.user.application;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerAndResumeDto;
+import org.bytefight.webserver.user.domain.dto.EmailDomainCountDto;
 import org.bytefight.webserver.user.domain.dto.ResumeDto;
 import org.bytefight.webserver.user.infra.UserRepository;
 import org.springframework.data.domain.Page;
@@ -26,11 +28,42 @@ public class AdminUserService {
     this.localStorageService = localStorageService;
   }
 
-  public Page<AdminUserWithPlayerAndResumeDto> listUsers(Pageable pageable, List<Long> userIds) {
+  /**
+   * @param query case-insensitive substring of email or username, or null
+   * @param emailDomain email domain such as {@code gatech.edu} (a leading {@code @} is allowed),
+   *     matched exactly and case-insensitively, or null
+   */
+  public Page<AdminUserWithPlayerAndResumeDto> listUsers(
+      Pageable pageable, List<Long> userIds, String query, String emailDomain) {
     if (userIds != null && !userIds.isEmpty()) {
       return userRepository.findAllWithPlayersByIdIn(userIds, pageable);
     }
-    return userRepository.findAllWithPlayers(pageable);
+    String pattern = isBlank(query) ? "%" : "%" + escapeLike(normalize(query)) + "%";
+    String domain = isBlank(emailDomain) ? "" : normalize(emailDomain).replaceFirst("^@+", "");
+    String emailPattern = domain.isEmpty() ? "%" : "%@" + escapeLike(domain);
+    if (pattern.equals("%") && emailPattern.equals("%")) {
+      return userRepository.findAllWithPlayers(pageable);
+    }
+    return userRepository.searchWithPlayers(pattern, emailPattern, pageable);
+  }
+
+  private static boolean isBlank(String value) {
+    return value == null || value.isBlank();
+  }
+
+  private static String normalize(String value) {
+    return value.trim().toLowerCase(Locale.ROOT);
+  }
+
+  private static String escapeLike(String value) {
+    return value.replace("!", "!!").replace("%", "!%").replace("_", "!_");
+  }
+
+
+  public List<EmailDomainCountDto> listEmailDomains() {
+    return userRepository.countUsersByEmailDomain().stream()
+        .map(row -> new EmailDomainCountDto((String) row[0], ((Number) row[1]).longValue()))
+        .toList();
   }
 
   public ResumeDto getResume(UUID userUuid) {
