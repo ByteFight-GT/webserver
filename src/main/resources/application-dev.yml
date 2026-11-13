@@ -16,9 +16,7 @@ app:
       password: password
       username: admin
   signup:
-    allowed-domains:
-      - gatech.edu
-      - example.com
+    allowed-domains: []
 
 storage:
   root: ./storage
