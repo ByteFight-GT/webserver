@@ -13,6 +13,7 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.dto.AdminCreateMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.AdminGameMatchDto;
+import org.bytefight.webserver.gamematch.domain.dto.AdminRescheduleResultDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Game Match (Admin)")
 @RequestMapping("/api/v1/admin/game-match")
@@ -27,10 +29,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class AdminGameMatchController {
   private static final int DEFAULT_PAGE_SIZE = 25;
-  private static final int MAX_PAGE_SIZE = 100;
+  private static final int MAX_PAGE_SIZE = 500;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
-      Set.of("createdAt", "scheduledAt", "startedAt", "finishedAt", "status", "reason", "id");
+      Set.of(
+          "createdAt",
+          "scheduledAt",
+          "startedAt",
+          "finishedAt",
+          "status",
+          "reason",
+          "id",
+          "retries");
 
   private final AdminGameMatchService adminGameMatchService;
   private final GameMatchService gameMatchService;
@@ -53,13 +63,32 @@ public class AdminGameMatchController {
     return ResponseEntity.ok().build();
   }
 
+  @PostMapping("/reschedule")
+  public AdminRescheduleResultDto adminRescheduleMatches(@RequestBody List<Long> matchIds) {
+    if (matchIds == null || matchIds.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No match ids provided");
+    }
+    return adminGameMatchService.rescheduleMatches(matchIds);
+  }
+
   @GetMapping
   public Page<AdminGameMatchDto> adminListGameMatches(@ModelAttribute RestPageRequest pageRequest) {
     Pageable pageable =
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
-    Specification<GameMatch> specs = (root, cq, cb) -> cb.conjunction();
+    Specification<GameMatch> specs = GameMatchSpecifications.fromFilter(pageRequest.getFilter());
     return adminGameMatchService.list(specs, pageable);
+  }
+
+  @PostMapping("/{id}/fail")
+  public ResponseEntity<Void> adminFailGameMatch(@PathVariable Long id) {
+    adminGameMatchService.markFailed(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{id}")
+  public AdminGameMatchDto adminGetGameMatch(@PathVariable Long id) {
+    return adminGameMatchService.get(id);
   }
 
   @PostMapping
