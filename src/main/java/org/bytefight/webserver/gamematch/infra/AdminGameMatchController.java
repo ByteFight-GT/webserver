@@ -29,7 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class AdminGameMatchController {
   private static final int DEFAULT_PAGE_SIZE = 25;
-  private static final int MAX_PAGE_SIZE = 100;
+  private static final int MAX_PAGE_SIZE = 500;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
       Set.of("createdAt", "scheduledAt", "startedAt", "finishedAt", "status", "reason", "id");
@@ -68,7 +68,7 @@ public class AdminGameMatchController {
     Pageable pageable =
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
-    Specification<GameMatch> specs = (root, cq, cb) -> cb.conjunction();
+    Specification<GameMatch> specs = GameMatchSpecifications.fromFilter(pageRequest.getFilter());
     return adminGameMatchService.list(specs, pageable);
   }
 
