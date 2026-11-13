@@ -6,6 +6,7 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.domain.dto.AdminCreateCompetitionDto;
 import org.bytefight.webserver.competition.domain.dto.AdminUpdateCompetitionDto;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
+import org.bytefight.webserver.gamematch.application.GameOutcomeReasonService;
 import org.bytefight.webserver.ladder.application.LadderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminCompetitionService {
   private final LadderService ladderService;
   private final CompetitionRepository competitionRepository;
+  private final GameOutcomeReasonService gameOutcomeReasonService;
 
   public Page<Competition> listCompetitions(Pageable pageable) {
     return competitionRepository.findAll(pageable);
@@ -44,6 +46,7 @@ public class AdminCompetitionService {
     //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     competition = competitionRepository.save(competition);
+    gameOutcomeReasonService.ensureDefaultReasons(competition);
 
     ladderService.createLadder(
         competition, "validation", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);

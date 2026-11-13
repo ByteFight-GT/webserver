@@ -23,6 +23,8 @@ public class AdminGameMatchDto {
   @NotNull Long submissionBId;
   MatchStatus status;
   MatchReason reason;
+  String mapCode;
+  String outcomeReasonCode;
   Instant scheduledAt;
   Instant startedAt;
   Instant finishedAt;
@@ -44,6 +46,8 @@ public class AdminGameMatchDto {
         gameMatch.getSubmissionB().getId(),
         gameMatch.getStatus(),
         gameMatch.getReason(),
+        gameMatch.getMapCode(),
+        gameMatch.getOutcomeReasonCode(),
         gameMatch.getScheduledAt(),
         gameMatch.getStartedAt(),
         gameMatch.getFinishedAt(),
