@@ -2,6 +2,7 @@ package org.bytefight.webserver.gamematch.application;
 
 import jakarta.transaction.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -36,9 +37,19 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional
 public class AdminGameMatchService {
-  private static final Set<MatchStatus> RESCHEDULABLE_STATUSES =
+  /** Matches that haven't reached a final state and so can be failed by an admin. */
+  private static final Set<MatchStatus> FAILABLE_STATUSES =
       EnumSet.of(
-          MatchStatus.created, MatchStatus.scheduling, MatchStatus.waiting, MatchStatus.failed);
+          MatchStatus.created,
+          MatchStatus.scheduling,
+          MatchStatus.waiting,
+          MatchStatus.in_progress);
+
+  private static final String ADMIN_FAILED_REASON_CODE = "admin_marked_failed";
+
+  /** Failed is terminal, like the win/draw/validation outcomes, so it can't be rescheduled. */
+  private static final Set<MatchStatus> RESCHEDULABLE_STATUSES =
+      EnumSet.of(MatchStatus.created, MatchStatus.scheduling, MatchStatus.waiting);
 
   private final CompetitionRepository competitionRepository;
   private final GameMatchRepository gameMatchRepository;
@@ -69,6 +80,39 @@ public class AdminGameMatchService {
 
   public Page<AdminGameMatchDto> list(Specification<GameMatch> specs, Pageable pageable) {
     return gameMatchRepository.findAll(specs, pageable).map(AdminGameMatchDto::fromEntity);
+  }
+
+  /**
+   * Marks a not-yet-finished match as failed. Uses the same guarded update as engine results, so
+   * it can't overwrite a result that lands concurrently. Deliberately skips result side effects
+   * (Glicko, tournament advancement, submission validity).
+   */
+  public void markFailed(Long id) {
+    GameMatch match =
+        gameMatchRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Game match not found"));
+    int updated =
+        gameMatchRepository.finalizeMatchResult(
+            match.getUuid(),
+            MatchStatus.failed,
+            Instant.now(),
+            match.getMapCode(),
+            ADMIN_FAILED_REASON_CODE,
+            FAILABLE_STATUSES);
+    if (updated == 0) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Match is already finished (status " + match.getStatus() + ")");
+    }
+  }
+
+  public AdminGameMatchDto get(Long id) {
+    return gameMatchRepository
+        .findById(id)
+        .map(AdminGameMatchDto::fromEntity)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Game match not found"));
   }
 
   public GameMatch createMatch(AdminCreateMatchDto input) {

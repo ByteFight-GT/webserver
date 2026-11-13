@@ -72,6 +72,17 @@ public class AdminGameMatchController {
     return adminGameMatchService.list(specs, pageable);
   }
 
+  @PostMapping("/{id}/fail")
+  public ResponseEntity<Void> adminFailGameMatch(@PathVariable Long id) {
+    adminGameMatchService.markFailed(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{id}")
+  public AdminGameMatchDto adminGetGameMatch(@PathVariable Long id) {
+    return adminGameMatchService.get(id);
+  }
+
   @PostMapping
   public ResponseEntity<AdminGameMatchDto> adminCreateGameMatch(
       @Valid @RequestBody AdminCreateMatchDto input) {
