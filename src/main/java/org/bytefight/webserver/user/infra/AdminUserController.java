@@ -3,6 +3,8 @@ package org.bytefight.webserver.user.infra;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.UUID;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.user.application.AdminUserService;
+import org.bytefight.webserver.user.domain.dto.AdminUpdateUserDto;
 import org.bytefight.webserver.user.domain.dto.AdminUserDetailDto;
 import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerAndResumeDto;
 import org.bytefight.webserver.user.domain.dto.EmailDomainCountDto;
@@ -25,7 +28,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -112,6 +117,19 @@ public class AdminUserController {
   public ResponseEntity<AdminUserDetailDto> getOne(@PathVariable long id) {
     try {
       return ResponseEntity.ok(adminUserService.getUserDetail(id));
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @PatchMapping("/{id:\\d+}")
+  @Operation(
+      operationId = "adminUpdateUser",
+      summary = "Update a user's service-account/eligibility flags and player profile")
+  public ResponseEntity<AdminUserDetailDto> update(
+      @PathVariable long id, @Valid @RequestBody AdminUpdateUserDto input) {
+    try {
+      return ResponseEntity.ok(adminUserService.updateUser(id, input));
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
