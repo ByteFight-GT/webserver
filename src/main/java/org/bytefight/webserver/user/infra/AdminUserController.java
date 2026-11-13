@@ -3,6 +3,8 @@ package org.bytefight.webserver.user.infra;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +15,10 @@ import java.util.UUID;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
 import org.bytefight.webserver.user.application.AdminUserService;
+import org.bytefight.webserver.user.domain.dto.AdminUpdateUserDto;
+import org.bytefight.webserver.user.domain.dto.AdminUserDetailDto;
 import org.bytefight.webserver.user.domain.dto.AdminUserWithPlayerAndResumeDto;
+import org.bytefight.webserver.user.domain.dto.EmailDomainCountDto;
 import org.bytefight.webserver.user.domain.dto.ResumeDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +28,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,9 +42,26 @@ public class AdminUserController {
   private static final int DEFAULT_PAGE_SIZE = 25;
   private static final int MAX_PAGE_SIZE = 100;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
-  private static final Set<String> ALLOWED_SORT_FIELDS =
-      Set.of("createdAt", "email", "isAdmin", "uuid", "resumeUuid");
-  private static final Map<String, String> SORT_FIELD_MAPPING = Map.of("resumeUuid", "r.uuid");
+  private static final String TIEBREAK_SORT_PATH = "u.id";
+
+  /**
+   * Admin list field name (as sent by react-admin) -> fully qualified JPQL path in the
+   * UserRepository list queries ({@code FROM User u LEFT JOIN Player p ... LEFT JOIN u.resume r}).
+   * Paths are qualified explicitly so they never depend on Spring Data's alias auto-prefixing.
+   */
+  private static final Map<String, String> SORT_FIELD_MAPPING =
+      Map.of(
+          "id", "u.id",
+          "uuid", "u.uuid",
+          "email", "u.email",
+          "createdAt", "u.createdAt",
+          "admin", "u.isAdmin",
+          "isAdmin", "u.isAdmin",
+          "playerUsername", "p.username",
+          "resumeUuid", "r.uuid");
+
+  /** Unknown/unsupported sort fields fall back to {@link #DEFAULT_SORT_FIELD} in RestPageable. */
+  private static final Set<String> ALLOWED_SORT_FIELDS = SORT_FIELD_MAPPING.keySet();
 
   private final AdminUserService adminUserService;
 
@@ -53,25 +77,62 @@ public class AdminUserController {
         pageRequest.toPageable(
             DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_SORT_FIELD, ALLOWED_SORT_FIELDS);
     pageable = remapSort(pageable);
-    List<Long> userIds = parseUserIds(pageRequest.getFilter());
-    return adminUserService.listUsers(pageable, userIds);
+    Map<String, Object> filter = pageRequest.getFilter();
+    List<Long> userIds = parseUserIds(filter);
+    return adminUserService.listUsers(
+        pageable, userIds, stringFilter(filter, "q"), stringFilter(filter, "emailDomain"));
   }
 
+  /**
+   * Translates list field names to JPQL paths, drops anything unmapped, and appends {@code u.id}
+   * as a tiebreaker so pagination is stable when the primary sort key has duplicates/nulls.
+   */
   private static Pageable remapSort(Pageable pageable) {
-    Sort original = pageable.getSort();
-    if (original.isUnsorted()) {
-      return pageable;
+    List<Sort.Order> orders = new ArrayList<>();
+    for (Sort.Order o : pageable.getSort()) {
+      String path = SORT_FIELD_MAPPING.get(o.getProperty());
+      if (path != null) {
+        orders.add(new Sort.Order(o.getDirection(), path));
+      }
     }
-    Sort remapped =
-        Sort.by(
-            original.stream()
-                .map(
-                    o ->
-                        new Sort.Order(
-                            o.getDirection(),
-                            SORT_FIELD_MAPPING.getOrDefault(o.getProperty(), o.getProperty())))
-                .toList());
-    return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), remapped);
+    if (orders.isEmpty()) {
+      orders.add(Sort.Order.desc(SORT_FIELD_MAPPING.get(DEFAULT_SORT_FIELD)));
+    }
+    if (orders.stream().noneMatch(o -> o.getProperty().equals(TIEBREAK_SORT_PATH))) {
+      orders.add(new Sort.Order(orders.get(0).getDirection(), TIEBREAK_SORT_PATH));
+    }
+    return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+  }
+
+  @GetMapping("/email-domains")
+  @Operation(
+      operationId = "adminListUserEmailDomains",
+      summary = "List distinct user email domains with user counts")
+  public List<EmailDomainCountDto> listEmailDomains() {
+    return adminUserService.listEmailDomains();
+  }
+
+  @GetMapping("/{id:\\d+}")
+  @Operation(operationId = "adminGetUser", summary = "Get full detail for one user")
+  public ResponseEntity<AdminUserDetailDto> getOne(@PathVariable long id) {
+    try {
+      return ResponseEntity.ok(adminUserService.getUserDetail(id));
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @PatchMapping("/{id:\\d+}")
+  @Operation(
+      operationId = "adminUpdateUser",
+      summary = "Update a user's service-account/eligibility flags and player profile")
+  public ResponseEntity<AdminUserDetailDto> update(
+      @PathVariable long id, @Valid @RequestBody AdminUpdateUserDto input) {
+    try {
+      return ResponseEntity.ok(adminUserService.updateUser(id, input));
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping("/{userUuid}/resume")
@@ -84,6 +145,10 @@ public class AdminUserController {
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  private static String stringFilter(Map<String, Object> filter, String key) {
+    return filter.get(key) instanceof String text ? text : null;
   }
 
   private static List<Long> parseUserIds(Map<String, Object> filter) {
