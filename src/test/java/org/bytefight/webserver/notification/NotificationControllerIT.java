@@ -147,6 +147,7 @@ class NotificationControllerIT extends FullStackIntegrationTestBase {
         .andExpect(jsonPath("$.count").value(2));
 
     mockMvc.perform(post(BASE + "/mark-read").with(user(user))).andExpect(status().isNoContent());
+    user = userRepository.findById(user.getId()).orElseThrow();
 
     mockMvc
         .perform(get(BASE + "/unread-count").with(user(user)))
