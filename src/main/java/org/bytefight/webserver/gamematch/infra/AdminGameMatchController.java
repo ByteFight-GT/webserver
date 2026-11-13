@@ -32,7 +32,15 @@ public class AdminGameMatchController {
   private static final int MAX_PAGE_SIZE = 500;
   private static final String DEFAULT_SORT_FIELD = "createdAt";
   private static final Set<String> ALLOWED_SORT_FIELDS =
-      Set.of("createdAt", "scheduledAt", "startedAt", "finishedAt", "status", "reason", "id");
+      Set.of(
+          "createdAt",
+          "scheduledAt",
+          "startedAt",
+          "finishedAt",
+          "status",
+          "reason",
+          "id",
+          "retries");
 
   private final AdminGameMatchService adminGameMatchService;
   private final GameMatchService gameMatchService;
