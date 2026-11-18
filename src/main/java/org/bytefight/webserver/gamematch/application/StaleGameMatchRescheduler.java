@@ -22,7 +22,7 @@ public class StaleGameMatchRescheduler {
   private final GameMatchRepository gameMatchRepository;
   private final GameMatchProperties matchProperties;
 
-  @Scheduled(fixedRate = 60000)
+//  @Scheduled(fixedRate = 60000)
   @Transactional
   public void rescheduleStaleGameMatches() {
     List<GameMatch> staleGameMatches =
