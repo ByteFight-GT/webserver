@@ -52,6 +52,9 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
   Optional<Player> findByUser(User user);
 
+  @Query("SELECT p FROM Player p JOIN FETCH p.user WHERE p.id = :playerId")
+  Optional<Player> findByIdWithUser(@Param("playerId") Long playerId);
+
   boolean existsByUserUuid(UUID authId);
 
   boolean existsByUsername(String username);
