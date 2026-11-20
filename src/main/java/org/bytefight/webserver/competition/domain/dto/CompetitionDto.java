@@ -18,6 +18,7 @@ public class CompetitionDto {
   @NotNull boolean isActive;
   @NotNull boolean isWhitelisted;
   @NotNull boolean internal;
+  @NotNull int maxPlayersPerTeam;
   @NotNull boolean allowNewSubmission;
   @NotNull boolean allowSetSubmission;
   @NotNull boolean allowCreateTeam;
@@ -36,6 +37,7 @@ public class CompetitionDto {
         .isActive(competition.isActive())
         .isWhitelisted(competition.isWhitelisted())
         .internal(competition.isInternal())
+        .maxPlayersPerTeam(competition.getMaxPlayersPerTeam())
         .allowNewSubmission(competition.isAllowNewSubmission())
         .allowSetSubmission(competition.isAllowSetSubmission())
         .allowCreateTeam(competition.isAllowCreateTeam())
