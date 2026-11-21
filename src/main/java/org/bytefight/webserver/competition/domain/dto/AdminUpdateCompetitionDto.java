@@ -1,9 +1,12 @@
 package org.bytefight.webserver.competition.domain.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Value;
 
 import java.util.Map;
+
+import org.bytefight.webserver.competition.domain.Competition;
 
 @Value
 public class AdminUpdateCompetitionDto {
@@ -19,6 +22,11 @@ public class AdminUpdateCompetitionDto {
   Boolean allowLeaveTeam;
   Boolean allowEditTeamName;
   Boolean allowCreateUserMatch;
+  Boolean leaderboardPagination;
+
+  @Min(1)
+  @Max(Competition.MAX_LEADERBOARD_PAGE_SIZE)
+  Integer leaderboardPageSize;
 
   @Min(1)
   Integer maxPlayersPerTeam;

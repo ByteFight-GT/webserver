@@ -26,6 +26,8 @@ public class CompetitionDto {
   @NotNull boolean allowLeaveTeam;
   @NotNull boolean allowEditTeamName;
   @NotNull boolean allowCreateUserMatch;
+  @NotNull boolean leaderboardPagination;
+  @NotNull int leaderboardPageSize;
   @NotNull Map<String, Object> settings;
   @NotNull TimestampsDto timestamps;
 
@@ -45,6 +47,8 @@ public class CompetitionDto {
         .allowLeaveTeam(competition.isAllowLeaveTeam())
         .allowEditTeamName(competition.isAllowEditTeamName())
         .allowCreateUserMatch(competition.isAllowCreateUserMatch())
+        .leaderboardPagination(competition.isLeaderboardPagination())
+        .leaderboardPageSize(competition.getLeaderboardPageSize())
         .settings(competition.getSettings())
         .timestamps(TimestampsDto.from(competition))
         .build();

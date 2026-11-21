@@ -20,6 +20,9 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "competitions")
 public class Competition extends BaseEntity {
+  public static final int DEFAULT_LEADERBOARD_PAGE_SIZE = 25;
+  public static final int MAX_LEADERBOARD_PAGE_SIZE = 200;
+
   @Column(name = "slug", nullable = false, unique = true, length = 255)
   private String slug;
 
@@ -68,6 +71,12 @@ public class Competition extends BaseEntity {
 
   @Column(name = "allow_create_user_match", nullable = false)
   private boolean allowCreateUserMatch;
+
+  @Column(name = "leaderboard_pagination", nullable = false)
+  private boolean leaderboardPagination = false;
+
+  @Column(name = "leaderboard_page_size", nullable = false)
+  private int leaderboardPageSize = DEFAULT_LEADERBOARD_PAGE_SIZE;
 
   @Override
   public int hashCode() {

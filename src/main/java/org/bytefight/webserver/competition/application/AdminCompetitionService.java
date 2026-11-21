@@ -41,8 +41,6 @@ public class AdminCompetitionService {
     competition.setName(input.getName());
     competition.setActive(false);
 
-    //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
-
     competition = competitionRepository.save(competition);
 
     ladderService.createLadder(
@@ -100,11 +98,29 @@ public class AdminCompetitionService {
     if (input.getAllowCreateUserMatch() != null) {
       competition.setAllowCreateUserMatch(input.getAllowCreateUserMatch());
     }
+    applyLeaderboardSettings(
+        competition, input.getLeaderboardPagination(), input.getLeaderboardPageSize());
     if (input.getSettings() != null) {
       competition.setSettings(input.getSettings());
     }
-    //    competition.setTeamSubmissionStorageSize(200 * 1000 * 1000);
 
     return competitionRepository.save(competition);
+  }
+
+  public Competition updateLeaderboardSettings(
+      Long id, Boolean leaderboardPagination, Integer leaderboardPageSize) {
+    Competition competition = getCompetition(id);
+    applyLeaderboardSettings(competition, leaderboardPagination, leaderboardPageSize);
+    return competitionRepository.save(competition);
+  }
+
+  private static void applyLeaderboardSettings(
+      Competition competition, Boolean leaderboardPagination, Integer leaderboardPageSize) {
+    if (leaderboardPagination != null) {
+      competition.setLeaderboardPagination(leaderboardPagination);
+    }
+    if (leaderboardPageSize != null) {
+      competition.setLeaderboardPageSize(leaderboardPageSize);
+    }
   }
 }

@@ -23,7 +23,9 @@ public record AdminCompetitionDto(
     boolean allowJoinTeam,
     boolean allowLeaveTeam,
     boolean allowEditTeamName,
-    boolean allowCreateUserMatch) {
+    boolean allowCreateUserMatch,
+    boolean leaderboardPagination,
+    int leaderboardPageSize) {
   public static AdminCompetitionDto from(Competition competition) {
     return new AdminCompetitionDto(
         competition.getId(),
@@ -43,6 +45,8 @@ public record AdminCompetitionDto(
         competition.isAllowJoinTeam(),
         competition.isAllowLeaveTeam(),
         competition.isAllowEditTeamName(),
-        competition.isAllowCreateUserMatch());
+        competition.isAllowCreateUserMatch(),
+        competition.isLeaderboardPagination(),
+        competition.getLeaderboardPageSize());
   }
 }
