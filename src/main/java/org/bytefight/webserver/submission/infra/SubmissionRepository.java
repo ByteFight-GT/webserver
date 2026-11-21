@@ -17,6 +17,29 @@ import org.springframework.stereotype.Repository;
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   List<Submission> findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(Team team);
 
+  @Query(
+      """
+        SELECT s, gm
+        FROM Submission s
+        JOIN FETCH s.fileRecord
+        JOIN FETCH s.team t
+        JOIN FETCH t.competition
+        LEFT JOIN GameMatch gm
+          ON gm.id = (
+            SELECT MAX(gm2.id)
+            FROM GameMatch gm2
+            WHERE gm2.submissionA = s
+              AND gm2.status IN (
+                org.bytefight.webserver.gamematch.domain.MatchStatus.submission_valid,
+                org.bytefight.webserver.gamematch.domain.MatchStatus.submission_invalid
+              )
+          )
+        WHERE s.team = :team
+          AND s.deletedAt IS NULL
+        ORDER BY s.createdAt DESC
+    """)
+  List<Object[]> findWithValidationMatchByTeam(@Param("team") Team team);
+
   Optional<Submission> findSubmissionByTeamAndUuidAndDeletedAtNull(Team team, UUID uuid);
 
   Optional<Submission> findSubmissionByUuidAndDeletedAtNull(UUID uuid);

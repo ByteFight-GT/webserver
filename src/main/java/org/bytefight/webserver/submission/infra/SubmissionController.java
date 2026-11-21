@@ -15,6 +15,7 @@ import org.bytefight.webserver.gamematch.application.GameMatchService;
 import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
@@ -61,8 +62,7 @@ public class SubmissionController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
     }
 
-    return ResponseEntity.ok(
-        submissionService.listSubmissionsByTeam(team).stream().map(SubmissionDto::from).toList());
+    return ResponseEntity.ok(submissionService.listSubmissionDtosByTeam(team));
   }
 
   @GetMapping("/team/{teamUuid}/status")
@@ -151,14 +151,14 @@ public class SubmissionController {
             null,
             null);
 
-    gameMatchService.scheduleMatch(validation);
+    validation = gameMatchService.scheduleMatch(validation);
 
     log.info(
         "Submission uploaded: submissionId={}, teamId={}, userId={}",
         submission.getUuid(),
         teamUuid,
         user.getUuid());
-    return ResponseEntity.ok(SubmissionDto.from(submission));
+    return ResponseEntity.ok(SubmissionDto.from(submission, GameMatchDto.fromEntity(validation)));
   }
 
   @DeleteMapping(path = "/team/{teamUuid}/{submissionUuid}")
