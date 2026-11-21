@@ -1,9 +1,11 @@
 package org.bytefight.webserver.submission.infra;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
 import org.springframework.data.domain.Page;
@@ -29,16 +31,25 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             SELECT MAX(gm2.id)
             FROM GameMatch gm2
             WHERE gm2.submissionA = s
-              AND gm2.status IN (
-                org.bytefight.webserver.gamematch.domain.MatchStatus.submission_valid,
-                org.bytefight.webserver.gamematch.domain.MatchStatus.submission_invalid
-              )
+              AND gm2.status IN :statuses
           )
         WHERE s.team = :team
           AND s.deletedAt IS NULL
         ORDER BY s.createdAt DESC
     """)
-  List<Object[]> findWithValidationMatchByTeam(@Param("team") Team team);
+  List<Object[]> findWithLatestMatchInStatusesByTeam(
+      @Param("team") Team team, @Param("statuses") Collection<MatchStatus> statuses);
+
+  List<MatchStatus> VALIDATION_RESULT_STATUSES =
+      List.of(MatchStatus.submission_valid, MatchStatus.submission_invalid);
+
+  /**
+   * Lists a team's undeleted submissions, newest first, each with its latest finished validation
+   * match. Each row is {@code [Submission, GameMatch]}, where the match may be null.
+   */
+  default List<Object[]> findWithValidationMatchByTeam(Team team) {
+    return findWithLatestMatchInStatusesByTeam(team, VALIDATION_RESULT_STATUSES);
+  }
 
   Optional<Submission> findSubmissionByTeamAndUuidAndDeletedAtNull(Team team, UUID uuid);
 
