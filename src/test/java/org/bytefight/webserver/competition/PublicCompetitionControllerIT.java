@@ -45,6 +45,17 @@ class PublicCompetitionControllerIT extends FullStackIntegrationTestBase {
   }
 
   @Test
+  void getCompetitionBySlugIncludesMaxPlayersPerTeam() throws Exception {
+    testDataFactory.createCompetition("comp-1", "Competition One", true, 4);
+
+    mockMvc
+        .perform(get("/api/v1/public/competition/comp-1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.slug").value("comp-1"))
+        .andExpect(jsonPath("$.maxPlayersPerTeam").value(4));
+  }
+
+  @Test
   void getAllCompetitionsHidesInternalCompetitionsFromAnonymousCallers() throws Exception {
     testDataFactory.createCompetition("comp-public", "Public Competition", true, 2);
     createInternalCompetition("comp-internal");

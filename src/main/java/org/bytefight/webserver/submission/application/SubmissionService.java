@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bytefight.webserver.gamematch.domain.GameMatch;
+import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -17,6 +19,7 @@ import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.SubmissionValidity;
+import org.bytefight.webserver.submission.domain.dto.SubmissionDto;
 import org.bytefight.webserver.submission.infra.SubmissionRepository;
 import org.bytefight.webserver.team.application.TeamService;
 import org.bytefight.webserver.team.domain.Team;
@@ -139,6 +142,19 @@ public class SubmissionService {
 
   public List<Submission> listSubmissionsByTeam(Team team) {
     return submissionRepository.findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(team);
+  }
+
+  public List<SubmissionDto> listSubmissionDtosByTeam(Team team) {
+    return submissionRepository.findWithValidationMatchByTeam(team).stream()
+        .map(
+            row -> {
+              Submission submission = (Submission) row[0];
+              GameMatch validationMatch = (GameMatch) row[1];
+              return SubmissionDto.from(
+                  submission,
+                  validationMatch != null ? GameMatchDto.fromEntity(validationMatch) : null);
+            })
+        .toList();
   }
 
   public long getTeamSubmissionStorageSize(Team team) {
