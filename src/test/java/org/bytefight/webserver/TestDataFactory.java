@@ -7,9 +7,14 @@ import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.competition.infra.CompetitionRepository;
 import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.ladder.infra.LadderRepository;
+import org.bytefight.webserver.notification.domain.Notification;
+import org.bytefight.webserver.notification.domain.NotificationPriority;
+import org.bytefight.webserver.notification.infra.NotificationRepository;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.player.infra.PlayerRepository;
 import org.bytefight.webserver.team.domain.Team;
+import org.bytefight.webserver.team.domain.TeamMember;
+import org.bytefight.webserver.team.infra.TeamMemberRepository;
 import org.bytefight.webserver.team.infra.TeamRepository;
 import org.bytefight.webserver.user.domain.User;
 import org.bytefight.webserver.user.infra.UserRepository;
@@ -22,18 +27,24 @@ public class TestDataFactory {
   private final UserRepository userRepository;
   private final PlayerRepository playerRepository;
   private final LadderRepository ladderRepository;
+  private final TeamMemberRepository teamMemberRepository;
+  private final NotificationRepository notificationRepository;
 
   public TestDataFactory(
       CompetitionRepository competitionRepository,
       TeamRepository teamRepository,
       UserRepository userRepository,
       PlayerRepository playerRepository,
-      LadderRepository ladderRepository) {
+      LadderRepository ladderRepository,
+      TeamMemberRepository teamMemberRepository,
+      NotificationRepository notificationRepository) {
     this.competitionRepository = competitionRepository;
     this.teamRepository = teamRepository;
     this.userRepository = userRepository;
     this.playerRepository = playerRepository;
     this.ladderRepository = ladderRepository;
+    this.teamMemberRepository = teamMemberRepository;
+    this.notificationRepository = notificationRepository;
   }
 
   public Competition createCompetition() {
@@ -147,5 +158,26 @@ public class TestDataFactory {
   public Player createUserWithPlayer(String email, String username) {
     User user = createUser(email, false);
     return createPlayer(user, username);
+  }
+
+  public TeamMember addTeamMember(Team team, Player player) {
+    TeamMember member = new TeamMember();
+    member.setTeam(team);
+    member.setPlayer(player);
+    member.setCompetition(team.getCompetition());
+    return teamMemberRepository.save(member);
+  }
+
+  /** Saved straight through the repository so tests can create already-expired notifications. */
+  public Notification createNotification(
+      String title, Competition competition, NotificationPriority priority, Instant expireAt) {
+    return notificationRepository.save(
+        Notification.builder()
+            .title(title)
+            .body("Body of " + title)
+            .priority(priority)
+            .competition(competition)
+            .expireAt(expireAt)
+            .build());
   }
 }
