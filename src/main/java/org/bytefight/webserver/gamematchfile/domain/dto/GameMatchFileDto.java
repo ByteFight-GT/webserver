@@ -6,6 +6,7 @@ import lombok.Value;
 
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 
 @Value
@@ -16,6 +17,7 @@ public class GameMatchFileDto {
   @NotNull String slug;
   @NotNull String fileRecordUuid;
   String teamUuid;
+  @NotNull GameMatchFileVisibility visibility;
   @NotNull TimestampsDto timestamps;
   DownloadLinkDto downloadLink;
 
@@ -27,6 +29,7 @@ public class GameMatchFileDto {
         .fileRecordUuid(gameMatchFile.getFileRecord().getUuid().toString())
         .teamUuid(
             gameMatchFile.getTeam() != null ? gameMatchFile.getTeam().getUuid().toString() : null)
+        .visibility(gameMatchFile.getVisibility())
         .timestamps(TimestampsDto.from(gameMatchFile))
         .downloadLink(downloadLink)
         .build();

@@ -18,6 +18,7 @@ import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchJob;
 import org.bytefight.webserver.gamematch.infra.GameMatchProperties;
 import org.bytefight.webserver.gamematch.infra.GameMatchRepository;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.rabbitmq.application.RabbitMQService;
@@ -304,11 +305,12 @@ public class GameMatchService {
         page);
   }
 
-  public Optional<GameMatchDto> getDTOByUuid(String uuid) {
+  public Optional<GameMatchDto> getDTOByUuid(
+      String uuid, java.util.function.Predicate<GameMatchFile> visibleFiles) {
     return gameMatchRepository
         .findByUuid(UUID.fromString(uuid))
         .filter(gameMatch -> accessGuard.canAccess(gameMatch.getCompetition()))
-        .map(GameMatchDto::fromEntity);
+        .map(gameMatch -> GameMatchDto.fromEntity(gameMatch, visibleFiles));
   }
 
   public long countTeamQueuedMatchesByLadder(Team team, Ladder ladder) {

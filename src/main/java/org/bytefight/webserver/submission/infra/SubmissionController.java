@@ -16,6 +16,7 @@ import org.bytefight.webserver.gamematch.domain.DefaultLadders;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematchfile.application.GameMatchFileService;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
@@ -42,6 +43,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SubmissionController {
   private final SubmissionService submissionService;
   private final GameMatchService gameMatchService;
+  private final GameMatchFileService gameMatchFileService;
   private final TeamService teamService;
   private final PlayerService playerService;
 
@@ -62,7 +64,8 @@ public class SubmissionController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not a member of this team");
     }
 
-    return ResponseEntity.ok(submissionService.listSubmissionDtosByTeam(team));
+    return ResponseEntity.ok(
+        submissionService.listSubmissionDtosByTeam(team, gameMatchFileService.visibleTo(user)));
   }
 
   @GetMapping("/team/{teamUuid}/status")
@@ -158,7 +161,9 @@ public class SubmissionController {
         submission.getUuid(),
         teamUuid,
         user.getUuid());
-    return ResponseEntity.ok(SubmissionDto.from(submission, GameMatchDto.fromEntity(validation)));
+    return ResponseEntity.ok(
+        SubmissionDto.from(
+            submission, GameMatchDto.fromEntity(validation, gameMatchFileService.visibleTo(user))));
   }
 
   @DeleteMapping(path = "/team/{teamUuid}/{submissionUuid}")
