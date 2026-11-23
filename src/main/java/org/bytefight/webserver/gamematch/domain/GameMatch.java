@@ -6,14 +6,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.bytefight.webserver.common.domain.AuditableEntity;
 import org.bytefight.webserver.competition.domain.Competition;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.matchmaking.domain.MatchmakingEvent;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.team.domain.Team;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -92,4 +96,8 @@ public class GameMatch extends AuditableEntity {
 
   @Column(name = "retries", nullable = false)
   private Integer retries = 0;
+
+  @OneToMany(mappedBy = "gameMatch", fetch = FetchType.LAZY)
+  @BatchSize(size = 50)
+  private List<GameMatchFile> files = new ArrayList<>();
 }

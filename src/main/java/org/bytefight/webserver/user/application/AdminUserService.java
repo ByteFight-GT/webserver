@@ -93,7 +93,6 @@ public class AdminUserService {
     return value.replace("!", "!!").replace("%", "!%").replace("_", "!_");
   }
 
-
   /**
    * Applies an admin edit and returns the updated detail. Username changes go through {@link
    * PlayerService#setUsername} so normalization and the uniqueness check stay in one place.

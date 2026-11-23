@@ -3,6 +3,8 @@ package org.bytefight.webserver.gamematch.infra;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import java.util.function.Predicate;
+
 import org.bytefight.webserver.competition.application.CompetitionService;
 import org.bytefight.webserver.competition.domain.Competition;
 import org.bytefight.webserver.gamematch.application.GameMatchService;
@@ -10,11 +12,15 @@ import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematchfile.application.GameMatchFileService;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
+import org.bytefight.webserver.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,17 +31,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class PublicGameMatchController {
   private final GameMatchService gameMatchService;
   private final CompetitionService competitionService;
+  private final GameMatchFileService gameMatchFileService;
 
   @GetMapping("/{uuid}")
-  public ResponseEntity<GameMatchDto> getGameMatchByUuid(@PathVariable String uuid) {
+  public ResponseEntity<GameMatchDto> getGameMatchByUuid(
+      @AuthenticationPrincipal User user, @PathVariable String uuid) {
     return ResponseEntity.ok(
         gameMatchService
-            .getDTOByUuid(uuid)
+            .getDTOByUuid(uuid, gameMatchFileService.visibleTo(user))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
   }
 
   @GetMapping
   public ResponseEntity<Page<GameMatchDto>> searchGameMatches(
+      @AuthenticationPrincipal User user,
       @RequestParam String competitionSlug,
       @RequestParam(required = false) String teamUuid,
       @RequestParam(required = false) String opponentTeamName,
@@ -68,11 +77,13 @@ public class PublicGameMatchController {
             matchStatus,
             pageRequest);
 
-    return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
+    Predicate<GameMatchFile> visibleFiles = gameMatchFileService.visibleTo(user);
+    return ResponseEntity.ok(gameMatches.map(m -> GameMatchDto.fromEntity(m, visibleFiles)));
   }
 
   @GetMapping("/queue/{competitionSlug}")
   public ResponseEntity<Page<GameMatchDto>> getCompetitionGameMatchQueue(
+      @AuthenticationPrincipal User user,
       @PathVariable String competitionSlug,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
@@ -84,6 +95,7 @@ public class PublicGameMatchController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     Page<GameMatch> gameMatches = gameMatchService.getFullPaginatedQueue(competition, pageRequest);
 
-    return ResponseEntity.ok(gameMatches.map(GameMatchDto::fromEntity));
+    Predicate<GameMatchFile> visibleFiles = gameMatchFileService.visibleTo(user);
+    return ResponseEntity.ok(gameMatches.map(m -> GameMatchDto.fromEntity(m, visibleFiles)));
   }
 }

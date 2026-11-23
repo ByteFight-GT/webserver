@@ -15,6 +15,7 @@ import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.dto.CreateMatchDto;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematchfile.application.GameMatchFileService;
 import org.bytefight.webserver.ladder.application.LadderService;
 import org.bytefight.webserver.ladder.domain.Ladder;
 import org.bytefight.webserver.player.application.PlayerService;
@@ -40,6 +41,7 @@ public class PrivateGameMatchController {
   private final TeamService teamService;
   private final LadderService ladderService;
   private final GameMatchService gameMatchService;
+  private final GameMatchFileService gameMatchFileService;
 
   @PostMapping
   public ResponseEntity<List<GameMatchDto>> createGameMatch(
@@ -141,7 +143,10 @@ public class PrivateGameMatchController {
       gameMatches.add(gameMatch);
     }
 
+    var visibleFiles = gameMatchFileService.visibleTo(user);
     return ResponseEntity.ok(
-        gameMatches.stream().map(GameMatchDto::fromEntity).collect(Collectors.toList()));
+        gameMatches.stream()
+            .map(m -> GameMatchDto.fromEntity(m, visibleFiles))
+            .collect(Collectors.toList()));
   }
 }
