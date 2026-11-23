@@ -206,6 +206,12 @@ public class TeamService {
         .collect(Collectors.toSet());
   }
 
+  public Set<Long> getCompetitionIds(Player player) {
+    return teamMemberRepository.findByPlayerAndTeamDeletedAtNull(player).stream()
+        .map(member -> member.getCompetition().getId())
+        .collect(Collectors.toSet());
+  }
+
   public boolean isMember(Team team, Player player) {
     if (team == null || player == null) {
       throw new IllegalArgumentException("Team and player are required");
