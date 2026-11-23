@@ -7,12 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.bytefight.webserver.common.domain.dto.TimestampsDto;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.MatchReason;
 import org.bytefight.webserver.gamematch.domain.MatchStatus;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
+import org.bytefight.webserver.gamematchfile.domain.dto.GameMatchFileDto;
 
 @Data
 @Builder
@@ -35,8 +39,10 @@ public class GameMatchDto {
   @NotNull private Instant finishedAt;
   @NotNull TimestampsDto timestampsDto;
 
-  // Convert from Entity to DTO
-  public static GameMatchDto fromEntity(GameMatch gameMatch) {
+  @NotNull private List<GameMatchFileDto> files;
+
+  public static GameMatchDto fromEntity(
+      GameMatch gameMatch, Predicate<GameMatchFile> visibleFiles) {
     return GameMatchDto.builder()
         .uuid(gameMatch.getUuid().toString())
         .competitionSlug(gameMatch.getCompetition().getSlug())
@@ -53,6 +59,11 @@ public class GameMatchDto {
         .startedAt(gameMatch.getStartedAt())
         .finishedAt(gameMatch.getFinishedAt())
         .timestampsDto(TimestampsDto.from(gameMatch))
+        .files(
+            gameMatch.getFiles().stream()
+                .filter(visibleFiles)
+                .map(f -> GameMatchFileDto.from(f, null))
+                .toList())
         .build();
   }
 }

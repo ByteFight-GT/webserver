@@ -9,9 +9,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.bytefight.webserver.gamematch.domain.GameMatch;
 import org.bytefight.webserver.gamematch.domain.dto.GameMatchDto;
+import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.player.application.PlayerService;
 import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
@@ -144,7 +146,8 @@ public class SubmissionService {
     return submissionRepository.findSubmissionsByTeamAndDeletedAtNullOrderByCreatedAtDesc(team);
   }
 
-  public List<SubmissionDto> listSubmissionDtosByTeam(Team team) {
+  public List<SubmissionDto> listSubmissionDtosByTeam(
+      Team team, Predicate<GameMatchFile> visibleFiles) {
     return submissionRepository.findWithValidationMatchByTeam(team).stream()
         .map(
             row -> {
@@ -152,7 +155,9 @@ public class SubmissionService {
               GameMatch validationMatch = (GameMatch) row[1];
               return SubmissionDto.from(
                   submission,
-                  validationMatch != null ? GameMatchDto.fromEntity(validationMatch) : null);
+                  validationMatch != null
+                      ? GameMatchDto.fromEntity(validationMatch, visibleFiles)
+                      : null);
             })
         .toList();
   }

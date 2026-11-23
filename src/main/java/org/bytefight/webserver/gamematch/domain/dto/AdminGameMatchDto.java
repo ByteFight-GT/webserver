@@ -27,6 +27,7 @@ public class AdminGameMatchDto {
   Instant startedAt;
   Instant finishedAt;
   @NotNull Instant createdAt;
+
   /** How many times the engine failed this match and dead-lettered it for retry. */
   @NotNull Integer retries;
 

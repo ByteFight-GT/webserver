@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
 import org.bytefight.webserver.gamematch.domain.GameMatch;
@@ -14,7 +16,6 @@ import org.bytefight.webserver.gamematchfile.domain.GameMatchFile;
 import org.bytefight.webserver.gamematchfile.domain.GameMatchFileVisibility;
 import org.bytefight.webserver.gamematchfile.infra.GameMatchFileRepository;
 import org.bytefight.webserver.player.application.PlayerService;
-import org.bytefight.webserver.player.domain.Player;
 import org.bytefight.webserver.storage.application.LocalStorageService;
 import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.storage.domain.FileRecord;
@@ -55,35 +56,30 @@ public class GameMatchFileService {
   }
 
   public DownloadLinkDto getDownloadLink(User requestingUser, GameMatchFile gameMatchFile) {
-    if (requestingUser.isAdmin()) {
-      return storageService.getDownloadLink(
-          gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
-    }
-
-    if (gameMatchFile.getVisibility() == GameMatchFileVisibility.admin) {
+    if (!visibleTo(requestingUser).test(gameMatchFile)) {
       throw new AccessDeniedException("You do not have permission to access this file");
     }
 
-    if (gameMatchFile.getVisibility() == GameMatchFileVisibility.team
-        && gameMatchFile.getTeam() != null) {
-      Player player =
-          playerService
-              .getPlayer(requestingUser)
-              .orElseThrow(
-                  () ->
-                      new AccessDeniedException("You do not have permission to access this file"));
-      if (teamService.isMember(gameMatchFile.getTeam(), player)) {
-        return storageService.getDownloadLink(
-            gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
-      }
+    return storageService.getDownloadLink(
+        gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
+  }
+
+  public Predicate<GameMatchFile> visibleTo(User viewer) {
+    if (viewer != null && viewer.isAdmin()) {
+      return file -> true;
     }
 
-    if (gameMatchFile.getVisibility() == GameMatchFileVisibility.everyone) {
-      return storageService.getDownloadLink(
-          gameMatchFile.getFileRecord().getUuid().toString(), Duration.ofMinutes(5));
-    }
+    Set<Long> teamIds =
+        viewer == null
+            ? Set.of()
+            : playerService.getPlayer(viewer).map(teamService::getTeamIds).orElse(Set.of());
 
-    throw new AccessDeniedException("You do not have permission to access this file");
+    return file ->
+        switch (file.getVisibility()) {
+          case everyone -> true;
+          case team -> file.getTeam() != null && teamIds.contains(file.getTeam().getId());
+          case admin -> false;
+        };
   }
 
   @Transactional

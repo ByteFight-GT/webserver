@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import org.bytefight.webserver.common.domain.PermissionDeniedException;
 import org.bytefight.webserver.competition.application.CompetitionAccessGuard;
@@ -196,6 +198,12 @@ public class TeamService {
     }
 
     return teamMemberRepository.findByTeam(team).stream().map(TeamMember::getPlayer).toList();
+  }
+
+  public Set<Long> getTeamIds(Player player) {
+    return teamMemberRepository.findByPlayerAndTeamDeletedAtNull(player).stream()
+        .map(member -> member.getTeam().getId())
+        .collect(Collectors.toSet());
   }
 
   public boolean isMember(Team team, Player player) {
