@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.bytefight.webserver.common.web.RestPageRequest;
+import org.bytefight.webserver.storage.domain.DownloadLinkDto;
 import org.bytefight.webserver.submission.application.AdminSubmissionService;
 import org.bytefight.webserver.submission.domain.Submission;
 import org.bytefight.webserver.submission.domain.dto.AdminCreateSubmissionDto;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +58,22 @@ public class AdminSubmissionController {
     Page<Submission> submissions = adminSubmissionService.listSubmissions(false, pageable);
     var data = submissions.stream().map(AdminSubmissionDto::from).toList();
     return new PageImpl<>(data, submissions.getPageable(), submissions.getTotalElements());
+  }
+
+  @GetMapping("/{id}")
+  @Operation(
+      operationId = "adminGetSubmission",
+      summary = "REST endpoint to get a submission, including deleted ones")
+  public AdminSubmissionDto getSubmission(@PathVariable Long id) {
+    return AdminSubmissionDto.from(adminSubmissionService.getSubmission(id));
+  }
+
+  @GetMapping("/{id}/download")
+  @Operation(
+      operationId = "adminGetSubmissionDownloadUrl",
+      summary = "Get a signed download URL for a submission's file")
+  public DownloadLinkDto getSubmissionDownloadUrl(@PathVariable Long id) {
+    return adminSubmissionService.getDownloadLink(id);
   }
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
